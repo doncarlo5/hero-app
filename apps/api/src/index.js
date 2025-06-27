@@ -1,8 +1,4 @@
-const app = require('./app');
+const app = require("./app");
 
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-  /* eslint-disable no-console */
-  console.log(`Listening: http://localhost:${port}`);
-  /* eslint-enable no-console */
-});
+// For Vercel serverless functions, export the app instead of starting a server
+module.exports = app;
