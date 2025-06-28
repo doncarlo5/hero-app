@@ -49,7 +49,7 @@
     <key>NSAppTransportSecurity</key>
     <dict>
       <key>NSAllowsArbitraryLoads</key>
-      <false/>
+      <true/> <!-- TODO: turn to false in production -->
       <key>NSAllowsLocalNetworking</key>
       <true/>
     </dict>
