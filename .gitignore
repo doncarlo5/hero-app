@@ -1,7 +1,14 @@
 # Dependencies
 node_modules/
+apps/*/node_modules/
+**/node_modules/
 .pnp
 .pnp.js
+
+# Package lock files
+package-lock.json
+apps/*/package-lock.json
+**/package-lock.json
 
 # Production builds
 build/
