@@ -1,7 +1,12 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ["class"],
-  content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
+  content: [
+    "./pages/**/*.{ts,tsx}",
+    "./components/**/*.{ts,tsx}",
+    "./app/**/*.{ts,tsx}",
+    "./src/**/*.{ts,tsx}",
+  ],
   prefix: "",
   theme: {
     container: {
@@ -663,7 +668,8 @@ module.exports = {
             zIndex: "999",
           },
           "50%": {
-            transform: "translateX(-105%) rotateY(35deg) rotateX(10deg) translateZ(-10px)",
+            transform:
+              "translateX(-105%) rotateY(35deg) rotateX(10deg) translateZ(-10px)",
             zIndex: "-1",
           },
           "80%": {
@@ -672,7 +678,8 @@ module.exports = {
           "100%": {
             zIndex: "-1",
             opacity: "0",
-            transform: "translateX(0%) rotateY(0deg) rotateX(0deg) translateZ(-10px)",
+            transform:
+              "translateX(0%) rotateY(0deg) rotateX(0deg) translateZ(-10px)",
           },
         },
         "browse-out-left": {
@@ -681,7 +688,8 @@ module.exports = {
             zIndex: "999",
           },
           "50%": {
-            transform: "translateX(-105%) rotateY(35deg) rotateX(10deg) translateZ(-10px)",
+            transform:
+              "translateX(-105%) rotateY(35deg) rotateX(10deg) translateZ(-10px)",
             zIndex: "-1",
           },
           "80%": {
@@ -690,7 +698,8 @@ module.exports = {
           "100%": {
             zIndex: "-1",
             opacity: "0",
-            transform: "translateX(0%) rotateY(0deg) rotateX(0deg) translateZ(-10px)",
+            transform:
+              "translateX(0%) rotateY(0deg) rotateX(0deg) translateZ(-10px)",
           },
         },
         "browse-out-right": {
@@ -699,7 +708,8 @@ module.exports = {
             zIndex: "999",
           },
           "50%": {
-            transform: "translateX(105%) rotateY(35deg) rotateX(10deg) translateZ(-10px)",
+            transform:
+              "translateX(105%) rotateY(35deg) rotateX(10deg) translateZ(-10px)",
             zIndex: "1",
           },
           "80%": {
@@ -708,7 +718,8 @@ module.exports = {
           "100%": {
             zIndex: "1",
             opacity: "0",
-            transform: "translateX(0%) rotateY(0deg) rotateX(0deg) translateZ(-10px)",
+            transform:
+              "translateX(0%) rotateY(0deg) rotateX(0deg) translateZ(-10px)",
           },
         },
         jiggle: {
@@ -1271,4 +1282,4 @@ module.exports = {
     },
   },
   plugins: [require("tailwindcss-animate")],
-}
+};
