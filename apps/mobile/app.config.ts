@@ -29,7 +29,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 			dark: "./assets/icon-dark.png",
 			light: "./assets/icon.png",
 		},
-		bundleIdentifier: "co.selego.hero-app-mobile",
+		bundleIdentifier: "co.selego.heroapp",
 	},
 	android: {
 		edgeToEdgeEnabled: true,
@@ -46,7 +46,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 				image: "./assets/splash-dark.png",
 			},
 		},
-		package: "co.selego.hero-app-mobile",
+		package: "co.selego.heroapp",
 	},
 	experiments: {
 		typedRoutes: true,
