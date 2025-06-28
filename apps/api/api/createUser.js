@@ -50,19 +50,21 @@ const createUser = async (sessionData) => {
 
   // Seed programs for the new user based on ProgramConstants
   for (const sessionType in ProgramConstants) {
-    const exercises = ProgramConstants[sessionType].map((exercise, index) => {
-      const exerciseTypeId = exerciseTypeMap[exercise.name];
-      if (!exerciseTypeId) {
-        return null; // Skip this exercise if no matching type is found
-      }
-      return {
-        exerciseType: exerciseTypeId,
-        order: index + 1,
-        alternatives: exercise.alternatives
-          .map(alt => exerciseTypeMap[alt])
-          .filter(id => id !== undefined), // Remove any undefined alternatives
-      };
-    }).filter(exercise => exercise !== null); // Remove null exercises
+    const exercises = ProgramConstants[sessionType]
+      .map((exercise, index) => {
+        const exerciseTypeId = exerciseTypeMap[exercise.name];
+        if (!exerciseTypeId) {
+          return null; // Skip this exercise if no matching type is found
+        }
+        return {
+          exerciseType: exerciseTypeId,
+          order: index + 1,
+          alternatives: exercise.alternatives
+            .map((alt) => exerciseTypeMap[alt])
+            .filter((id) => id !== undefined), // Remove any undefined alternatives
+        };
+      })
+      .filter((exercise) => exercise !== null); // Remove null exercises
 
     if (exercises.length > 0) {
       // Create program for the user only if there are valid exercises

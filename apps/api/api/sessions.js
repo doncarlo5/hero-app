@@ -28,7 +28,9 @@ router.get("/", isAuthenticated, async (req, res, next) => {
 
     if (req.query.lastFourWeeks) {
       const now = new Date();
-      const startOfCurrentWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+      const startOfCurrentWeek = new Date(
+        now.setDate(now.getDate() - now.getDay())
+      );
       const fourWeeksAgo = new Date(startOfCurrentWeek);
       fourWeeksAgo.setDate(fourWeeksAgo.getDate() - 28);
       query.date_session = { $gte: fourWeeksAgo, $lt: startOfCurrentWeek };
@@ -57,7 +59,10 @@ router.get("/", isAuthenticated, async (req, res, next) => {
 // get all sessions by user last 31 days
 router.get("/last-31-days", isAuthenticated, async (req, res, next) => {
   try {
-    const sessions = await Session.find({ owner: req.user._id, date_session: { $gte: new Date(Date.now() - 31 * 24 * 60 * 60 * 1000) } });
+    const sessions = await Session.find({
+      owner: req.user._id,
+      date_session: { $gte: new Date(Date.now() - 31 * 24 * 60 * 60 * 1000) },
+    });
     res.json(sessions);
   } catch (error) {
     next(error);

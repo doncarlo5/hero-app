@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const Exercise = require("../models/exercise-type.model")
+const Exercise = require("../models/exercise-type.model");
 const defaultExerciseTypes = require("../constants/DefaultExerciseTypesConstant");
 
 mongoose.connect(
@@ -10,13 +10,12 @@ mongoose.connect(
   }
 );
 
-
 // List of exercises that should not be updated
 const doNotUpdate = [
   "Fentes Bulgare - Haltères",
   "Développé couché - Haltères",
   "Dead Lift - Trap Bar",
-  "Overhead Press - Barre"
+  "Overhead Press - Barre",
 ];
 
 const updateExerciseNames = async () => {

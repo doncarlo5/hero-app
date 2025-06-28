@@ -49,8 +49,17 @@ router.post("/", async (req, res, next) => {
     }
 
     if (
-      !Array.isArray(type_session)
-      || !type_session.every((session) => ["Upper A", "Lower", "Upper B", "Other", "Séance A", "Séance B"].includes(session))
+      !Array.isArray(type_session) ||
+      !type_session.every((session) =>
+        [
+          "Upper A",
+          "Lower",
+          "Upper B",
+          "Other",
+          "Séance A",
+          "Séance B",
+        ].includes(session)
+      )
     ) {
       return res.status(400).json({ message: "Invalid type session(s)" });
     }
@@ -104,7 +113,16 @@ router.put("/:id", async (req, res, next) => {
     if (
       type_session &&
       (!Array.isArray(type_session) ||
-        !type_session.every((session) => ["Upper A", "Lower", "Upper B", "Other", "Séance A", "Séance B"].includes(session)))
+        !type_session.every((session) =>
+          [
+            "Upper A",
+            "Lower",
+            "Upper B",
+            "Other",
+            "Séance A",
+            "Séance B",
+          ].includes(session)
+        ))
     ) {
       return res.status(400).json({ message: "Invalid type session(s)" });
     }

@@ -12,7 +12,7 @@ const checkAndAwardTrophies = async (exerciseUser) => {
   const { type, weight, rep, session, owner } = exerciseUser;
   const sessionDetails = await Session.findById(session);
   const bodyWeight = sessionDetails.body_weight;
-  const bodyWeightUser = sessionDetails.body_weight
+  const bodyWeightUser = sessionDetails.body_weight;
 
   // Fetch the exercise type details
   const exerciseType = await ExerciseType.findById(type);
@@ -55,30 +55,29 @@ const checkAndAwardTrophies = async (exerciseUser) => {
     // Check if the user already has this trophy
     const existingTrophy = existingTrophies.find((t) => t.level === level);
 
-
-      if (existingTrophy && !existingTrophy.achieved && trophyAchieved) { 
-        // Update the existing trophy to achieved if it's not already achieved
-        existingTrophy.achieved = true;
-        existingTrophy.awardedAt = new Date();
-        existingTrophy.repsUser = repsUser;
-        existingTrophy.weightUser = weightUser;
-        existingTrophy.exerciseUser = exerciseUser._id;
-        existingTrophy.bodyWeight = bodyWeightUser;
-        const UpdatedTrophies = await existingTrophy.save();
-        newTrophies.push(UpdatedTrophies.toJSON());
-      }
-    
-      if (existingTrophy && existingTrophy.achieved && !trophyAchieved) {
-        // If the exercise no longer meets the criteria, set the trophy to not achieved
-        existingTrophy.achieved = false;
-        existingTrophy.awardedAt = null;
-        existingTrophy.repsUser = 0;
-        existingTrophy.weightUser = 0;
-        existingTrophy.exerciseUser = null;
-        await existingTrophy.save();
-      }
+    if (existingTrophy && !existingTrophy.achieved && trophyAchieved) {
+      // Update the existing trophy to achieved if it's not already achieved
+      existingTrophy.achieved = true;
+      existingTrophy.awardedAt = new Date();
+      existingTrophy.repsUser = repsUser;
+      existingTrophy.weightUser = weightUser;
+      existingTrophy.exerciseUser = exerciseUser._id;
+      existingTrophy.bodyWeight = bodyWeightUser;
+      const UpdatedTrophies = await existingTrophy.save();
+      newTrophies.push(UpdatedTrophies.toJSON());
     }
-  
+
+    if (existingTrophy && existingTrophy.achieved && !trophyAchieved) {
+      // If the exercise no longer meets the criteria, set the trophy to not achieved
+      existingTrophy.achieved = false;
+      existingTrophy.awardedAt = null;
+      existingTrophy.repsUser = 0;
+      existingTrophy.weightUser = 0;
+      existingTrophy.exerciseUser = null;
+      await existingTrophy.save();
+    }
+  }
+
   return newTrophies;
 };
 

@@ -75,7 +75,8 @@ const defaultExerciseTypes = [
   },
   {
     name: "Romanian Deadlift - Barre",
-    advice: "Rétraction, menton sur la clavicule et s'arreter en dessous des genoux",
+    advice:
+      "Rétraction, menton sur la clavicule et s'arreter en dessous des genoux",
     timer: 90,
     repRange1: "10-15",
     repRange2: "10-15",
@@ -131,7 +132,9 @@ const createExerciseTypesForUser = async (email) => {
         await newExercise.save();
         console.log(`Created exercise: "${exercise.name}" for user "${email}"`);
       } else {
-        console.log(`Exercise "${exercise.name}" already exists for user "${email}".`);
+        console.log(
+          `Exercise "${exercise.name}" already exists for user "${email}".`
+        );
       }
     }
   } catch (error) {

@@ -7,10 +7,13 @@ const Session = require("../models/session.model");
 const TrophiesConstants = require("../constants/TrophiesConstant");
 
 // MongoDB connection
-mongoose.connect("mongodb+srv://admin-test:yqbvFFLNMy9nG3Mo@hero-app.p7ekmkz.mongodb.net/?retryWrites=true&w=majority&appName=hero-app", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+mongoose.connect(
+  "mongodb+srv://admin-test:yqbvFFLNMy9nG3Mo@hero-app.p7ekmkz.mongodb.net/?retryWrites=true&w=majority&appName=hero-app",
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  }
+);
 
 // Main function to award trophies to a specific user by email
 const awardTrophiesToSpecificUser = async () => {
@@ -33,7 +36,11 @@ const awardTrophiesToSpecificUser = async () => {
       // Ensure all trophies are created for this exercise type
       if (trophyCriteria) {
         for (const trophy of trophyCriteria) {
-          const existingTrophy = await Trophy.findOne({ owner: user._id, exerciseType: exerciseType._id, level: trophy.level });
+          const existingTrophy = await Trophy.findOne({
+            owner: user._id,
+            exerciseType: exerciseType._id,
+            level: trophy.level,
+          });
           if (!existingTrophy) {
             // Create a trophy if it doesn't exist
             await Trophy.create({
@@ -50,14 +57,18 @@ const awardTrophiesToSpecificUser = async () => {
               owner: user._id,
               rewardText: trophy.rewardText,
             });
-            console.log(`Created new trophy: ${trophy.name} for user: ${user.email}`);
+            console.log(
+              `Created new trophy: ${trophy.name} for user: ${user.email}`
+            );
           }
         }
       }
     }
 
     // Fetch all exercise sessions for the user
-    const sessions = await Session.find({ owner: user._id }).populate("exercise_user_list");
+    const sessions = await Session.find({ owner: user._id }).populate(
+      "exercise_user_list"
+    );
 
     // Iterate through each session
     for (const session of sessions) {
@@ -69,14 +80,18 @@ const awardTrophiesToSpecificUser = async () => {
         const exerciseType = await ExerciseType.findById(exerciseUser.type);
 
         if (!exerciseType) {
-          console.log(`Exercise type not found for exerciseUser: ${exerciseUser._id}`);
+          console.log(
+            `Exercise type not found for exerciseUser: ${exerciseUser._id}`
+          );
           continue;
         }
 
         // Get the trophy criteria for the exercise type
         const trophyCriteria = TrophiesConstants[exerciseType.name];
         if (!trophyCriteria) {
-          console.log(`No trophy criteria found for exercise type: ${exerciseType.name}`);
+          console.log(
+            `No trophy criteria found for exercise type: ${exerciseType.name}`
+          );
           continue;
         }
 
@@ -90,7 +105,10 @@ const awardTrophiesToSpecificUser = async () => {
 
           // Check each rep and weight pair from the exerciseUser
           for (let i = 0; i < exerciseUser.weight.length; i++) {
-            if (exerciseUser.rep[i] >= repsGoal && exerciseUser.weight[i] >= bodyWeight * weightMultiplier) {
+            if (
+              exerciseUser.rep[i] >= repsGoal &&
+              exerciseUser.weight[i] >= bodyWeight * weightMultiplier
+            ) {
               trophyAchieved = true;
               repsUser = exerciseUser.rep[i];
               weightUser = exerciseUser.weight[i];
@@ -99,7 +117,11 @@ const awardTrophiesToSpecificUser = async () => {
           }
 
           // Fetch the existing trophy for the user at this level
-          const existingTrophy = await Trophy.findOne({ owner: user._id, exerciseType: exerciseUser.type, level });
+          const existingTrophy = await Trophy.findOne({
+            owner: user._id,
+            exerciseType: exerciseUser.type,
+            level,
+          });
 
           if (existingTrophy) {
             if (trophyAchieved && !existingTrophy.achieved) {

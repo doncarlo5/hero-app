@@ -82,8 +82,7 @@ router.post("/", async (req, res, next) => {
 
     const newTrophies = await checkAndAwardTrophies(createExerciseUser);
 
-    res.status(201).json({ ...createExerciseUser.toJSON(), newTrophies});
-
+    res.status(201).json({ ...createExerciseUser.toJSON(), newTrophies });
   } catch (error) {
     next(error);
   }
@@ -126,7 +125,7 @@ router.put("/:id", async (req, res, next) => {
 
     const newTrophies = await checkAndAwardTrophies(updateExerciseUser);
 
-    res.status(202).json({ ...updateExerciseUser, newTrophies});
+    res.status(202).json({ ...updateExerciseUser, newTrophies });
   } catch (error) {
     next(error);
   }
