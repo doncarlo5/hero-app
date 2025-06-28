@@ -78,6 +78,12 @@ const DoExercisePage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+    }
+  };
+
   useEffect(() => {
     setFormState({
       rep1: lastExercise?.rep[0] || "",
@@ -387,6 +393,7 @@ const DoExercisePage = () => {
                 <div className="flex w-[25%] flex-col gap-1 text-center">
                   <p className="pb-1 text-sm text-gray-500">Reps</p>
                   <Input
+                    onKeyDown={handleKeyDown}
                     id="rep1"
                     placeholder={lastExercise?.rep[0]}
                     value={formState.rep1}
@@ -396,6 +403,7 @@ const DoExercisePage = () => {
                     className="text-md h-12 w-full rounded-xl text-center text-2xl font-bold [appearance:textfield] focus:bg-slate-50 focus:shadow-inner [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                   />
                   <Input
+                    onKeyDown={handleKeyDown}
                     id="rep2"
                     placeholder={lastExercise?.rep[1]}
                     value={formState.rep2}
@@ -405,6 +413,7 @@ const DoExercisePage = () => {
                     className="text-md h-12 w-full rounded-xl text-center text-2xl font-bold [appearance:textfield] focus:bg-slate-50 focus:shadow-inner [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                   />
                   <Input
+                    onKeyDown={handleKeyDown}
                     id="rep3"
                     placeholder={lastExercise?.rep[2]}
                     value={formState.rep3}
@@ -415,6 +424,7 @@ const DoExercisePage = () => {
                   />
                   {(addRep4 || oneExerciseType.repRange4) && (
                     <Input
+                      onKeyDown={handleKeyDown}
                       id="rep4"
                       placeholder={lastExercise?.rep[3]}
                       value={formState.rep4}
@@ -428,6 +438,7 @@ const DoExercisePage = () => {
                 <div className="flex w-[35%] flex-col gap-1 text-center">
                   <p className="pb-1 text-sm text-gray-500">KG</p>
                   <Input
+                    onKeyDown={handleKeyDown}
                     id="weight1"
                     placeholder={lastExercise?.weight[0]}
                     value={formState.weight1}
@@ -437,6 +448,7 @@ const DoExercisePage = () => {
                     className="text-md h-12 w-full rounded-xl text-center text-2xl font-bold [appearance:textfield] focus:bg-slate-50 focus:shadow-inner [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                   />
                   <Input
+                    onKeyDown={handleKeyDown}
                     id="weight2"
                     placeholder={lastExercise?.weight[1]}
                     value={formState.weight2}
@@ -446,6 +458,7 @@ const DoExercisePage = () => {
                     className="text-md h-12 w-full rounded-xl text-center text-2xl font-bold [appearance:textfield] focus:bg-slate-50 focus:shadow-inner [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                   />
                   <Input
+                    onKeyDown={handleKeyDown}
                     id="weight3"
                     placeholder={lastExercise?.weight[2]}
                     value={formState.weight3}
@@ -456,6 +469,7 @@ const DoExercisePage = () => {
                   />
                   {(addRep4 || oneExerciseType.repRange4) && (
                     <Input
+                      onKeyDown={handleKeyDown}
                       id="weight4"
                       placeholder={lastExercise?.weight[3]}
                       value={formState.weight4}
