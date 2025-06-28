@@ -1,9 +1,9 @@
-import { ExpoConfig, ConfigContext } from "expo/config";
+import { ConfigContext, ExpoConfig } from "expo/config";
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
-	name: "ExpoSupabaseStarter",
-	slug: "ExpoSupabaseStarter",
-	scheme: "expo-supabase-starter",
+	name: "Hero App",
+	slug: "hero-app-mobile",
+	scheme: "hero-app-mobile",
 	version: "1.0.0",
 	orientation: "portrait",
 	icon: "./assets/icon.png",
@@ -29,7 +29,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 			dark: "./assets/icon-dark.png",
 			light: "./assets/icon.png",
 		},
-		bundleIdentifier: "com.flemingvincent.ExpoSupabaseStarter",
+		bundleIdentifier: "co.selego.hero-app-mobile",
 	},
 	android: {
 		edgeToEdgeEnabled: true,
@@ -46,7 +46,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 				image: "./assets/splash-dark.png",
 			},
 		},
-		package: "com.flemingvincent.ExpoSupabaseStarter",
+		package: "co.selego.hero-app-mobile",
 	},
 	experiments: {
 		typedRoutes: true,
