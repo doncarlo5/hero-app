@@ -1,9 +1,10 @@
-import useAuth from "@/context/use-auth"
-import { LucideLoader2 } from "lucide-react"
-import { Navigate, Outlet } from "react-router-dom"
+import { LucideLoader2 } from "lucide-react";
+import { Navigate, Outlet } from "react-router-dom";
+
+import useAuth from "@/context/use-auth";
 
 const IsNotAuthenticated = () => {
-  const { isLoggedIn, isLoading } = useAuth()
+  const { isLoggedIn, isLoading } = useAuth();
 
   if (isLoading) {
     return (
@@ -12,13 +13,13 @@ const IsNotAuthenticated = () => {
           <LucideLoader2 className=" animate-spin " size={32} />
         </div>
       </div>
-    )
+    );
   }
   if (isLoggedIn) {
-    return <Navigate to="/main" />
+    return <Navigate to="/main" />;
   }
 
-  return <Outlet />
-}
+  return <Outlet />;
+};
 
-export default IsNotAuthenticated
+export default IsNotAuthenticated;

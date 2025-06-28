@@ -1,78 +1,78 @@
-import { useEffect, useState } from "react"
-import { ReloadIcon } from "@radix-ui/react-icons"
-import { FaGoogle } from "react-icons/fa6"
-import { useNavigate } from "react-router-dom"
+import { ReloadIcon } from "@radix-ui/react-icons";
+import { useEffect, useState } from "react";
+import { FaGoogle } from "react-icons/fa6";
+import { useNavigate } from "react-router-dom";
 
-import { supabase } from "@/lib/supabaseClient"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { supabase } from "@/lib/supabaseClient";
 
-import { useToast } from "../components/ui/use-toast"
+import { useToast } from "../components/ui/use-toast";
 
 const AuthPage = () => {
-  const { toast } = useToast()
-  const [isLogin, setIsLogin] = useState(true)
+  const { toast } = useToast();
+  const [isLogin, setIsLogin] = useState(true);
   const [loginState, setLoginState] = useState({
     email: "",
     password: "",
-  })
+  });
   const [signupState, setSignupState] = useState({
     firstName: "",
     lastName: "",
     email: "",
     password: "",
-  })
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState("")
-  const navigate = useNavigate()
+  });
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   useEffect(() => {
     const checkSession = async () => {
       const {
         data: { session },
-      } = await supabase.auth.getSession()
+      } = await supabase.auth.getSession();
       if (session) {
-        navigate("/")
+        navigate("/");
       }
-    }
+    };
 
-    checkSession()
-  }, [navigate])
+    checkSession();
+  }, [navigate]);
 
   const handleLoginChange = (e: any) => {
-    setLoginState({ ...loginState, [e.target.id]: e.target.value })
-  }
+    setLoginState({ ...loginState, [e.target.id]: e.target.value });
+  };
 
   const handleSignupChange = (e: any) => {
-    setSignupState({ ...signupState, [e.target.id]: e.target.value })
-  }
+    setSignupState({ ...signupState, [e.target.id]: e.target.value });
+  };
 
   const handleLoginSubmit = async (e: any) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError("")
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email: loginState.email,
         password: loginState.password,
-      })
-      if (error) throw error
-      navigate("/")
+      });
+      if (error) throw error;
+      navigate("/");
     } catch (error: any) {
-      setError(error.message)
+      setError(error.message);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleSignupSubmit = async (e: any) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError("")
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
     try {
       const { error } = await supabase.auth.signUp({
         email: signupState.email,
@@ -83,56 +83,59 @@ const AuthPage = () => {
             lastName: signupState.lastName,
           },
         },
-      })
-      if (error) throw error
+      });
+      if (error) throw error;
       toast({
         title: "Inscription réussie!",
         description: "Vérifiez votre email pour confirmer votre compte.",
-      })
+      });
       setSignupState({
         firstName: "",
         lastName: "",
         email: "",
         password: "",
-      })
+      });
     } catch (error: any) {
-      setError(error.message)
+      setError(error.message);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleResetPassword = async (e: any) => {
-    e.preventDefault()
-    setIsLoading(true)
-    setError("")
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
     try {
-      const { error } = await supabase.auth.resetPasswordForEmail(loginState.email, {
-        redirectTo: "https://hero-app.org/profile/reset-password",
-      })
-      if (error) throw error
-      alert("Check your email for the password reset link.")
+      const { error } = await supabase.auth.resetPasswordForEmail(
+        loginState.email,
+        {
+          redirectTo: "https://hero-app.org/profile/reset-password",
+        }
+      );
+      if (error) throw error;
+      alert("Check your email for the password reset link.");
     } catch (error: any) {
-      setError(error.message)
+      setError(error.message);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleOAuthSignIn = async (provider: any) => {
-    setIsLoading(true)
-    setError("")
+    setIsLoading(true);
+    setError("");
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider,
-      })
-      if (error) throw error
+      });
+      if (error) throw error;
     } catch (error: any) {
-      setError(error.message)
+      setError(error.message);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div>
@@ -189,7 +192,10 @@ const AuthPage = () => {
                         checked={showPassword}
                         onCheckedChange={() => setShowPassword(!showPassword)}
                       />
-                      <label htmlFor="showPassword" className="ml-2 block text-sm text-gray-900 dark:text-gray-200">
+                      <label
+                        htmlFor="showPassword"
+                        className="ml-2 block text-sm text-gray-900 dark:text-gray-200"
+                      >
                         Afficher le mot de passe
                       </label>
                     </div>
@@ -329,7 +335,7 @@ const AuthPage = () => {
         </div>
       </main>
     </div>
-  )
-}
+  );
+};
 
-export default AuthPage
+export default AuthPage;

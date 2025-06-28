@@ -1,34 +1,44 @@
-import { useEffect, useState } from "react"
-import { format } from "date-fns"
-import { LucideLoader2 } from "lucide-react"
-import { Area, AreaChart, Label, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { format } from "date-fns";
+import { LucideLoader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  Area,
+  AreaChart,
+  Label,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
-import fetchApi from "@/lib/api-handler"
+import fetchApi from "@/lib/api-handler";
 
 function BodyWeightChart() {
-  const [session, setSession] = useState([] as any[])
-  const [isLoading, setIsLoading] = useState(true)
+  const [session, setSession] = useState([] as any[]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchUserSessions = async () => {
     try {
-      const response = await fetchApi("/api/sessions?limit=1000&sortBy=date_session:asc");
+      const response = await fetchApi(
+        "/api/sessions?limit=1000&sortBy=date_session:asc"
+      );
       setSession(response);
     } catch (error) {
       console.error("Fetch error: ", error);
     } finally {
       setIsLoading(false);
     }
-  }
-  
+  };
 
   const formatXAxis = (tickFormat: string) => {
-    const formattedDate = format(new Date(tickFormat), "dd/MM/yyyy")
-    return formattedDate
-  }
+    const formattedDate = format(new Date(tickFormat), "dd/MM/yyyy");
+    return formattedDate;
+  };
 
   useEffect(() => {
-    fetchUserSessions()
-  }, [])
+    fetchUserSessions();
+  }, []);
   return (
     <>
       {isLoading && (
@@ -46,7 +56,11 @@ function BodyWeightChart() {
         </div>
       )}
       {session.length > 0 && (
-        <ResponsiveContainer className="mt-4 rounded-xl border bg-slate-50 p-4" width="100%" height="80%">
+        <ResponsiveContainer
+          className="mt-4 rounded-xl border bg-slate-50 p-4"
+          width="100%"
+          height="80%"
+        >
           <AreaChart
             data={session}
             margin={{
@@ -62,7 +76,10 @@ function BodyWeightChart() {
                 <stop offset="95%" stopColor="#38b2ac" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <XAxis dataKey="date_session" tickFormatter={(tick) => formatXAxis(tick)} />
+            <XAxis
+              dataKey="date_session"
+              tickFormatter={(tick) => formatXAxis(tick)}
+            />
             <YAxis name="Kg" domain={["auto", "dataMax + 5"]}>
               <Label
                 style={{
@@ -80,7 +97,7 @@ function BodyWeightChart() {
             </YAxis>
             <Tooltip
               labelFormatter={(value) => {
-                return `Date: ${format(new Date(value), "dd/MM/yyyy")}`
+                return `Date: ${format(new Date(value), "dd/MM/yyyy")}`;
               }}
               animationEasing={"ease-out"}
             />
@@ -101,7 +118,7 @@ function BodyWeightChart() {
         </ResponsiveContainer>
       )}
     </>
-  )
+  );
 }
 
-export default BodyWeightChart
+export default BodyWeightChart;

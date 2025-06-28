@@ -1,11 +1,23 @@
+import React from "react";
+
 interface TrophyLevelProps {
-  achieved: boolean
-  className?: string
+  achieved: boolean;
+  className?: string;
 }
 
-export const TrophyLevel1: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) =>
+export const TrophyLevel1: React.FC<TrophyLevelProps> = ({
+  achieved,
+  ...rest
+}) =>
   achieved ? (
-    <svg width="216" height="221" viewBox="0 0 216 221" fill="none" xmlns="http://www.w3.org/2000/svg" {...rest}>
+    <svg
+      width="216"
+      height="221"
+      viewBox="0 0 216 221"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...rest}
+    >
       <mask
         id="mask0_503_13458"
         style={{ maskType: "luminance" }}
@@ -29,7 +41,13 @@ export const TrophyLevel1: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
         </g>
       </g>
       <g opacity="0.1">
-        <circle cx="108" cy="108" r="66" fill="#50C22B" style={{ mixBlendMode: "multiply" }} />
+        <circle
+          cx="108"
+          cy="108"
+          r="66"
+          fill="#50C22B"
+          style={{ mixBlendMode: "multiply" }}
+        />
       </g>
       <g filter="url(#filter0_d_503_13458)">
         <path
@@ -39,7 +57,14 @@ export const TrophyLevel1: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           fill="#265388"
         />
       </g>
-      <circle style={{ mixBlendMode: "multiply" }} opacity="0.2" cx="108" cy="114" r="60" fill="#62CF3F" />
+      <circle
+        style={{ mixBlendMode: "multiply" }}
+        opacity="0.2"
+        cx="108"
+        cy="114"
+        r="60"
+        fill="#62CF3F"
+      />
       <circle cx="108" cy="108" r="60" fill="url(#paint1_linear_503_13458)" />
       <mask
         id="mask1_503_13458"
@@ -59,25 +84,60 @@ export const TrophyLevel1: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           strokeWidth="3"
         />
         <g style={{ mixBlendMode: "multiply" }} opacity="0.12">
-          <path d="M147 119.258L182.258 84" stroke="#78A2A9" strokeWidth="6" strokeLinecap="round" />
+          <path
+            d="M147 119.258L182.258 84"
+            stroke="#78A2A9"
+            strokeWidth="6"
+            strokeLinecap="round"
+          />
         </g>
         <g style={{ mixBlendMode: "multiply" }} opacity="0.12">
-          <path d="M132 86.258L167.258 51" stroke="#78A2A9" strokeWidth="6" strokeLinecap="round" />
+          <path
+            d="M132 86.258L167.258 51"
+            stroke="#78A2A9"
+            strokeWidth="6"
+            strokeLinecap="round"
+          />
         </g>
         <g style={{ mixBlendMode: "multiply" }} opacity="0.12">
-          <path d="M21.0001 143.258L56.258 108" stroke="#78A2A9" strokeWidth="6" strokeLinecap="round" />
+          <path
+            d="M21.0001 143.258L56.258 108"
+            stroke="#78A2A9"
+            strokeWidth="6"
+            strokeLinecap="round"
+          />
         </g>
         <g style={{ mixBlendMode: "multiply" }} opacity="0.12">
-          <path d="M153 77.258L188.258 42" stroke="#78A2A9" strokeWidth="6" strokeLinecap="round" />
+          <path
+            d="M153 77.258L188.258 42"
+            stroke="#78A2A9"
+            strokeWidth="6"
+            strokeLinecap="round"
+          />
         </g>
         <g style={{ mixBlendMode: "multiply" }} opacity="0.12">
-          <path d="M42.0001 134.258L77.258 99" stroke="#78A2A9" strokeWidth="6" strokeLinecap="round" />
+          <path
+            d="M42.0001 134.258L77.258 99"
+            stroke="#78A2A9"
+            strokeWidth="6"
+            strokeLinecap="round"
+          />
         </g>
         <g style={{ mixBlendMode: "multiply" }} opacity="0.12">
-          <path d="M93.0001 170.258L128.258 135" stroke="#78A2A9" strokeWidth="6" strokeLinecap="round" />
+          <path
+            d="M93.0001 170.258L128.258 135"
+            stroke="#78A2A9"
+            strokeWidth="6"
+            strokeLinecap="round"
+          />
         </g>
         <g style={{ mixBlendMode: "multiply" }} opacity="0.12">
-          <path d="M141 149.258L176.258 114" stroke="#78A2A9" strokeWidth="6" strokeLinecap="round" />
+          <path
+            d="M141 149.258L176.258 114"
+            stroke="#78A2A9"
+            strokeWidth="6"
+            strokeLinecap="round"
+          />
         </g>
         <path
           d="M149.366 149.366C159.952 138.779 166.5 124.154 166.5 108C166.5 75.6913 140.309 49.5 108 49.5C75.6914 49.5 49.5001 75.6913 49.5001 108C49.5001 124.154 56.0479 138.779 66.6343 149.366"
@@ -109,7 +169,14 @@ export const TrophyLevel1: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
       </g>
       <g filter="url(#filter1_d_503_13458)">
         <circle cx="108" cy="108" r="45" fill="url(#paint2_linear_503_13458)" />
-        <circle cx="108" cy="108" r="46.5" stroke="#64788F" strokeOpacity="0.06" strokeWidth="3" />
+        <circle
+          cx="108"
+          cy="108"
+          r="46.5"
+          stroke="#64788F"
+          strokeOpacity="0.06"
+          strokeWidth="3"
+        />
       </g>
       <mask
         id="mask2_503_13458"
@@ -124,19 +191,44 @@ export const TrophyLevel1: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
       </mask>
       <g mask="url(#mask2_503_13458)">
         <g style={{ mixBlendMode: "multiply" }} opacity="0.12">
-          <path d="M132 80.258L167.258 45" stroke="#78A2A9" strokeWidth="6" strokeLinecap="round" />
+          <path
+            d="M132 80.258L167.258 45"
+            stroke="#78A2A9"
+            strokeWidth="6"
+            strokeLinecap="round"
+          />
         </g>
         <g style={{ mixBlendMode: "multiply" }} opacity="0.12">
-          <path d="M153 71.258L188.258 36" stroke="#78A2A9" strokeWidth="6" strokeLinecap="round" />
+          <path
+            d="M153 71.258L188.258 36"
+            stroke="#78A2A9"
+            strokeWidth="6"
+            strokeLinecap="round"
+          />
         </g>
         <g style={{ mixBlendMode: "multiply" }} opacity="0.12">
-          <path d="M42.0001 128.258L77.2581 93" stroke="#78A2A9" strokeWidth="6" strokeLinecap="round" />
+          <path
+            d="M42.0001 128.258L77.2581 93"
+            stroke="#78A2A9"
+            strokeWidth="6"
+            strokeLinecap="round"
+          />
         </g>
         <g style={{ mixBlendMode: "multiply" }} opacity="0.12">
-          <path d="M93.0001 164.258L128.258 129" stroke="#78A2A9" strokeWidth="6" strokeLinecap="round" />
+          <path
+            d="M93.0001 164.258L128.258 129"
+            stroke="#78A2A9"
+            strokeWidth="6"
+            strokeLinecap="round"
+          />
         </g>
         <g style={{ mixBlendMode: "multiply" }} opacity="0.12">
-          <path d="M147 113.258L182.258 78" stroke="#78A2A9" strokeWidth="6" strokeLinecap="round" />
+          <path
+            d="M147 113.258L182.258 78"
+            stroke="#78A2A9"
+            strokeWidth="6"
+            strokeLinecap="round"
+          />
         </g>
         <path
           opacity="0.6"
@@ -147,7 +239,10 @@ export const TrophyLevel1: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
         />
       </g>
       <g filter="url(#filter2_d_503_13458)">
-        <path d="M90.8006 108L108 85.8864L125.199 108L108 130.113L90.8006 108Z" fill="white" />
+        <path
+          d="M90.8006 108L108 85.8864L125.199 108L108 130.113L90.8006 108Z"
+          fill="white"
+        />
         <path
           d="M88.4325 106.158C87.5899 107.241 87.5899 108.758 88.4325 109.842L105.632 131.955C106.2 132.686 107.074 133.113 108 133.113C108.926 133.113 109.8 132.686 110.368 131.955L127.567 109.842C128.41 108.758 128.41 107.241 127.567 106.158L110.368 84.0445C109.8 83.3138 108.926 82.8864 108 82.8864C107.074 82.8864 106.2 83.3138 105.632 84.0445L88.4325 106.158Z"
           stroke="white"
@@ -156,7 +251,10 @@ export const TrophyLevel1: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
         />
       </g>
       <g filter="url(#filter3_i_503_13458)">
-        <path d="M90.8006 108L108 85.8864L125.199 108L108 130.113L90.8006 108Z" fill="url(#paint3_linear_503_13458)" />
+        <path
+          d="M90.8006 108L108 85.8864L125.199 108L108 130.113L90.8006 108Z"
+          fill="url(#paint3_linear_503_13458)"
+        />
       </g>
       <defs>
         <filter
@@ -177,9 +275,21 @@ export const TrophyLevel1: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset dy="6" />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.603922 0 0 0 0 0.713726 0 0 0 0 0.356863 0 0 0 0.2 0" />
-          <feBlend mode="darken" in2="BackgroundImageFix" result="effect1_dropShadow_503_13458" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13458" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.603922 0 0 0 0 0.713726 0 0 0 0 0.356863 0 0 0 0.2 0"
+          />
+          <feBlend
+            mode="darken"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13458"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13458"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter1_d_503_13458"
@@ -199,9 +309,21 @@ export const TrophyLevel1: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset dy="3" />
           <feGaussianBlur stdDeviation="6" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.279884 0 0 0 0 0.409586 0 0 0 0 0.470833 0 0 0 0.2 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13458" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13458" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.279884 0 0 0 0 0.409586 0 0 0 0 0.470833 0 0 0 0.2 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13458"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13458"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter2_d_503_13458"
@@ -221,9 +343,21 @@ export const TrophyLevel1: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset dy="3" />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.19669 0 0 0 0 0.27695 0 0 0 0 0.483333 0 0 0 0.2 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13458" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13458" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.19669 0 0 0 0 0.27695 0 0 0 0 0.483333 0 0 0 0.2 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13458"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13458"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter3_i_503_13458"
@@ -235,7 +369,12 @@ export const TrophyLevel1: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           colorInterpolationFilters="sRGB"
         >
           <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="BackgroundImageFix"
+            result="shape"
+          />
           <feColorMatrix
             in="SourceAlpha"
             type="matrix"
@@ -245,18 +384,46 @@ export const TrophyLevel1: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           <feOffset dy="3" />
           <feGaussianBlur stdDeviation="1.5" />
           <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.324977 0 0 0 0 0.428027 0 0 0 0 0.579167 0 0 0 0.4 0" />
-          <feBlend mode="normal" in2="shape" result="effect1_innerShadow_503_13458" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.324977 0 0 0 0 0.428027 0 0 0 0 0.579167 0 0 0 0.4 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="shape"
+            result="effect1_innerShadow_503_13458"
+          />
         </filter>
-        <linearGradient id="paint0_linear_503_13458" x1="24" y1="24" x2="24" y2="192" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint0_linear_503_13458"
+          x1="24"
+          y1="24"
+          x2="24"
+          y2="192"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#D9E242" />
           <stop offset="1" stopColor="#84C400" />
         </linearGradient>
-        <linearGradient id="paint1_linear_503_13458" x1="48" y1="48" x2="48" y2="168" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint1_linear_503_13458"
+          x1="48"
+          y1="48"
+          x2="48"
+          y2="168"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#ABB7CC" />
           <stop offset="1" stopColor="#76879C" />
         </linearGradient>
-        <linearGradient id="paint2_linear_503_13458" x1="63" y1="63" x2="63" y2="153" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint2_linear_503_13458"
+          x1="63"
+          y1="63"
+          x2="63"
+          y2="153"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#C6D1E4" />
           <stop offset="1" stopColor="#A4B1C4" />
         </linearGradient>
@@ -274,7 +441,14 @@ export const TrophyLevel1: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
       </defs>
     </svg>
   ) : (
-    <svg width="216" height="216" viewBox="0 0 216 216" fill="none" xmlns="http://www.w3.org/2000/svg" {...rest}>
+    <svg
+      width="216"
+      height="216"
+      viewBox="0 0 216 216"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...rest}
+    >
       <mask
         id="mask0_503_14658"
         style={{ maskType: "luminance" }}
@@ -318,11 +492,21 @@ export const TrophyLevel1: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
         strokeLinejoin="round"
       />
     </svg>
-  )
+  );
 
-export const TrophyLevel2: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) =>
+export const TrophyLevel2: React.FC<TrophyLevelProps> = ({
+  achieved,
+  ...rest
+}) =>
   achieved ? (
-    <svg width="216" height="221" viewBox="0 0 216 221" fill="none" xmlns="http://www.w3.org/2000/svg" {...rest}>
+    <svg
+      width="216"
+      height="221"
+      viewBox="0 0 216 221"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...rest}
+    >
       <mask
         id="mask0_503_13459"
         style={{ maskType: "luminance" }}
@@ -379,7 +563,12 @@ export const TrophyLevel2: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
         />
       </mask>
       <g mask="url(#mask1_503_13459)">
-        <path fillRule="evenodd" clipRule="evenodd" d="M95.9999 156H120V210H95.9999V156Z" fill="white" />
+        <path
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M95.9999 156H120V210H95.9999V156Z"
+          fill="white"
+        />
       </g>
       <path
         style={{ mixBlendMode: "multiply" }}
@@ -417,8 +606,18 @@ export const TrophyLevel2: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           stroke="#E67515"
           strokeWidth="3"
         />
-        <path d="M149.824 155.067L169.502 94.5062" stroke="#F68A2C" strokeWidth="3" strokeLinecap="round" />
-        <path d="M46.4978 94.5062L66.1752 155.067" stroke="#F68A2C" strokeWidth="3" strokeLinecap="round" />
+        <path
+          d="M149.824 155.067L169.502 94.5062"
+          stroke="#F68A2C"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
+        <path
+          d="M46.4978 94.5062L66.1752 155.067"
+          stroke="#F68A2C"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
         <path
           d="M169.502 94.5063C170.908 90.1801 169.368 85.4407 165.688 82.7669L114.172 45.3383C110.492 42.6646 105.508 42.6646 101.828 45.3383L50.3121 82.7669C46.632 85.4407 45.0921 90.1801 46.4978 94.5063"
           stroke="#FAA953"
@@ -432,7 +631,12 @@ export const TrophyLevel2: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           strokeWidth="3"
           strokeLinecap="round"
         />
-        <path d="M101.828 45.338L88.9492 54.6952" stroke="white" strokeWidth="3" strokeLinecap="round" />
+        <path
+          d="M101.828 45.338L88.9492 54.6952"
+          stroke="white"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
       </g>
       <g filter="url(#filter1_d_503_13459)">
         <path
@@ -471,7 +675,10 @@ export const TrophyLevel2: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           d="M108 108L59.9999 120V96L108 108ZM108 108L120 60H95.9999L108 108ZM108 108L156 96V120L108 108ZM108 108L133.456 65.5736L150.426 82.5442L108 108ZM108 108L133.456 150.426L150.426 133.456L108 108ZM108 108L95.9999 156H120L108 108ZM108 108L82.5441 150.426L65.5735 133.456L108 108Z"
           fill="url(#paint3_linear_503_13459)"
         />
-        <path d="M82.5441 65.5736L65.5735 82.5442L108 108L82.5441 65.5736Z" fill="url(#paint4_linear_503_13459)" />
+        <path
+          d="M82.5441 65.5736L65.5735 82.5442L108 108L82.5441 65.5736Z"
+          fill="url(#paint4_linear_503_13459)"
+        />
         <path
           d="M100.531 67.281C98.4478 68.7942 96.8395 69.9627 95.7056 70.7866"
           stroke="white"
@@ -516,9 +723,21 @@ export const TrophyLevel2: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset dy="6" />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.333333 0 0 0 0 0.819608 0 0 0 0 0.615686 0 0 0 0.2 0" />
-          <feBlend mode="darken" in2="BackgroundImageFix" result="effect1_dropShadow_503_13459" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13459" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.333333 0 0 0 0 0.819608 0 0 0 0 0.615686 0 0 0 0.2 0"
+          />
+          <feBlend
+            mode="darken"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13459"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13459"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter1_d_503_13459"
@@ -538,9 +757,21 @@ export const TrophyLevel2: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset dy="3" />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.95 0 0 0 0 0.442079 0 0 0 0 0 0 0 0 0.8 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13459" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13459" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.95 0 0 0 0 0.442079 0 0 0 0 0 0 0 0 0.8 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13459"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13459"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter2_d_503_13459"
@@ -560,9 +791,21 @@ export const TrophyLevel2: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset dy="3" />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.643137 0 0 0 0 0.262856 0 0 0 0 0.0196078 0 0 0 0.2 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13459" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13459" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.643137 0 0 0 0 0.262856 0 0 0 0 0.0196078 0 0 0 0.2 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13459"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13459"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter3_i_503_13459"
@@ -574,7 +817,12 @@ export const TrophyLevel2: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           colorInterpolationFilters="sRGB"
         >
           <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="BackgroundImageFix"
+            result="shape"
+          />
           <feColorMatrix
             in="SourceAlpha"
             type="matrix"
@@ -584,14 +832,35 @@ export const TrophyLevel2: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           <feOffset dy="3" />
           <feGaussianBlur stdDeviation="1.5" />
           <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.921569 0 0 0 0 0.447059 0 0 0 0 0.105882 0 0 0 0.4 0" />
-          <feBlend mode="normal" in2="shape" result="effect1_innerShadow_503_13459" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.921569 0 0 0 0 0.447059 0 0 0 0 0.105882 0 0 0 0.4 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="shape"
+            result="effect1_innerShadow_503_13459"
+          />
         </filter>
-        <linearGradient id="paint0_linear_503_13459" x1="24" y1="24" x2="24" y2="192" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint0_linear_503_13459"
+          x1="24"
+          y1="24"
+          x2="24"
+          y2="192"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#60DCA7" />
           <stop offset="1" stopColor="#54D09C" />
         </linearGradient>
-        <linearGradient id="paint1_linear_503_13459" x1="39" y1="39" x2="39" y2="177" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint1_linear_503_13459"
+          x1="39"
+          y1="39"
+          x2="39"
+          y2="177"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#FD9C43" />
           <stop offset="1" stopColor="#F27E1D" />
         </linearGradient>
@@ -642,7 +911,14 @@ export const TrophyLevel2: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
       </defs>
     </svg>
   ) : (
-    <svg width="216" height="216" viewBox="0 0 216 216" fill="none" xmlns="http://www.w3.org/2000/svg" {...rest}>
+    <svg
+      width="216"
+      height="216"
+      viewBox="0 0 216 216"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...rest}
+    >
       <mask
         id="mask0_503_14659"
         style={{ maskType: "luminance" }}
@@ -690,7 +966,12 @@ export const TrophyLevel2: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
         />
       </mask>
       <g mask="url(#mask1_503_14659)">
-        <path fillRule="evenodd" clipRule="evenodd" d="M96 156H120V210H96V156Z" fill="#E7F1FF" />
+        <path
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M96 156H120V210H96V156Z"
+          fill="#E7F1FF"
+        />
       </g>
       <path
         fillRule="evenodd"
@@ -715,11 +996,21 @@ export const TrophyLevel2: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
         strokeLinejoin="round"
       />
     </svg>
-  )
+  );
 
-export const TrophyLevel3: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) =>
+export const TrophyLevel3: React.FC<TrophyLevelProps> = ({
+  achieved,
+  ...rest
+}) =>
   achieved ? (
-    <svg width="216" height="221" viewBox="0 0 216 221" fill="none" xmlns="http://www.w3.org/2000/svg" {...rest}>
+    <svg
+      width="216"
+      height="221"
+      viewBox="0 0 216 221"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...rest}
+    >
       <mask
         id="mask0_503_13460"
         style={{ maskType: "luminance" }}
@@ -776,7 +1067,12 @@ export const TrophyLevel3: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
         />
       </mask>
       <g mask="url(#mask1_503_13460)">
-        <path fillRule="evenodd" clipRule="evenodd" d="M96 156H120V210H96V156Z" fill="white" />
+        <path
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M96 156H120V210H96V156Z"
+          fill="white"
+        />
       </g>
       <path
         style={{ mixBlendMode: "multiply" }}
@@ -820,8 +1116,18 @@ export const TrophyLevel3: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           strokeWidth="3"
           strokeLinecap="round"
         />
-        <path d="M149.825 155.067L169.502 94.5062" stroke="#B1CDD0" strokeWidth="3" strokeLinecap="round" />
-        <path d="M46.4978 94.5062L66.1752 155.067" stroke="#B1CDD0" strokeWidth="3" strokeLinecap="round" />
+        <path
+          d="M149.825 155.067L169.502 94.5062"
+          stroke="#B1CDD0"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
+        <path
+          d="M46.4978 94.5062L66.1752 155.067"
+          stroke="#B1CDD0"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
         <path
           d="M169.502 94.5063C170.908 90.1801 169.368 85.4407 165.688 82.7669L114.172 45.3383C110.492 42.6646 105.508 42.6646 101.828 45.3383L50.3122 82.7669C46.6321 85.4407 45.0922 90.1801 46.4979 94.5063"
           stroke="#C3E6E7"
@@ -835,7 +1141,12 @@ export const TrophyLevel3: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           strokeWidth="3"
           strokeLinecap="round"
         />
-        <path d="M101.828 45.338L88.9493 54.6952" stroke="white" strokeWidth="3" strokeLinecap="round" />
+        <path
+          d="M101.828 45.338L88.9493 54.6952"
+          stroke="white"
+          strokeWidth="3"
+          strokeLinecap="round"
+        />
       </g>
       <g filter="url(#filter1_d_503_13460)">
         <path
@@ -875,7 +1186,10 @@ export const TrophyLevel3: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
             d="M108 108L60 120V96L108 108ZM108 108L120 60H96L108 108ZM108 108L156 96V120L108 108ZM108 108L133.456 65.5736L150.426 82.5442L108 108ZM108 108L133.456 150.426L150.426 133.456L108 108ZM108 108L96 156H120L108 108ZM108 108L82.5442 150.426L65.5736 133.456L108 108Z"
             fill="url(#paint3_linear_503_13460)"
           />
-          <path d="M82.5442 65.5736L65.5736 82.5442L108 108L82.5442 65.5736Z" fill="url(#paint4_linear_503_13460)" />
+          <path
+            d="M82.5442 65.5736L65.5736 82.5442L108 108L82.5442 65.5736Z"
+            fill="url(#paint4_linear_503_13460)"
+          />
         </g>
         <path
           d="M100.531 67.281C98.448 68.7942 96.8397 69.9627 95.7057 70.7866"
@@ -945,9 +1259,21 @@ export const TrophyLevel3: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset dy="6" />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.333333 0 0 0 0 0.790431 0 0 0 0 0.819608 0 0 0 0.2 0" />
-          <feBlend mode="darken" in2="BackgroundImageFix" result="effect1_dropShadow_503_13460" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13460" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.333333 0 0 0 0 0.790431 0 0 0 0 0.819608 0 0 0 0.2 0"
+          />
+          <feBlend
+            mode="darken"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13460"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13460"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter1_d_503_13460"
@@ -967,9 +1293,21 @@ export const TrophyLevel3: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset dy="3" />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.0196078 0 0 0 0 0.443137 0 0 0 0 0.643137 0 0 0 0.12 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13460" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13460" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.0196078 0 0 0 0 0.443137 0 0 0 0 0.643137 0 0 0 0.12 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13460"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13460"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter2_d_503_13460"
@@ -989,9 +1327,21 @@ export const TrophyLevel3: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset dy="3" />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.596078 0 0 0 0 0.745098 0 0 0 0 0.780392 0 0 0 0.5 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13460" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13460" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.596078 0 0 0 0 0.745098 0 0 0 0 0.780392 0 0 0 0.5 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13460"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13460"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter3_i_503_13460"
@@ -1003,7 +1353,12 @@ export const TrophyLevel3: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           colorInterpolationFilters="sRGB"
         >
           <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="BackgroundImageFix"
+            result="shape"
+          />
           <feColorMatrix
             in="SourceAlpha"
             type="matrix"
@@ -1013,8 +1368,15 @@ export const TrophyLevel3: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           <feOffset dy="3" />
           <feGaussianBlur stdDeviation="1.5" />
           <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.508286 0 0 0 0 0.694443 0 0 0 0 0.72829 0 0 0 0.4 0" />
-          <feBlend mode="normal" in2="shape" result="effect1_innerShadow_503_13460" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.508286 0 0 0 0 0.694443 0 0 0 0 0.72829 0 0 0 0.4 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="shape"
+            result="effect1_innerShadow_503_13460"
+          />
         </filter>
         <filter
           id="filter4_d_503_13460"
@@ -1034,9 +1396,21 @@ export const TrophyLevel3: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.705882 0 0 0 0 0.823529 0 0 0 0 0.831373 0 0 0 1 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13460" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13460" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.705882 0 0 0 0 0.823529 0 0 0 0 0.831373 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13460"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13460"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter5_d_503_13460"
@@ -1056,9 +1430,21 @@ export const TrophyLevel3: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.705882 0 0 0 0 0.823529 0 0 0 0 0.831373 0 0 0 1 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13460" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13460" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.705882 0 0 0 0 0.823529 0 0 0 0 0.831373 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13460"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13460"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter6_d_503_13460"
@@ -1078,19 +1464,52 @@ export const TrophyLevel3: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.705882 0 0 0 0 0.823529 0 0 0 0 0.831373 0 0 0 1 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13460" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13460" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.705882 0 0 0 0 0.823529 0 0 0 0 0.831373 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13460"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13460"
+            result="shape"
+          />
         </filter>
-        <linearGradient id="paint0_linear_503_13460" x1="24" y1="24" x2="24" y2="192" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint0_linear_503_13460"
+          x1="24"
+          y1="24"
+          x2="24"
+          y2="192"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#59CBF2" />
           <stop offset="1" stopColor="#40A7E8" />
         </linearGradient>
-        <linearGradient id="paint1_linear_503_13460" x1="39" y1="39" x2="39" y2="177" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint1_linear_503_13460"
+          x1="39"
+          y1="39"
+          x2="39"
+          y2="177"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#C4ECEB" />
           <stop offset="1" stopColor="#A7BCC1" />
         </linearGradient>
-        <linearGradient id="paint2_linear_503_13460" x1="60" y1="60" x2="60" y2="156" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint2_linear_503_13460"
+          x1="60"
+          y1="60"
+          x2="60"
+          y2="156"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#F0FBFE" />
           <stop offset="1" stopColor="#C0DCDC" />
         </linearGradient>
@@ -1130,7 +1549,14 @@ export const TrophyLevel3: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
       </defs>
     </svg>
   ) : (
-    <svg width="216" height="216" viewBox="0 0 216 216" fill="none" xmlns="http://www.w3.org/2000/svg" {...rest}>
+    <svg
+      width="216"
+      height="216"
+      viewBox="0 0 216 216"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...rest}
+    >
       <mask
         id="mask0_503_14660"
         style={{ maskType: "luminance" }}
@@ -1178,7 +1604,12 @@ export const TrophyLevel3: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
         />
       </mask>
       <g mask="url(#mask1_503_14660)">
-        <path fillRule="evenodd" clipRule="evenodd" d="M96 156H120V210H96V156Z" fill="#E7F1FF" />
+        <path
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M96 156H120V210H96V156Z"
+          fill="#E7F1FF"
+        />
       </g>
       <path
         fillRule="evenodd"
@@ -1224,11 +1655,21 @@ export const TrophyLevel3: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
       </mask>
       <g mask="url(#mask2_503_14660)"></g>
     </svg>
-  )
+  );
 
-export const TrophyLevel4: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) =>
+export const TrophyLevel4: React.FC<TrophyLevelProps> = ({
+  achieved,
+  ...rest
+}) =>
   achieved ? (
-    <svg width="216" height="221" viewBox="0 0 216 221" fill="none" xmlns="http://www.w3.org/2000/svg" {...rest}>
+    <svg
+      width="216"
+      height="221"
+      viewBox="0 0 216 221"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...rest}
+    >
       <mask
         id="mask0_503_13462"
         style={{ maskType: "luminance" }}
@@ -1537,7 +1978,10 @@ export const TrophyLevel4: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
             d="M108 108L60 120V96L108 108ZM108 108L120 60H96L108 108ZM108 108L156 96V120L108 108ZM108 108L133.456 65.5736L150.426 82.5442L108 108ZM108 108L133.456 150.426L150.426 133.456L108 108ZM108 108L96 156H120L108 108ZM108 108L82.5441 150.426L65.5735 133.456L108 108Z"
             fill="#FFD640"
           />
-          <path d="M82.5441 65.5736L65.5735 82.5442L108 108L82.5441 65.5736Z" fill="#FFD640" />
+          <path
+            d="M82.5441 65.5736L65.5735 82.5442L108 108L82.5441 65.5736Z"
+            fill="#FFD640"
+          />
         </g>
         <path
           opacity="0.4"
@@ -1576,15 +2020,30 @@ export const TrophyLevel4: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
         d="M100.349 97.4699L108 86.3068L115.65 97.4699L128.631 101.296L120.379 112.022L120.751 125.55L108 121.016L95.2489 125.55L95.621 112.022L87.3684 101.296L100.349 97.4699Z"
         fill="url(#paint9_linear_503_13462)"
       />
-      <path opacity="0.4" d="M108 108V86.3068L100.248 97.3163L108 108Z" fill="url(#paint10_linear_503_13462)" />
-      <path opacity="0.8" d="M108 108L100.248 97.3162L87.3684 101.296L108 108Z" fill="url(#paint11_linear_503_13462)" />
-      <path opacity="0.5" d="M108 108L95.4475 112.084L95.2489 125.55L108 108Z" fill="url(#paint12_linear_503_13462)" />
+      <path
+        opacity="0.4"
+        d="M108 108V86.3068L100.248 97.3163L108 108Z"
+        fill="url(#paint10_linear_503_13462)"
+      />
+      <path
+        opacity="0.8"
+        d="M108 108L100.248 97.3162L87.3684 101.296L108 108Z"
+        fill="url(#paint11_linear_503_13462)"
+      />
+      <path
+        opacity="0.5"
+        d="M108 108L95.4475 112.084L95.2489 125.55L108 108Z"
+        fill="url(#paint12_linear_503_13462)"
+      />
       <path
         opacity="0.4"
         d="M120.751 125.55L120.552 112.084L108 108L120.751 125.55Z"
         fill="url(#paint13_linear_503_13462)"
       />
-      <path d="M120.552 112.084L128.631 101.297L108 108L120.552 112.084Z" fill="#FEBA1B" />
+      <path
+        d="M120.552 112.084L128.631 101.297L108 108L120.552 112.084Z"
+        fill="#FEBA1B"
+      />
       <path
         opacity="0.6"
         d="M128.631 101.296L115.752 97.3162L108 108L128.631 101.296Z"
@@ -1641,9 +2100,21 @@ export const TrophyLevel4: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset dy="6" />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.401412 0 0 0 0 0.333333 0 0 0 0 0.819608 0 0 0 0.2 0" />
-          <feBlend mode="darken" in2="BackgroundImageFix" result="effect1_dropShadow_503_13462" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13462" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.401412 0 0 0 0 0.333333 0 0 0 0 0.819608 0 0 0 0.2 0"
+          />
+          <feBlend
+            mode="darken"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13462"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13462"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter1_d_503_13462"
@@ -1663,9 +2134,21 @@ export const TrophyLevel4: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset dy="6" />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.401412 0 0 0 0 0.333333 0 0 0 0 0.819608 0 0 0 0.2 0" />
-          <feBlend mode="darken" in2="BackgroundImageFix" result="effect1_dropShadow_503_13462" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13462" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.401412 0 0 0 0 0.333333 0 0 0 0 0.819608 0 0 0 0.2 0"
+          />
+          <feBlend
+            mode="darken"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13462"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13462"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter2_d_503_13462"
@@ -1685,9 +2168,21 @@ export const TrophyLevel4: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset dy="3" />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.927721 0 0 0 0 0.665867 0 0 0 0 0.0535899 0 0 0 0.4 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13462" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13462" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.927721 0 0 0 0 0.665867 0 0 0 0 0.0535899 0 0 0 0.4 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13462"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13462"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter3_d_503_13462"
@@ -1707,9 +2202,21 @@ export const TrophyLevel4: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset dy="3" />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.996078 0 0 0 0 0.733333 0 0 0 0 0.105882 0 0 0 1 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13462" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13462" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.996078 0 0 0 0 0.733333 0 0 0 0 0.105882 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13462"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13462"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter4_d_503_13462"
@@ -1729,9 +2236,21 @@ export const TrophyLevel4: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 0.94902 0 0 0 0 0.305882 0 0 0 1 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13462" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13462" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 1 0 0 0 0 0.94902 0 0 0 0 0.305882 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13462"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13462"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter5_d_503_13462"
@@ -1751,9 +2270,21 @@ export const TrophyLevel4: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 0.94902 0 0 0 0 0.305882 0 0 0 1 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13462" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13462" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 1 0 0 0 0 0.94902 0 0 0 0 0.305882 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13462"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13462"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter6_d_503_13462"
@@ -1773,9 +2304,21 @@ export const TrophyLevel4: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 0.94902 0 0 0 0 0.305882 0 0 0 1 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13462" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13462" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 1 0 0 0 0 0.94902 0 0 0 0 0.305882 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13462"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13462"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter7_d_503_13462"
@@ -1795,27 +2338,74 @@ export const TrophyLevel4: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 0.94902 0 0 0 0 0.305882 0 0 0 1 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13462" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13462" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 1 0 0 0 0 0.94902 0 0 0 0 0.305882 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13462"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13462"
+            result="shape"
+          />
         </filter>
-        <linearGradient id="paint0_linear_503_13462" x1="24" y1="24" x2="24" y2="192" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint0_linear_503_13462"
+          x1="24"
+          y1="24"
+          x2="24"
+          y2="192"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#6F61EC" />
           <stop offset="1" stopColor="#3D2CD4" />
         </linearGradient>
-        <linearGradient id="paint1_linear_503_13462" x1="177" y1="60" x2="177" y2="117" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint1_linear_503_13462"
+          x1="177"
+          y1="60"
+          x2="177"
+          y2="117"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#F7C71A" />
           <stop offset="1" stopColor="#FBAA00" />
         </linearGradient>
-        <linearGradient id="paint2_linear_503_13462" x1="177" y1="60" x2="177" y2="117" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint2_linear_503_13462"
+          x1="177"
+          y1="60"
+          x2="177"
+          y2="117"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#FFDF6B" />
           <stop offset="1" stopColor="#F8A60A" />
         </linearGradient>
-        <linearGradient id="paint3_linear_503_13462" x1="39" y1="60" x2="39" y2="117" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint3_linear_503_13462"
+          x1="39"
+          y1="60"
+          x2="39"
+          y2="117"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#F7C71A" />
           <stop offset="1" stopColor="#FBAA00" />
         </linearGradient>
-        <linearGradient id="paint4_linear_503_13462" x1="39" y1="60" x2="39" y2="117" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint4_linear_503_13462"
+          x1="39"
+          y1="60"
+          x2="39"
+          y2="117"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#FFDF6B" />
           <stop offset="1" stopColor="#F8A60A" />
         </linearGradient>
@@ -1841,11 +2431,25 @@ export const TrophyLevel4: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           <stop stopColor="#FFDF6B" />
           <stop offset="1" stopColor="#F8A60A" />
         </linearGradient>
-        <linearGradient id="paint7_linear_503_13462" x1="39" y1="39" x2="39" y2="177" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint7_linear_503_13462"
+          x1="39"
+          y1="39"
+          x2="39"
+          y2="177"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#FDE046" />
           <stop offset="1" stopColor="#F9B800" />
         </linearGradient>
-        <linearGradient id="paint8_linear_503_13462" x1="60" y1="60" x2="60" y2="156" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint8_linear_503_13462"
+          x1="60"
+          y1="60"
+          x2="60"
+          y2="156"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#FFF550" />
           <stop offset="1" stopColor="#FFD541" />
         </linearGradient>
@@ -1918,7 +2522,14 @@ export const TrophyLevel4: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
       </defs>
     </svg>
   ) : (
-    <svg width="216" height="216" viewBox="0 0 216 216" fill="none" xmlns="http://www.w3.org/2000/svg" {...rest}>
+    <svg
+      width="216"
+      height="216"
+      viewBox="0 0 216 216"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...rest}
+    >
       <mask
         id="mask0_503_14653"
         style={{ maskType: "luminance" }}
@@ -2095,11 +2706,21 @@ export const TrophyLevel4: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
         strokeLinejoin="round"
       />
     </svg>
-  )
+  );
 
-export const TrophyLevel5: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) =>
+export const TrophyLevel5: React.FC<TrophyLevelProps> = ({
+  achieved,
+  ...rest
+}) =>
   achieved ? (
-    <svg width="216" height="221" viewBox="0 0 216 221" fill="none" xmlns="http://www.w3.org/2000/svg" {...rest}>
+    <svg
+      width="216"
+      height="221"
+      viewBox="0 0 216 221"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...rest}
+    >
       <mask
         id="mask0_503_13463"
         style={{ maskType: "luminance" }}
@@ -2213,13 +2834,21 @@ export const TrophyLevel5: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
         />
       </mask>
       <g mask="url(#mask2_503_13463)">
-        <g style={{ mixBlendMode: "multiply" }} opacity="0.6" filter="url(#filter3_i_503_13463)">
+        <g
+          style={{ mixBlendMode: "multiply" }}
+          opacity="0.6"
+          filter="url(#filter3_i_503_13463)"
+        >
           <path
             d="M163.5 86.5L180.577 79.3846C181.342 79.066 181.703 78.1878 181.385 77.4231C181.066 76.6584 180.188 76.2968 179.423 76.6154L161.423 84.1154C160.864 84.3483 163.5 86.5 163.5 86.5Z"
             fill="#FABC10"
           />
         </g>
-        <g style={{ mixBlendMode: "multiply" }} opacity="0.6" filter="url(#filter4_i_503_13463)">
+        <g
+          style={{ mixBlendMode: "multiply" }}
+          opacity="0.6"
+          filter="url(#filter4_i_503_13463)"
+        >
           <path
             d="M163.5 104.5L180.577 97.3846C181.342 97.066 181.703 96.1878 181.385 95.4231C181.066 94.6584 180.188 94.2968 179.423 94.6154L161.423 102.115C160.864 102.348 163.5 104.5 163.5 104.5Z"
             fill="#FABC10"
@@ -2266,13 +2895,21 @@ export const TrophyLevel5: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
         />
       </mask>
       <g mask="url(#mask3_503_13463)">
-        <g style={{ mixBlendMode: "multiply" }} opacity="0.6" filter="url(#filter5_i_503_13463)">
+        <g
+          style={{ mixBlendMode: "multiply" }}
+          opacity="0.6"
+          filter="url(#filter5_i_503_13463)"
+        >
           <path
             d="M52.5001 86.5L35.4232 79.3846C34.6585 79.066 34.2969 78.1878 34.6155 77.4231C34.9341 76.6584 35.8123 76.2968 36.577 76.6154L54.577 84.1154C55.136 84.3483 52.5001 86.5 52.5001 86.5Z"
             fill="#FABC10"
           />
         </g>
-        <g style={{ mixBlendMode: "multiply" }} opacity="0.6" filter="url(#filter6_i_503_13463)">
+        <g
+          style={{ mixBlendMode: "multiply" }}
+          opacity="0.6"
+          filter="url(#filter6_i_503_13463)"
+        >
           <path
             d="M52.5001 104.5L35.4232 97.3846C34.6585 97.066 34.2969 96.1878 34.6155 95.4231C34.9341 94.6584 35.8123 94.2968 36.577 94.6154L54.577 102.115C55.136 102.348 52.5001 104.5 52.5001 104.5Z"
             fill="#FABC10"
@@ -2307,7 +2944,11 @@ export const TrophyLevel5: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
         strokeOpacity="0.4"
         strokeWidth="3"
       />
-      <g style={{ mixBlendMode: "multiply" }} opacity="0.8" filter="url(#filter7_i_503_13463)">
+      <g
+        style={{ mixBlendMode: "multiply" }}
+        opacity="0.8"
+        filter="url(#filter7_i_503_13463)"
+      >
         <path
           fillRule="evenodd"
           clipRule="evenodd"
@@ -2415,7 +3056,12 @@ export const TrophyLevel5: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
         />
       </g>
       <g filter="url(#filter9_d_503_13463)">
-        <path fillRule="evenodd" clipRule="evenodd" d="M108 81L132 108L108 135L84 108L108 81Z" fill="white" />
+        <path
+          fillRule="evenodd"
+          clipRule="evenodd"
+          d="M108 81L132 108L108 135L84 108L108 81Z"
+          fill="white"
+        />
         <path
           d="M110.242 79.0069C109.673 78.3664 108.857 78 108 78C107.143 78 106.327 78.3664 105.758 79.0069L81.7578 106.007C80.7474 107.144 80.7474 108.856 81.7578 109.993L105.758 136.993C106.327 137.634 107.143 138 108 138C108.857 138 109.673 137.634 110.242 136.993L134.242 109.993C135.253 108.856 135.253 107.144 134.242 106.007L110.242 79.0069Z"
           stroke="white"
@@ -2423,7 +3069,12 @@ export const TrophyLevel5: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           strokeLinejoin="round"
         />
       </g>
-      <path fillRule="evenodd" clipRule="evenodd" d="M108 81L132 108H84L108 81Z" fill="url(#paint9_linear_503_13463)" />
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M108 81L132 108H84L108 81Z"
+        fill="url(#paint9_linear_503_13463)"
+      />
       <path
         fillRule="evenodd"
         clipRule="evenodd"
@@ -2493,9 +3144,21 @@ export const TrophyLevel5: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset dy="6" />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.309804 0 0 0 0 0.247059 0 0 0 0 0.866667 0 0 0 0.2 0" />
-          <feBlend mode="darken" in2="BackgroundImageFix" result="effect1_dropShadow_503_13463" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13463" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.309804 0 0 0 0 0.247059 0 0 0 0 0.866667 0 0 0 0.2 0"
+          />
+          <feBlend
+            mode="darken"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13463"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13463"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter1_d_503_13463"
@@ -2515,9 +3178,21 @@ export const TrophyLevel5: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset dy="6" />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.309804 0 0 0 0 0.247059 0 0 0 0 0.866667 0 0 0 0.2 0" />
-          <feBlend mode="darken" in2="BackgroundImageFix" result="effect1_dropShadow_503_13463" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13463" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.309804 0 0 0 0 0.247059 0 0 0 0 0.866667 0 0 0 0.2 0"
+          />
+          <feBlend
+            mode="darken"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13463"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13463"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter2_d_503_13463"
@@ -2537,9 +3212,21 @@ export const TrophyLevel5: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset dy="6" />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.309804 0 0 0 0 0.247059 0 0 0 0 0.866667 0 0 0 0.2 0" />
-          <feBlend mode="darken" in2="BackgroundImageFix" result="effect1_dropShadow_503_13463" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13463" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.309804 0 0 0 0 0.247059 0 0 0 0 0.866667 0 0 0 0.2 0"
+          />
+          <feBlend
+            mode="darken"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13463"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13463"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter3_i_503_13463"
@@ -2551,7 +3238,12 @@ export const TrophyLevel5: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           colorInterpolationFilters="sRGB"
         >
           <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="BackgroundImageFix"
+            result="shape"
+          />
           <feColorMatrix
             in="SourceAlpha"
             type="matrix"
@@ -2561,8 +3253,15 @@ export const TrophyLevel5: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           <feOffset dy="3" />
           <feGaussianBlur stdDeviation="1.5" />
           <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.976471 0 0 0 0 0.713726 0 0 0 0 0.0352941 0 0 0 1 0" />
-          <feBlend mode="normal" in2="shape" result="effect1_innerShadow_503_13463" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.976471 0 0 0 0 0.713726 0 0 0 0 0.0352941 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="shape"
+            result="effect1_innerShadow_503_13463"
+          />
         </filter>
         <filter
           id="filter4_i_503_13463"
@@ -2574,7 +3273,12 @@ export const TrophyLevel5: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           colorInterpolationFilters="sRGB"
         >
           <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="BackgroundImageFix"
+            result="shape"
+          />
           <feColorMatrix
             in="SourceAlpha"
             type="matrix"
@@ -2584,8 +3288,15 @@ export const TrophyLevel5: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           <feOffset dy="3" />
           <feGaussianBlur stdDeviation="1.5" />
           <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.976471 0 0 0 0 0.713726 0 0 0 0 0.0352941 0 0 0 1 0" />
-          <feBlend mode="normal" in2="shape" result="effect1_innerShadow_503_13463" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.976471 0 0 0 0 0.713726 0 0 0 0 0.0352941 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="shape"
+            result="effect1_innerShadow_503_13463"
+          />
         </filter>
         <filter
           id="filter5_i_503_13463"
@@ -2597,7 +3308,12 @@ export const TrophyLevel5: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           colorInterpolationFilters="sRGB"
         >
           <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="BackgroundImageFix"
+            result="shape"
+          />
           <feColorMatrix
             in="SourceAlpha"
             type="matrix"
@@ -2607,8 +3323,15 @@ export const TrophyLevel5: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           <feOffset dy="3" />
           <feGaussianBlur stdDeviation="1.5" />
           <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.976471 0 0 0 0 0.713726 0 0 0 0 0.0352941 0 0 0 1 0" />
-          <feBlend mode="normal" in2="shape" result="effect1_innerShadow_503_13463" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.976471 0 0 0 0 0.713726 0 0 0 0 0.0352941 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="shape"
+            result="effect1_innerShadow_503_13463"
+          />
         </filter>
         <filter
           id="filter6_i_503_13463"
@@ -2620,7 +3343,12 @@ export const TrophyLevel5: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           colorInterpolationFilters="sRGB"
         >
           <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="BackgroundImageFix"
+            result="shape"
+          />
           <feColorMatrix
             in="SourceAlpha"
             type="matrix"
@@ -2630,8 +3358,15 @@ export const TrophyLevel5: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           <feOffset dy="3" />
           <feGaussianBlur stdDeviation="1.5" />
           <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.976471 0 0 0 0 0.713726 0 0 0 0 0.0352941 0 0 0 1 0" />
-          <feBlend mode="normal" in2="shape" result="effect1_innerShadow_503_13463" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.976471 0 0 0 0 0.713726 0 0 0 0 0.0352941 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="shape"
+            result="effect1_innerShadow_503_13463"
+          />
         </filter>
         <filter
           id="filter7_i_503_13463"
@@ -2643,7 +3378,12 @@ export const TrophyLevel5: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           colorInterpolationFilters="sRGB"
         >
           <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="BackgroundImageFix"
+            result="shape"
+          />
           <feColorMatrix
             in="SourceAlpha"
             type="matrix"
@@ -2653,8 +3393,15 @@ export const TrophyLevel5: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           <feOffset dy="3" />
           <feGaussianBlur stdDeviation="1.5" />
           <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.976471 0 0 0 0 0.713726 0 0 0 0 0.0352941 0 0 0 1 0" />
-          <feBlend mode="normal" in2="shape" result="effect1_innerShadow_503_13463" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.976471 0 0 0 0 0.713726 0 0 0 0 0.0352941 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="shape"
+            result="effect1_innerShadow_503_13463"
+          />
         </filter>
         <filter
           id="filter8_d_503_13463"
@@ -2674,9 +3421,21 @@ export const TrophyLevel5: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset dy="3" />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.927721 0 0 0 0 0.665867 0 0 0 0 0.0535899 0 0 0 0.4 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13463" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13463" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.927721 0 0 0 0 0.665867 0 0 0 0 0.0535899 0 0 0 0.4 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13463"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13463"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter9_d_503_13463"
@@ -2696,9 +3455,21 @@ export const TrophyLevel5: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset dy="3" />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.996078 0 0 0 0 0.733333 0 0 0 0 0.105882 0 0 0 1 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13463" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13463" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.996078 0 0 0 0 0.733333 0 0 0 0 0.105882 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13463"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13463"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter10_d_503_13463"
@@ -2718,9 +3489,21 @@ export const TrophyLevel5: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 0.94902 0 0 0 0 0.305882 0 0 0 1 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13463" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13463" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 1 0 0 0 0 0.94902 0 0 0 0 0.305882 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13463"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13463"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter11_d_503_13463"
@@ -2740,9 +3523,21 @@ export const TrophyLevel5: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 0.94902 0 0 0 0 0.305882 0 0 0 1 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13463" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13463" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 1 0 0 0 0 0.94902 0 0 0 0 0.305882 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13463"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13463"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter12_d_503_13463"
@@ -2762,9 +3557,21 @@ export const TrophyLevel5: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 0.94902 0 0 0 0 0.305882 0 0 0 1 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13463" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13463" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 1 0 0 0 0 0.94902 0 0 0 0 0.305882 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13463"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13463"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter13_d_503_13463"
@@ -2784,9 +3591,21 @@ export const TrophyLevel5: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 0.94902 0 0 0 0 0.305882 0 0 0 1 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13463" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13463" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 1 0 0 0 0 0.94902 0 0 0 0 0.305882 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13463"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13463"
+            result="shape"
+          />
         </filter>
         <linearGradient
           id="paint0_linear_503_13463"
@@ -2799,19 +3618,47 @@ export const TrophyLevel5: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           <stop stopColor="#AE66FF" />
           <stop offset="1" stopColor="#7E07E0" />
         </linearGradient>
-        <linearGradient id="paint1_linear_503_13463" x1="177" y1="60" x2="177" y2="117" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint1_linear_503_13463"
+          x1="177"
+          y1="60"
+          x2="177"
+          y2="117"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#F7C71A" />
           <stop offset="1" stopColor="#FBAA00" />
         </linearGradient>
-        <linearGradient id="paint2_linear_503_13463" x1="177" y1="60" x2="177" y2="117" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint2_linear_503_13463"
+          x1="177"
+          y1="60"
+          x2="177"
+          y2="117"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#FFDF6B" />
           <stop offset="1" stopColor="#F8A60A" />
         </linearGradient>
-        <linearGradient id="paint3_linear_503_13463" x1="39" y1="60" x2="39" y2="117" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint3_linear_503_13463"
+          x1="39"
+          y1="60"
+          x2="39"
+          y2="117"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#F7C71A" />
           <stop offset="1" stopColor="#FBAA00" />
         </linearGradient>
-        <linearGradient id="paint4_linear_503_13463" x1="39" y1="60" x2="39" y2="117" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint4_linear_503_13463"
+          x1="39"
+          y1="60"
+          x2="39"
+          y2="117"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#FFDF6B" />
           <stop offset="1" stopColor="#F8A60A" />
         </linearGradient>
@@ -2837,19 +3684,47 @@ export const TrophyLevel5: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           <stop stopColor="#FFDF6B" />
           <stop offset="1" stopColor="#F8A60A" />
         </linearGradient>
-        <linearGradient id="paint7_linear_503_13463" x1="39" y1="39" x2="39" y2="177" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint7_linear_503_13463"
+          x1="39"
+          y1="39"
+          x2="39"
+          y2="177"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#FDE046" />
           <stop offset="1" stopColor="#F9B800" />
         </linearGradient>
-        <linearGradient id="paint8_linear_503_13463" x1="60" y1="60" x2="60" y2="156" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint8_linear_503_13463"
+          x1="60"
+          y1="60"
+          x2="60"
+          y2="156"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#FFF550" />
           <stop offset="1" stopColor="#FFD541" />
         </linearGradient>
-        <linearGradient id="paint9_linear_503_13463" x1="84" y1="81" x2="84" y2="108" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint9_linear_503_13463"
+          x1="84"
+          y1="81"
+          x2="84"
+          y2="108"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#27DEEB" />
           <stop offset="1" stopColor="#08C9FF" />
         </linearGradient>
-        <linearGradient id="paint10_linear_503_13463" x1="84" y1="108" x2="84" y2="135" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint10_linear_503_13463"
+          x1="84"
+          y1="108"
+          x2="84"
+          y2="135"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#009BF6" />
           <stop offset="1" stopColor="#00B5FF" />
         </linearGradient>
@@ -2878,7 +3753,14 @@ export const TrophyLevel5: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
       </defs>
     </svg>
   ) : (
-    <svg width="216" height="216" viewBox="0 0 216 216" fill="none" xmlns="http://www.w3.org/2000/svg" {...rest}>
+    <svg
+      width="216"
+      height="216"
+      viewBox="0 0 216 216"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...rest}
+    >
       <mask
         id="mask0_503_14654"
         style={{ maskType: "luminance" }}
@@ -2969,11 +3851,21 @@ export const TrophyLevel5: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
         strokeLinejoin="round"
       />
     </svg>
-  )
+  );
 
-export const TrophyLevel6: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) =>
+export const TrophyLevel6: React.FC<TrophyLevelProps> = ({
+  achieved,
+  ...rest
+}) =>
   achieved ? (
-    <svg width="216" height="221" viewBox="0 0 216 221" fill="none" xmlns="http://www.w3.org/2000/svg" {...rest}>
+    <svg
+      width="216"
+      height="221"
+      viewBox="0 0 216 221"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...rest}
+    >
       <mask
         id="mask0_503_13464"
         style={{ maskType: "luminance" }}
@@ -3087,13 +3979,21 @@ export const TrophyLevel6: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
         />
       </mask>
       <g mask="url(#mask2_503_13464)">
-        <g style={{ mixBlendMode: "multiply" }} opacity="0.6" filter="url(#filter3_i_503_13464)">
+        <g
+          style={{ mixBlendMode: "multiply" }}
+          opacity="0.6"
+          filter="url(#filter3_i_503_13464)"
+        >
           <path
             d="M57.5571 90.1073C58.3263 90.415 58.7004 91.2879 58.3927 92.0571C58.0851 92.8263 57.2121 93.2004 56.4429 92.8927L41.4429 86.8927C40.8735 86.6649 40.5 86.1134 40.5 85.5V83.5L23.4231 76.3846C22.6584 76.066 22.2968 75.1878 22.6154 74.4231C22.934 73.6584 23.8122 73.2968 24.5769 73.6154L42.5769 81.1154C43.1359 81.3483 43.5 81.8945 43.5 82.5V84.4845L57.5571 90.1073Z"
             fill="#FABC10"
           />
         </g>
-        <g style={{ mixBlendMode: "multiply" }} opacity="0.6" filter="url(#filter4_i_503_13464)">
+        <g
+          style={{ mixBlendMode: "multiply" }}
+          opacity="0.6"
+          filter="url(#filter4_i_503_13464)"
+        >
           <path
             d="M60.5571 108.107C61.3263 108.415 61.7004 109.288 61.3927 110.057C61.0851 110.826 60.2121 111.2 59.4429 110.893L44.4429 104.893C43.8735 104.665 43.5 104.113 43.5 103.5V101.5L26.4231 94.3846C25.6584 94.066 25.2968 93.1878 25.6154 92.4231C25.934 91.6584 26.8122 91.2968 27.5769 91.6154L45.5769 99.1154C46.1359 99.3483 46.5 99.8945 46.5 100.5V102.484L60.5571 108.107Z"
             fill="#FABC10"
@@ -3139,13 +4039,21 @@ export const TrophyLevel6: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
         />
       </mask>
       <g mask="url(#mask3_503_13464)">
-        <g style={{ mixBlendMode: "multiply" }} opacity="0.6" filter="url(#filter5_i_503_13464)">
+        <g
+          style={{ mixBlendMode: "multiply" }}
+          opacity="0.6"
+          filter="url(#filter5_i_503_13464)"
+        >
           <path
             d="M158.443 90.1073C157.674 90.415 157.3 91.2879 157.607 92.0571C157.915 92.8263 158.788 93.2004 159.557 92.8927L174.557 86.8927C175.127 86.6649 175.5 86.1134 175.5 85.5V83.5L192.577 76.3846C193.342 76.066 193.703 75.1878 193.385 74.4231C193.066 73.6584 192.188 73.2968 191.423 73.6154L173.423 81.1154C172.864 81.3483 172.5 81.8945 172.5 82.5V84.4845L158.443 90.1073Z"
             fill="#FABC10"
           />
         </g>
-        <g style={{ mixBlendMode: "multiply" }} opacity="0.6" filter="url(#filter6_i_503_13464)">
+        <g
+          style={{ mixBlendMode: "multiply" }}
+          opacity="0.6"
+          filter="url(#filter6_i_503_13464)"
+        >
           <path
             d="M155.443 108.107C154.674 108.415 154.3 109.288 154.607 110.057C154.915 110.826 155.788 111.2 156.557 110.893L171.557 104.893C172.127 104.665 172.5 104.113 172.5 103.5V101.5L189.577 94.3846C190.342 94.066 190.703 93.1878 190.385 92.4231C190.066 91.6584 189.188 91.2968 188.423 91.6154L170.423 99.1154C169.864 99.3483 169.5 99.8945 169.5 100.5V102.484L155.443 108.107Z"
             fill="#FABC10"
@@ -3248,14 +4156,26 @@ export const TrophyLevel6: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
         d="M90.0612 71.0248C90.0612 75.6271 87.4289 79.8241 83.2856 81.8278L77.4077 84.6704C69.4391 88.524 60.1833 82.7188 60.1833 73.8673V59.3392C60.1833 57.1957 61.3269 55.2149 63.1833 54.1431L85.5612 41.2232C87.5612 40.0685 90.0612 41.5119 90.0612 43.8213V71.0248Z"
         fill="url(#paint9_linear_503_13464)"
       />
-      <path opacity="0.4" d="M63.6199 55.6195L86.3437 42.5024" stroke="#FDEDAC" strokeWidth="3" strokeLinecap="round" />
+      <path
+        opacity="0.4"
+        d="M63.6199 55.6195L86.3437 42.5024"
+        stroke="#FDEDAC"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
       <path
         fillRule="evenodd"
         clipRule="evenodd"
         d="M125.939 71.0248C125.939 75.6271 128.571 79.8241 132.715 81.8278L138.593 84.6704C146.561 88.524 155.817 82.7188 155.817 73.8673V59.3392C155.817 57.1957 154.673 55.2149 152.817 54.1431L130.439 41.2232C128.439 40.0685 125.939 41.5119 125.939 43.8213V71.0248Z"
         fill="url(#paint10_linear_503_13464)"
       />
-      <path opacity="0.4" d="M152.38 55.6195L129.656 42.5024" stroke="#FDEDAC" strokeWidth="3" strokeLinecap="round" />
+      <path
+        opacity="0.4"
+        d="M152.38 55.6195L129.656 42.5024"
+        stroke="#FDEDAC"
+        strokeWidth="3"
+        strokeLinecap="round"
+      />
       <path
         fillRule="evenodd"
         clipRule="evenodd"
@@ -3282,7 +4202,11 @@ export const TrophyLevel6: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
         />
       </mask>
       <g mask="url(#mask6_503_13464)">
-        <g style={{ mixBlendMode: "multiply" }} opacity="0.8" filter="url(#filter7_i_503_13464)">
+        <g
+          style={{ mixBlendMode: "multiply" }}
+          opacity="0.8"
+          filter="url(#filter7_i_503_13464)"
+        >
           <path
             fillRule="evenodd"
             clipRule="evenodd"
@@ -3368,7 +4292,10 @@ export const TrophyLevel6: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
             d="M108 108L60 120V96L108 108ZM108 108L120 60H96L108 108ZM108 108L156 96V120L108 108ZM108 108L133.456 65.5736L150.426 82.5442L108 108ZM108 108L133.456 150.426L150.426 133.456L108 108ZM108 108L96 156H120L108 108ZM108 108L82.5442 150.426L65.5736 133.456L108 108Z"
             fill="#FFD640"
           />
-          <path d="M82.5442 65.5736L65.5736 82.5442L108 108L82.5442 65.5736Z" fill="#FFD640" />
+          <path
+            d="M82.5442 65.5736L65.5736 82.5442L108 108L82.5442 65.5736Z"
+            fill="#FFD640"
+          />
         </g>
         <path
           opacity="0.4"
@@ -3392,7 +4319,10 @@ export const TrophyLevel6: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
         />
       </g>
       <g filter="url(#filter9_d_503_13464)">
-        <path d="M89.3333 91.672L108 80.5001L126.667 91.672V124.328L108 135.5L89.3333 124.328V91.672Z" fill="white" />
+        <path
+          d="M89.3333 91.672L108 80.5001L126.667 91.672V124.328L108 135.5L89.3333 124.328V91.672Z"
+          fill="white"
+        />
         <path
           d="M87.7927 89.0978C86.8874 89.6396 86.3333 90.617 86.3333 91.672V124.328C86.3333 125.383 86.8874 126.361 87.7927 126.902L106.459 138.074C107.408 138.642 108.592 138.642 109.541 138.074L128.207 126.902C129.113 126.361 129.667 125.383 129.667 124.328V91.672C129.667 90.617 129.113 89.6396 128.207 89.0978L109.541 77.9259C108.592 77.3582 107.408 77.3582 106.459 77.9259L87.7927 89.0978Z"
           stroke="white"
@@ -3493,9 +4423,21 @@ export const TrophyLevel6: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset dy="6" />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.921569 0 0 0 0 0.215686 0 0 0 0 0.305882 0 0 0 0.2 0" />
-          <feBlend mode="darken" in2="BackgroundImageFix" result="effect1_dropShadow_503_13464" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13464" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.921569 0 0 0 0 0.215686 0 0 0 0 0.305882 0 0 0 0.2 0"
+          />
+          <feBlend
+            mode="darken"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13464"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13464"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter1_d_503_13464"
@@ -3515,9 +4457,21 @@ export const TrophyLevel6: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset dy="6" />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.921569 0 0 0 0 0.215686 0 0 0 0 0.305882 0 0 0 0.2 0" />
-          <feBlend mode="darken" in2="BackgroundImageFix" result="effect1_dropShadow_503_13464" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13464" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.921569 0 0 0 0 0.215686 0 0 0 0 0.305882 0 0 0 0.2 0"
+          />
+          <feBlend
+            mode="darken"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13464"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13464"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter2_d_503_13464"
@@ -3537,9 +4491,21 @@ export const TrophyLevel6: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset dy="6" />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.921569 0 0 0 0 0.215686 0 0 0 0 0.305882 0 0 0 0.2 0" />
-          <feBlend mode="darken" in2="BackgroundImageFix" result="effect1_dropShadow_503_13464" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13464" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.921569 0 0 0 0 0.215686 0 0 0 0 0.305882 0 0 0 0.2 0"
+          />
+          <feBlend
+            mode="darken"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13464"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13464"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter3_i_503_13464"
@@ -3551,7 +4517,12 @@ export const TrophyLevel6: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           colorInterpolationFilters="sRGB"
         >
           <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="BackgroundImageFix"
+            result="shape"
+          />
           <feColorMatrix
             in="SourceAlpha"
             type="matrix"
@@ -3561,8 +4532,15 @@ export const TrophyLevel6: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           <feOffset dy="3" />
           <feGaussianBlur stdDeviation="1.5" />
           <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.976471 0 0 0 0 0.713726 0 0 0 0 0.0352941 0 0 0 1 0" />
-          <feBlend mode="normal" in2="shape" result="effect1_innerShadow_503_13464" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.976471 0 0 0 0 0.713726 0 0 0 0 0.0352941 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="shape"
+            result="effect1_innerShadow_503_13464"
+          />
         </filter>
         <filter
           id="filter4_i_503_13464"
@@ -3574,7 +4552,12 @@ export const TrophyLevel6: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           colorInterpolationFilters="sRGB"
         >
           <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="BackgroundImageFix"
+            result="shape"
+          />
           <feColorMatrix
             in="SourceAlpha"
             type="matrix"
@@ -3584,8 +4567,15 @@ export const TrophyLevel6: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           <feOffset dy="3" />
           <feGaussianBlur stdDeviation="1.5" />
           <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.976471 0 0 0 0 0.713726 0 0 0 0 0.0352941 0 0 0 1 0" />
-          <feBlend mode="normal" in2="shape" result="effect1_innerShadow_503_13464" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.976471 0 0 0 0 0.713726 0 0 0 0 0.0352941 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="shape"
+            result="effect1_innerShadow_503_13464"
+          />
         </filter>
         <filter
           id="filter5_i_503_13464"
@@ -3597,7 +4587,12 @@ export const TrophyLevel6: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           colorInterpolationFilters="sRGB"
         >
           <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="BackgroundImageFix"
+            result="shape"
+          />
           <feColorMatrix
             in="SourceAlpha"
             type="matrix"
@@ -3607,8 +4602,15 @@ export const TrophyLevel6: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           <feOffset dy="3" />
           <feGaussianBlur stdDeviation="1.5" />
           <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.976471 0 0 0 0 0.713726 0 0 0 0 0.0352941 0 0 0 1 0" />
-          <feBlend mode="normal" in2="shape" result="effect1_innerShadow_503_13464" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.976471 0 0 0 0 0.713726 0 0 0 0 0.0352941 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="shape"
+            result="effect1_innerShadow_503_13464"
+          />
         </filter>
         <filter
           id="filter6_i_503_13464"
@@ -3620,7 +4622,12 @@ export const TrophyLevel6: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           colorInterpolationFilters="sRGB"
         >
           <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="BackgroundImageFix"
+            result="shape"
+          />
           <feColorMatrix
             in="SourceAlpha"
             type="matrix"
@@ -3630,8 +4637,15 @@ export const TrophyLevel6: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           <feOffset dy="3" />
           <feGaussianBlur stdDeviation="1.5" />
           <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.976471 0 0 0 0 0.713726 0 0 0 0 0.0352941 0 0 0 1 0" />
-          <feBlend mode="normal" in2="shape" result="effect1_innerShadow_503_13464" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.976471 0 0 0 0 0.713726 0 0 0 0 0.0352941 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="shape"
+            result="effect1_innerShadow_503_13464"
+          />
         </filter>
         <filter
           id="filter7_i_503_13464"
@@ -3643,7 +4657,12 @@ export const TrophyLevel6: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           colorInterpolationFilters="sRGB"
         >
           <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="BackgroundImageFix"
+            result="shape"
+          />
           <feColorMatrix
             in="SourceAlpha"
             type="matrix"
@@ -3653,8 +4672,15 @@ export const TrophyLevel6: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           <feOffset dy="3" />
           <feGaussianBlur stdDeviation="1.5" />
           <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.976471 0 0 0 0 0.713726 0 0 0 0 0.0352941 0 0 0 1 0" />
-          <feBlend mode="normal" in2="shape" result="effect1_innerShadow_503_13464" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.976471 0 0 0 0 0.713726 0 0 0 0 0.0352941 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="shape"
+            result="effect1_innerShadow_503_13464"
+          />
         </filter>
         <filter
           id="filter8_d_503_13464"
@@ -3674,9 +4700,21 @@ export const TrophyLevel6: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset dy="3" />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.927721 0 0 0 0 0.665867 0 0 0 0 0.0535899 0 0 0 0.4 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13464" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13464" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.927721 0 0 0 0 0.665867 0 0 0 0 0.0535899 0 0 0 0.4 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13464"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13464"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter9_d_503_13464"
@@ -3696,9 +4734,21 @@ export const TrophyLevel6: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset dy="3" />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.996078 0 0 0 0 0.733333 0 0 0 0 0.105882 0 0 0 1 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13464" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13464" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.996078 0 0 0 0 0.733333 0 0 0 0 0.105882 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13464"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13464"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter10_d_503_13464"
@@ -3718,9 +4768,21 @@ export const TrophyLevel6: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 0.94902 0 0 0 0 0.305882 0 0 0 1 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13464" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13464" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 1 0 0 0 0 0.94902 0 0 0 0 0.305882 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13464"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13464"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter11_d_503_13464"
@@ -3740,9 +4802,21 @@ export const TrophyLevel6: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 0.94902 0 0 0 0 0.305882 0 0 0 1 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13464" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13464" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 1 0 0 0 0 0.94902 0 0 0 0 0.305882 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13464"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13464"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter12_d_503_13464"
@@ -3762,9 +4836,21 @@ export const TrophyLevel6: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 0.94902 0 0 0 0 0.305882 0 0 0 1 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13464" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13464" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 1 0 0 0 0 0.94902 0 0 0 0 0.305882 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13464"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13464"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter13_d_503_13464"
@@ -3784,35 +4870,96 @@ export const TrophyLevel6: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 0.94902 0 0 0 0 0.305882 0 0 0 1 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13464" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13464" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 1 0 0 0 0 0.94902 0 0 0 0 0.305882 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13464"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13464"
+            result="shape"
+          />
         </filter>
-        <linearGradient id="paint0_linear_503_13464" x1="24" y1="24" x2="24" y2="192" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint0_linear_503_13464"
+          x1="24"
+          y1="24"
+          x2="24"
+          y2="192"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#FF7F7D" />
           <stop offset="1" stopColor="#EC2E4A" />
         </linearGradient>
-        <linearGradient id="paint1_linear_503_13464" x1="24" y1="57" x2="24" y2="120" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint1_linear_503_13464"
+          x1="24"
+          y1="57"
+          x2="24"
+          y2="120"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#F7C71A" />
           <stop offset="1" stopColor="#FBAA00" />
         </linearGradient>
-        <linearGradient id="paint2_linear_503_13464" x1="24" y1="57" x2="24" y2="120" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint2_linear_503_13464"
+          x1="24"
+          y1="57"
+          x2="24"
+          y2="120"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#FFDF6B" />
           <stop offset="1" stopColor="#F8A60A" />
         </linearGradient>
-        <linearGradient id="paint3_linear_503_13464" x1="192" y1="57" x2="192" y2="120" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint3_linear_503_13464"
+          x1="192"
+          y1="57"
+          x2="192"
+          y2="120"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#F7C71A" />
           <stop offset="1" stopColor="#FBAA00" />
         </linearGradient>
-        <linearGradient id="paint4_linear_503_13464" x1="192" y1="57" x2="192" y2="120" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint4_linear_503_13464"
+          x1="192"
+          y1="57"
+          x2="192"
+          y2="120"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#FFDF6B" />
           <stop offset="1" stopColor="#F8A60A" />
         </linearGradient>
-        <linearGradient id="paint5_linear_503_13464" x1="39" y1="126" x2="39" y2="154.5" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint5_linear_503_13464"
+          x1="39"
+          y1="126"
+          x2="39"
+          y2="154.5"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#F7C71A" />
           <stop offset="1" stopColor="#FBAA00" />
         </linearGradient>
-        <linearGradient id="paint6_linear_503_13464" x1="39" y1="126" x2="39" y2="154.5" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint6_linear_503_13464"
+          x1="39"
+          y1="126"
+          x2="39"
+          y2="154.5"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#FFDF6B" />
           <stop offset="1" stopColor="#F8A60A" />
         </linearGradient>
@@ -3860,11 +5007,25 @@ export const TrophyLevel6: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           <stop stopColor="#FBCC24" />
           <stop offset="1" stopColor="#F9B800" />
         </linearGradient>
-        <linearGradient id="paint11_linear_503_13464" x1="39" y1="39" x2="39" y2="177" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint11_linear_503_13464"
+          x1="39"
+          y1="39"
+          x2="39"
+          y2="177"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#FDE046" />
           <stop offset="1" stopColor="#F9B800" />
         </linearGradient>
-        <linearGradient id="paint12_linear_503_13464" x1="60" y1="60" x2="60" y2="156" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint12_linear_503_13464"
+          x1="60"
+          y1="60"
+          x2="60"
+          y2="156"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#FFF550" />
           <stop offset="1" stopColor="#FFD541" />
         </linearGradient>
@@ -3948,7 +5109,14 @@ export const TrophyLevel6: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
       </defs>
     </svg>
   ) : (
-    <svg width="216" height="216" viewBox="0 0 216 216" fill="none" xmlns="http://www.w3.org/2000/svg" {...rest}>
+    <svg
+      width="216"
+      height="216"
+      viewBox="0 0 216 216"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...rest}
+    >
       <mask
         id="mask0_503_14655"
         style={{ maskType: "luminance" }}
@@ -4055,11 +5223,21 @@ export const TrophyLevel6: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
         />
       </g>
     </svg>
-  )
+  );
 
-export const TrophyLevel7: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) =>
+export const TrophyLevel7: React.FC<TrophyLevelProps> = ({
+  achieved,
+  ...rest
+}) =>
   achieved ? (
-    <svg width="216" height="221" viewBox="0 0 216 221" fill="none" xmlns="http://www.w3.org/2000/svg" {...rest}>
+    <svg
+      width="216"
+      height="221"
+      viewBox="0 0 216 221"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...rest}
+    >
       <mask
         id="mask0_503_13465"
         style={{ maskType: "luminance" }}
@@ -4439,7 +5617,10 @@ export const TrophyLevel7: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
               d="M108 108L36 90V126L108 108ZM108 108L126 36H90L108 108ZM108 108L180 126V90L108 108ZM108 108L146.184 44.3604L171.64 69.8162L108 108ZM108 108L171.64 146.184L146.184 171.64L108 108ZM108 108L69.8162 171.64L44.3604 146.184L108 108ZM108 108L126 180H90L108 108Z"
               fill="#5A5951"
             />
-            <path d="M69.8162 44.3604L44.3604 69.8162L108 108L69.8162 44.3604Z" fill="#5A5951" />
+            <path
+              d="M69.8162 44.3604L44.3604 69.8162L108 108L69.8162 44.3604Z"
+              fill="#5A5951"
+            />
           </g>
         </g>
         <path
@@ -4520,7 +5701,10 @@ export const TrophyLevel7: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
             d="M108 108L60 120V96L108 108ZM108 108L120 60H96L108 108ZM108 108L156 96V120L108 108ZM108 108L133.456 65.5736L150.426 82.5442L108 108ZM108 108L133.456 150.426L150.426 133.456L108 108ZM108 108L96 156H120L108 108ZM108 108L82.5442 150.426L65.5736 133.456L108 108Z"
             fill="#FFD640"
           />
-          <path d="M82.5442 65.5736L65.5736 82.5442L108 108L82.5442 65.5736Z" fill="#FFD640" />
+          <path
+            d="M82.5442 65.5736L65.5736 82.5442L108 108L82.5442 65.5736Z"
+            fill="#FFD640"
+          />
         </g>
         <path
           opacity="0.4"
@@ -4584,10 +5768,22 @@ export const TrophyLevel7: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
         d="M108 132L99 105H117L108 132Z"
         fill="url(#paint32_linear_503_13465)"
       />
-      <path d="M90 89.4115L81 105H135L126 89.4115H90Z" fill="url(#paint33_linear_503_13465)" />
-      <path d="M90 89.4115L99 105H81L90 89.4115Z" fill="url(#paint34_linear_503_13465)" />
-      <path d="M108 89.4115L117 105H99L108 89.4115Z" fill="url(#paint35_linear_503_13465)" />
-      <path d="M126 89.4115L135 105H117L126 89.4115Z" fill="url(#paint36_linear_503_13465)" />
+      <path
+        d="M90 89.4115L81 105H135L126 89.4115H90Z"
+        fill="url(#paint33_linear_503_13465)"
+      />
+      <path
+        d="M90 89.4115L99 105H81L90 89.4115Z"
+        fill="url(#paint34_linear_503_13465)"
+      />
+      <path
+        d="M108 89.4115L117 105H99L108 89.4115Z"
+        fill="url(#paint35_linear_503_13465)"
+      />
+      <path
+        d="M126 89.4115L135 105H117L126 89.4115Z"
+        fill="url(#paint36_linear_503_13465)"
+      />
       <g filter="url(#filter9_d_503_13465)">
         <path
           fillRule="evenodd"
@@ -4647,9 +5843,21 @@ export const TrophyLevel7: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset dy="6" />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.61352 0 0 0 0 0.61352 0 0 0 0 0.61352 0 0 0 0.2 0" />
-          <feBlend mode="darken" in2="BackgroundImageFix" result="effect1_dropShadow_503_13465" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13465" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.61352 0 0 0 0 0.61352 0 0 0 0 0.61352 0 0 0 0.2 0"
+          />
+          <feBlend
+            mode="darken"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13465"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13465"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter1_d_503_13465"
@@ -4669,9 +5877,21 @@ export const TrophyLevel7: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset dy="6" />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.61352 0 0 0 0 0.61352 0 0 0 0 0.61352 0 0 0 0.2 0" />
-          <feBlend mode="darken" in2="BackgroundImageFix" result="effect1_dropShadow_503_13465" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13465" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.61352 0 0 0 0 0.61352 0 0 0 0 0.61352 0 0 0 0.2 0"
+          />
+          <feBlend
+            mode="darken"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13465"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13465"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter2_d_503_13465"
@@ -4691,9 +5911,21 @@ export const TrophyLevel7: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset dy="6" />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.61352 0 0 0 0 0.61352 0 0 0 0 0.61352 0 0 0 0.2 0" />
-          <feBlend mode="darken" in2="BackgroundImageFix" result="effect1_dropShadow_503_13465" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13465" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.61352 0 0 0 0 0.61352 0 0 0 0 0.61352 0 0 0 0.2 0"
+          />
+          <feBlend
+            mode="darken"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13465"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13465"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter3_d_503_13465"
@@ -4713,9 +5945,21 @@ export const TrophyLevel7: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset dy="6" />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.61352 0 0 0 0 0.61352 0 0 0 0 0.61352 0 0 0 0.2 0" />
-          <feBlend mode="darken" in2="BackgroundImageFix" result="effect1_dropShadow_503_13465" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13465" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.61352 0 0 0 0 0.61352 0 0 0 0 0.61352 0 0 0 0.2 0"
+          />
+          <feBlend
+            mode="darken"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13465"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13465"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter4_d_503_13465"
@@ -4735,9 +5979,21 @@ export const TrophyLevel7: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset dy="6" />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.61352 0 0 0 0 0.61352 0 0 0 0 0.61352 0 0 0 0.2 0" />
-          <feBlend mode="darken" in2="BackgroundImageFix" result="effect1_dropShadow_503_13465" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13465" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.61352 0 0 0 0 0.61352 0 0 0 0 0.61352 0 0 0 0.2 0"
+          />
+          <feBlend
+            mode="darken"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13465"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13465"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter5_i_503_13465"
@@ -4749,7 +6005,12 @@ export const TrophyLevel7: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           colorInterpolationFilters="sRGB"
         >
           <feFlood floodOpacity="0" result="BackgroundImageFix" />
-          <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="BackgroundImageFix"
+            result="shape"
+          />
           <feColorMatrix
             in="SourceAlpha"
             type="matrix"
@@ -4759,8 +6020,15 @@ export const TrophyLevel7: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           <feOffset dy="3" />
           <feGaussianBlur stdDeviation="1.5" />
           <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.929412 0 0 0 0 0.568627 0 0 0 0 0 0 0 0 0.5 0" />
-          <feBlend mode="normal" in2="shape" result="effect1_innerShadow_503_13465" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.929412 0 0 0 0 0.568627 0 0 0 0 0 0 0 0 0.5 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="shape"
+            result="effect1_innerShadow_503_13465"
+          />
         </filter>
         <filter
           id="filter6_di_503_13465"
@@ -4780,9 +6048,21 @@ export const TrophyLevel7: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset dy="1.2" />
           <feGaussianBlur stdDeviation="1.5" />
-          <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 0.909804 0 0 0 0 0.556863 0 0 0 0.4 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13465" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13465" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 1 0 0 0 0 0.909804 0 0 0 0 0.556863 0 0 0 0.4 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13465"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13465"
+            result="shape"
+          />
           <feColorMatrix
             in="SourceAlpha"
             type="matrix"
@@ -4792,8 +6072,15 @@ export const TrophyLevel7: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           <feOffset dy="3" />
           <feGaussianBlur stdDeviation="1.5" />
           <feComposite in2="hardAlpha" operator="arithmetic" k2="-1" k3="1" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.31048 0 0 0 0 0.31048 0 0 0 0 0.279572 0 0 0 1 0" />
-          <feBlend mode="normal" in2="shape" result="effect2_innerShadow_503_13465" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.31048 0 0 0 0 0.31048 0 0 0 0 0.279572 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="shape"
+            result="effect2_innerShadow_503_13465"
+          />
         </filter>
         <filter
           id="filter7_d_503_13465"
@@ -4813,9 +6100,21 @@ export const TrophyLevel7: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset dy="3" />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.927721 0 0 0 0 0.665867 0 0 0 0 0.0535899 0 0 0 0.4 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13465" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13465" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.927721 0 0 0 0 0.665867 0 0 0 0 0.0535899 0 0 0 0.4 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13465"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13465"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter8_d_503_13465"
@@ -4835,9 +6134,21 @@ export const TrophyLevel7: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset dy="3" />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 0.996078 0 0 0 0 0.733333 0 0 0 0 0.105882 0 0 0 1 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13465" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13465" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 0.996078 0 0 0 0 0.733333 0 0 0 0 0.105882 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13465"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13465"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter9_d_503_13465"
@@ -4857,9 +6168,21 @@ export const TrophyLevel7: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 0.94902 0 0 0 0 0.305882 0 0 0 1 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13465" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13465" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 1 0 0 0 0 0.94902 0 0 0 0 0.305882 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13465"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13465"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter10_d_503_13465"
@@ -4879,9 +6202,21 @@ export const TrophyLevel7: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 0.94902 0 0 0 0 0.305882 0 0 0 1 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13465" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13465" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 1 0 0 0 0 0.94902 0 0 0 0 0.305882 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13465"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13465"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter11_d_503_13465"
@@ -4901,9 +6236,21 @@ export const TrophyLevel7: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 0.94902 0 0 0 0 0.305882 0 0 0 1 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13465" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13465" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 1 0 0 0 0 0.94902 0 0 0 0 0.305882 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13465"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13465"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter12_d_503_13465"
@@ -4923,9 +6270,21 @@ export const TrophyLevel7: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 0.94902 0 0 0 0 0.305882 0 0 0 1 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13465" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13465" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 1 0 0 0 0 0.94902 0 0 0 0 0.305882 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13465"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13465"
+            result="shape"
+          />
         </filter>
         <filter
           id="filter13_d_503_13465"
@@ -4945,11 +6304,30 @@ export const TrophyLevel7: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           />
           <feOffset />
           <feGaussianBlur stdDeviation="3" />
-          <feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 0.94902 0 0 0 0 0.305882 0 0 0 1 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_503_13465" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_503_13465" result="shape" />
+          <feColorMatrix
+            type="matrix"
+            values="0 0 0 0 1 0 0 0 0 0.94902 0 0 0 0 0.305882 0 0 0 1 0"
+          />
+          <feBlend
+            mode="normal"
+            in2="BackgroundImageFix"
+            result="effect1_dropShadow_503_13465"
+          />
+          <feBlend
+            mode="normal"
+            in="SourceGraphic"
+            in2="effect1_dropShadow_503_13465"
+            result="shape"
+          />
         </filter>
-        <linearGradient id="paint0_linear_503_13465" x1="24" y1="24" x2="24" y2="192" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint0_linear_503_13465"
+          x1="24"
+          y1="24"
+          x2="24"
+          y2="192"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#575753" />
           <stop offset="1" stopColor="#403F36" />
         </linearGradient>
@@ -5261,11 +6639,25 @@ export const TrophyLevel7: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
           <stop stopColor="#FFDF6B" />
           <stop offset="1" stopColor="#F8A60A" />
         </linearGradient>
-        <linearGradient id="paint29_linear_503_13465" x1="39" y1="39" x2="39" y2="177" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint29_linear_503_13465"
+          x1="39"
+          y1="39"
+          x2="39"
+          y2="177"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#FDE046" />
           <stop offset="1" stopColor="#F9B800" />
         </linearGradient>
-        <linearGradient id="paint30_linear_503_13465" x1="60" y1="60" x2="60" y2="156" gradientUnits="userSpaceOnUse">
+        <linearGradient
+          id="paint30_linear_503_13465"
+          x1="60"
+          y1="60"
+          x2="60"
+          y2="156"
+          gradientUnits="userSpaceOnUse"
+        >
           <stop stopColor="#FFF550" />
           <stop offset="1" stopColor="#FFD541" />
         </linearGradient>
@@ -5338,7 +6730,14 @@ export const TrophyLevel7: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
       </defs>
     </svg>
   ) : (
-    <svg width="216" height="216" viewBox="0 0 216 216" fill="none" xmlns="http://www.w3.org/2000/svg" {...rest}>
+    <svg
+      width="216"
+      height="216"
+      viewBox="0 0 216 216"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      {...rest}
+    >
       <mask
         id="mask0_503_14656"
         style={{ maskType: "luminance" }}
@@ -5441,4 +6840,4 @@ export const TrophyLevel7: React.FC<TrophyLevelProps> = ({ achieved, ...rest }) 
         strokeLinejoin="round"
       />
     </svg>
-  )
+  );

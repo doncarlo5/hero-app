@@ -1,14 +1,14 @@
-import { useState } from "react"
-import { ChevronLeft, LucideClock4 } from "lucide-react"
-import { Link } from "react-router-dom"
+import { ChevronLeft, LucideClock4 } from "lucide-react";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import CountDownTimer from "@/components/countdown-timer"
-import { Navbar } from "@/components/navbar"
+import CountDownTimer from "@/components/countdown-timer";
+import { Navbar } from "@/components/navbar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 function TimerPage() {
-  const [customTimer, setCustomTimer] = useState(120)
+  const [customTimer, setCustomTimer] = useState(120);
 
   return (
     <div className="">
@@ -26,7 +26,9 @@ function TimerPage() {
         </div>
         <div className="flex flex-col items-center justify-center pt-5 ">
           <CountDownTimer exerciseTypeTimer={customTimer} />
-          <p className="mb-5 text-center text-gray-500 dark:text-gray-400 md:text-xl">Choisi ton temps en secondes</p>
+          <p className="mb-5 text-center text-gray-500 dark:text-gray-400 md:text-xl">
+            Choisi ton temps en secondes
+          </p>
           <div className="flex">
             <div className="relative ">
               <div className="pointer-events-none absolute inset-y-0 start-0 flex items-center ps-3.5">
@@ -45,7 +47,7 @@ function TimerPage() {
         </div>
       </main>
     </div>
-  )
+  );
 }
 
-export default TimerPage
+export default TimerPage;

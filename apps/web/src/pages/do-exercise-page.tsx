@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react"
-import { Accordion, AccordionItem } from "@radix-ui/react-accordion"
-import { ReloadIcon } from "@radix-ui/react-icons"
-import { format } from "date-fns"
+import { Accordion, AccordionItem } from "@radix-ui/react-accordion";
+import { ReloadIcon } from "@radix-ui/react-icons";
+import { format } from "date-fns";
 import {
   Check,
   ChevronLeft,
@@ -13,13 +12,14 @@ import {
   LucideRotateCcw,
   Stars,
   X,
-} from "lucide-react"
-import { CountdownCircleTimer } from "react-countdown-circle-timer"
-import { useNavigate, useParams, useSearchParams } from "react-router-dom"
+} from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { CountdownCircleTimer } from "react-countdown-circle-timer";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
-import fetchApi from "@/lib/api-handler"
-import { cn } from "@/lib/utils"
-import { AccordionContent, AccordionTrigger } from "@/components/ui/accordion"
+import { Navbar } from "@/components/navbar";
+import ScreenLockToggle from "@/components/screen-lock-toggle";
+import { AccordionContent, AccordionTrigger } from "@/components/ui/accordion";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,31 +30,38 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Textarea } from "@/components/ui/textarea"
-import { useToast } from "@/components/ui/use-toast"
-import { Navbar } from "@/components/navbar"
-import ScreenLockToggle from "@/components/screen-lock-toggle"
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/components/ui/use-toast";
+import fetchApi from "@/lib/api-handler";
+import { cn } from "@/lib/utils";
 
 const DoExercisePage = () => {
-  const [oneExerciseType, setOneExerciseType] = useState(null as any)
-  const [lastExercise, setLastExercise] = useState(null as any)
-  const [allExerciseTypes, setAllExerciseTypes] = useState([] as any[])
-  const [session, setSession] = useState<any>({})
-  const [showPrefillButton, setShowPrefillButton] = useState(false)
-  const [addRep4, setAddRep4] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [isLoadingTypes, setIsLoadingTypes] = useState(true)
-  const [isLoadingLastExercise, setIsLoadingLastExercise] = useState(true)
+  const [oneExerciseType, setOneExerciseType] = useState(null as any);
+  const [lastExercise, setLastExercise] = useState(null as any);
+  const [allExerciseTypes, setAllExerciseTypes] = useState([] as any[]);
+  const [session, setSession] = useState<any>({});
+  const [showPrefillButton, setShowPrefillButton] = useState(false);
+  const [addRep4, setAddRep4] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingTypes, setIsLoadingTypes] = useState(true);
+  const [isLoadingLastExercise, setIsLoadingLastExercise] = useState(true);
 
-  const { sessionId } = useParams()
-  const [searchParams] = useSearchParams()
-  const exerciseTypeId = searchParams.get("exerciseTypeId")
-  console.log("🚀 ~ DoExercisePage ~ exerciseTypeId:", exerciseTypeId)
+  const { sessionId } = useParams();
+  const [searchParams] = useSearchParams();
+  const exerciseTypeId = searchParams.get("exerciseTypeId");
+  console.log("🚀 ~ DoExercisePage ~ exerciseTypeId:", exerciseTypeId);
 
   const [formState, setFormState] = useState({
     rep1: lastExercise?.rep[0] || "",
@@ -66,10 +73,10 @@ const DoExercisePage = () => {
     weight3: lastExercise?.weight[2] || "",
     weight4: lastExercise?.weight[3] || "",
     comment: lastExercise?.comment || "",
-  })
+  });
 
-  const navigate = useNavigate()
-  const { toast } = useToast()
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     setFormState({
@@ -82,118 +89,136 @@ const DoExercisePage = () => {
       rep4: lastExercise?.rep[3] || "",
       weight4: lastExercise?.weight[3] || "",
       comment: "",
-    })
+    });
     if (lastExercise?.rep[3]) {
-      setAddRep4(true)
+      setAddRep4(true);
     } else {
-      setAddRep4(false)
+      setAddRep4(false);
     }
-  }, [lastExercise])
+  }, [lastExercise]);
 
   const fetchOneSession = async () => {
     try {
-      const response = await fetchApi(`/api/sessions/${sessionId}`)
-      return response
+      const response = await fetchApi(`/api/sessions/${sessionId}`);
+      return response;
     } catch (error: any) {
-      console.error("Fetch error: ", error)
+      console.error("Fetch error: ", error);
     }
-  }
+  };
 
   const onExerciseTypeChange = async (exerciseType: any) => {
-    setOneExerciseType(exerciseType)
-    setIsLoadingLastExercise(true)
+    setOneExerciseType(exerciseType);
+    setIsLoadingLastExercise(true);
     try {
-      const response = await fetchApi(`/api/exercise-user?limit=1&sort=-createdAt&type=${exerciseType._id}`)
-      setLastExercise(response[0])
+      const response = await fetchApi(
+        `/api/exercise-user?limit=1&sort=-createdAt&type=${exerciseType._id}`
+      );
+      setLastExercise(response[0]);
     } catch (error: any) {
-      console.error("Fetch error: ", error)
+      console.error("Fetch error: ", error);
     } finally {
-      setIsLoadingLastExercise(false)
+      setIsLoadingLastExercise(false);
     }
-  }
+  };
 
   const fetchAllExerciseTypes = async (sessionData: any) => {
     try {
-      const response = await fetchApi(`/api/exercise-type?type_session=${sessionData.type_session}&limit=1000`)
-      return response
+      const response = await fetchApi(
+        `/api/exercise-type?type_session=${sessionData.type_session}&limit=1000`
+      );
+      return response;
     } catch (error: any) {
-      console.error("Fetch error: ", error)
+      console.error("Fetch error: ", error);
     } finally {
-      setIsLoadingTypes(false)
+      setIsLoadingTypes(false);
     }
-  }
+  };
 
   useEffect(() => {
     const fetchInitialData = async () => {
-      const sessionData = await fetchOneSession()
-      setSession(sessionData)
-      const exerciseTypes = await fetchAllExerciseTypes(sessionData)
-      setAllExerciseTypes(exerciseTypes)
+      const sessionData = await fetchOneSession();
+      setSession(sessionData);
+      const exerciseTypes = await fetchAllExerciseTypes(sessionData);
+      setAllExerciseTypes(exerciseTypes);
 
       // Check if exerciseTypeId exists in URL, and auto-select the exercise type
       if (exerciseTypeId) {
-        const selectedExerciseType = exerciseTypes.find((type: any) => type._id === exerciseTypeId)
+        const selectedExerciseType = exerciseTypes.find(
+          (type: any) => type._id === exerciseTypeId
+        );
         if (selectedExerciseType) {
-          await onExerciseTypeChange(selectedExerciseType) // Pre-select the exercise type
+          await onExerciseTypeChange(selectedExerciseType); // Pre-select the exercise type
         }
       }
-    }
+    };
 
-    fetchInitialData()
-  }, [exerciseTypeId])
+    fetchInitialData();
+  }, [exerciseTypeId]);
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { target } = event
-    const key = target.id
-    const value = target.value
-    setFormState({ ...formState, [key]: value })
+  const handleChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { target } = event;
+    const key = target.id;
+    const value = target.value;
+    setFormState({ ...formState, [key]: value });
 
     if (key === "weight1") {
-      setShowPrefillButton(true)
+      setShowPrefillButton(true);
     }
-  }
+  };
 
   const handlePrefillWeights = () => {
     setFormState({
       ...formState,
       weight2: formState.weight1,
       weight3: formState.weight1,
-    })
+    });
     if (oneExerciseType.repRange4) {
       setFormState({
         ...formState,
         weight2: formState.weight1,
         weight3: formState.weight1,
         weight4: formState.weight1,
-      })
+      });
     }
-    setShowPrefillButton(false)
-  }
+    setShowPrefillButton(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
-      setIsLoading(true)
+      setIsLoading(true);
 
       const response = await fetchApi("/api/exercise-user", {
         method: "POST",
         body: JSON.stringify({
           type: oneExerciseType._id,
-          rep: [formState.rep1, formState.rep2, formState.rep3, formState?.rep4],
-          weight: [formState.weight1, formState.weight2, formState.weight3, formState?.weight4],
+          rep: [
+            formState.rep1,
+            formState.rep2,
+            formState.rep3,
+            formState?.rep4,
+          ],
+          weight: [
+            formState.weight1,
+            formState.weight2,
+            formState.weight3,
+            formState?.weight4,
+          ],
           comment: formState.comment,
           session: sessionId,
         }),
-      })
+      });
 
       const updatedSession = {
         exercise_user_list: [...session.exercise_user_list, response._id],
-      }
+      };
 
       await fetchApi(`/api/sessions/${sessionId}`, {
         method: "PUT",
         body: JSON.stringify(updatedSession),
-      })
+      });
 
       if (response.newTrophies) {
         response.newTrophies.forEach((trophy: any) => {
@@ -202,17 +227,17 @@ const DoExercisePage = () => {
             description: trophy.description,
             variant: "success",
             className: "bg-teal-500 border-none",
-          })
-        })
+          });
+        });
       }
 
-      navigate(`/history/session/${sessionId}`)
+      navigate(`/history/session/${sessionId}`);
     } catch (error: any) {
-      console.error(error)
+      console.error(error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <>
@@ -228,12 +253,18 @@ const DoExercisePage = () => {
               </AlertDialogTrigger>
               <AlertDialogContent className="w-10/12 rounded-md">
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Retourner à la page précédente ?</AlertDialogTitle>
-                  <AlertDialogDescription>Les données seront perdues.</AlertDialogDescription>
+                  <AlertDialogTitle>
+                    Retourner à la page précédente ?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Les données seront perdues.
+                  </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Annuler</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => navigate(`/history/session/${session._id}`)}>
+                  <AlertDialogAction
+                    onClick={() => navigate(`/history/session/${session._id}`)}
+                  >
                     Continuer
                   </AlertDialogAction>
                 </AlertDialogFooter>
@@ -241,9 +272,13 @@ const DoExercisePage = () => {
             </AlertDialog>
 
             {oneExerciseType ? (
-              <h1 className="ml-5 text-xl font-bold md:text-3xl">{oneExerciseType?.name}</h1>
+              <h1 className="ml-5 text-xl font-bold md:text-3xl">
+                {oneExerciseType?.name}
+              </h1>
             ) : (
-              <h1 className="ml-5 text-xl font-medium md:text-3xl">Nouvel exercice</h1>
+              <h1 className="ml-5 text-xl font-medium md:text-3xl">
+                Nouvel exercice
+              </h1>
             )}
           </div>
 
@@ -267,7 +302,10 @@ const DoExercisePage = () => {
           </SelectTrigger>
           <SelectContent>
             {isLoadingTypes ? (
-              <div role="status" className="flex max-w-sm animate-pulse items-center">
+              <div
+                role="status"
+                className="flex max-w-sm animate-pulse items-center"
+              >
                 <div className="mb-2 ml-3 mt-2 h-4 w-64 rounded-full bg-gray-200 dark:bg-gray-700"></div>
               </div>
             ) : allExerciseTypes.length === 0 ? (
@@ -293,20 +331,30 @@ const DoExercisePage = () => {
               {isLoadingLastExercise ? (
                 <Skeleton className="h-3 w-20" />
               ) : (
-                format(new Date(lastExercise?.session?.date_session), "dd/MM/yyyy")
+                format(
+                  new Date(lastExercise?.session?.date_session),
+                  "dd/MM/yyyy"
+                )
               )}
             </p>
           </div>
         )}
         {oneExerciseType?.advice && (
-          <Accordion type="single" collapsible className="mt-3 rounded-2xl bg-slate-100">
+          <Accordion
+            type="single"
+            collapsible
+            className="mt-3 rounded-2xl bg-slate-100"
+          >
             <AccordionItem value="advice">
               <AccordionTrigger className="flex h-10 gap-2 px-5 text-left text-gray-500 dark:text-gray-400">
                 <div className="flex items-center gap-2">
-                  <LucideInfo className="size-4" /> <p className="text-left ">Conseil</p>
+                  <LucideInfo className="size-4" />{" "}
+                  <p className="text-left ">Conseil</p>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="px-3 pb-3 pt-1 ">{oneExerciseType?.advice}</AccordionContent>
+              <AccordionContent className="px-3 pb-3 pt-1 ">
+                {oneExerciseType?.advice}
+              </AccordionContent>
             </AccordionItem>
           </Accordion>
         )}
@@ -440,7 +488,10 @@ const DoExercisePage = () => {
                 <div className="flex w-[20%] flex-col gap-1 text-center">
                   <p className="pb-1 text-sm text-gray-500">Série</p>
                   <div className="flex h-12 w-full items-center justify-center rounded-md bg-slate-200 bg-transparent">
-                    <label className="relative flex cursor-pointer items-center rounded-full" htmlFor="set1">
+                    <label
+                      className="relative flex cursor-pointer items-center rounded-full"
+                      htmlFor="set1"
+                    >
                       <input
                         id="set1"
                         type="checkbox"
@@ -465,7 +516,10 @@ const DoExercisePage = () => {
                     </label>
                   </div>
                   <div className="flex h-12 w-full items-center justify-center rounded-md bg-slate-200 bg-transparent">
-                    <label className="relative flex cursor-pointer items-center rounded-full" htmlFor="set2">
+                    <label
+                      className="relative flex cursor-pointer items-center rounded-full"
+                      htmlFor="set2"
+                    >
                       <input
                         id="set2"
                         type="checkbox"
@@ -490,7 +544,10 @@ const DoExercisePage = () => {
                     </label>
                   </div>
                   <div className="flex h-12 w-full items-center justify-center rounded-md bg-slate-200 bg-transparent">
-                    <label className="relative flex cursor-pointer items-center rounded-full" htmlFor="set3">
+                    <label
+                      className="relative flex cursor-pointer items-center rounded-full"
+                      htmlFor="set3"
+                    >
                       <input
                         id="set3"
                         type="checkbox"
@@ -516,7 +573,10 @@ const DoExercisePage = () => {
                   </div>
                   {(addRep4 || oneExerciseType.repRange4) && (
                     <div className="flex h-12 w-full items-center justify-center rounded-md bg-slate-200 bg-transparent">
-                      <label className="relative flex cursor-pointer items-center rounded-full" htmlFor="set4">
+                      <label
+                        className="relative flex cursor-pointer items-center rounded-full"
+                        htmlFor="set4"
+                      >
                         <input
                           id="set4"
                           type="checkbox"
@@ -552,9 +612,13 @@ const DoExercisePage = () => {
                 })}
               >
                 {addRep4 ? (
-                  <div className=" text-xs italic text-gray-400">Réduire d'une série ↑</div>
+                  <div className=" text-xs italic text-gray-400">
+                    Réduire d'une série ↑
+                  </div>
                 ) : (
-                  <div className=" text-xs italic text-gray-400 ">Ajouter une série ↓</div>
+                  <div className=" text-xs italic text-gray-400 ">
+                    Ajouter une série ↓
+                  </div>
                 )}
               </button>
             </div>
@@ -623,27 +687,27 @@ const DoExercisePage = () => {
         )}
       </main>
     </>
-  )
-}
+  );
+};
 
 function CountDownTimer({ exerciseTypeTimer }: { exerciseTypeTimer: number }) {
-  const [isTimerPlaying, setIsTimerPlaying] = useState(false)
-  const [key, setKey] = useState(0)
+  const [isTimerPlaying, setIsTimerPlaying] = useState(false);
+  const [key, setKey] = useState(0);
 
   const renderTime = ({ remainingTime }: { remainingTime: number }) => {
     if (remainingTime === 0) {
-      const ding = new Audio("/ding.mp3")
-      ding.currentTime = 0
-      ding.play()
+      const ding = new Audio("/ding.mp3");
+      ding.currentTime = 0;
+      ding.play();
       setTimeout(() => {
-        setKey((prevKey) => prevKey + 1)
-      }, 3000)
-      setIsTimerPlaying(false)
+        setKey((prevKey) => prevKey + 1);
+      }, 3000);
+      setIsTimerPlaying(false);
       return (
         <div className="flex items-center justify-center">
           <p className="text-sm font-bold text-teal-600">GO!</p>
         </div>
-      )
+      );
     }
 
     if (Number.isNaN(remainingTime)) {
@@ -651,33 +715,33 @@ function CountDownTimer({ exerciseTypeTimer }: { exerciseTypeTimer: number }) {
         <div className="flex items-center justify-center">
           <p className="text-xs text-gray-500">--:--</p>
         </div>
-      )
+      );
     }
 
-    const minutes = Math.floor(remainingTime / 60)
-    const seconds = remainingTime % 60
-    const formattedSeconds = seconds < 10 ? `0${seconds}` : `${seconds}`
+    const minutes = Math.floor(remainingTime / 60);
+    const seconds = remainingTime % 60;
+    const formattedSeconds = seconds < 10 ? `0${seconds}` : `${seconds}`;
 
     return (
       <div className="flex items-center justify-center">
         <p className="text-sm font-semibold">{`${minutes}:${formattedSeconds}`}</p>
       </div>
-    )
-  }
+    );
+  };
 
   const restartFunction = () => {
-    setKey((prevKey) => prevKey + 1)
-    setIsTimerPlaying(false)
-  }
+    setKey((prevKey) => prevKey + 1);
+    setIsTimerPlaying(false);
+  };
 
   return (
     <div
       className="flex items-center gap-3"
       onClick={() => {
         if (isTimerPlaying) {
-          restartFunction()
+          restartFunction();
         } else {
-          setIsTimerPlaying(true)
+          setIsTimerPlaying(true);
         }
       }}
     >
@@ -693,7 +757,11 @@ function CountDownTimer({ exerciseTypeTimer }: { exerciseTypeTimer: number }) {
           duration={exerciseTypeTimer}
           colors={["#0F766E", "#0F766E", "#760f17", "#760f17"]}
           colorsTime={[7, 5, 2, 0]}
-          onComplete={() => ({ shouldRepeat: false, delay: 1, newInitialRemainingTime: exerciseTypeTimer })}
+          onComplete={() => ({
+            shouldRepeat: false,
+            delay: 1,
+            newInitialRemainingTime: exerciseTypeTimer,
+          })}
         >
           {renderTime}
         </CountdownCircleTimer>
@@ -715,7 +783,7 @@ function CountDownTimer({ exerciseTypeTimer }: { exerciseTypeTimer: number }) {
         </button>
       )}
     </div>
-  )
+  );
 }
 
-export default DoExercisePage
+export default DoExercisePage;

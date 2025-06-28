@@ -1,76 +1,103 @@
-import { useEffect, useState } from "react"
-import { format } from "date-fns"
-import { LucideLoader2 } from "lucide-react"
-import { Area, AreaChart, CartesianGrid, Label, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import { format } from "date-fns";
+import { LucideLoader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  Label,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
-import fetchApi from "@/lib/api-handler"
+import fetchApi from "@/lib/api-handler";
 
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./ui/select";
 
 function ExerciseChart() {
-  const [exercise, setExercise] = useState([] as any[])
-  const [allExerciseTypes, setAllExerciseTypes] = useState([] as any[])
-  const [selectedExerciseType, setSelectedExerciseType] = useState<any>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [exercise, setExercise] = useState([] as any[]);
+  const [allExerciseTypes, setAllExerciseTypes] = useState([] as any[]);
+  const [selectedExerciseType, setSelectedExerciseType] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const fetchAllExerciseTypes = async () => {
     try {
-      const response = await fetchApi(`/api/exercise-type?limit=1000`)
-      return response
+      const response = await fetchApi(`/api/exercise-type?limit=1000`);
+      return response;
     } catch (error) {
-      console.error("Fetch error: ", error)
+      console.error("Fetch error: ", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     const init = async () => {
-      setIsLoading(true)
-      const exerciseTypeData = await fetchAllExerciseTypes()
-      setAllExerciseTypes(exerciseTypeData)
+      setIsLoading(true);
+      const exerciseTypeData = await fetchAllExerciseTypes();
+      setAllExerciseTypes(exerciseTypeData);
 
       if (exerciseTypeData.length > 0) {
-        const defaultExerciseType = exerciseTypeData[29] || exerciseTypeData[0]
-        setSelectedExerciseType(defaultExerciseType)
-        await AllExercisesTypeChange(defaultExerciseType)
+        const defaultExerciseType = exerciseTypeData[29] || exerciseTypeData[0];
+        setSelectedExerciseType(defaultExerciseType);
+        await AllExercisesTypeChange(defaultExerciseType);
       } else {
-        setSelectedExerciseType(null)
-        setExercise([])
+        setSelectedExerciseType(null);
+        setExercise([]);
       }
 
-      setIsLoading(false)
-    }
+      setIsLoading(false);
+    };
 
-    init()
-  }, [])
+    init();
+  }, []);
 
   const AllExercisesTypeChange = async (value: any) => {
-    const response = await fetchApi(`/api/exercise-user?limit=1000&sort=createdAt&type=${value._id}`)
-    setExercise(response)
-    setSelectedExerciseType(value)
-    return response
-  }
+    const response = await fetchApi(
+      `/api/exercise-user?limit=1000&sort=createdAt&type=${value._id}`
+    );
+    setExercise(response);
+    setSelectedExerciseType(value);
+    return response;
+  };
 
   const formatXAxis = (tickFormat: string) => {
-    const formattedDate = format(new Date(tickFormat), "dd/MM/yyyy")
-    return formattedDate
-  }
+    const formattedDate = format(new Date(tickFormat), "dd/MM/yyyy");
+    return formattedDate;
+  };
 
   const values = exercise.map((obj) => {
-    return obj.pv
-  })
-  const min = Math.min(...values)
-  const max = Math.max(...values)
+    return obj.pv;
+  });
+  const min = Math.min(...values);
+  const max = Math.max(...values);
 
-  const domain = [Math.floor(min / 100) * 100 - 100, Math.ceil(max / 100) * 100 + 100]
+  const domain = [
+    Math.floor(min / 100) * 100 - 100,
+    Math.ceil(max / 100) * 100 + 100,
+  ];
 
   return (
     <>
-      <Select onValueChange={AllExercisesTypeChange} value={selectedExerciseType}>
+      <Select
+        onValueChange={AllExercisesTypeChange}
+        value={selectedExerciseType}
+      >
         <SelectTrigger className="w-full data-[placeholder]:italic data-[placeholder]:text-gray-700">
           <SelectValue className="" placeholder="Sélectionne un exercice...">
-            {selectedExerciseType ? selectedExerciseType.name : "Sélectionne un exercice..."}
+            {selectedExerciseType
+              ? selectedExerciseType.name
+              : "Sélectionne un exercice..."}
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
@@ -95,7 +122,11 @@ function ExerciseChart() {
       )}
 
       {exercise.length > 0 && (
-        <ResponsiveContainer className="mt-4 rounded-xl border bg-slate-50 p-4" width="100%" height="70%">
+        <ResponsiveContainer
+          className="mt-4 rounded-xl border bg-slate-50 p-4"
+          width="100%"
+          height="70%"
+        >
           <AreaChart
             width={0}
             data={exercise}
@@ -112,7 +143,10 @@ function ExerciseChart() {
                 <stop offset="95%" stopColor="#38b2ac" stopOpacity={0} /> */}
               </linearGradient>
             </defs>
-            <XAxis dataKey="session.date_session" tickFormatter={(tick) => formatXAxis(tick)} />
+            <XAxis
+              dataKey="session.date_session"
+              tickFormatter={(tick) => formatXAxis(tick)}
+            />
             <CartesianGrid strokeDasharray="3 3" />
 
             {/* <YAxis name="Weight" width={50} domain={["dataMin - 10", "dataMax + 10"]}> */}
@@ -134,7 +168,7 @@ function ExerciseChart() {
 
             <Tooltip
               labelFormatter={(value) => {
-                return `Date: ${format(new Date(value), "dd/MM/yyyy")}`
+                return `Date: ${format(new Date(value), "dd/MM/yyyy")}`;
               }}
               animationEasing={"ease-out"}
             />
@@ -182,7 +216,7 @@ function ExerciseChart() {
         </div>
       )}
     </>
-  )
+  );
 }
 
-export default ExerciseChart
+export default ExerciseChart;

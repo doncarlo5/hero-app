@@ -1,49 +1,58 @@
-import { useEffect, useState } from "react"
-import { PolarAngleAxis, RadialBar, RadialBarChart, ResponsiveContainer } from "recharts"
+import { useEffect, useState } from "react";
+import {
+  PolarAngleAxis,
+  RadialBar,
+  RadialBarChart,
+  ResponsiveContainer,
+} from "recharts";
 
+import fetchApi from "@/lib/api-handler";
+import { TrophyType } from "@/types/trophy.type";
 
-import fetchApi from "@/lib/api-handler"
-import { TrophyType } from "@/types/trophy.type"
-
-const COLORS = ["#38b2ac", "#e0e0e0"] // Teal for achieved, gray for unachieved
+const COLORS = ["#38b2ac", "#e0e0e0"]; // Teal for achieved, gray for unachieved
 
 function TrophyChart() {
-  const [trophies, setTrophies] = useState<TrophyType[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [data, setData] = useState<any[]>([])
+  const [trophies, setTrophies] = useState<TrophyType[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [data, setData] = useState<any[]>([]);
 
   // Fetch all trophies
   const fetchTrophies = async () => {
     try {
-      const response: TrophyType[] = await fetchApi("/api/trophies")
-      setTrophies(response)
+      const response: TrophyType[] = await fetchApi("/api/trophies");
+      setTrophies(response);
 
       // Calculate achieved vs unachieved trophies
 
-      const achievedTrophies = response.filter((trophy) => trophy.achieved).length
+      const achievedTrophies = response.filter(
+        (trophy) => trophy.achieved
+      ).length;
 
       // Prepare data for the radial bar chart
-      setData([{ name: "Achieved", value: achievedTrophies, fill: COLORS[0] }])
+      setData([{ name: "Achieved", value: achievedTrophies, fill: COLORS[0] }]);
 
-      setIsLoading(false)
+      setIsLoading(false);
     } catch (error) {
-      console.error("Error fetching trophies:", error)
-      setIsLoading(false)
+      console.error("Error fetching trophies:", error);
+      setIsLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchTrophies()
-  }, [])
+    fetchTrophies();
+  }, []);
 
   // Calculate percentage of achieved trophies
-  const totalTrophies = trophies.length
-  const achievedTrophies = trophies.filter((trophy) => trophy.achieved).length
-  const achievedPercentage = totalTrophies > 0 ? (achievedTrophies / totalTrophies) * 100 : 0
+  const totalTrophies = trophies.length;
+  const achievedTrophies = trophies.filter((trophy) => trophy.achieved).length;
+  const achievedPercentage =
+    totalTrophies > 0 ? (achievedTrophies / totalTrophies) * 100 : 0;
 
   return (
     <>
-      {isLoading && <main className="flex flex-1 items-center justify-center"></main>}
+      {isLoading && (
+        <main className="flex flex-1 items-center justify-center"></main>
+      )}
 
       {!isLoading && totalTrophies > 0 && (
         <ResponsiveContainer width="100%">
@@ -65,7 +74,11 @@ function TrophyChart() {
               </linearGradient>
             </defs>
 
-            <PolarAngleAxis type="number" domain={[0, totalTrophies]} tick={false} />
+            <PolarAngleAxis
+              type="number"
+              domain={[0, totalTrophies]}
+              tick={false}
+            />
 
             <RadialBar
               style={{
@@ -101,7 +114,7 @@ function TrophyChart() {
         </div>
       )}
     </>
-  )
+  );
 }
 
-export default TrophyChart
+export default TrophyChart;

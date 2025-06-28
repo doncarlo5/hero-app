@@ -1,8 +1,8 @@
-import { LucideClock4, LucideInfo } from "lucide-react"
-import { Link } from "react-router-dom"
+import { LucideClock4, LucideInfo } from "lucide-react";
+import { Link } from "react-router-dom";
 
-import { Badge } from "./ui/badge"
-import { Card } from "./ui/card"
+import { Badge } from "./ui/badge";
+import { Card } from "./ui/card";
 
 function ExerciseTypeCard({ exerciseType }: { exerciseType: any }) {
   return (
@@ -34,7 +34,11 @@ function ExerciseTypeCard({ exerciseType }: { exerciseType: any }) {
             {/* <span className=" text-sm font-medium ">{exerciseType.type_session.join(" & ")}</span> */}
           </div>
           <div className="mr-1 mt-1 flex items-center gap-1 rounded-sm rounded-tr-lg border px-2">
-            <LucideClock4 fill="#e8ecf2" size={13} className="text-gray-500 dark:text-gray-400" />
+            <LucideClock4
+              fill="#e8ecf2"
+              size={13}
+              className="text-gray-500 dark:text-gray-400"
+            />
             <span className=" text-sm font-medium ">{exerciseType.timer}</span>
           </div>
         </div>
@@ -45,14 +49,16 @@ function ExerciseTypeCard({ exerciseType }: { exerciseType: any }) {
               <div className="my-1 flex w-full rounded-full border border-gray-200 dark:border-gray-800"></div>
               <div className="flex w-full items-center gap-1 text-gray-500 dark:text-gray-400">
                 <LucideInfo className=" flex-none" size={12} />
-                <div className=" truncate text-left text-xs">{exerciseType.advice}</div>
+                <div className=" truncate text-left text-xs">
+                  {exerciseType.advice}
+                </div>
               </div>
             </>
           )}
         </div>
       </Card>
     </Link>
-  )
+  );
 }
 
-export default ExerciseTypeCard
+export default ExerciseTypeCard;

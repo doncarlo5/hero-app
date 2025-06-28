@@ -1,27 +1,29 @@
-import { useState } from "react"
-import { LucidePlay, LucideRotateCcw } from "lucide-react"
-import { CountdownCircleTimer } from "react-countdown-circle-timer"
+import { LucidePlay, LucideRotateCcw } from "lucide-react";
+import { useState } from "react";
+import { CountdownCircleTimer } from "react-countdown-circle-timer";
 
 function CountDownTimer({ exerciseTypeTimer }: { exerciseTypeTimer: number }) {
-  const [isTimerPlaying, setIsTimerPlaying] = useState(false)
-  const [key, setKey] = useState(0)
+  const [isTimerPlaying, setIsTimerPlaying] = useState(false);
+  const [key, setKey] = useState(0);
 
   const renderTime = ({ remainingTime }: { remainingTime: number }) => {
     if (remainingTime === 0) {
-      const ding = new Audio("/ding.mp3")
-      ding.currentTime = 0
-      ding.play()
+      const ding = new Audio("/ding.mp3");
+      ding.currentTime = 0;
+      ding.play();
       setTimeout(() => {
-        setKey((prevKey) => prevKey + 1)
-      }, 3000)
-      setIsTimerPlaying(false)
+        setKey((prevKey) => prevKey + 1);
+      }, 3000);
+      setIsTimerPlaying(false);
       return (
         <div className="flex ">
           <div className="items-center justify-center ">
-            <p className="flex animate-ping select-none justify-center text-3xl font-black tracking-tighter">GO !</p>
+            <p className="flex animate-ping select-none justify-center text-3xl font-black tracking-tighter">
+              GO !
+            </p>
           </div>
         </div>
-      )
+      );
     }
 
     if (Number.isNaN(remainingTime)) {
@@ -33,25 +35,25 @@ function CountDownTimer({ exerciseTypeTimer }: { exerciseTypeTimer: number }) {
             </p>
           </div>
         </div>
-      )
+      );
     }
 
-    const minutes = Math.floor(remainingTime / 60)
-    const seconds = remainingTime % 60
-    const formattedSeconds = seconds < 10 ? `0${seconds}` : `${seconds}`
+    const minutes = Math.floor(remainingTime / 60);
+    const seconds = remainingTime % 60;
+    const formattedSeconds = seconds < 10 ? `0${seconds}` : `${seconds}`;
 
     return (
       <div className="flex flex-col">
         <div className="select-none text-xs">Temps restant</div>
         <div className="flex justify-center text-2xl font-black">{`${minutes}:${formattedSeconds}`}</div>
       </div>
-    )
-  }
+    );
+  };
 
   const restartFunction = () => {
-    setKey((prevKey) => prevKey + 1)
-    setIsTimerPlaying(false)
-  }
+    setKey((prevKey) => prevKey + 1);
+    setIsTimerPlaying(false);
+  };
 
   return (
     <div className="flex justify-center gap-8">
@@ -65,9 +67,13 @@ function CountDownTimer({ exerciseTypeTimer }: { exerciseTypeTimer: number }) {
           strokeWidth={17}
           isPlaying={isTimerPlaying}
           duration={exerciseTypeTimer}
-          colors={["#0F766E", "#0F766E","#760f17", "#760f17" ]}
+          colors={["#0F766E", "#0F766E", "#760f17", "#760f17"]}
           colorsTime={[7, 5, 2, 0]}
-          onComplete={() => ({ shouldRepeat: false, delay: 1, newInitialRemainingTime: exerciseTypeTimer })}
+          onComplete={() => ({
+            shouldRepeat: false,
+            delay: 1,
+            newInitialRemainingTime: exerciseTypeTimer,
+          })}
         >
           {renderTime}
         </CountdownCircleTimer>
@@ -90,7 +96,7 @@ function CountDownTimer({ exerciseTypeTimer }: { exerciseTypeTimer: number }) {
         )}
       </div>
     </div>
-  )
+  );
 }
 
-export default CountDownTimer
+export default CountDownTimer;

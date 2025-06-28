@@ -1,25 +1,41 @@
-import { useEffect, useState } from "react"
-import { eachWeekOfInterval, format, startOfWeek, endOfWeek, subWeeks } from "date-fns"
-import { Label, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import {
+  eachWeekOfInterval,
+  endOfWeek,
+  format,
+  startOfWeek,
+  subWeeks,
+} from "date-fns";
+import { useEffect, useState } from "react";
+import {
+  Label,
+  Line,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
-import fetchApi from "@/lib/api-handler"
+import fetchApi from "@/lib/api-handler";
 
 function SessionChart() {
-  const [sessions, setSessions] = useState([] as any[])
-  const [isLoading, setIsLoading] = useState(true)
-  const [data, setData] = useState([] as any[])
+  const [sessions, setSessions] = useState([] as any[]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [data, setData] = useState([] as any[]);
 
   // Fetch all sessions from the last 4 weeks excluding the current week
   const fetchLastFourWeeksSessions = async () => {
     try {
-      const response = await fetchApi(`/api/sessions?limit=1000&sortBy=createdAt:desc&lastFourWeeks`)
-      return response
+      const response = await fetchApi(
+        `/api/sessions?limit=1000&sortBy=createdAt:desc&lastFourWeeks`
+      );
+      return response;
     } catch (error) {
-      console.error("Fetch error: ", error)
+      console.error("Fetch error: ", error);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   // Prepare the data for the chart
   const prepareChartData = (sessions: any[]) => {
@@ -28,10 +44,13 @@ function SessionChart() {
     const fourWeeksAgo = subWeeks(startOfCurrentWeek, 4); // 4 weeks ago (exclude current week)
 
     // Generate an array of the last 4 weeks excluding the current week
-    const weeks = eachWeekOfInterval({
-      start: fourWeeksAgo,
-      end: subWeeks(now, 1), // Exclude current week
-    }, { weekStartsOn: 1 });
+    const weeks = eachWeekOfInterval(
+      {
+        start: fourWeeksAgo,
+        end: subWeeks(now, 1), // Exclude current week
+      },
+      { weekStartsOn: 1 }
+    );
 
     // Create an object to store the session count per week
     const sessionCountByWeek = weeks.map((weekStart) => {
@@ -72,7 +91,9 @@ function SessionChart() {
 
   return (
     <>
-      {isLoading && <main className="flex flex-1 items-center justify-center"></main>}
+      {isLoading && (
+        <main className="flex flex-1 items-center justify-center"></main>
+      )}
 
       {!isLoading && data.length > 0 && (
         <ResponsiveContainer className="" width="100%" height="100%">
@@ -100,8 +121,7 @@ function SessionChart() {
               tickFormatter={(tick) => tick}
               fontSize={14}
               interval={0} // Show all weeks
-              padding={{ left: 20, right: 20 }} 
-            
+              padding={{ left: 20, right: 20 }}
             />
             <YAxis
               name="Sessions"

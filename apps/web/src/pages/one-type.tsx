@@ -1,8 +1,16 @@
-import React, { useEffect, useState } from "react"
-import { UpdateIcon } from "@radix-ui/react-icons"
-import { ChevronLeft, Edit, LucideLoader2, LucideTrash, MinusCircle, PlusCircle } from "lucide-react"
-import { Link, useNavigate, useParams } from "react-router-dom"
+import { UpdateIcon } from "@radix-ui/react-icons";
+import {
+  ChevronLeft,
+  Edit,
+  LucideLoader2,
+  LucideTrash,
+  MinusCircle,
+  PlusCircle,
+} from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
+import { Navbar } from "@/components/navbar";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,36 +21,35 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
-import { Textarea } from "@/components/ui/textarea"
-import { toast } from "@/components/ui/use-toast"
-import { Navbar } from "@/components/navbar"
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/use-toast";
 
-import fetchApi from "../lib/api-handler"
+import fetchApi from "../lib/api-handler";
 
 interface FormState {
-  id: string
-  name: string
-  advice: string
-  timer: string
-  repRange1: string
-  repRange2: string
-  repRange3: string
-  repRange4?: string
-  type_session: string[]
+  id: string;
+  name: string;
+  advice: string;
+  timer: string;
+  repRange1: string;
+  repRange2: string;
+  repRange3: string;
+  repRange4?: string;
+  type_session: string[];
 }
 
 const OneType = () => {
-  const [isEditable, setIsEditable] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
-  const [type, setType] = useState<any>({})
-  const [isRepRange4, setIsRepRange4] = useState(false)
-  const [addRepRange4, setAddRepRange4] = useState(false)
+  const [isEditable, setIsEditable] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [type, setType] = useState<any>({});
+  const [isRepRange4, setIsRepRange4] = useState(false);
+  const [addRepRange4, setAddRepRange4] = useState(false);
   const [formState, setFormState] = useState<FormState>({
     id: "",
     name: "",
@@ -53,19 +60,19 @@ const OneType = () => {
     repRange3: "",
     repRange4: "",
     type_session: [],
-  })
+  });
 
-  const { typeId } = useParams()
-  const navigate = useNavigate()
+  const { typeId } = useParams();
+  const navigate = useNavigate();
 
   const toggleIsEditable = (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsEditable((current) => !current)
-  }
+    e.preventDefault();
+    setIsEditable((current) => !current);
+  };
 
   const fetchOneType = async () => {
     try {
-      const response = await fetchApi(`/api/exercise-type/${typeId}`)
+      const response = await fetchApi(`/api/exercise-type/${typeId}`);
       setFormState({
         id: response._id,
         name: response.name,
@@ -76,49 +83,51 @@ const OneType = () => {
         repRange3: response.repRange3,
         repRange4: response?.repRange4,
         type_session: response.type_session,
-      })
+      });
       if (response.repRange4) {
-        setIsRepRange4(true)
+        setIsRepRange4(true);
       }
-      setType(response)
+      setType(response);
     } catch (error: any) {
-      console.error(error.message)
+      console.error(error.message);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchOneType()
-  }, [])
+    fetchOneType();
+  }, []);
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { target } = event
-    const key = target.id
-    const value = target.value
-    setFormState({ ...formState, [key]: value })
-  }
+  const handleChange = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { target } = event;
+    const key = target.id;
+    const value = target.value;
+    setFormState({ ...formState, [key]: value });
+  };
 
   const handleCheckboxChange = (checked: boolean, id: string) => {
     setFormState((prevState) => {
       const updatedTypeSession = checked
         ? [...prevState.type_session, id]
-        : prevState.type_session.filter((session) => session !== id)
-      return { ...prevState, type_session: updatedTypeSession }
-    })
-  }
+        : prevState.type_session.filter((session) => session !== id);
+      return { ...prevState, type_session: updatedTypeSession };
+    });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
       if (formState.type_session.length === 0) {
         toast({
           title: "⚠️ Tu dois choisir au moins un type de séance.",
           variant: "destructive",
-        })
-        return
+        });
+        return;
       }
-      const timerValue = parseInt(formState.timer)
+      const timerValue = parseInt(formState.timer);
       await fetchApi(`/api/exercise-type/${typeId}`, {
         method: "PUT",
         body: JSON.stringify({
@@ -131,28 +140,28 @@ const OneType = () => {
           repRange4: formState.repRange4,
           type_session: formState.type_session,
         }),
-      })
-      fetchOneType()
-      setIsEditable(false)
+      });
+      fetchOneType();
+      setIsEditable(false);
       toast({
         title: "Exercice mis à jour!",
-      })
+      });
     } catch (error: any) {
-      console.error(error.message)
+      console.error(error.message);
     }
-  }
+  };
 
   const handleDelete = async (id: string) => {
     try {
       await fetchApi(`/api/exercise-type/${id}`, {
         method: "DELETE",
-      })
-      fetchOneType()
-      navigate("/profile/type")
+      });
+      fetchOneType();
+      navigate("/profile/type");
     } catch (error) {
-      console.error("Fetch error: ", error)
+      console.error("Fetch error: ", error);
     }
-  }
+  };
 
   return (
     <>
@@ -166,13 +175,20 @@ const OneType = () => {
               </Button>
             </Link>
             <div>
-              <h1 className="ml-5 text-xl font-medium md:text-3xl">Ton exercice type</h1>
-              <h1 className="ml-5 text-xl font-bold md:text-3xl">{type?.name}</h1>
+              <h1 className="ml-5 text-xl font-medium md:text-3xl">
+                Ton exercice type
+              </h1>
+              <h1 className="ml-5 text-xl font-bold md:text-3xl">
+                {type?.name}
+              </h1>
             </div>
           </div>
 
           <div className="space-y-4">
-            <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4 px-5 pb-14">
+            <form
+              onSubmit={handleSubmit}
+              className="grid grid-cols-2 gap-4 px-5 pb-14"
+            >
               <div className="col-span-2 space-y-2">
                 <Label htmlFor="name">Nom de l'exercice</Label>
                 <Input
@@ -192,7 +208,9 @@ const OneType = () => {
                     <div className="flex items-center space-x-2">
                       <Checkbox
                         id="Upper A"
-                        onCheckedChange={(checked) => handleCheckboxChange(Boolean(checked), "Upper A")}
+                        onCheckedChange={(checked) =>
+                          handleCheckboxChange(Boolean(checked), "Upper A")
+                        }
                         checked={formState.type_session.includes("Upper A")}
                         disabled={!isEditable}
                       />
@@ -201,7 +219,9 @@ const OneType = () => {
                     <div className="flex items-center space-x-2">
                       <Checkbox
                         id="Lower"
-                        onCheckedChange={(checked) => handleCheckboxChange(Boolean(checked), "Lower")}
+                        onCheckedChange={(checked) =>
+                          handleCheckboxChange(Boolean(checked), "Lower")
+                        }
                         checked={formState.type_session.includes("Lower")}
                         disabled={!isEditable}
                       />
@@ -210,7 +230,9 @@ const OneType = () => {
                     <div className="flex items-center space-x-2">
                       <Checkbox
                         id="Upper B"
-                        onCheckedChange={(checked) => handleCheckboxChange(Boolean(checked), "Upper B")}
+                        onCheckedChange={(checked) =>
+                          handleCheckboxChange(Boolean(checked), "Upper B")
+                        }
                         checked={formState.type_session.includes("Upper B")}
                         disabled={!isEditable}
                       />
@@ -222,7 +244,9 @@ const OneType = () => {
                     <div className="flex items-center space-x-2">
                       <Checkbox
                         id="Séance A"
-                        onCheckedChange={(checked) => handleCheckboxChange(Boolean(checked), "Séance A")}
+                        onCheckedChange={(checked) =>
+                          handleCheckboxChange(Boolean(checked), "Séance A")
+                        }
                         checked={formState.type_session.includes("Séance A")}
                         disabled={!isEditable}
                       />
@@ -231,7 +255,9 @@ const OneType = () => {
                     <div className="flex items-center space-x-2">
                       <Checkbox
                         id="Séance B"
-                        onCheckedChange={(checked) => handleCheckboxChange(Boolean(checked), "Séance B")}
+                        onCheckedChange={(checked) =>
+                          handleCheckboxChange(Boolean(checked), "Séance B")
+                        }
                         checked={formState.type_session.includes("Séance B")}
                         disabled={!isEditable}
                       />
@@ -264,7 +290,11 @@ const OneType = () => {
                     onClick={() => setAddRepRange4(!addRepRange4)}
                     className=" mt-1 disabled:text-gray-500"
                   >
-                    {addRepRange4 ? <MinusCircle className="h-4 w-4" /> : <PlusCircle className="h-4 w-4" />}
+                    {addRepRange4 ? (
+                      <MinusCircle className="h-4 w-4" />
+                    ) : (
+                      <PlusCircle className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
 
@@ -347,19 +377,27 @@ const OneType = () => {
                     <AlertDialogHeader>
                       <AlertDialogTitle>Supprimer ce type ?</AlertDialogTitle>
                       <AlertDialogDescription>
-                        Tu ne pourras pas récupérer ce type d'exercice une fois supprimé.
+                        Tu ne pourras pas récupérer ce type d'exercice une fois
+                        supprimé.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                       <AlertDialogCancel>Annuler</AlertDialogCancel>
-                      <AlertDialogAction variant="destructive" onClick={() => handleDelete(formState.id)}>
+                      <AlertDialogAction
+                        variant="destructive"
+                        onClick={() => handleDelete(formState.id)}
+                      >
                         Confirmer
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
                 {!isEditable ? (
-                  <Button variant="outline" onClick={toggleIsEditable} className="col-span-2 w-full">
+                  <Button
+                    variant="outline"
+                    onClick={toggleIsEditable}
+                    className="col-span-2 w-full"
+                  >
                     <Edit className="mr-2 h-4 w-4" />
                     Modifier
                   </Button>
@@ -386,7 +424,7 @@ const OneType = () => {
         </div>
       )}
     </>
-  )
-}
+  );
+};
 
-export default OneType
+export default OneType;

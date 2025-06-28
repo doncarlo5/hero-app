@@ -1,5 +1,3 @@
-import { useState } from "react"
-import useAuth from "@/context/use-auth"
 import {
   LucideActivity,
   LucideLineChart,
@@ -9,12 +7,14 @@ import {
   LucideTimer,
   LucideTrophy,
   LucideUserRoundCog,
-} from "lucide-react"
-import { Link } from "react-router-dom"
+} from "lucide-react";
+import { useState } from "react";
+import { Link } from "react-router-dom";
 
-import fetchApi from "@/lib/api-handler"
+import useAuth from "@/context/use-auth";
+import fetchApi from "@/lib/api-handler";
 
-import { Button } from "./ui/button"
+import { Button } from "./ui/button";
 import {
   Dialog,
   DialogContent,
@@ -23,27 +23,27 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "./ui/dialog"
-import { Input } from "./ui/input"
-import { Label } from "./ui/label"
-import { Textarea } from "./ui/textarea"
-import { toast } from "./ui/use-toast"
+} from "./ui/dialog";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Textarea } from "./ui/textarea";
+import { toast } from "./ui/use-toast";
 
 function DashboardComponent() {
-  const { user, handleLogout } = useAuth()
-  const [open, setOpen] = useState(false)
-  const [formState, setFormState] = useState({ subject: "", message: "" })
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
+  const { user, handleLogout } = useAuth();
+  const [open, setOpen] = useState(false);
+  const [formState, setFormState] = useState({ subject: "", message: "" });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const handleFeedbackSubmit = async (e: any) => {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
 
     try {
       if (!formState.subject || !formState.message) {
-        throw new Error("Veuillez remplir tous les champs.")
+        throw new Error("Veuillez remplir tous les champs.");
       }
       await fetchApi("/api/feedbacks", {
         method: "POST",
@@ -52,22 +52,22 @@ function DashboardComponent() {
           subject: formState.subject,
           message: formState.message,
         }),
-      })
+      });
 
       toast({
         title: "Feeback envoyé!",
         description: "Merci pour votre contribution.",
         variant: "success",
-      })
-      setFormState({ subject: "", message: "" })
-      setOpen(false)
+      });
+      setFormState({ subject: "", message: "" });
+      setOpen(false);
     } catch (error: any) {
-      setError(error.message)
-      console.error(error.message)
+      setError(error.message);
+      console.error(error.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="">
@@ -131,7 +131,9 @@ function DashboardComponent() {
           <DialogContent className=" mx-0 w-11/12 rounded-2xl px-3">
             <DialogHeader>
               <DialogTitle className="text-left">Feedback</DialogTitle>
-              <DialogDescription className="text-left">Décrivez votre expérience de l'application.</DialogDescription>
+              <DialogDescription className="text-left">
+                Décrivez votre expérience de l'application.
+              </DialogDescription>
             </DialogHeader>
             <div className="grid gap-2 ">
               {error && <p className="text-sm text-red-500">{error}</p>}
@@ -142,7 +144,9 @@ function DashboardComponent() {
                 <Input
                   id="subject"
                   value={formState.subject}
-                  onChange={(e) => setFormState({ ...formState, subject: e.target.value })}
+                  onChange={(e) =>
+                    setFormState({ ...formState, subject: e.target.value })
+                  }
                   required
                   className="col-span-3"
                 />
@@ -154,7 +158,9 @@ function DashboardComponent() {
                 <Textarea
                   id="message"
                   value={formState.message}
-                  onChange={(e) => setFormState({ ...formState, message: e.target.value })}
+                  onChange={(e) =>
+                    setFormState({ ...formState, message: e.target.value })
+                  }
                   required
                   className="col-span-3"
                 />
@@ -162,28 +168,48 @@ function DashboardComponent() {
               <div className="flex justify-evenly gap-2">
                 <Button
                   variant="outline"
-                  onClick={() => setFormState({ ...formState, message: formState.message + "\n• Bug: " })}
+                  onClick={() =>
+                    setFormState({
+                      ...formState,
+                      message: formState.message + "\n• Bug: ",
+                    })
+                  }
                   className="text-xs"
                 >
                   Bug
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => setFormState({ ...formState, message: formState.message + "\n• Feature: " })}
+                  onClick={() =>
+                    setFormState({
+                      ...formState,
+                      message: formState.message + "\n• Feature: ",
+                    })
+                  }
                   className="text-xs"
                 >
                   Feature
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => setFormState({ ...formState, message: formState.message + "\n• Séance: " })}
+                  onClick={() =>
+                    setFormState({
+                      ...formState,
+                      message: formState.message + "\n• Séance: ",
+                    })
+                  }
                   className="text-xs"
                 >
                   Séance
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => setFormState({ ...formState, message: formState.message + "\n• Design: " })}
+                  onClick={() =>
+                    setFormState({
+                      ...formState,
+                      message: formState.message + "\n• Design: ",
+                    })
+                  }
                   className="text-xs"
                 >
                   Design
@@ -191,19 +217,27 @@ function DashboardComponent() {
               </div>
             </div>
             <DialogFooter>
-              <Button type="submit" onClick={handleFeedbackSubmit} disabled={loading}>
+              <Button
+                type="submit"
+                onClick={handleFeedbackSubmit}
+                disabled={loading}
+              >
                 {loading ? "Envoi en cours..." : "Envoyer"}
               </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
-        <Button variant={"outline"} onClick={() => handleLogout()} className="flex h-24 flex-col gap-1">
+        <Button
+          variant={"outline"}
+          onClick={() => handleLogout()}
+          className="flex h-24 flex-col gap-1"
+        >
           <LucideLogOut strokeWidth={1.1} size={31} />
           Déconnexion
         </Button>
       </div>
     </div>
-  )
+  );
 }
 
-export default DashboardComponent
+export default DashboardComponent;

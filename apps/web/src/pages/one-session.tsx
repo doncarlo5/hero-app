@@ -1,7 +1,10 @@
-import React, { useEffect, useState } from "react"
-import { CalendarIcon, InfoCircledIcon, ReloadIcon } from "@radix-ui/react-icons"
-import { format } from "date-fns"
-import { fr } from "date-fns/locale/fr"
+import {
+  CalendarIcon,
+  InfoCircledIcon,
+  ReloadIcon,
+} from "@radix-ui/react-icons";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale/fr";
 import {
   ChevronLeft,
   ChevronsRight,
@@ -12,12 +15,13 @@ import {
   Plus,
   SaveIcon,
   Weight,
-} from "lucide-react"
-import { SelectSingleEventHandler } from "react-day-picker"
-import { Link, useNavigate, useParams } from "react-router-dom"
+} from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { SelectSingleEventHandler } from "react-day-picker";
+import { Link, useNavigate, useParams } from "react-router-dom";
 
-import { ProgramType } from "@/types/program.type"
-import { cn } from "@/lib/utils"
+import ExerciseCard from "@/components/exercise-card";
+import { Navbar } from "@/components/navbar";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,36 +32,40 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
-import { Calendar } from "@/components/ui/calendar"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Skeleton } from "@/components/ui/skeleton"
-import { Textarea } from "@/components/ui/textarea"
-import { toast } from "@/components/ui/use-toast"
-import ExerciseCard from "@/components/exercise-card"
-import { Navbar } from "@/components/navbar"
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/components/ui/use-toast";
+import { cn } from "@/lib/utils";
+import { ProgramType } from "@/types/program.type";
 
-import fetchApi from "../lib/api-handler"
+import fetchApi from "../lib/api-handler";
 
 interface FormState {
-  id: string
-  date_session: string
-  type_session: string
-  body_weight: string
-  exercise_user_list: any[]
-  is_done: boolean
-  comment?: string
+  id: string;
+  date_session: string;
+  type_session: string;
+  body_weight: string;
+  exercise_user_list: any[];
+  is_done: boolean;
+  comment?: string;
 }
 
 const OneSession = () => {
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false)
-  const [isLoadingSubmit, setIsLoadingSubmit] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
-  const [session, setSession] = useState<any>({})
-  const [lastSession, setLastSession] = useState<any>({})
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [session, setSession] = useState<any>({});
+  const [lastSession, setLastSession] = useState<any>({});
   const [formState, setFormState] = useState<FormState>({
     id: "",
     date_session: "",
@@ -66,31 +74,35 @@ const OneSession = () => {
     exercise_user_list: [],
     is_done: false,
     comment: "",
-  })
-  const [formIsDirty, setFormIsDirty] = useState(false)
-  const [skippedExercises, setSkippedExercises] = useState<string[]>([])
+  });
+  const [formIsDirty, setFormIsDirty] = useState(false);
+  const [skippedExercises, setSkippedExercises] = useState<string[]>([]);
 
-  const [program, setProgram] = useState<ProgramType>()
+  const [program, setProgram] = useState<ProgramType>();
 
-  const { sessionId } = useParams()
-  const navigate = useNavigate()
+  const { sessionId } = useParams();
+  const navigate = useNavigate();
 
   const fetchLastSessionUser = async () => {
     try {
-      const response = await fetchApi(`/api/sessions?limit=2&sortBy=date_session:desc`)
+      const response = await fetchApi(
+        `/api/sessions?limit=2&sortBy=date_session:desc`
+      );
       if (response && response.length > 0) {
-        setLastSession(response[1])
+        setLastSession(response[1]);
       } else {
-        setLastSession(null)
+        setLastSession(null);
       }
     } catch (error) {
-      console.error("Error fetching last session:", error)
+      console.error("Error fetching last session:", error);
     }
-  }
+  };
 
   const fetchOneSession = async () => {
     try {
-      const response = await fetchApi(`/api/sessions/${sessionId}?type_session=${formState.type_session}`)
+      const response = await fetchApi(
+        `/api/sessions/${sessionId}?type_session=${formState.type_session}`
+      );
 
       const formStateValues = {
         id: response._id,
@@ -100,68 +112,72 @@ const OneSession = () => {
         exercise_user_list: response.exercise_user_list,
         is_done: response.is_done,
         comment: response.comment,
-      }
+      };
 
-      setFormState(formStateValues)
+      setFormState(formStateValues);
 
-      setSession(response)
-      return formStateValues
+      setSession(response);
+      return formStateValues;
     } catch (error: any) {
-      console.error(error.message)
+      console.error(error.message);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const fetchProgram = async (typeSession: string) => {
     try {
-      console.log("typeSession", typeSession)
-      const response = await fetchApi(`/api/program/${typeSession}`)
-      console.log("response", response)
-      setProgram(response)
+      console.log("typeSession", typeSession);
+      const response = await fetchApi(`/api/program/${typeSession}`);
+      console.log("response", response);
+      setProgram(response);
     } catch (error: any) {
-      console.error(error.message)
+      console.error(error.message);
     }
-  }
+  };
 
   const getNextExercise = () => {
-    const completedExerciseIds = formState.exercise_user_list.map((exercise) => exercise.type._id)
+    const completedExerciseIds = formState.exercise_user_list.map(
+      (exercise) => exercise.type._id
+    );
 
     // Find the next exercise that hasn't been completed or skipped
     const nextExercise = program?.exercises.find(
       (exercise) =>
         !completedExerciseIds.includes(exercise.exerciseType._id) &&
         !skippedExercises.includes(exercise.exerciseType._id)
-    )
+    );
 
-    return nextExercise
-  }
+    return nextExercise;
+  };
 
   const handleSkipExercise = () => {
-    const nextExercise = getNextExercise()
+    const nextExercise = getNextExercise();
     if (nextExercise && nextExercise.exerciseType) {
-      setSkippedExercises([...skippedExercises, nextExercise.exerciseType._id])
+      setSkippedExercises([...skippedExercises, nextExercise.exerciseType._id]);
     }
-  }
+  };
 
   useEffect(() => {
     const asyncFunction = async () => {
-      const formStateValues = await fetchOneSession()
-      fetchProgram(formStateValues?.type_session)
-      fetchLastSessionUser()
-    }
-    asyncFunction()
-  }, [])
+      const formStateValues = await fetchOneSession();
+      fetchProgram(formStateValues?.type_session);
+      fetchLastSessionUser();
+    };
+    asyncFunction();
+  }, []);
 
   useEffect(() => {
-    const isDirty = formState.body_weight !== session.body_weight || formState.comment !== session.comment
-    setFormIsDirty(isDirty)
-  }, [formState, session])
+    const isDirty =
+      formState.body_weight !== session.body_weight ||
+      formState.comment !== session.comment;
+    setFormIsDirty(isDirty);
+  }, [formState, session]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
-      setIsLoadingSubmit(true)
+      setIsLoadingSubmit(true);
       await fetchApi(`/api/sessions/${sessionId}`, {
         method: "PUT",
         body: JSON.stringify({
@@ -172,57 +188,61 @@ const OneSession = () => {
           is_done: true,
           comment: formState.comment,
         }),
-      })
-      fetchOneSession()
-      setFormIsDirty(false)
-      navigate("/history/")
+      });
+      fetchOneSession();
+      setFormIsDirty(false);
+      navigate("/history/");
     } catch (error: any) {
-      console.error(error.message)
+      console.error(error.message);
     } finally {
-      setIsLoadingSubmit(false)
+      setIsLoadingSubmit(false);
     }
-  }
+  };
 
-  const handleSelectDate: SelectSingleEventHandler = async (date: Date | undefined) => {
-    setFormState({ ...formState, date_session: date?.toString() || "" })
+  const handleSelectDate: SelectSingleEventHandler = async (
+    date: Date | undefined
+  ) => {
+    setFormState({ ...formState, date_session: date?.toString() || "" });
     try {
       await fetchApi(`/api/sessions/${sessionId}`, {
         method: "PUT",
         body: JSON.stringify({ date_session: date }),
-      })
+      });
     } catch (error: any) {
-      console.error(error.message)
+      console.error(error.message);
     }
-    setIsCalendarOpen(false)
-  }
+    setIsCalendarOpen(false);
+  };
 
   const handleDelete = async (id: string) => {
     try {
       await fetchApi(`/api/sessions/${id}`, {
         method: "DELETE",
-      })
-      navigate("/history/")
+      });
+      navigate("/history/");
     } catch (error) {
-      console.error("Fetch error: ", error)
+      console.error("Fetch error: ", error);
     }
-  }
+  };
 
   const handleSelectWeight = (event: React.FormEvent<HTMLInputElement>) => {
-    const { target } = event
+    const { target } = event;
     if (target instanceof HTMLInputElement) {
-      const { value } = target
-      setFormState({ ...formState, body_weight: value })
+      const { value } = target;
+      setFormState({ ...formState, body_weight: value });
     }
-  }
+  };
 
-  const handleCommentChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const { value } = event.target
-    setFormState({ ...formState, comment: value })
-  }
+  const handleCommentChange = (
+    event: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    const { value } = event.target;
+    setFormState({ ...formState, comment: value });
+  };
 
   const handleSave = async () => {
     try {
-      setIsLoadingSubmit(true)
+      setIsLoadingSubmit(true);
       await fetchApi(`/api/sessions/${sessionId}`, {
         method: "PUT",
         body: JSON.stringify({
@@ -233,25 +253,26 @@ const OneSession = () => {
           is_done: false,
           comment: formState.comment,
         }),
-      })
-      fetchOneSession()
-      setFormIsDirty(false)
+      });
+      fetchOneSession();
+      setFormIsDirty(false);
       toast({
         title: "Séance enregistrée",
         description: "Les modifications ont été enregistrées avec succès.",
         variant: "success",
-      })
+      });
     } catch (error: any) {
-      console.error(error.message)
+      console.error(error.message);
       toast({
         title: "Erreur",
-        description: "Une erreur est survenue lors de l'enregistrement de la séance.",
+        description:
+          "Une erreur est survenue lors de l'enregistrement de la séance.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsLoadingSubmit(false)
+      setIsLoadingSubmit(false);
     }
-  }
+  };
 
   return (
     <>
@@ -264,7 +285,9 @@ const OneSession = () => {
             </Button>
           </Link>
           <div>
-            <h1 className="ml-5 text-2xl font-bold md:text-4xl">{session?.type_session}</h1>
+            <h1 className="ml-5 text-2xl font-bold md:text-4xl">
+              {session?.type_session}
+            </h1>
           </div>
           <Popover>
             <PopoverTrigger asChild>
@@ -339,7 +362,9 @@ const OneSession = () => {
                       )}
                     >
                       {formState.date_session ? (
-                        format(new Date(formState.date_session), "d MMM yyyy", { locale: fr })
+                        format(new Date(formState.date_session), "d MMM yyyy", {
+                          locale: fr,
+                        })
                       ) : (
                         <span>Choisir une date</span>
                       )}
@@ -351,9 +376,15 @@ const OneSession = () => {
                       locale={fr}
                       id="session_date"
                       mode="single"
-                      selected={formState.date_session ? new Date(formState.date_session) : undefined}
+                      selected={
+                        formState.date_session
+                          ? new Date(formState.date_session)
+                          : undefined
+                      }
                       onSelect={handleSelectDate}
-                      disabled={(date) => date > new Date() || date < new Date("1900-01-01")}
+                      disabled={(date) =>
+                        date > new Date() || date < new Date("1900-01-01")
+                      }
                       initialFocus
                     />
                   </PopoverContent>
@@ -384,7 +415,10 @@ const OneSession = () => {
                   {Array(2)
                     .fill(0)
                     .map((_, index) => (
-                      <Skeleton key={index} className=" h-40 w-11/12 rounded-xl" />
+                      <Skeleton
+                        key={index}
+                        className=" h-40 w-11/12 rounded-xl"
+                      />
                     ))}
                 </div>
               ) : (
@@ -403,11 +437,11 @@ const OneSession = () => {
                         <Button
                           variant="outline"
                           onClick={() => {
-                            const nextExercise = getNextExercise()
+                            const nextExercise = getNextExercise();
                             if (nextExercise && nextExercise.exerciseType) {
                               navigate(
                                 `/history/session/${sessionId}/do-exercise?exerciseTypeId=${nextExercise.exerciseType._id}`
-                              )
+                              );
                             }
                           }}
                           className="flex h-fit w-full items-center justify-center gap-2 rounded-2xl border-2 border-dotted bg-slate-100/20 px-3 py-2 shadow-md active:translate-y-0.5 active:shadow-none dark:bg-slate-900 dark:bg-opacity-40 md:text-lg"
@@ -430,13 +464,17 @@ const OneSession = () => {
                       {/* Alternative exercises buttons */}
                       {(getNextExercise()?.alternatives?.length ?? 0) > 0 && (
                         <div className=" flex flex-col gap-1">
-                          <p className="text-sm font-medium text-gray-500">Alternative:</p>
+                          <p className="text-sm font-medium text-gray-500">
+                            Alternative:
+                          </p>
                           {getNextExercise()?.alternatives?.map((alt) => (
                             <Button
                               variant="outline"
                               key={alt._id}
                               onClick={() =>
-                                navigate(`/history/session/${sessionId}/do-exercise?exerciseTypeId=${alt._id}`)
+                                navigate(
+                                  `/history/session/${sessionId}/do-exercise?exerciseTypeId=${alt._id}`
+                                )
                               }
                               className="flex h-fit w-full items-center justify-center rounded-2xl border-2 border-dotted bg-slate-100/20 px-3 py-2 text-gray-500 shadow-md active:translate-y-0.5 active:shadow-none dark:bg-slate-900 dark:bg-opacity-40 md:text-lg"
                             >
@@ -463,7 +501,9 @@ const OneSession = () => {
                 <Textarea
                   id="comment"
                   placeholder={
-                    lastSession?.comment ? `Note précédente: ${lastSession?.comment}` : "Note précédente : Aucune."
+                    lastSession?.comment
+                      ? `Note précédente: ${lastSession?.comment}`
+                      : "Note précédente : Aucune."
                   }
                   value={formState.comment}
                   onChange={handleCommentChange}
@@ -500,12 +540,19 @@ const OneSession = () => {
                 </AlertDialogTrigger>
                 <AlertDialogContent className="w-10/12 rounded-md">
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Supprimer cette séance ?</AlertDialogTitle>
-                    <AlertDialogDescription>Les exercices seront également supprimés.</AlertDialogDescription>
+                    <AlertDialogTitle>
+                      Supprimer cette séance ?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Les exercices seront également supprimés.
+                    </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
                     <AlertDialogCancel>Annuler</AlertDialogCancel>
-                    <AlertDialogAction variant="destructive" onClick={() => handleDelete(formState.id)}>
+                    <AlertDialogAction
+                      variant="destructive"
+                      onClick={() => handleDelete(formState.id)}
+                    >
                       Confirmer
                     </AlertDialogAction>
                   </AlertDialogFooter>
@@ -532,7 +579,7 @@ const OneSession = () => {
         </div>
       </main>
     </>
-  )
-}
+  );
+};
 
-export default OneSession
+export default OneSession;

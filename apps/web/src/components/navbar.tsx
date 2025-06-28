@@ -1,17 +1,23 @@
-import useAuth from "@/context/use-auth"
-import { LucideAlignJustify, LucideCircleUser, LucideRocket } from "lucide-react"
-import { FaHouse } from "react-icons/fa6"
-import { NavLink } from "react-router-dom"
+import {
+  LucideAlignJustify,
+  LucideCircleUser,
+  LucideRocket,
+} from "lucide-react";
+import { FaHouse } from "react-icons/fa6";
+import { NavLink } from "react-router-dom";
+
+import useAuth from "@/context/use-auth";
 
 function Navbar() {
-  const { isLoggedIn } = useAuth()
-  const activeLink = "text-teal-600"
-  const inactiveLink = "text-slate-950/50"
+  const { isLoggedIn } = useAuth();
+  const activeLink = "text-teal-600";
+  const inactiveLink = "text-slate-950/50";
 
-  const strokeWidthActive = 2.2
-  const strokeWidthInactive = 1.7
+  const strokeWidthActive = 2.2;
+  const strokeWidthInactive = 1.7;
 
-  const getStrokeWidth = (isActive: any) => (isActive ? strokeWidthActive : strokeWidthInactive)
+  const getStrokeWidth = (isActive: any) =>
+    isActive ? strokeWidthActive : strokeWidthInactive;
 
   return (
     <header className="">
@@ -32,8 +38,14 @@ function Navbar() {
                 >
                   {({ isActive }) => (
                     <>
-                      <FaHouse strokeWidth={getStrokeWidth(isActive)} className="mb-1 inline-block" size={24} />
-                      <span className="tab tab-whishlist block text-xs">Home</span>
+                      <FaHouse
+                        strokeWidth={getStrokeWidth(isActive)}
+                        className="mb-1 inline-block"
+                        size={24}
+                      />
+                      <span className="tab tab-whishlist block text-xs">
+                        Home
+                      </span>
                     </>
                   )}
                 </NavLink>
@@ -46,8 +58,14 @@ function Navbar() {
                 >
                   {({ isActive }) => (
                     <>
-                      <LucideRocket strokeWidth={getStrokeWidth(isActive)} className="mb-1 inline-block" size={24} />
-                      <span className="tab tab-whishlist block text-xs">Se connecter</span>
+                      <LucideRocket
+                        strokeWidth={getStrokeWidth(isActive)}
+                        className="mb-1 inline-block"
+                        size={24}
+                      />
+                      <span className="tab tab-whishlist block text-xs">
+                        Se connecter
+                      </span>
                     </>
                   )}
                 </NavLink>
@@ -63,8 +81,14 @@ function Navbar() {
                 >
                   {({ isActive }) => (
                     <>
-                      <FaHouse strokeWidth={getStrokeWidth(isActive)} className="mb-1 inline-block" size={24} />
-                      <span className="tab tab-whishlist block text-xs">Home</span>
+                      <FaHouse
+                        strokeWidth={getStrokeWidth(isActive)}
+                        className="mb-1 inline-block"
+                        size={24}
+                      />
+                      <span className="tab tab-whishlist block text-xs">
+                        Home
+                      </span>
                     </>
                   )}
                 </NavLink>
@@ -82,7 +106,9 @@ function Navbar() {
                         className="mb-1 inline-block"
                         size={24}
                       />
-                      <span className="tab tab-whishlist block text-xs">Séances</span>
+                      <span className="tab tab-whishlist block text-xs">
+                        Séances
+                      </span>
                     </>
                   )}
                 </NavLink>
@@ -101,7 +127,9 @@ function Navbar() {
                         className="mb-1 inline-block"
                         size={24}
                       />
-                      <span className="tab tab-whishlist block text-xs">Profil</span>
+                      <span className="tab tab-whishlist block text-xs">
+                        Profil
+                      </span>
                     </>
                   )}
                 </NavLink>
@@ -111,7 +139,7 @@ function Navbar() {
         </section>
       </div>
     </header>
-  )
+  );
 }
 
-export { Navbar }
+export { Navbar };

@@ -1,12 +1,12 @@
-import { useEffect, useState } from "react";
 import { ChevronLeft, PlusIcon } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
-import fetchApi from "@/lib/api-handler";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 import ExerciseTypeCard from "@/components/exercise-type-card";
 import { Navbar } from "@/components/navbar";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import fetchApi from "@/lib/api-handler";
 
 export function TypesList() {
   const [exerciseType, setExerciseType] = useState([] as any[]);
@@ -18,7 +18,9 @@ export function TypesList() {
 
   const fetchTypes = async () => {
     try {
-      const response = await fetchApi("/api/exercise-type?limit=1000&sort=-updatedAt");
+      const response = await fetchApi(
+        "/api/exercise-type?limit=1000&sort=-updatedAt"
+      );
       setExerciseType(response);
       setFilteredExerciseType(response);
     } catch (error: any) {
@@ -35,7 +37,9 @@ export function TypesList() {
   const handleFilter = (typeSession: string | null) => {
     setCurrentFilter(typeSession);
     setFilteredExerciseType(
-      typeSession ? exerciseType.filter((type) => type.type_session.includes(typeSession)) : exerciseType
+      typeSession
+        ? exerciseType.filter((type) => type.type_session.includes(typeSession))
+        : exerciseType
     );
   };
 
@@ -65,7 +69,7 @@ export function TypesList() {
     <div>
       <Navbar />
       <main className="container mx-auto my-0 flex h-dvh max-w-lg flex-col">
-      <div className="flex items-center pt-5">
+        <div className="flex items-center pt-5">
           <Link to="/profile">
             <Button variant="outline" size="icon">
               <ChevronLeft className="h-4 w-4" />
@@ -78,15 +82,24 @@ export function TypesList() {
         <div className="pb-10">
           <div className="rounded-lg border-gray-200 bg-white p-4 dark:border-gray-800 dark:bg-gray-950 dark:shadow-sm">
             <div className="mb-4 grid grid-cols-1 gap-4">
-              <div className="mt-5 mb-4 flex flex-wrap justify-center gap-3">
-                {["Tous", "Upper A", "Lower", "Upper B", "Séance A", "Séance B"].map((filter) => (
+              <div className="mb-4 mt-5 flex flex-wrap justify-center gap-3">
+                {[
+                  "Tous",
+                  "Upper A",
+                  "Lower",
+                  "Upper B",
+                  "Séance A",
+                  "Séance B",
+                ].map((filter) => (
                   <Button
                     key={filter}
                     variant="secondary"
                     className={`w-1/4 border-2 border-transparent ${
                       currentFilter === filter ? "border-slate-400" : ""
                     } ${filter === "Tous" ? "" : ""}`}
-                    onClick={() => handleFilter(filter === "Tous" ? null : filter)}
+                    onClick={() =>
+                      handleFilter(filter === "Tous" ? null : filter)
+                    }
                   >
                     {filter}
                   </Button>
@@ -110,7 +123,10 @@ export function TypesList() {
               ) : (
                 <div className="flex flex-col gap-4">
                   {filteredExerciseType.map((exerciseType: any) => (
-                    <ExerciseTypeCard exerciseType={exerciseType} key={exerciseType._id} />
+                    <ExerciseTypeCard
+                      exerciseType={exerciseType}
+                      key={exerciseType._id}
+                    />
                   ))}
                 </div>
               )}

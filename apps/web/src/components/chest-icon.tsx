@@ -1,3 +1,5 @@
+import React from "react";
+
 export default function IconChest(_props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
@@ -24,5 +26,5 @@ export default function IconChest(_props: React.SVGProps<SVGSVGElement>) {
         </g>
       </g>
     </svg>
-  )
+  );
 }

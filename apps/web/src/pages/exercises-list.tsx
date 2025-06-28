@@ -1,9 +1,13 @@
-import { useEffect, useState } from "react"
-import { format } from "date-fns"
-import { LucideArrowRightCircle, LucideMessageSquareText, LucideTrash2 } from "lucide-react"
-import { Link } from "react-router-dom"
+import { format } from "date-fns";
+import {
+  LucideArrowRightCircle,
+  LucideMessageSquareText,
+  LucideTrash2,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
-import fetchApi from "@/lib/api-handler"
+import { Navbar } from "@/components/navbar";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,44 +18,54 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
-import { Button } from "@/components/ui/button"
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Navbar } from "@/components/navbar"
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Table,
+  TableBody,
+  TableCaption,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import fetchApi from "@/lib/api-handler";
 
 export function ExercicesList() {
-  const [exercise, setExercise] = useState([] as any[])
+  const [exercise, setExercise] = useState([] as any[]);
 
   const fetchUserExercises = async () => {
     try {
-      const response = await fetchApi("/api/exercise-user?limit=1000&sort=-updatedAt")
-      setExercise(response)
+      const response = await fetchApi(
+        "/api/exercise-user?limit=1000&sort=-updatedAt"
+      );
+      setExercise(response);
     } catch (error: any) {
-      console.error("Fetch error: ", error)
+      console.error("Fetch error: ", error);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchUserExercises()
-  }, [])
+    fetchUserExercises();
+  }, []);
 
   const handleDelete = async (id: string) => {
     try {
       await fetchApi(`/api/exercise-user/${id}`, {
         method: "DELETE",
-      })
-      fetchUserExercises()
+      });
+      fetchUserExercises();
     } catch (error: any) {
-      console.error("Fetch error: ", error)
+      console.error("Fetch error: ", error);
     }
-  }
+  };
 
   const formatDate = (dateString: string) => {
     if (!dateString) {
-      return ""
+      return "";
     }
-    return format(dateString, "dd/MM/yyyy")
-  }
+    return format(dateString, "dd/MM/yyyy");
+  };
 
   return (
     <div className="">
@@ -89,14 +103,21 @@ export function ExercicesList() {
                         </AlertDialogTrigger>
                         <AlertDialogContent>
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Supprimer cet exercice ?</AlertDialogTitle>
+                            <AlertDialogTitle>
+                              Supprimer cet exercice ?
+                            </AlertDialogTitle>
                             <AlertDialogDescription>
-                              Tu ne pourras pas récupérer cet exercice une fois supprimé.
+                              Tu ne pourras pas récupérer cet exercice une fois
+                              supprimé.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
                             <AlertDialogCancel>Conserver</AlertDialogCancel>
-                            <AlertDialogAction variant="destructive" asChild onClick={() => handleDelete(exercise._id)}>
+                            <AlertDialogAction
+                              variant="destructive"
+                              asChild
+                              onClick={() => handleDelete(exercise._id)}
+                            >
                               <Button>Confirmer</Button>
                             </AlertDialogAction>{" "}
                           </AlertDialogFooter>
@@ -106,10 +127,19 @@ export function ExercicesList() {
                     <TableCell className="content-center ">
                       <div>
                         {" "}
-                        {exercise.comment ? <LucideMessageSquareText className="mx-1 mt-0.5" size={16} /> : ""}
+                        {exercise.comment ? (
+                          <LucideMessageSquareText
+                            className="mx-1 mt-0.5"
+                            size={16}
+                          />
+                        ) : (
+                          ""
+                        )}
                       </div>
                     </TableCell>
-                    <TableCell>{formatDate(exercise.session.date_session)}</TableCell>
+                    <TableCell>
+                      {formatDate(exercise.session.date_session)}
+                    </TableCell>
                     <TableCell>{exercise.type?.name}</TableCell>
                     <TableCell>
                       {exercise.rep[0]}x{exercise.weight[0]}
@@ -123,7 +153,10 @@ export function ExercicesList() {
 
                     <TableCell>
                       <Button asChild variant="ghost">
-                        <Link to={`/exercises/${exercise._id}`} key={exercise._id}>
+                        <Link
+                          to={`/exercises/${exercise._id}`}
+                          key={exercise._id}
+                        >
                           <LucideArrowRightCircle size={16} />
                         </Link>
                       </Button>
@@ -148,7 +181,7 @@ export function ExercicesList() {
         </main>
       )}
     </div>
-  )
+  );
 }
 
-export default ExercicesList
+export default ExercicesList;

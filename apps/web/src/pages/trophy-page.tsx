@@ -1,70 +1,83 @@
-import { useEffect, useState } from "react"
-import { LockClosedIcon } from "@radix-ui/react-icons"
-import { motion } from "framer-motion"
-import { ChevronLeft, Unlock } from "lucide-react"
-import Crossfire from "react-canvas-confetti/dist/presets/realistic"
-import { Link } from "react-router-dom"
+import { LockClosedIcon } from "@radix-ui/react-icons";
+import { motion } from "framer-motion";
+import { ChevronLeft, Unlock } from "lucide-react";
+import { useEffect, useState } from "react";
+import Crossfire from "react-canvas-confetti/dist/presets/realistic";
+import { Link } from "react-router-dom";
 
-import { TrophyType } from "@/types/trophy.type"
-import fetchApi from "@/lib/api-handler"
-import { cn } from "@/lib/utils"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog"
-import { Navbar } from "@/components/navbar"
-import TrophyIcon from "@/components/TrophyIcon"
+import TrophyIcon from "@/components/TrophyIcon";
+import { Navbar } from "@/components/navbar";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import fetchApi from "@/lib/api-handler";
+import { cn } from "@/lib/utils";
+import { TrophyType } from "@/types/trophy.type";
 
 function TrophyPage() {
-  const [trophies, setTrophies] = useState<TrophyType[]>([])
-  const [selectedTrophy, setSelectedTrophy] = useState<TrophyType | null>(null)
-  const [confetti, setConfetti] = useState(false)
+  const [trophies, setTrophies] = useState<TrophyType[]>([]);
+  const [selectedTrophy, setSelectedTrophy] = useState<TrophyType | null>(null);
+  const [confetti, setConfetti] = useState(false);
 
   // Ref for confetti animation
 
   useEffect(() => {
     const fetchTrophies = async () => {
       try {
-        const response: TrophyType[] = await fetchApi("/api/trophies")
-        setTrophies(response)
+        const response: TrophyType[] = await fetchApi("/api/trophies");
+        setTrophies(response);
       } catch (error) {
-        console.error("Error fetching trophies:", error)
+        console.error("Error fetching trophies:", error);
       }
-    }
+    };
 
-    fetchTrophies()
-  }, [])
+    fetchTrophies();
+  }, []);
 
   // Group trophies by exercise type
   const groupedTrophies = trophies.reduce(
     (acc, trophy) => {
       if (!acc[trophy.exerciseType.name]) {
-        acc[trophy.exerciseType.name] = []
+        acc[trophy.exerciseType.name] = [];
       }
-      acc[trophy.exerciseType.name].push(trophy)
-      return acc
+      acc[trophy.exerciseType.name].push(trophy);
+      return acc;
     },
     {} as Record<string, TrophyType[]>
-  )
+  );
 
   // Calculate the number of achieved trophies per group
   const groupedTrophiesWithCounts = Object.keys(groupedTrophies).reduce(
     (acc, exerciseTypeName) => {
-      const trophies = groupedTrophies[exerciseTypeName]
-      const achievedCount = trophies.filter((trophy) => trophy.achieved).length
-      const totalCount = trophies.length
+      const trophies = groupedTrophies[exerciseTypeName];
+      const achievedCount = trophies.filter((trophy) => trophy.achieved).length;
+      const totalCount = trophies.length;
 
-      acc[exerciseTypeName] = { trophies, achievedCount, totalCount }
-      return acc
+      acc[exerciseTypeName] = { trophies, achievedCount, totalCount };
+      return acc;
     },
-    {} as Record<string, { trophies: TrophyType[]; achievedCount: number; totalCount: number }>
-  )
+    {} as Record<
+      string,
+      { trophies: TrophyType[]; achievedCount: number; totalCount: number }
+    >
+  );
 
   const handleConfetti = () => {
-    setConfetti(true)
+    setConfetti(true);
     setTimeout(() => {
-      setConfetti(false)
-    }, 3000)
-  }
+      setConfetti(false);
+    }, 3000);
+  };
 
   return (
     <div>
@@ -83,7 +96,8 @@ function TrophyPage() {
 
         <Accordion type="multiple" className=" pb-20 pt-5 ">
           {Object.keys(groupedTrophiesWithCounts).map((exerciseTypeName) => {
-            const { trophies, achievedCount, totalCount } = groupedTrophiesWithCounts[exerciseTypeName]
+            const { trophies, achievedCount, totalCount } =
+              groupedTrophiesWithCounts[exerciseTypeName];
             return (
               <AccordionItem key={exerciseTypeName} value={exerciseTypeName}>
                 <AccordionTrigger className=" ">
@@ -96,7 +110,11 @@ function TrophyPage() {
                 </AccordionTrigger>
                 <AccordionContent>
                   {trophies.map((trophy, i) => (
-                    <div className=" w-full max-w-sm" key={trophy._id} onClick={() => setSelectedTrophy(trophy)}>
+                    <div
+                      className=" w-full max-w-sm"
+                      key={trophy._id}
+                      onClick={() => setSelectedTrophy(trophy)}
+                    >
                       <div className="grid">
                         <div
                           className={cn(
@@ -114,13 +132,22 @@ function TrophyPage() {
                           />
                           <div className="space-y-1">
                             {trophy.achieved ? (
-                              <div className="text-xl font-semibold capitalize">Trophée {trophy.trophyType}</div>
+                              <div className="text-xl font-semibold capitalize">
+                                Trophée {trophy.trophyType}
+                              </div>
                             ) : (
-                              <div className="mt-1 italic text-gray-500">???</div>
+                              <div className="mt-1 italic text-gray-500">
+                                ???
+                              </div>
                             )}
                             {trophy.achieved ? (
                               <div className="text-sm text-gray-500">
-                                Obtenu le {trophy.awardedAt ? new Date(trophy.awardedAt).toLocaleDateString() : ""}
+                                Obtenu le{" "}
+                                {trophy.awardedAt
+                                  ? new Date(
+                                      trophy.awardedAt
+                                    ).toLocaleDateString()
+                                  : ""}
                               </div>
                             ) : (
                               ""
@@ -132,7 +159,7 @@ function TrophyPage() {
                   ))}
                 </AccordionContent>
               </AccordionItem>
-            )
+            );
           })}
         </Accordion>
 
@@ -155,7 +182,10 @@ function TrophyPage() {
         )}
 
         {selectedTrophy && (
-          <Dialog open={!!selectedTrophy} onOpenChange={() => setSelectedTrophy(null)}>
+          <Dialog
+            open={!!selectedTrophy}
+            onOpenChange={() => setSelectedTrophy(null)}
+          >
             <DialogTitle>{""}</DialogTitle>
             <DialogContent className=" w-11/12 rounded-3xl sm:max-w-md">
               <DialogDescription>
@@ -189,16 +219,24 @@ function TrophyPage() {
                           </div>
                           <div className=" px-3 text-gray-600">
                             Tu as obtenu le trophée{" "}
-                            <span className=" font-medium capitalize ">{selectedTrophy.trophyType} </span> pour
-                            l'exercice{" "}
-                            <span className=" font-medium capitalize ">{selectedTrophy.exerciseType.name}</span> avec{" "}
-                            {selectedTrophy.repsUser} reps.
+                            <span className=" font-medium capitalize ">
+                              {selectedTrophy.trophyType}{" "}
+                            </span>{" "}
+                            pour l'exercice{" "}
+                            <span className=" font-medium capitalize ">
+                              {selectedTrophy.exerciseType.name}
+                            </span>{" "}
+                            avec {selectedTrophy.repsUser} reps.
                           </div>
                           <button className="flex w-fit items-center justify-evenly gap-2 rounded-lg border border-gray-300 bg-gray-500/60 px-2 py-1 text-xs text-white shadow-md shadow-gray-300">
                             <Unlock className="h-5 w-5" />
                             <div className=" flex flex-col text-left ">
-                              <div className=" flex flex-row">{selectedTrophy.description}</div>
-                              <div>{selectedTrophy.repsGoal} Rep min requises</div>
+                              <div className=" flex flex-row">
+                                {selectedTrophy.description}
+                              </div>
+                              <div>
+                                {selectedTrophy.repsGoal} Rep min requises
+                              </div>
                             </div>
                           </button>
                         </div>
@@ -208,7 +246,9 @@ function TrophyPage() {
                 ) : (
                   <div className="flex h-full flex-col items-center justify-center gap-4">
                     <LockClosedIcon className="mx-auto h-16 w-16 text-gray-500" />
-                    <div className="text-  font-medium ">{selectedTrophy.description}</div>
+                    <div className="text-  font-medium ">
+                      {selectedTrophy.description}
+                    </div>
                   </div>
                 )}
               </DialogDescription>
@@ -217,7 +257,7 @@ function TrophyPage() {
         )}
       </main>
     </div>
-  )
+  );
 }
 
-export default TrophyPage
+export default TrophyPage;

@@ -1,72 +1,72 @@
-import React, { useState } from "react"
-import useAuth from "@/context/use-auth"
-import { ReloadIcon, UpdateIcon } from "@radix-ui/react-icons"
-import { ChevronLeft } from "lucide-react"
-import { Link } from "react-router-dom"
+import { ReloadIcon, UpdateIcon } from "@radix-ui/react-icons";
+import { ChevronLeft } from "lucide-react";
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
 
-import fetchApi from "@/lib/api-handler"
+import useAuth from "@/context/use-auth";
+import fetchApi from "@/lib/api-handler";
 
-import { Button } from "../components/ui/button"
-import { Input } from "../components/ui/input"
-import { Label } from "../components/ui/label"
-import { useToast } from "../components/ui/use-toast"
+import { Button } from "../components/ui/button";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { useToast } from "../components/ui/use-toast";
 
 function SettingsPage() {
-  const { toast } = useToast()
-  const { user, session } = useAuth()
+  const { toast } = useToast();
+  const { user, session } = useAuth();
 
   const [formState, setFormState] = useState({
     firstName: user?.firstName || "",
     lastName: user?.lastName || "",
     email: user?.email || "",
-  })
-  const [newPassword, setNewPassword] = useState("")
-  const [error, setError] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
+  });
+  const [newPassword, setNewPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (event: React.FormEvent<HTMLInputElement>) => {
-    const { target } = event
+    const { target } = event;
     if (target instanceof HTMLInputElement) {
-      const key = target.id
-      const value = target.value
-      setFormState({ ...formState, [key]: value })
+      const key = target.id;
+      const value = target.value;
+      setFormState({ ...formState, [key]: value });
     }
-  }
+  };
 
   const handleChangePassword = (event: React.FormEvent<HTMLInputElement>) => {
-    const { target } = event
+    const { target } = event;
     if (target instanceof HTMLInputElement) {
-      setNewPassword(target.value)
+      setNewPassword(target.value);
     }
-  }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
     try {
       await fetchApi("/api/auth/settings", {
         method: "PATCH",
         body: JSON.stringify(formState),
-      })
+      });
 
       toast({
         title: "Profil mis à jour!",
-      })
+      });
     } catch (error: any) {
-      const errorMessage = error.message || "Une erreur est survenue!"
+      const errorMessage = error.message || "Une erreur est survenue!";
       toast({
         variant: "destructive",
         title: "Une erreur est survenue! ❌",
         description: errorMessage,
-      })
-      setError(errorMessage)
+      });
+      setError(errorMessage);
       setTimeout(() => {
-        setError("")
-      }, 3000)
+        setError("");
+      }, 3000);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div>
@@ -152,7 +152,7 @@ function SettingsPage() {
             </Button> */}
       </main>
     </div>
-  )
+  );
 }
 
-export default SettingsPage
+export default SettingsPage;

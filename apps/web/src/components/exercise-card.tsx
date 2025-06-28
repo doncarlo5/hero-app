@@ -1,5 +1,5 @@
-import { ChevronRight, Edit } from "lucide-react"
-import { Link } from "react-router-dom"
+import { ChevronRight, Edit } from "lucide-react";
+import { Link } from "react-router-dom";
 
 function ExerciseCard({ exercise }: { exercise: any }) {
   return (
@@ -30,21 +30,37 @@ function ExerciseCard({ exercise }: { exercise: any }) {
             </div>
             <div className="flex flex-col items-center gap-1">
               <p className="pb-1 text-sm text-gray-500 ">Reps</p>
-              <p className="text-md flex h-7 w-12 items-center justify-center font-bold ">{exercise.rep[0]}</p>
-              <p className="text-md flex h-7 w-12 items-center justify-center font-bold">{exercise.rep[1]}</p>
-              <p className="text-md flex h-7 w-12 items-center justify-center font-bold ">{exercise.rep[2]}</p>
+              <p className="text-md flex h-7 w-12 items-center justify-center font-bold ">
+                {exercise.rep[0]}
+              </p>
+              <p className="text-md flex h-7 w-12 items-center justify-center font-bold">
+                {exercise.rep[1]}
+              </p>
+              <p className="text-md flex h-7 w-12 items-center justify-center font-bold ">
+                {exercise.rep[2]}
+              </p>
               {exercise.rep[3] && (
-                <p className="text-md flex h-7 w-12 items-center justify-center font-bold ">{exercise.rep[3]}</p>
+                <p className="text-md flex h-7 w-12 items-center justify-center font-bold ">
+                  {exercise.rep[3]}
+                </p>
               )}
             </div>
 
             <div className="flex flex-col items-center gap-1">
               <p className="pb-1 text-sm text-gray-500 ">KG</p>
-              <p className="text-md flex h-7 w-12 items-center justify-center font-bold ">{exercise.weight[0]}</p>
-              <p className="text-md flex h-7 w-12 items-center justify-center font-bold ">{exercise.weight[1]}</p>
-              <p className="text-md flex h-7 w-12 items-center justify-center font-bold ">{exercise.weight[2]}</p>
+              <p className="text-md flex h-7 w-12 items-center justify-center font-bold ">
+                {exercise.weight[0]}
+              </p>
+              <p className="text-md flex h-7 w-12 items-center justify-center font-bold ">
+                {exercise.weight[1]}
+              </p>
+              <p className="text-md flex h-7 w-12 items-center justify-center font-bold ">
+                {exercise.weight[2]}
+              </p>
               {exercise.rep[3] && (
-                <p className="text-md flex h-7 w-12 items-center justify-center font-bold ">{exercise.weight[3]}</p>
+                <p className="text-md flex h-7 w-12 items-center justify-center font-bold ">
+                  {exercise.weight[3]}
+                </p>
               )}
             </div>
             <div className="flex flex-col items-center gap-1">
@@ -71,14 +87,15 @@ function ExerciseCard({ exercise }: { exercise: any }) {
         {exercise.comment && (
           <div className="flex pl-2 pt-2 text-gray-500 dark:text-gray-400">
             <div className="flex items-center gap-2 ">
-              <Edit className="size-4 flex-shrink-0" /> <p className="text-sm ">{exercise.comment}</p>
+              <Edit className="size-4 flex-shrink-0" />{" "}
+              <p className="text-sm ">{exercise.comment}</p>
             </div>
           </div>
         )}
       </div>
       <ChevronRight className="absolute right-2 top-2 my-auto" />
     </Link>
-  )
+  );
 }
 
-export default ExerciseCard
+export default ExerciseCard;

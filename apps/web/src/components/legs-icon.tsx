@@ -1,3 +1,5 @@
+import React from "react";
+
 export default function IconLegs(_props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
@@ -14,5 +16,5 @@ export default function IconLegs(_props: React.SVGProps<SVGSVGElement>) {
         </g>
       </g>
     </svg>
-  )
+  );
 }

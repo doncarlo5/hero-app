@@ -1,5 +1,6 @@
 import { LockClosedIcon, LockOpen1Icon } from "@radix-ui/react-icons";
 import useWakeLock from "react-use-wake-lock";
+
 import { useToast } from "@/components/ui/use-toast";
 
 const ScreenLockToggle = () => {
@@ -26,7 +27,11 @@ const ScreenLockToggle = () => {
 
   return (
     <button type="button" onClick={handleLockScreen}>
-      {isLocked ? <LockClosedIcon className="h-6 w-6" /> : <LockOpen1Icon className="h-6 w-6" />}
+      {isLocked ? (
+        <LockClosedIcon className="h-6 w-6" />
+      ) : (
+        <LockOpen1Icon className="h-6 w-6" />
+      )}
     </button>
   );
 };

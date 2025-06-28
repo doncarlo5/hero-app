@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+
 import BorderRotateButton from "@/components/ui/border-rotate-button";
 
 export function HomePage() {
@@ -6,7 +7,7 @@ export function HomePage() {
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
       <main className="container mx-auto px-4">
         {/* Hero Section */}
-        <section className="py-20 text-center flex flex-col items-center gap-20">
+        <section className="flex flex-col items-center gap-20 py-20 text-center">
           <h1 className="text-5xl font-bold tracking-tighter sm:text-6xl md:text-7xl">
             Hero App
           </h1>
