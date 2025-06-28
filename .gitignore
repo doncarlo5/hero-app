@@ -7,8 +7,10 @@ apps/*/node_modules/
 
 # Package lock files
 package-lock.json
+.package-lock.json
 apps/*/package-lock.json
 **/package-lock.json
+**/.package-lock.json
 apps/api/package-lock.json
 
 # Production builds
