@@ -1,16 +1,16 @@
-import {
-	FlatList,
-	View,
-	TouchableOpacity,
-	ActivityIndicator,
-} from "react-native";
-import { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import {
+	ActivityIndicator,
+	FlatList,
+	TouchableOpacity,
+	View,
+} from "react-native";
 
 import { Text } from "@/components/ui/text";
-import { fetchApi } from "@/lib/api-handler";
 import { colors } from "@/constants/colors";
-import { MessageSquareText } from "@/lib/icons/messageSquareText";
+import { fetchApi } from "@/lib/api-handler";
+import { MessageSquareText } from "lucide-react-native";
 
 export default function List() {
 	const router = useRouter();

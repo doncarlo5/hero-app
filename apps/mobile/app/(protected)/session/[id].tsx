@@ -1,30 +1,30 @@
-import {
-	View,
-	ScrollView,
-	FlatList,
-	RefreshControl,
-	ActivityIndicator,
-	Pressable,
-	Alert,
-	Modal,
-} from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState, useCallback } from "react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale/fr";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
+import {
+	ActivityIndicator,
+	Alert,
+	FlatList,
+	Modal,
+	Pressable,
+	RefreshControl,
+	ScrollView,
+	View,
+} from "react-native";
 
-import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Text } from "@/components/ui/text";
 import { Textarea } from "@/components/ui/textarea";
 import { fetchApi } from "@/lib/api-handler";
 import {
-	ChevronRightIcon,
 	CalendarIcon,
+	CheckCircleIcon,
+	ChevronRightIcon,
 	SaveIcon,
 	TrashIcon,
 	XIcon,
-	CheckCircleIcon,
 } from "lucide-react-native";
 
 type ExerciseUser = {
