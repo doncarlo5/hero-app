@@ -61,9 +61,7 @@ export default function List() {
 								className={`h-3 w-3 rounded-full mr-3 ${item.is_done ? "bg-green-500" : "bg-orange-500"}`}
 							/>
 							<Text className="mr-3 text-foreground dark:text-foreground-dark">
-								<MessageSquareText
-									className={`${!item.comment && "opacity-30"}`}
-								/>
+								<MessageSquareText opacity={!item.comment ? 0.3 : 1} />
 							</Text>
 							<Text className="mr-3 text-foreground dark:text-foreground-dark">
 								{new Date(item.date_session).toLocaleDateString("fr-FR")}
