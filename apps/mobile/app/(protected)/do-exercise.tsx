@@ -1,27 +1,27 @@
-import React, { useEffect, useState } from "react";
+import { format } from "date-fns";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import {
-	View,
-	ScrollView,
-	Alert,
-	TouchableOpacity,
-	ActivityIndicator,
-} from "react-native";
-import { useRouter, useLocalSearchParams } from "expo-router";
-import {
+	CheckIcon,
 	ChevronLeftIcon,
+	EditIcon,
+	HistoryIcon,
 	InfoIcon,
 	StarIcon,
 	XIcon,
-	CheckIcon,
-	HistoryIcon,
-	EditIcon,
 } from "lucide-react-native";
-import { format } from "date-fns";
+import React, { useEffect, useState } from "react";
+import {
+	ActivityIndicator,
+	Alert,
+	ScrollView,
+	TouchableOpacity,
+	View,
+} from "react-native";
 
 import { SafeAreaView } from "@/components/safe-area-view";
-import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Text } from "@/components/ui/text";
 import { Textarea } from "@/components/ui/textarea";
 import { fetchApi } from "@/lib/api-handler";
 
@@ -117,17 +117,6 @@ export default function DoExercise() {
 		}
 	}, [lastExercise]);
 
-	const fetchOneSession = async () => {
-		if (!sessionId) return null;
-		try {
-			const response = await fetchApi(`/api/sessions/${sessionId}`);
-			return response;
-		} catch (error: any) {
-			console.error("Fetch error: ", error);
-			return null;
-		}
-	};
-
 	const onExerciseTypeChange = async (exerciseType: ExerciseType) => {
 		setOneExerciseType(exerciseType);
 		setIsLoadingLastExercise(true);
@@ -158,6 +147,17 @@ export default function DoExercise() {
 	};
 
 	useEffect(() => {
+		const fetchOneSession = async () => {
+			if (!sessionId) return null;
+			try {
+				const response = await fetchApi(`/api/sessions/${sessionId}`);
+				return response;
+			} catch (error: any) {
+				console.error("Fetch error: ", error);
+				return null;
+			}
+		};
+
 		const fetchInitialData = async () => {
 			const sessionData = await fetchOneSession();
 			if (sessionData) {

@@ -1,25 +1,25 @@
-import {
-	View,
-	ScrollView,
-	RefreshControl,
-	ActivityIndicator,
-	Alert,
-	TouchableOpacity,
-} from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
+import {
+	ActivityIndicator,
+	Alert,
+	RefreshControl,
+	ScrollView,
+	TouchableOpacity,
+	View,
+} from "react-native";
 
-import { Text } from "@/components/ui/text";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Text } from "@/components/ui/text";
+import { Textarea } from "@/components/ui/textarea";
 import { fetchApi } from "@/lib/api-handler";
 import {
+	CheckIcon,
+	EditIcon,
 	InfoIcon,
 	TrashIcon,
-	EditIcon,
 	XIcon,
-	CheckIcon,
 } from "lucide-react-native";
 
 type ExerciseUser = {

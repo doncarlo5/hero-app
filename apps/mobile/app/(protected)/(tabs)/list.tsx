@@ -16,7 +16,7 @@ export default function List() {
 	const router = useRouter();
 	const [isLoadingSessions, setIsLoadingSessions] = useState(false);
 	const [sessions, setSessions] = useState<any[]>([]);
-	const [sortConfig, setSortConfig] = useState({
+	const [sortConfig] = useState({
 		field: "date_session",
 		order: "desc",
 	});
