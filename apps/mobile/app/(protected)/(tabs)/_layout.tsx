@@ -1,9 +1,9 @@
-import React from "react";
 import { Tabs } from "expo-router";
+import React from "react";
 
-import { useColorScheme } from "@/lib/useColorScheme";
 import { colors } from "@/constants/colors";
-import { HomeIcon, ListIcon, SettingsIcon } from "lucide-react-native";
+import { useColorScheme } from "@/lib/useColorScheme";
+import { HomeIcon, SettingsIcon } from "lucide-react-native";
 
 export default function TabsLayout() {
 	const { colorScheme } = useColorScheme();
@@ -51,15 +51,6 @@ export default function TabsLayout() {
 					title: "Settings",
 					tabBarIcon: ({ color, size }) => (
 						<SettingsIcon strokeWidth={1.7} size={26} color={color} />
-					),
-				}}
-			/>
-			<Tabs.Screen
-				name="list"
-				options={{
-					title: "Mes séances",
-					tabBarIcon: ({ color, size }) => (
-						<ListIcon strokeWidth={1.7} size={26} color={color} />
 					),
 				}}
 			/>
