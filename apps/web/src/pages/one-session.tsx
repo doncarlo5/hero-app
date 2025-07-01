@@ -436,6 +436,7 @@ const OneSession = () => {
                       <div className=" flex gap-4">
                         <Button
                           variant="outline"
+                          type="button"
                           onClick={() => {
                             const nextExercise = getNextExercise();
                             if (nextExercise && nextExercise.exerciseType) {
@@ -470,6 +471,7 @@ const OneSession = () => {
                           {getNextExercise()?.alternatives?.map((alt) => (
                             <Button
                               variant="outline"
+                              type="button"
                               key={alt._id}
                               onClick={() =>
                                 navigate(
