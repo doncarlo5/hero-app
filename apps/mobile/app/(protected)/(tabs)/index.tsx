@@ -7,6 +7,7 @@ import {
 	View,
 } from "react-native";
 
+import NewSessionButton from "@/components/new-session-button";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors";
 import { fetchApi } from "@/lib/api-handler";
@@ -86,6 +87,7 @@ export default function Home() {
 					)}
 				/>
 			)}
+			<NewSessionButton />
 		</View>
 	);
 }
