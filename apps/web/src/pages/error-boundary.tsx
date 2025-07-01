@@ -40,7 +40,7 @@ class CustomErrorBoundary extends Component<Props, State> {
                 Oops! Something went wrong.
               </p>
               <div className="flex gap-4">
-                <Link className="w-[150px]" to="/">
+                <Link className="w-[150px]" to="/main" reloadDocument>
                   <Button className="w-full">Accueil</Button>
                 </Link>
               </div>

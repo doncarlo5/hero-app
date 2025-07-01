@@ -16,7 +16,7 @@ function NotFoundPage() {
             Oops! La page recherchée n'existe pas.
           </p>
           <div className="flex gap-4">
-            <Link className="w-[150px]" to="/">
+            <Link className="w-[150px]" to="/main" reloadDocument>
               <Button className="w-full">Accueil</Button>
             </Link>
           </div>
