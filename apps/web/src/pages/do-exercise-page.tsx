@@ -42,6 +42,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import fetchApi from "@/lib/api-handler";
@@ -57,6 +58,7 @@ const DoExercisePage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingTypes, setIsLoadingTypes] = useState(true);
   const [isLoadingLastExercise, setIsLoadingLastExercise] = useState(true);
+  const [isMiniCountdown, setIsMiniCountdown] = useState(true);
 
   const { sessionId } = useParams();
   const [searchParams] = useSearchParams();
@@ -291,8 +293,17 @@ const DoExercisePage = () => {
           <ScreenLockToggle />
         </div>
 
+        {/* Full-width countdown timer at top */}
+        {oneExerciseType && !isMiniCountdown && (
+          <div className="mb-4 w-full rounded-2xl bg-slate-50 px-4 py-6 dark:bg-slate-900 dark:bg-opacity-40">
+            <div className="flex items-center justify-center">
+              <FullCountDownTimer exerciseTypeTimer={oneExerciseType.timer} />
+            </div>
+          </div>
+        )}
+
         <Select onValueChange={onExerciseTypeChange}>
-          <SelectTrigger className="w-full data-[placeholder]:italic data-[placeholder]:text-gray-700 dark:data-[placeholder]:text-white ">
+          <SelectTrigger className="w-full data-[placeholder]:italic data-[placeholder]:text-gray-700 dark:data-[placeholder]:text-white">
             <SelectValue
               onLoad={() => setIsLoadingTypes(false)}
               placeholder={
@@ -331,7 +342,7 @@ const DoExercisePage = () => {
         </Select>
         {/* display last time that exercise has be done with lastExercise.session.dat_session with date-fns */}
         {lastExercise && (
-          <div className=" flex items-center justify-end gap-1 px-2 py-1 text-gray-500 dark:text-gray-400">
+          <div className="flex items-center justify-end gap-1 px-2 py-1 text-gray-500 dark:text-gray-400">
             <HistoryIcon size={14} />
             <p className="text-sm">
               {isLoadingLastExercise ? (
@@ -355,10 +366,10 @@ const DoExercisePage = () => {
               <AccordionTrigger className="flex h-10 gap-2 px-5 text-left text-gray-500 dark:text-gray-400">
                 <div className="flex items-center gap-2">
                   <LucideInfo className="size-4" />{" "}
-                  <p className="text-left ">Conseil</p>
+                  <p className="text-left">Conseil</p>
                 </div>
               </AccordionTrigger>
-              <AccordionContent className="px-3 pb-3 pt-1 ">
+              <AccordionContent className="px-3 pb-3 pt-1">
                 {oneExerciseType?.advice}
               </AccordionContent>
             </AccordionItem>
@@ -367,7 +378,7 @@ const DoExercisePage = () => {
         {oneExerciseType && (
           <form onSubmit={handleSubmit} className="mt-3">
             {showPrefillButton && (
-              <div className=" flex gap-2">
+              <div className="flex gap-2">
                 <Button
                   variant={"outline"}
                   type="button"
@@ -565,7 +576,7 @@ const DoExercisePage = () => {
                       <input
                         id="set3"
                         type="checkbox"
-                        className="before:content[''] border-blue-gray-200 before:bg-blue-gray-500 peer relative h-8 w-8 cursor-pointer appearance-none rounded-sm border border-dashed transition-all before:absolute before:left-2/4 before:top-2/4 before:block before:h-9 before:w-9 before:-translate-x-2/4 before:-translate-y-2/4 before:rounded-full before:opacity-0 before:transition-opacity checked:border-teal-700 checked:bg-teal-700 checked:before:bg-teal-700 "
+                        className="before:content[''] border-blue-gray-200 before:bg-blue-gray-500 peer relative h-8 w-8 cursor-pointer appearance-none rounded-sm border border-dashed transition-all before:absolute before:left-2/4 before:top-2/4 before:block before:h-9 before:w-9 before:-translate-x-2/4 before:-translate-y-2/4 before:rounded-full before:opacity-0 before:transition-opacity checked:border-teal-700 checked:bg-teal-700 checked:before:bg-teal-700"
                       />
                       <span className="pointer-events-none absolute left-2/4 top-2/4 -translate-x-2/4 -translate-y-2/4 text-white opacity-0 transition-opacity peer-checked:opacity-100">
                         <svg
@@ -626,18 +637,18 @@ const DoExercisePage = () => {
                 })}
               >
                 {addRep4 ? (
-                  <div className=" text-xs italic text-gray-400">
+                  <div className="text-xs italic text-gray-400">
                     Réduire d'une série ↑
                   </div>
                 ) : (
-                  <div className=" text-xs italic text-gray-400 ">
+                  <div className="text-xs italic text-gray-400">
                     Ajouter une série ↓
                   </div>
                 )}
               </button>
             </div>
 
-            <div className="pt-5 ">
+            <div className="pt-5">
               <Accordion
                 type="single"
                 collapsible
@@ -655,7 +666,7 @@ const DoExercisePage = () => {
                       )}
                     </div>
                   </AccordionTrigger>
-                  <AccordionContent className="px-3 pb-3 pt-1 ">
+                  <AccordionContent className="px-3 pb-3 pt-1">
                     <Textarea
                       id="comment"
                       placeholder={
@@ -670,10 +681,24 @@ const DoExercisePage = () => {
                   </AccordionContent>
                 </AccordionItem>
               </Accordion>
+              {/* Switch to mini countdown timer or full top countdown timer */}
+              <div
+                className="flex cursor-pointer items-center justify-between gap-3 rounded-2xl bg-slate-50 py-3 pl-5 pr-4"
+                onClick={() => setIsMiniCountdown(!isMiniCountdown)}
+              >
+                <span className="text-sm text-gray-600">Expanded timer</span>
+                <div onClick={(e) => e.stopPropagation()}>
+                  <Switch
+                    className="data-[state=checked]:bg-teal-700"
+                    checked={!isMiniCountdown}
+                    onCheckedChange={(checked) => setIsMiniCountdown(!checked)}
+                  />
+                </div>
+              </div>
             </div>
 
             {/* Fixed countdown timer at bottom */}
-            {oneExerciseType && (
+            {oneExerciseType && isMiniCountdown && (
               <div className="fixed bottom-20 left-0 cursor-pointer">
                 <div className="rounded-lg bg-slate-100 px-3 py-2 shadow-lg dark:bg-slate-800">
                   <CountDownTimer exerciseTypeTimer={oneExerciseType.timer} />
@@ -684,7 +709,7 @@ const DoExercisePage = () => {
               {isLoading ? (
                 <Button
                   disabled
-                  className="flex  h-16 w-16  items-center justify-center rounded-full text-white shadow-lg focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-opacity-75 active:scale-95 active:shadow-inner"
+                  className="flex h-16 w-16 items-center justify-center rounded-full text-white shadow-lg focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-opacity-75 active:scale-95 active:shadow-inner"
                 >
                   <ReloadIcon className="h-10 w-10 animate-spin" />
                 </Button>
@@ -703,6 +728,106 @@ const DoExercisePage = () => {
     </>
   );
 };
+
+function FullCountDownTimer({
+  exerciseTypeTimer,
+}: {
+  exerciseTypeTimer: number;
+}) {
+  const [isTimerPlaying, setIsTimerPlaying] = useState(false);
+  const [key, setKey] = useState(0);
+
+  const renderTime = ({ remainingTime }: { remainingTime: number }) => {
+    if (remainingTime === 0) {
+      const ding = new Audio("/ding.mp3");
+      ding.currentTime = 0;
+      ding.play();
+      setTimeout(() => {
+        setKey((prevKey) => prevKey + 1);
+      }, 3000);
+      setIsTimerPlaying(false);
+      return (
+        <div className="flex items-center justify-center">
+          <p className="text-3xl font-bold text-teal-600">GO!</p>
+        </div>
+      );
+    }
+
+    if (Number.isNaN(remainingTime)) {
+      return (
+        <div className="flex items-center justify-center">
+          <p className="text-2xl text-gray-500">--:--</p>
+        </div>
+      );
+    }
+
+    const minutes = Math.floor(remainingTime / 60);
+    const seconds = remainingTime % 60;
+    const formattedSeconds = seconds < 10 ? `0${seconds}` : `${seconds}`;
+
+    return (
+      <div className="flex items-center justify-center">
+        <p className="text-3xl font-bold">{`${minutes}:${formattedSeconds}`}</p>
+      </div>
+    );
+  };
+
+  const restartFunction = () => {
+    setKey((prevKey) => prevKey + 1);
+    setIsTimerPlaying(false);
+  };
+
+  return (
+    <div
+      className="flex items-center gap-6"
+      onClick={() => {
+        if (isTimerPlaying) {
+          restartFunction();
+        } else {
+          setIsTimerPlaying(true);
+        }
+      }}
+    >
+      <div className="flex items-center gap-4">
+        <CountdownCircleTimer
+          isSmoothColorTransition={true}
+          isGrowing={true}
+          rotation="counterclockwise"
+          key={key}
+          size={120}
+          strokeWidth={8}
+          isPlaying={isTimerPlaying}
+          duration={exerciseTypeTimer}
+          colors={["#0F766E", "#0F766E", "#760f17", "#760f17"]}
+          colorsTime={[7, 5, 2, 0]}
+          onComplete={() => ({
+            shouldRepeat: false,
+            delay: 1,
+            newInitialRemainingTime: exerciseTypeTimer,
+          })}
+        >
+          {renderTime}
+        </CountdownCircleTimer>
+      </div>
+
+      {isTimerPlaying ? (
+        <button
+          type="button"
+          className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full bg-teal-700 text-white shadow-md transition-all hover:shadow-lg active:scale-95"
+        >
+          <LucideRotateCcw className="h-6 w-6" />
+        </button>
+      ) : (
+        <button
+          type="button"
+          className="flex h-12 w-12 cursor-pointer items-center justify-center rounded-full bg-teal-700 text-white shadow-md transition-all hover:shadow-lg active:scale-95"
+        >
+          <LucidePlay className="h-6 w-6" />
+        </button>
+      )}
+    </div>
+  );
+}
 
 function CountDownTimer({ exerciseTypeTimer }: { exerciseTypeTimer: number }) {
   const [isTimerPlaying, setIsTimerPlaying] = useState(false);
