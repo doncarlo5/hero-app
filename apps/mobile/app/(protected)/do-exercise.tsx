@@ -410,21 +410,21 @@ export default function DoExercise() {
 											onChangeText={(value) => handleInputChange("rep1", value)}
 											placeholder={lastExercise?.rep[0]?.toString() || "0"}
 											keyboardType="numeric"
-											className="h-12 text-center text-2xl font-bold"
+											className="h-12 text-center text-3xl font-black"
 										/>
 										<Input
 											value={formState.rep2}
 											onChangeText={(value) => handleInputChange("rep2", value)}
 											placeholder={lastExercise?.rep[1]?.toString() || "0"}
 											keyboardType="numeric"
-											className="h-12 text-center text-2xl font-bold"
+											className="h-12 text-center text-3xl font-black"
 										/>
 										<Input
 											value={formState.rep3}
 											onChangeText={(value) => handleInputChange("rep3", value)}
 											placeholder={lastExercise?.rep[2]?.toString() || "0"}
 											keyboardType="numeric"
-											className="h-12 text-center text-2xl font-bold"
+											className="h-12 text-center text-3xl font-black"
 										/>
 										{(addRep4 || oneExerciseType.repRange4) && (
 											<Input
@@ -434,7 +434,7 @@ export default function DoExercise() {
 												}
 												placeholder={lastExercise?.rep[3]?.toString() || "0"}
 												keyboardType="numeric"
-												className="h-12 text-center text-2xl font-bold"
+												className="h-12 text-center text-3xl font-black"
 											/>
 										)}
 									</View>
@@ -453,7 +453,7 @@ export default function DoExercise() {
 											}
 											placeholder={lastExercise?.weight[0]?.toString() || "0"}
 											keyboardType="numeric"
-											className="h-12 text-center text-2xl font-bold"
+											className="h-12 text-center text-3xl font-black"
 										/>
 										<Input
 											value={formState.weight2}
@@ -462,7 +462,7 @@ export default function DoExercise() {
 											}
 											placeholder={lastExercise?.weight[1]?.toString() || "0"}
 											keyboardType="numeric"
-											className="h-12 text-center text-2xl font-bold"
+											className="h-12 text-center text-3xl font-black"
 										/>
 										<Input
 											value={formState.weight3}
@@ -471,7 +471,7 @@ export default function DoExercise() {
 											}
 											placeholder={lastExercise?.weight[2]?.toString() || "0"}
 											keyboardType="numeric"
-											className="h-12 text-center text-2xl font-bold"
+											className="h-12 text-center text-3xl font-black"
 										/>
 										{(addRep4 || oneExerciseType.repRange4) && (
 											<Input
@@ -594,16 +594,17 @@ export default function DoExercise() {
 
 			{/* Submit Button */}
 			{oneExerciseType && (
-				<View className="absolute bottom-20 right-4">
+				<View className="absolute bottom-20 right-10">
 					<Button
 						onPress={handleSubmit}
 						disabled={isLoading}
-						className="h-16 w-16 rounded-full items-center justify-center"
+						size="icon"
+						className="h-16 w-16 rounded-full items-center justify-center p-0"
 					>
 						{isLoading ? (
 							<ActivityIndicator size="small" color="white" />
 						) : (
-							<CheckIcon size={32} color="white" />
+							<CheckIcon size={28} color="white" />
 						)}
 					</Button>
 				</View>
