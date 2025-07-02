@@ -89,7 +89,7 @@ export default function NewSessionButton() {
 			>
 				<BottomSheetView className="flex-1 px-4 pb-4">
 					{isLoading ? (
-						<View className="flex-1 items-center justify-center">
+						<View className="flex-1 pt-14 items-center justify-center">
 							<ActivityIndicator size="large" />
 						</View>
 					) : (
@@ -125,7 +125,7 @@ export default function NewSessionButton() {
 											</Text>
 											<Image
 												source={bodyFront}
-												className="h-16 w-9"
+												className="h-14 w-9"
 												resizeMode="contain"
 											/>
 										</Pressable>
@@ -138,7 +138,7 @@ export default function NewSessionButton() {
 											</Text>
 											<Image
 												source={bodyBack}
-												className="h-16 w-9"
+												className="h-14 w-9"
 												resizeMode="contain"
 											/>
 										</Pressable>
