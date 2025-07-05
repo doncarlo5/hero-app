@@ -60,8 +60,6 @@ export default function NewSessionButton() {
 		}
 	};
 
-	console.log("bottomSheetRef", bottomSheetRef);
-
 	return (
 		<>
 			{/* FAB — render it only when the sheet is closed */}
