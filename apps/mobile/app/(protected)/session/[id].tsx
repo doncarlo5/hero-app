@@ -19,6 +19,7 @@ import { Text } from "@/components/ui/text";
 import { Textarea } from "@/components/ui/textarea";
 import { fetchApi } from "@/lib/api-handler";
 import {
+	ArrowLeftIcon,
 	CalendarIcon,
 	CheckCircleIcon,
 	ChevronRightIcon,
@@ -64,7 +65,10 @@ type FormState = {
 };
 
 export default function SessionDetail() {
-	const { id } = useLocalSearchParams<{ id: string }>();
+	const { id } = useLocalSearchParams<{
+		id: string;
+		fromExercise?: string;
+	}>();
 	const router = useRouter();
 
 	const [session, setSession] = useState<Session | null>(null);
@@ -187,7 +191,7 @@ export default function SessionDetail() {
 								}),
 							});
 							await fetchSession();
-							router.back();
+							router.replace("/(protected)/(tabs)");
 						} catch (error) {
 							console.error("Complete session error:", error);
 							Alert.alert(
@@ -482,17 +486,16 @@ export default function SessionDetail() {
 					</View>
 
 					{/* Add New Exercise Button */}
-					{!session.is_done && (
-						<Pressable
-							onPress={() =>
-								router.push(`/(protected)/do-exercise?sessionId=${session._id}`)
-							}
-							className="relative mb-4 border border-gray-300 flex-row items-center from-gray-100 to-gray-500 bg-gradient-to-br justify-center gap-2 rounded-2xl p-3 active:translate-y-0.5"
-						>
-							<PlusIcon size={20} color="#6b7280" />
-							<Text className="">Add an exercise</Text>
-						</Pressable>
-					)}
+
+					<Pressable
+						onPress={() =>
+							router.push(`/(protected)/do-exercise?sessionId=${session._id}`)
+						}
+						className="relative mb-4 border border-gray-300 flex-row items-center from-gray-100 to-gray-500 bg-gradient-to-br justify-center gap-2 rounded-2xl p-3 active:translate-y-0.5"
+					>
+						<PlusIcon size={20} color="#6b7280" />
+						<Text className="">Add an exercise</Text>
+					</Pressable>
 
 					<FlatList
 						data={session.exercise_user_list}
@@ -565,7 +568,7 @@ export default function SessionDetail() {
 						</Text>
 					</Button>
 
-					{!session.is_done && (
+					{!session.is_done ? (
 						<Button
 							onPress={handleCompleteSession}
 							disabled={isCompleting}
@@ -575,6 +578,14 @@ export default function SessionDetail() {
 							<Text className="ml-2">
 								{isCompleting ? "Completing..." : "Complete"}
 							</Text>
+						</Button>
+					) : (
+						<Button
+							onPress={() => router.replace("/(protected)/(tabs)")}
+							className="flex-1 dark:bg-transparent flex-row items-center justify-center dark:bg-background-dark dark:text-foreground-dark"
+						>
+							<ArrowLeftIcon size={16} color="white" />
+							<Text className="ml-2">Go back to list</Text>
 						</Button>
 					)}
 				</View>
