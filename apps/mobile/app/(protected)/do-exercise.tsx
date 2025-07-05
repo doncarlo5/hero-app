@@ -2,7 +2,6 @@ import { format } from "date-fns";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
 	CheckIcon,
-	ChevronLeftIcon,
 	EditIcon,
 	HistoryIcon,
 	InfoIcon,
@@ -236,24 +235,16 @@ export default function DoExercise() {
 				});
 			}
 
-			router.push(`/(protected)/session/${sessionId}`);
+			router.replace({
+				pathname: "/(protected)/session/[id]",
+				params: { id: sessionId, fromExercise: "true" },
+			});
 		} catch (error: any) {
 			console.error(error);
 			Alert.alert("Error", "Failed to save exercise");
 		} finally {
 			setIsLoading(false);
 		}
-	};
-
-	const handleGoBack = () => {
-		Alert.alert("Go back", "The data will be lost.", [
-			{ text: "Cancel", style: "cancel" },
-			{
-				text: "Continue",
-				style: "destructive",
-				onPress: () => router.push(`/(protected)/session/${sessionId}`),
-			},
-		]);
 	};
 
 	const toggleSet = (setNumber: 1 | 2 | 3 | 4) => {
@@ -287,20 +278,8 @@ export default function DoExercise() {
 	);
 
 	return (
-		<SafeAreaView className="flex-1 bg-background" edges={["top", "bottom"]}>
-			<ScrollView className="flex-1 px-4">
-				{/* Header */}
-				<View className="flex-row items-center justify-between py-5">
-					<View className="flex-row items-center">
-						<Button variant="outline" size="icon" onPress={handleGoBack}>
-							<ChevronLeftIcon size={16} color="#6b7280" />
-						</Button>
-						<Text className="ml-5 text-xl font-bold">
-							{oneExerciseType ? oneExerciseType.name : "New Exercise"}
-						</Text>
-					</View>
-				</View>
-
+		<SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
+			<ScrollView className="flex-1 px-4 pt-4">
 				{/* Exercise Type Selection */}
 				<View className="mb-4">
 					{isLoadingTypes ? (
