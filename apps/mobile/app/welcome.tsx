@@ -20,8 +20,14 @@ export default function WelcomeScreen() {
 	return (
 		<SafeAreaView className="flex flex-1 bg-background p-4">
 			<View className="flex flex-1 items-center justify-center gap-y-4 web:m-4">
-				<Image source={appIcon} className="w-16 h-16 rounded-xl" />
-				<H1 className="text-center">Hero App</H1>
+				<View className="flex flex-row items-center gap-x-2">
+					<Image source={appIcon} className="w-20 h-20 rounded-xl" />
+					<View className="flex flex-col">
+						<H1 className="tracking-tight text-[2.7rem]">Hero</H1>
+						<H1 className="tracking-tight -mt-5 text-[2.7rem]">App</H1>
+					</View>
+				</View>
+
 				<Muted className="text-center">Your workout journey starts here.</Muted>
 			</View>
 			<View className="flex flex-col gap-y-4 web:m-4">
