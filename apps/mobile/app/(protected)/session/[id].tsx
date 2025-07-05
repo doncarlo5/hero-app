@@ -487,12 +487,10 @@ export default function SessionDetail() {
 							onPress={() =>
 								router.push(`/(protected)/do-exercise?sessionId=${session._id}`)
 							}
-							className="relative mb-4 flex h-14 w-full items-center justify-center gap-2 rounded-2xl border-2 border-dotted border-muted/30 dark:border-muted-dark/30 bg-muted/10 dark:bg-muted-dark/10 px-3 py-2 shadow-sm active:translate-y-0.5 active:shadow-none"
+							className="relative mb-4 border border-gray-300 flex-row items-center from-gray-100 to-gray-500 bg-gradient-to-br justify-center gap-2 rounded-2xl p-3 active:translate-y-0.5"
 						>
 							<PlusIcon size={20} color="#6b7280" />
-							<Text className="text-muted-foreground dark:text-muted-foreground-dark font-medium">
-								Select an exercise
-							</Text>
+							<Text className="">Add an exercise</Text>
 						</Pressable>
 					)}
 
