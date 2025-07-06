@@ -51,11 +51,6 @@
 			"typedRoutes": true
 		},
 		"plugins": ["expo-router", "expo-secure-store"],
-		"extra": {
-			"eas": {
-				"projectId": "ff46ca35-931b-4872-a88f-f59e62c4b189"
-			}
-		},
 		"cli": {
 			"appVersionSource": "remote"
 		}
