@@ -53,6 +53,13 @@
 		"plugins": ["expo-router", "expo-secure-store"],
 		"cli": {
 			"appVersionSource": "remote"
-		}
+		},
+		"extra": {
+			"router": {},
+			"eas": {
+				"projectId": "d832f74d-83c2-4d98-aa11-bdf11856d5f8"
+			}
+		},
+		"owner": "doncarlos"
 	}
 }

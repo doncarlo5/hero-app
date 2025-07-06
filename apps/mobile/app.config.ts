@@ -1,6 +1,7 @@
 import { ConfigContext, ExpoConfig } from "expo/config";
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
+	...config,
 	name: "Hero App",
 	slug: "hero-app",
 	scheme: "hero-app",
@@ -10,6 +11,13 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 	userInterfaceStyle: "automatic",
 	assetBundlePatterns: ["**/*"],
 	newArchEnabled: true,
+	extra: {
+		...(config as any)?.expo?.extra,
+		apiUrl: process.env.EXPO_PUBLIC_API_URL,
+		eas: {
+			projectId: "d832f74d-83c2-4d98-aa11-bdf11856d5f8",
+		},
+	},
 	ios: {
 		supportsTablet: true,
 		config: {
