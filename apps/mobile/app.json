@@ -51,9 +51,6 @@
 			"typedRoutes": true
 		},
 		"plugins": ["expo-router", "expo-secure-store"],
-		"cli": {
-			"appVersionSource": "remote"
-		},
 		"extra": {
 			"router": {},
 			"eas": {
