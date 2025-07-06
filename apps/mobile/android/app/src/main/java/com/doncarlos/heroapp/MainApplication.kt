@@ -1,4 +1,4 @@
-package co.selego.heroapp
+package com.doncarlos.heroapp
 
 import android.app.Application
 import android.content.res.Configuration

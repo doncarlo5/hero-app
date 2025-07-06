@@ -87,9 +87,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'co.selego.heroapp'
+    namespace 'com.doncarlos.heroapp'
     defaultConfig {
-        applicationId 'co.selego.heroapp'
+        applicationId 'com.doncarlos.heroapp'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

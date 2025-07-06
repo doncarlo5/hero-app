@@ -10,6 +10,11 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 	userInterfaceStyle: "automatic",
 	assetBundlePatterns: ["**/*"],
 	newArchEnabled: true,
+	extra: {
+		eas: {
+			projectId: "ff46ca35-931b-4872-a88f-f59e62c4b189",
+		},
+	},
 	ios: {
 		supportsTablet: true,
 		config: {

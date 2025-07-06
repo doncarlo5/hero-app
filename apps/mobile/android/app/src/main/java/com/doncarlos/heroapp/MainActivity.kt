@@ -1,4 +1,4 @@
-package co.selego.heroapp
+package com.doncarlos.heroapp
 
 import android.os.Build
 import android.os.Bundle

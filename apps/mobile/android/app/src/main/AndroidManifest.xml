@@ -24,8 +24,8 @@
         <action android:name="android.intent.action.VIEW"/>
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
-        <data android:scheme="hero-app-mobile"/>
-        <data android:scheme="exp+hero-app-mobile"/>
+        <data android:scheme="hero-app"/>
+        <data android:scheme="exp+hero-app"/>
       </intent-filter>
     </activity>
   </application>

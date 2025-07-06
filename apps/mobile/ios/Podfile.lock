@@ -2663,8 +2663,8 @@ EXTERNAL SOURCES:
     :path: "../../../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
-  boost: c7db0cf32caf6315b467a902f922c7a38b1ae426
-  DoubleConversion: 9aae6cc0ecb301224cc36b63bf0ff0d9ea15d00e
+  boost: 7e761d76ca2ce687f7cc98e698152abd03a18f90
+  DoubleConversion: cb417026b2400c8f53ae97020b2be961b59470cb
   EXConstants: 9f310f44bfedba09087042756802040e464323c0
   EXJSONUtils: 1d3e4590438c3ee593684186007028a14b3686cd
   EXManifests: 951161dd9a63523c4eef0fa2a7476639a7ba230d
@@ -2685,15 +2685,15 @@ SPEC CHECKSUMS:
   ExpoSystemUI: 8f2979df9afed5bfaa7d69465a07a9f602c1f3a7
   ExpoWebBrowser: dc39a88485f007e61a3dff05d6a75f22ab4a2e92
   EXUpdatesInterface: 7ff005b7af94ee63fa452ea7bb95d7a8ff40277a
-  fast_float: afdfb7d8d5934a5dc225af0c5a7ef27085c03424
+  fast_float: 06eeec4fe712a76acc9376682e4808b05ce978b6
   FBLazyVector: 15c28682af535aa55b9b31e64deff54b7ed7d453
-  fmt: 793e14dfc270e0be50ff8f6679d6de663e337e16
-  glog: 02d5a79e2d91544a6170b768f0b7791763d6a6ee
-  hermes-engine: 286336cd334018e43fc4c011e2e10dcbc10c4f07
+  fmt: a40bb5bd0294ea969aaaba240a927bd33d878cdd
+  glog: 5683914934d5b6e4240e497e0f4a3b42d1854183
+  hermes-engine: 8b5a5eb386b990287d072fd7b6f6ebd9544dd251
   libavif: 84bbb62fb232c3018d6f1bab79beea87e35de7b7
   libdav1d: 23581a4d8ec811ff171ed5e2e05cd27bad64c39f
   libwebp: 02b23773aedb6ff1fd38cec7a77b81414c6842a8
-  RCT-Folly: 3c12715b5d41a41cda64c46bc7d2f5807bfa0e91
+  RCT-Folly: e78785aa9ba2ed998ea4151e314036f6c49e6d82
   RCTDeprecation: 0418ac97b9f53b2e37f473da1663ef3061e46beb
   RCTRequired: b9fde7f981b11aa898f03a70d3d4d36b80f1b16d
   RCTTypeSafety: 397515ea9a8122b62a7a310adf30205f0a5e3bfc
