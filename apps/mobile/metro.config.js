@@ -3,6 +3,7 @@ const { withNativeWind } = require("nativewind/metro");
 const path = require("path");
 
 // Find the project and workspace directories
+// This is an npm workspace, not yarn
 const projectRoot = __dirname;
 const monorepoRoot = path.resolve(projectRoot, "../..");
 
