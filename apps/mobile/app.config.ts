@@ -17,6 +17,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 		eas: {
 			projectId: "d832f74d-83c2-4d98-aa11-bdf11856d5f8",
 		},
+		EXPO_ROUTER_APP_ROOT: "./app",
 	},
 	ios: {
 		supportsTablet: true,
