@@ -27,14 +27,14 @@
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>hero-app-mobile</string>
-          <string>co.selego.heroapp</string>
+          <string>hero-app</string>
+          <string>com.doncarlos.heroapp</string>
         </array>
       </dict>
       <dict>
         <key>CFBundleURLSchemes</key>
         <array>
-          <string>exp+hero-app-mobile</string>
+          <string>exp+hero-app</string>
         </array>
       </dict>
     </array>
