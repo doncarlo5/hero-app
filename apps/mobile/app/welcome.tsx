@@ -14,8 +14,8 @@ export default function WelcomeScreen() {
 	const { colorScheme } = useColorScheme();
 	const appIcon =
 		colorScheme === "dark"
-			? require("@/assets/icon.png")
-			: require("@/assets/icon-dark.png");
+			? require("../../assets/icon.png")
+			: require("../../assets/icon-dark.png");
 
 	return (
 		<SafeAreaView className="flex flex-1 bg-background p-4">
