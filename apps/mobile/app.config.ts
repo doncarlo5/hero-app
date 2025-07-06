@@ -2,8 +2,8 @@ import { ConfigContext, ExpoConfig } from "expo/config";
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
 	name: "Hero App",
-	slug: "hero-app-mobile",
-	scheme: "hero-app-mobile",
+	slug: "hero-app",
+	scheme: "hero-app",
 	version: "1.0.0",
 	orientation: "portrait",
 	icon: "./assets/icon.png",
@@ -29,7 +29,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 			dark: "./assets/icon-dark.png",
 			light: "./assets/icon.png",
 		},
-		bundleIdentifier: "co.selego.heroapp",
+		bundleIdentifier: "com.doncarlos.heroapp",
 	},
 	android: {
 		edgeToEdgeEnabled: true,
@@ -46,7 +46,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 				image: "./assets/splash-dark.png",
 			},
 		},
-		package: "co.selego.heroapp",
+		package: "com.doncarlos.heroapp",
 	},
 	experiments: {
 		typedRoutes: true,
