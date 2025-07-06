@@ -107,5 +107,5 @@ temp/
 *.local
 
 # Native build directories for CNG/Prebuild
-/android
-/ios
+apps/mobile/android
+apps/mobile/ios
