@@ -10,7 +10,8 @@
 		"lint": "eslint . --fix",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
-		"generate-colors": "node ./scripts/generate-colors.js && eslint ./constants/colors.ts --fix"
+		"generate-colors": "node ./scripts/generate-colors.js && eslint ./constants/colors.ts --fix",
+		"postinstall": "cd ../.. && yarn build"
 	},
 	"dependencies": {
 		"@gorhom/bottom-sheet": "^5.1.6",
