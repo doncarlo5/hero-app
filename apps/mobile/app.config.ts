@@ -39,6 +39,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 			light: "./assets/icon.png",
 		},
 		bundleIdentifier: "com.doncarlos.heroapp",
+		buildNumber: "2",
 	},
 	android: {
 		edgeToEdgeEnabled: true,
