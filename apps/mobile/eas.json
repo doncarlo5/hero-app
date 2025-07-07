@@ -11,6 +11,10 @@
 			"distribution": "store",
 			"env": {
 				"EXPO_ROUTER_APP_ROOT": "./app"
+			},
+			"ios": {
+				"resourceClass": "m-medium",
+				"buildConfiguration": "Release"
 			}
 		}
 	},
