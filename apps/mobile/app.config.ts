@@ -60,5 +60,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 	experiments: {
 		typedRoutes: true,
 	},
-	plugins: ["expo-router", "expo-secure-store"],
+	plugins: [
+		"expo-router",
+		"expo-secure-store",
+		"react-native-reanimated/plugin",
+	],
 });
