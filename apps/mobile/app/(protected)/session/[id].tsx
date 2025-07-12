@@ -277,15 +277,19 @@ export default function SessionDetail() {
 				onRequestClose={() => setIsCalendarOpen(false)}
 			>
 				<View className="flex-1 bg-black/50 justify-center items-center p-4">
-					<View className="bg-background dark:bg-background-dark rounded-xl p-4 w-80 max-w-full">
+					<View className="bg-background dark:bg-background-dark rounded-xl w-80 max-w-full p-4 py-6">
 						<View className="flex-row items-center justify-between mb-4">
-							<Text className="text-lg font-semibold text-foreground dark:text-foreground-dark">
+							<Text className="text-lg capitalize font-semibold text-foreground dark:text-foreground-dark">
 								{format(currentDate, "MMMM yyyy", { locale: fr })}
 							</Text>
-							<Pressable onPress={() => setIsCalendarOpen(false)}>
-								<XIcon size={20} color="#6b7280" />
-							</Pressable>
 						</View>
+						<Button
+							variant="ghost"
+							onPress={() => setIsCalendarOpen(false)}
+							className="absolute top-0 -right-1.5 active:opacity-50 active:bg-transparent"
+						>
+							<XIcon size={20} color="#6b7280" />
+						</Button>
 
 						{/* Calendar header */}
 						<View className="flex-row mb-2">
@@ -487,15 +491,16 @@ export default function SessionDetail() {
 
 					{/* Add New Exercise Button */}
 
-					<Pressable
+					<Button
 						onPress={() =>
 							router.push(`/(protected)/do-exercise?sessionId=${session._id}`)
 						}
-						className="relative mb-4 border border-gray-300 flex-row items-center from-gray-100 to-gray-500 bg-gradient-to-br justify-center gap-2 rounded-2xl p-3 active:translate-y-0.5"
+						variant="default"
+						className="flex-row items-center justify-center gap-2"
 					>
-						<PlusIcon size={20} color="#6b7280" />
-						<Text className="">Add an exercise</Text>
-					</Pressable>
+						<PlusIcon size={16} color="white" />
+						<Text>Add an exercise</Text>
+					</Button>
 
 					<FlatList
 						data={session.exercise_user_list}
