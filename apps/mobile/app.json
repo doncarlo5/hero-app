@@ -2,7 +2,7 @@
 	"expo": {
 		"name": "Hero App",
 		"slug": "hero-app",
-		"scheme": "hero-app",
+		"scheme": "com.doncarlos.heroapp",
 		"version": "1.0.0",
 		"orientation": "portrait",
 		"icon": "./assets/icon.png",
