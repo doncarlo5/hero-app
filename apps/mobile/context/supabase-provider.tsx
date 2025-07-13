@@ -1,4 +1,3 @@
-import * as Linking from "expo-linking";
 import { SplashScreen, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import {
@@ -13,6 +12,9 @@ import { Session } from "@supabase/supabase-js";
 
 import { supabase } from "@/config/supabase";
 
+import { makeRedirectUri } from "expo-auth-session";
+import * as QueryParams from "expo-auth-session/build/QueryParams";
+
 SplashScreen.preventAutoHideAsync();
 
 // Configure WebBrowser for OAuth
@@ -21,19 +23,25 @@ WebBrowser.maybeCompleteAuthSession();
 type AuthState = {
 	initialized: boolean;
 	session: Session | null;
-	signUp: (email: string, password: string) => Promise<void>;
-	signIn: (email: string, password: string) => Promise<void>;
-	signInWithGoogle: () => Promise<void>;
-	signOut: () => Promise<void>;
+	signUp: (
+		email: string,
+		password: string,
+	) => Promise<{ error: string | null }>;
+	signIn: (
+		email: string,
+		password: string,
+	) => Promise<{ error: string | null }>;
+	signInWithGoogle: () => Promise<{ error: string | null }>;
+	signOut: () => Promise<{ error: string | null }>;
 };
 
 export const AuthContext = createContext<AuthState>({
 	initialized: false,
 	session: null,
-	signUp: async () => {},
-	signIn: async () => {},
-	signInWithGoogle: async () => {},
-	signOut: async () => {},
+	signUp: async () => ({ error: null }),
+	signIn: async () => ({ error: null }),
+	signInWithGoogle: async () => ({ error: null }),
+	signOut: async () => ({ error: null }),
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -43,15 +51,21 @@ export function AuthProvider({ children }: PropsWithChildren) {
 	const [session, setSession] = useState<Session | null>(null);
 	const router = useRouter();
 
+	const oauthRedirectUrl = makeRedirectUri({
+		scheme: "com.doncarlos.heroapp",
+		path: "auth",
+	});
+
 	const signUp = async (email: string, password: string) => {
 		const { data, error } = await supabase.auth.signUp({
 			email,
 			password,
+			options: { emailRedirectTo: oauthRedirectUrl },
 		});
 
 		if (error) {
 			console.error("Error signing up:", error);
-			return;
+			return { error: error.message };
 		}
 
 		if (data.session) {
@@ -60,6 +74,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
 		} else {
 			console.log("No user returned from sign up");
 		}
+
+		return { error: null };
 	};
 
 	const signIn = async (email: string, password: string) => {
@@ -70,7 +86,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
 		if (error) {
 			console.error("Error signing in:", error);
-			return;
+			return { error: error.message };
 		}
 
 		if (data.session) {
@@ -79,18 +95,17 @@ export function AuthProvider({ children }: PropsWithChildren) {
 		} else {
 			console.log("No user returned from sign in");
 		}
+
+		return { error: null };
 	};
 
 	const signInWithGoogle = async () => {
 		try {
-			// Create a more specific redirect URL for mobile
-			const redirectUrl = Linking.createURL("auth");
-			console.log("Mobile redirect URL:", redirectUrl);
-
 			const { data, error } = await supabase.auth.signInWithOAuth({
 				provider: "google",
 				options: {
-					redirectTo: redirectUrl,
+					redirectTo: oauthRedirectUrl,
+					skipBrowserRedirect: true,
 					queryParams: {
 						access_type: "offline",
 						prompt: "consent",
@@ -100,7 +115,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
 			if (error) {
 				console.error("Error creating OAuth URL:", error);
-				throw error;
+				return { error: error.message };
 			}
 
 			console.log("Opening OAuth URL:", data.url);
@@ -108,7 +123,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 			// Open the OAuth URL in the browser
 			const result = await WebBrowser.openAuthSessionAsync(
 				data.url,
-				redirectUrl,
+				oauthRedirectUrl,
 			);
 
 			console.log("OAuth result:", result);
@@ -116,31 +131,29 @@ export function AuthProvider({ children }: PropsWithChildren) {
 			if (result.type === "success") {
 				console.log("OAuth completed successfully, processing result...");
 
-				// Extract tokens from the result URL
-				const url = result.url;
-				if (url.includes("access_token=")) {
-					console.log("Found access token in URL, processing...");
+				// Supabase puts tokens in the hash. Convert # → ? so QueryParams can read it.
+				const fixedUrl = result.url.replace("#", "?");
+				const { params } = QueryParams.getQueryParams(fixedUrl);
 
-					// Let Supabase handle the session automatically
-					// The onAuthStateChange listener will catch the session change
-					setTimeout(async () => {
-						const {
-							data: { session },
-						} = await supabase.auth.getSession();
-						if (session) {
-							console.log("Google sign in successful:", session.user);
-							setSession(session);
-						}
-					}, 1000);
+				if ("access_token" in params && "refresh_token" in params) {
+					await supabase.auth.setSession({
+						access_token: params.access_token,
+						refresh_token: params.refresh_token,
+					}); // ✅ updates the onAuthStateChange listener
 				}
 			} else if (result.type === "cancel") {
 				console.log("User cancelled Google sign in");
 			} else {
 				console.log("OAuth result type:", result.type);
 			}
+
+			return { error: null };
 		} catch (error) {
 			console.error("Error signing in with Google:", error);
-			throw error;
+			return {
+				error:
+					error instanceof Error ? error.message : "Unknown error occurred",
+			};
 		}
 	};
 
@@ -149,10 +162,12 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
 		if (error) {
 			console.error("Error signing out:", error);
-			return;
+			return { error: error.message };
 		} else {
 			console.log("User signed out");
 		}
+
+		return { error: null };
 	};
 
 	useEffect(() => {
@@ -162,49 +177,25 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
 		const {
 			data: { subscription },
-		} = supabase.auth.onAuthStateChange((_event, session) => {
-			setSession(session);
-		});
+		} = supabase.auth.onAuthStateChange((event, session) => {
+			console.log("Auth state change:", event, session?.user?.id);
 
-		// Handle deep links for OAuth callback
-		const handleDeepLink = async (url: string) => {
-			console.log("Deep link received:", url);
-
-			// Handle OAuth redirects
-			if (
-				url &&
-				(url.includes("#access_token=") || url.includes("?access_token="))
-			) {
-				console.log("Processing OAuth callback from deep link");
-
-				try {
-					// Let Supabase automatically handle the session from the URL
-					const { data, error } = await supabase.auth.getSession();
-					if (data.session) {
-						console.log(
-							"Session established from deep link:",
-							data.session.user,
-						);
-						setSession(data.session);
-					} else if (error) {
-						console.error("Error processing OAuth callback:", error);
-					}
-				} catch (error) {
-					console.error("Error handling deep link OAuth:", error);
-				}
+			// Handle token refresh failure
+			if (event === ("TOKEN_REFRESH_FAILED" as any)) {
+				console.log("Token refresh failed, forcing logout");
+				setSession(null);
+				// Force logout by clearing the session
+				supabase.auth.signOut();
+				return;
 			}
-		};
 
-		// Listen for deep links
-		const linkingListener = Linking.addEventListener("url", ({ url }) => {
-			handleDeepLink(url);
+			setSession(session);
 		});
 
 		setInitialized(true);
 
 		return () => {
 			subscription?.unsubscribe();
-			linkingListener?.remove();
 		};
 	}, []);
 
