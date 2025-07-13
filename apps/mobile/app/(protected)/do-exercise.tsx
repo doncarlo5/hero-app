@@ -17,6 +17,7 @@ import {
 	View,
 } from "react-native";
 
+import { CountDownTimer } from "@/components/countdown-timer";
 import { SafeAreaView } from "@/components/safe-area-view";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -346,6 +347,15 @@ export default function DoExercise() {
 						<Text className="text-sm text-blue-700 dark:text-blue-200 flex-1">
 							{oneExerciseType.advice}
 						</Text>
+					</View>
+				)}
+
+				{/* Full-width countdown timer at top */}
+				{oneExerciseType && (
+					<View className="mb-4 w-full rounded-2xl bg-slate-50 dark:bg-slate-900/40 px-4 py-6">
+						<View className="flex items-center justify-center">
+							<CountDownTimer exerciseTypeTimer={oneExerciseType.timer} />
+						</View>
 					</View>
 				)}
 
