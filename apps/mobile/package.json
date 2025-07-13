@@ -15,6 +15,7 @@
 		"postinstall": "cd ../.. && npm run build"
 	},
 	"dependencies": {
+		"@expo/ui": "~0.1.1-alpha.10",
 		"@gorhom/bottom-sheet": "^5.1.6",
 		"@hookform/resolvers": "^5.0.1",
 		"@react-native-async-storage/async-storage": "2.1.2",
@@ -33,6 +34,8 @@
 		"clsx": "^2.1.1",
 		"date-fns": "^4.1.0",
 		"expo": "53.0.17",
+		"expo-audio": "~0.4.8",
+		"expo-auth-session": "^6.2.1",
 		"expo-constants": "~17.1.6",
 		"expo-dev-client": "~5.2.4",
 		"expo-image": "~2.3.2",
@@ -59,9 +62,7 @@
 		"react-native-web": "^0.20.0",
 		"tailwind-merge": "^3.2.0",
 		"tailwindcss": "~3.4.17",
-		"zod": "^3.24.3",
-		"expo-audio": "~0.4.8",
-		"@expo/ui": "~0.1.1-alpha.10"
+		"zod": "^3.24.3"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.20.0",
