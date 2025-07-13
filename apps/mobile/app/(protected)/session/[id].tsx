@@ -1,3 +1,4 @@
+import { BottomSheet, DateTimePicker } from "@expo/ui/swift-ui";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale/fr";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -6,7 +7,6 @@ import {
 	ActivityIndicator,
 	Alert,
 	FlatList,
-	Modal,
 	Pressable,
 	RefreshControl,
 	ScrollView,
@@ -26,7 +26,6 @@ import {
 	PlusIcon,
 	SaveIcon,
 	TrashIcon,
-	XIcon,
 } from "lucide-react-native";
 
 type ExerciseUser = {
@@ -79,6 +78,11 @@ export default function SessionDetail() {
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [refreshing, setRefreshing] = useState(false);
 	const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+
+	// Debug: Log state changes
+	useEffect(() => {
+		console.log("isCalendarOpen state changed to:", isCalendarOpen);
+	}, [isCalendarOpen]);
 	const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 
 	const [formState, setFormState] = useState<FormState>({
@@ -246,112 +250,6 @@ export default function SessionDetail() {
 			...prev,
 			date_session: date.toISOString(),
 		}));
-		setIsCalendarOpen(false);
-	};
-
-	const renderCalendar = () => {
-		const today = new Date();
-		const currentDate = selectedDate || new Date();
-
-		// Generate calendar days for current month
-		const year = currentDate.getFullYear();
-		const month = currentDate.getMonth();
-		const firstDay = new Date(year, month, 1);
-		const lastDay = new Date(year, month + 1, 0);
-		const daysInMonth = lastDay.getDate();
-		const startDay = firstDay.getDay();
-
-		const days = [];
-		for (let i = 0; i < startDay; i++) {
-			days.push(null);
-		}
-		for (let i = 1; i <= daysInMonth; i++) {
-			days.push(i);
-		}
-
-		return (
-			<Modal
-				visible={isCalendarOpen}
-				transparent
-				animationType="fade"
-				onRequestClose={() => setIsCalendarOpen(false)}
-			>
-				<View className="flex-1 bg-black/50 justify-center items-center p-4">
-					<View className="bg-background dark:bg-background-dark rounded-xl w-80 max-w-full p-4 py-6">
-						<View className="flex-row items-center justify-between mb-4">
-							<Text className="text-lg capitalize font-semibold text-foreground dark:text-foreground-dark">
-								{format(currentDate, "MMMM yyyy", { locale: fr })}
-							</Text>
-						</View>
-						<Button
-							variant="ghost"
-							onPress={() => setIsCalendarOpen(false)}
-							className="absolute top-0 -right-1.5 active:opacity-50 active:bg-transparent"
-						>
-							<XIcon size={20} color="#6b7280" />
-						</Button>
-
-						{/* Calendar header */}
-						<View className="flex-row mb-2">
-							{["Dim", "Lun", "Mar", "Mer", "Jeu", "Ven", "Sam"].map((day) => (
-								<View key={day} className="flex-1 items-center">
-									<Text className="text-xs font-medium text-muted-foreground dark:text-muted-foreground-dark">
-										{day}
-									</Text>
-								</View>
-							))}
-						</View>
-
-						{/* Calendar grid */}
-						<View className="flex-row flex-wrap">
-							{days.map((day, index) => (
-								<Pressable
-									key={index}
-									className="w-[14.28%] h-10 items-center justify-center"
-									onPress={() => {
-										if (day) {
-											const selectedDate = new Date(year, month, day);
-											if (selectedDate <= today) {
-												handleDateSelect(selectedDate);
-											}
-										}
-									}}
-									disabled={!day}
-								>
-									{day && (
-										<View
-											className={`w-8 h-8 rounded-full items-center justify-center ${
-												selectedDate &&
-												selectedDate.getDate() === day &&
-												selectedDate.getMonth() === month &&
-												selectedDate.getFullYear() === year
-													? "bg-primary"
-													: "bg-transparent"
-											}`}
-										>
-											<Text
-												className={`text-sm ${
-													selectedDate &&
-													selectedDate.getDate() === day &&
-													selectedDate.getMonth() === month &&
-													selectedDate.getFullYear() === year
-														? "text-white"
-														: new Date(year, month, day) > today
-															? "text-muted-foreground/30 dark:text-muted-foreground-dark/30"
-															: "text-foreground dark:text-foreground-dark"
-												}`}
-											>
-												{day}
-											</Text>
-										</View>
-									)}
-								</Pressable>
-							))}
-						</View>
-					</View>
-				</View>
-			</Modal>
-		);
 	};
 
 	if (isLoading) {
@@ -374,251 +272,273 @@ export default function SessionDetail() {
 
 	return (
 		<View className="flex-1 bg-background dark:bg-background-dark">
-			<ScrollView
-				className="flex-1"
-				refreshControl={
-					<RefreshControl
-						refreshing={refreshing}
-						onRefresh={() => {
-							setRefreshing(true);
-							fetchSession();
-						}}
-					/>
-				}
-				contentContainerStyle={{ padding: 16, paddingBottom: 120 }}
-			>
-				{/* Session Header */}
-				<View className="flex-row items-center justify-between mb-4">
-					<View className="flex-1">
-						<Text className="text-2xl font-bold text-foreground dark:text-foreground-dark mb-1">
-							{session.type_session}
-						</Text>
-						<Text className="text-sm text-muted-foreground dark:text-muted-foreground-dark">
-							{format(new Date(session.date_session), "EEEE d MMMM yyyy", {
-								locale: fr,
-							})}
-						</Text>
-					</View>
-					<View
-						className={`rounded-full px-4 py-2 ${
-							session.is_done
-								? "bg-green-100 dark:bg-green-900/30"
-								: "bg-orange-100 dark:bg-orange-900/30"
-						}`}
-					>
-						<Text
-							className={`text-sm font-medium ${
-								session.is_done
-									? "text-green-700 dark:text-green-300"
-									: "text-orange-700 dark:text-orange-300"
-							}`}
-						>
-							{session.is_done ? "Completed" : "In Progress"}
-						</Text>
-					</View>
-				</View>
-
-				{/* Editable Fields */}
-				<View className="space-y-4 mb-6">
-					{/* Date Picker */}
-					<View>
-						<Text className="text-sm font-medium text-muted-foreground dark:text-muted-foreground-dark mb-2">
-							Date
-						</Text>
-						<Pressable
-							onPress={() => setIsCalendarOpen(true)}
-							className="flex-row items-center justify-between p-3 border border-muted/20 dark:border-muted-dark/20 rounded-lg"
-						>
-							<Text className="text-foreground dark:text-foreground-dark">
-								{selectedDate
-									? format(selectedDate, "d MMM yyyy", { locale: fr })
-									: "Select date"}
-							</Text>
-							<CalendarIcon size={20} color="#6b7280" />
-						</Pressable>
-					</View>
-
-					{/* Body Weight */}
-					<View>
-						<Text className="text-sm font-medium text-muted-foreground dark:text-muted-foreground-dark mb-2">
-							Body Weight (kg)
-						</Text>
-						<Input
-							value={formState.body_weight || ""}
-							onChangeText={(text) =>
-								setFormState((prev) => ({ ...prev, body_weight: text }))
-							}
-							keyboardType="numeric"
-							placeholder="Enter your weight"
-							className="text-foreground dark:text-foreground-dark"
+			<View style={{ position: "relative", flex: 1 }}>
+				<ScrollView
+					className="flex-1"
+					refreshControl={
+						<RefreshControl
+							refreshing={refreshing}
+							onRefresh={() => {
+								setRefreshing(true);
+								fetchSession();
+							}}
 						/>
-					</View>
-
-					{/* Comment with last session reference */}
-					<View>
-						<Text className="text-sm font-medium text-muted-foreground dark:text-muted-foreground-dark mb-2">
-							Session Notes
-						</Text>
-						<Textarea
-							value={formState.comment}
-							onChangeText={(text) =>
-								setFormState((prev) => ({ ...prev, comment: text }))
-							}
-							placeholder={
-								lastSession?.comment
-									? `Previous session: ${lastSession.comment}`
-									: "Add notes about your session..."
-							}
-							className="text-foreground dark:text-foreground-dark"
-							numberOfLines={4}
-						/>
-					</View>
-				</View>
-
-				{/* EXERCISES */}
-				<View>
-					<View className="flex-row items-center justify-between mb-6">
+					}
+					contentContainerStyle={{ padding: 16, paddingBottom: 120 }}
+				>
+					{/* Session Header */}
+					<View className="flex-row items-center justify-between mb-4">
 						<View className="flex-1">
-							<Text className="text-2xl font-bold text-foreground dark:text-foreground-dark">
-								Exercises
+							<Text className="text-2xl font-bold text-foreground dark:text-foreground-dark mb-1">
+								{session.type_session}
 							</Text>
 							<Text className="text-sm text-muted-foreground dark:text-muted-foreground-dark">
-								{session.exercise_user_list.length} exercise
-								{session.exercise_user_list.length !== 1 ? "s" : ""} completed
+								{format(new Date(session.date_session), "EEEE d MMMM yyyy", {
+									locale: fr,
+								})}
+							</Text>
+						</View>
+						<View
+							className={`rounded-full px-4 py-2 ${
+								session.is_done
+									? "bg-green-100 dark:bg-green-900/30"
+									: "bg-orange-100 dark:bg-orange-900/30"
+							}`}
+						>
+							<Text
+								className={`text-sm font-medium ${
+									session.is_done
+										? "text-green-700 dark:text-green-300"
+										: "text-orange-700 dark:text-orange-300"
+								}`}
+							>
+								{session.is_done ? "Completed" : "In Progress"}
 							</Text>
 						</View>
 					</View>
 
-					{/* Add New Exercise Button */}
-
-					<Button
-						onPress={() =>
-							router.push(`/(protected)/do-exercise?sessionId=${session._id}`)
-						}
-						variant="default"
-						className="flex-row items-center justify-center gap-2"
-					>
-						<PlusIcon size={16} color="white" />
-						<Text>Add an exercise</Text>
-					</Button>
-
-					<FlatList
-						data={session.exercise_user_list}
-						keyExtractor={(item) => item._id}
-						renderItem={({ item }) => (
-							<Pressable
-								onPress={() => router.push(`/exercise/${item._id}`)}
-								className="mb-4 overflow-hidden rounded-xl bg-background dark:bg-background-dark shadow-sm border border-muted/20 dark:border-muted-dark/20"
+					{/* Editable Fields */}
+					<View className="space-y-4 mb-6">
+						{/* Date Picker */}
+						<View>
+							<Button
+								onPress={() => {
+									setIsCalendarOpen(true);
+								}}
+								variant="ghost"
+								className="flex-row items-center border border-gray-300 dark:border-gray-700 rounded-md justify-between"
 							>
-								{/* Exercise Header */}
-								<View className="flex-row items-center justify-between mb-3 ">
-									<View className="flex-1">
-										<Text className="font-bold text-lg text-foreground dark:text-foreground-dark">
-											{item.type.name}
-										</Text>
-									</View>
-									<ChevronRightIcon size={20} color="#6b7280" />
-								</View>
+								<Text className="text-foreground dark:text-foreground-dark">
+									{selectedDate
+										? format(selectedDate, "d MMM yyyy", { locale: fr })
+										: "Select date"}
+								</Text>
+								<CalendarIcon size={20} color="gray" strokeWidth={1.5} />
+							</Button>
+						</View>
 
-								<View className="mb-3">
-									<View className="flex-row gap-2 w-full">
-										{item.rep.map((rep, index) => {
-											// Only show sets with actual data
-											if (rep <= 0 || item.weight[index] <= 0) return null;
+						{/* Body Weight */}
+						<View>
+							<Text className="text-sm font-medium text-muted-foreground dark:text-muted-foreground-dark mb-2">
+								Body Weight (kg)
+							</Text>
+							<Input
+								value={formState.body_weight || ""}
+								onChangeText={(text) =>
+									setFormState((prev) => ({ ...prev, body_weight: text }))
+								}
+								keyboardType="numeric"
+								placeholder="Enter your weight"
+								className="text-foreground dark:text-foreground-dark"
+							/>
+						</View>
 
-											return (
-												<View
-													key={index}
-													className="bg-primary/5 flex-1 dark:bg-primary-dark/5 rounded-lg px-3 py-2 border border-primary/10 dark:border-primary-dark/10"
-												>
-													<Text className="text-xs font-medium text-primary dark:text-primary-dark">
-														Set {index + 1}
-													</Text>
-													<Text className="text-sm font-bold text-foreground dark:text-foreground-dark">
-														{rep} reps
-													</Text>
-													<Text className="text-xs text-muted-foreground dark:text-muted-foreground-dark">
-														{item.weight[index]} kg
-													</Text>
-												</View>
-											);
-										})}
-									</View>
-								</View>
+						{/* Comment with last session reference */}
+						<View>
+							<Text className="text-sm font-medium text-muted-foreground dark:text-muted-foreground-dark mb-2">
+								Session Notes
+							</Text>
+							<Textarea
+								value={formState.comment}
+								onChangeText={(text) =>
+									setFormState((prev) => ({ ...prev, comment: text }))
+								}
+								placeholder={
+									lastSession?.comment
+										? `Previous session: ${lastSession.comment}`
+										: "Add notes about your session..."
+								}
+								className="text-foreground dark:text-foreground-dark"
+								numberOfLines={4}
+							/>
+						</View>
+					</View>
 
-								{item.comment && (
-									<View className="bg-muted/20 dark:bg-muted-dark/20 rounded-lg mb-4">
-										<Text className="text-sm text-foreground dark:text-foreground-dark">
-											{item.comment}
-										</Text>
-									</View>
-								)}
-							</Pressable>
-						)}
-						scrollEnabled={false}
-					/>
-				</View>
+					{/* EXERCISES */}
+					<View>
+						<View className="flex-row items-center justify-between mb-6">
+							<View className="flex-1">
+								<Text className="text-2xl font-bold text-foreground dark:text-foreground-dark">
+									Exercises
+								</Text>
+								<Text className="text-sm text-muted-foreground dark:text-muted-foreground-dark">
+									{session.exercise_user_list.length} exercise
+									{session.exercise_user_list.length !== 1 ? "s" : ""} completed
+								</Text>
+							</View>
+						</View>
 
-				{/* Bottom Action Buttons */}
-				<View className="flex-row gap-2 mb-6">
-					<Button
-						variant="outline"
-						onPress={handleDeleteSession}
-						disabled={isDeleting}
-						className="flex-1 flex-row items-center justify-center dark:bg-background-dark dark:text-foreground-dark"
-					>
-						<TrashIcon size={16} color="#ef4444" />
-						<Text className="ml-2 text-red-500">
-							{isDeleting ? "Deleting..." : "Delete"}
-						</Text>
-					</Button>
+						{/* Add New Exercise Button */}
 
-					{!session.is_done ? (
 						<Button
-							onPress={handleCompleteSession}
-							disabled={isCompleting}
-							className="flex-1 dark:bg-transparent flex-row items-center justify-center dark:bg-background-dark dark:text-foreground-dark"
+							onPress={() =>
+								router.push(`/(protected)/do-exercise?sessionId=${session._id}`)
+							}
+							variant="default"
+							className="flex-row items-center justify-center gap-2"
 						>
-							<CheckCircleIcon size={16} color="white" />
-							<Text className="ml-2">
-								{isCompleting ? "Completing..." : "Complete"}
+							<PlusIcon size={16} color="white" />
+							<Text>Add an exercise</Text>
+						</Button>
+
+						<FlatList
+							data={session.exercise_user_list}
+							keyExtractor={(item) => item._id}
+							renderItem={({ item }) => (
+								<Pressable
+									onPress={() => router.push(`/exercise/${item._id}`)}
+									className="mb-4 overflow-hidden rounded-xl bg-background dark:bg-background-dark shadow-sm border border-muted/20 dark:border-muted-dark/20"
+								>
+									{/* Exercise Header */}
+									<View className="flex-row items-center justify-between mb-3 ">
+										<View className="flex-1">
+											<Text className="font-bold text-lg text-foreground dark:text-foreground-dark">
+												{item.type.name}
+											</Text>
+										</View>
+										<ChevronRightIcon size={20} color="#6b7280" />
+									</View>
+
+									<View className="mb-3">
+										<View className="flex-row gap-2 w-full">
+											{item.rep.map((rep, index) => {
+												// Only show sets with actual data
+												if (rep <= 0 || item.weight[index] <= 0) return null;
+
+												return (
+													<View
+														key={index}
+														className="bg-primary/5 flex-1 dark:bg-primary-dark/5 rounded-lg px-3 py-2 border border-primary/10 dark:border-primary-dark/10"
+													>
+														<Text className="text-xs font-medium text-primary dark:text-primary-dark">
+															Set {index + 1}
+														</Text>
+														<Text className="text-sm font-bold text-foreground dark:text-foreground-dark">
+															{rep} reps
+														</Text>
+														<Text className="text-xs text-muted-foreground dark:text-muted-foreground-dark">
+															{item.weight[index]} kg
+														</Text>
+													</View>
+												);
+											})}
+										</View>
+									</View>
+
+									{item.comment && (
+										<View className="bg-muted/20 dark:bg-muted-dark/20 rounded-lg mb-4">
+											<Text className="text-sm text-foreground dark:text-foreground-dark">
+												{item.comment}
+											</Text>
+										</View>
+									)}
+								</Pressable>
+							)}
+							scrollEnabled={false}
+						/>
+					</View>
+
+					{/* Bottom Action Buttons */}
+					<View className="flex-row gap-2 mb-6">
+						<Button
+							variant="outline"
+							onPress={handleDeleteSession}
+							disabled={isDeleting}
+							className="flex-1 flex-row items-center justify-center dark:bg-background-dark dark:text-foreground-dark"
+						>
+							<TrashIcon size={16} color="#ef4444" />
+							<Text className="ml-2 text-red-500">
+								{isDeleting ? "Deleting..." : "Delete"}
 							</Text>
 						</Button>
-					) : (
-						<Button
-							onPress={() => router.replace("/(protected)/(tabs)")}
-							className="flex-1 dark:bg-transparent flex-row items-center justify-center dark:bg-background-dark dark:text-foreground-dark"
-						>
-							<ArrowLeftIcon size={16} color="white" />
-							<Text className="ml-2">Go back to list</Text>
-						</Button>
-					)}
-				</View>
-			</ScrollView>
 
-			{/* Floating Save Button */}
-			{hasChanges() && (
-				<View className="absolute bottom-10 right-10">
-					<Pressable
-						onPress={handleSave}
-						disabled={isSaving}
-						className={`w-14 h-14 rounded-full items-center justify-center shadow-lg ${
-							isSaving
-								? "bg-muted dark:bg-muted-dark"
-								: "bg-primary dark:bg-primary-dark"
-						}`}
-					>
-						{isSaving ? (
-							<ActivityIndicator size="small" color="white" />
+						{!session.is_done ? (
+							<Button
+								onPress={handleCompleteSession}
+								disabled={isCompleting}
+								className="flex-1 dark:bg-transparent flex-row items-center justify-center dark:bg-background-dark dark:text-foreground-dark"
+							>
+								<CheckCircleIcon size={16} color="white" />
+								<Text className="ml-2">
+									{isCompleting ? "Completing..." : "Complete"}
+								</Text>
+							</Button>
 						) : (
-							<SaveIcon size={24} color="white" />
+							<Button
+								onPress={() => router.replace("/(protected)/(tabs)")}
+								className="flex-1 dark:bg-transparent flex-row items-center justify-center dark:bg-background-dark dark:text-foreground-dark"
+							>
+								<ArrowLeftIcon size={16} color="white" />
+								<Text className="ml-2">Go back to list</Text>
+							</Button>
 						)}
-					</Pressable>
-				</View>
-			)}
+					</View>
+				</ScrollView>
 
-			{/* Calendar Modal */}
-			{renderCalendar()}
+				{/* Floating Save Button */}
+				{hasChanges() && (
+					<View className="absolute bottom-10 right-10">
+						<Pressable
+							onPress={handleSave}
+							disabled={isSaving}
+							className={`w-14 h-14 rounded-full items-center justify-center shadow-lg ${
+								isSaving
+									? "bg-muted dark:bg-muted-dark"
+									: "bg-primary dark:bg-primary-dark"
+							}`}
+						>
+							{isSaving ? (
+								<ActivityIndicator size="small" color="white" />
+							) : (
+								<SaveIcon size={24} color="white" />
+							)}
+						</Pressable>
+					</View>
+				)}
+			</View>
+
+			{/* Calendar BottomSheet - Moved outside main content */}
+			{isCalendarOpen && (
+				<BottomSheet
+					isOpened={isCalendarOpen}
+					onIsOpenedChange={(e) => {
+						console.log("BottomSheet onIsOpenedChange:", e);
+						setIsCalendarOpen(e);
+					}}
+				>
+					<View className="bg-background dark:bg-background-dark p-6">
+						<DateTimePicker
+							onDateSelected={handleDateSelect}
+							displayedComponents="date"
+							initialDate={
+								selectedDate?.toISOString() || new Date().toISOString()
+							}
+							variant="wheel"
+							title=""
+						/>
+					</View>
+				</BottomSheet>
+			)}
 		</View>
 	);
 }
