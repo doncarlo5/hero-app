@@ -70,9 +70,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
 		if (data.session) {
 			setSession(data.session);
-			console.log("User signed up:", data.user);
-		} else {
-			console.log("No user returned from sign up");
 		}
 
 		return { error: null };
@@ -91,9 +88,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
 		if (data.session) {
 			setSession(data.session);
-			console.log("User signed in:", data.user);
-		} else {
-			console.log("No user returned from sign in");
 		}
 
 		return { error: null };
@@ -118,19 +112,13 @@ export function AuthProvider({ children }: PropsWithChildren) {
 				return { error: error.message };
 			}
 
-			console.log("Opening OAuth URL:", data.url);
-
 			// Open the OAuth URL in the browser
 			const result = await WebBrowser.openAuthSessionAsync(
 				data.url,
 				oauthRedirectUrl,
 			);
 
-			console.log("OAuth result:", result);
-
 			if (result.type === "success") {
-				console.log("OAuth completed successfully, processing result...");
-
 				// Supabase puts tokens in the hash. Convert # → ? so QueryParams can read it.
 				const fixedUrl = result.url.replace("#", "?");
 				const { params } = QueryParams.getQueryParams(fixedUrl);
@@ -141,10 +129,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
 						refresh_token: params.refresh_token,
 					}); // ✅ updates the onAuthStateChange listener
 				}
-			} else if (result.type === "cancel") {
-				console.log("User cancelled Google sign in");
-			} else {
-				console.log("OAuth result type:", result.type);
 			}
 
 			return { error: null };
@@ -163,8 +147,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
 		if (error) {
 			console.error("Error signing out:", error);
 			return { error: error.message };
-		} else {
-			console.log("User signed out");
 		}
 
 		return { error: null };
@@ -178,11 +160,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
 		const {
 			data: { subscription },
 		} = supabase.auth.onAuthStateChange((event, session) => {
-			console.log("Auth state change:", event, session?.user?.id);
-
 			// Handle token refresh failure
 			if (event === ("TOKEN_REFRESH_FAILED" as any)) {
-				console.log("Token refresh failed, forcing logout");
 				setSession(null);
 				// Force logout by clearing the session
 				supabase.auth.signOut();
