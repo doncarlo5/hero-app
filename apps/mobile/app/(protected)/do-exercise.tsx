@@ -2,6 +2,7 @@ import { BottomSheet } from "@expo/ui/swift-ui";
 import { format } from "date-fns";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
+	AlignJustifyIcon,
 	CheckIcon,
 	EditIcon,
 	HistoryIcon,
@@ -305,7 +306,7 @@ export default function DoExercise() {
 							<Text className="text-foreground dark:text-foreground-dark">
 								{oneExerciseType ? oneExerciseType.name : "Select an exercise"}
 							</Text>
-							<EditIcon size={20} color="#252525" strokeWidth={1.5} />
+							<AlignJustifyIcon size={20} color="#252525" strokeWidth={1.5} />
 						</Button>
 					)}
 				</View>
