@@ -1,4 +1,4 @@
-import { BottomSheet, DateTimePicker } from "@expo/ui/swift-ui";
+import { BottomSheet, DateTimePicker, Picker } from "@expo/ui/swift-ui";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale/fr";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -14,7 +14,6 @@ import {
 } from "react-native";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { Textarea } from "@/components/ui/textarea";
 import { fetchApi } from "@/lib/api-handler";
@@ -23,6 +22,7 @@ import {
 	CalendarIcon,
 	CheckCircleIcon,
 	ChevronRightIcon,
+	Gauge,
 	PlusIcon,
 	SaveIcon,
 	TrashIcon,
@@ -78,12 +78,17 @@ export default function SessionDetail() {
 	const [isDeleting, setIsDeleting] = useState(false);
 	const [refreshing, setRefreshing] = useState(false);
 	const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+	const [isWeightPickerOpen, setIsWeightPickerOpen] = useState(false);
 
-	// Debug: Log state changes
-	useEffect(() => {
-		console.log("isCalendarOpen state changed to:", isCalendarOpen);
-	}, [isCalendarOpen]);
 	const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+	const [selectedWeight, setSelectedWeight] = useState<string>("");
+	const [selectedWeightIndex, setSelectedWeightIndex] = useState<number>(0);
+
+	// Weight options for picker (30kg to 200kg with 0.1kg increments)
+	const weightOptions = Array.from(
+		{ length: 1701 },
+		(_, i) => `${(i / 10 + 30).toFixed(1)} kg`,
+	);
 
 	const [formState, setFormState] = useState<FormState>({
 		body_weight: "",
@@ -124,6 +129,13 @@ export default function SessionDetail() {
 			setFormState(newFormState);
 			setOriginalFormState(newFormState);
 			setSelectedDate(new Date(response.date_session));
+			setSelectedWeight(String(response.body_weight || ""));
+			// Find the index of the current weight in the options array
+			const weightValue = String(response.body_weight || "70.0");
+			const weightIndex = weightOptions.findIndex(
+				(option) => option === `${parseFloat(weightValue).toFixed(1)} kg`,
+			);
+			setSelectedWeightIndex(weightIndex >= 0 ? weightIndex : 400); // Default to 70.0kg (index 400)
 		} catch (error) {
 			console.error("Fetch session error:", error);
 		} finally {
@@ -252,6 +264,20 @@ export default function SessionDetail() {
 		}));
 	};
 
+	const handleWeightIndexSelect = ({
+		nativeEvent: { index },
+	}: {
+		nativeEvent: { index: number };
+	}) => {
+		setSelectedWeightIndex(index);
+		const selectedWeightValue = weightOptions[index].replace(" kg", "");
+		setSelectedWeight(selectedWeightValue);
+		setFormState((prev) => ({
+			...prev,
+			body_weight: selectedWeightValue,
+		}));
+	};
+
 	if (isLoading) {
 		return (
 			<View className="flex-1 items-center justify-center bg-background dark:bg-background-dark">
@@ -320,37 +346,39 @@ export default function SessionDetail() {
 					{/* Editable Fields */}
 					<View className="space-y-4 mb-6">
 						{/* Date Picker */}
-						<View>
-							<Button
-								onPress={() => {
-									setIsCalendarOpen(true);
-								}}
-								variant="ghost"
-								className="flex-row items-center border border-gray-300 dark:border-gray-700 rounded-md justify-between"
-							>
-								<Text className="text-foreground dark:text-foreground-dark">
-									{selectedDate
-										? format(selectedDate, "d MMM yyyy", { locale: fr })
-										: "Select date"}
-								</Text>
-								<CalendarIcon size={20} color="gray" strokeWidth={1.5} />
-							</Button>
-						</View>
+						<View className="flex-row items-center gap-2">
+							<View className="flex-1">
+								<Button
+									onPress={() => {
+										setIsCalendarOpen(true);
+									}}
+									variant="ghost"
+									className="flex-row w-full items-center dark:text-foreground-dark bg-gray-100 dark:bg-gray-700 rounded-md justify-between"
+								>
+									<Text className="text-foreground dark:text-foreground-dark">
+										{selectedDate
+											? format(selectedDate, "d MMM yyyy", { locale: fr })
+											: "Select date"}
+									</Text>
+									<CalendarIcon size={20} color="#252525" strokeWidth={1.5} />
+								</Button>
+							</View>
 
-						{/* Body Weight */}
-						<View>
-							<Text className="text-sm font-medium text-muted-foreground dark:text-muted-foreground-dark mb-2">
-								Body Weight (kg)
-							</Text>
-							<Input
-								value={formState.body_weight || ""}
-								onChangeText={(text) =>
-									setFormState((prev) => ({ ...prev, body_weight: text }))
-								}
-								keyboardType="numeric"
-								placeholder="Enter your weight"
-								className="text-foreground dark:text-foreground-dark"
-							/>
+							{/* Body Weight */}
+							<View className="flex-1">
+								<Button
+									onPress={() => {
+										setIsWeightPickerOpen(true);
+									}}
+									variant="ghost"
+									className="flex-row w-full items-center dark:text-foreground-dark bg-gray-100 dark:bg-gray-700 rounded-md justify-between"
+								>
+									<Text className="text-foreground dark:text-foreground-dark">
+										{selectedWeight ? `${selectedWeight} kg` : "Select weight"}
+									</Text>
+									<Gauge size={20} color="#252525" strokeWidth={1.5} />
+								</Button>
+							</View>
 						</View>
 
 						{/* Comment with last session reference */}
@@ -522,11 +550,14 @@ export default function SessionDetail() {
 				<BottomSheet
 					isOpened={isCalendarOpen}
 					onIsOpenedChange={(e) => {
-						console.log("BottomSheet onIsOpenedChange:", e);
 						setIsCalendarOpen(e);
 					}}
 				>
 					<View className="bg-background dark:bg-background-dark p-6">
+						<View className="w-12 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-4" />
+						<Text className="text-lg font-bold text-foreground dark:text-foreground-dark">
+							Date of the session
+						</Text>
 						<DateTimePicker
 							onDateSelected={handleDateSelect}
 							displayedComponents="date"
@@ -535,6 +566,32 @@ export default function SessionDetail() {
 							}
 							variant="wheel"
 							title=""
+						/>
+					</View>
+				</BottomSheet>
+			)}
+
+			{/* Weight Picker BottomSheet - Moved outside main content */}
+			{isWeightPickerOpen && (
+				<BottomSheet
+					isOpened={isWeightPickerOpen}
+					onIsOpenedChange={(e) => {
+						setIsWeightPickerOpen(e);
+					}}
+				>
+					<View className="bg-background dark:bg-background-dark p-6">
+						<View className="w-12 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-4" />
+						<Text className="text-lg font-bold text-foreground dark:text-foreground-dark mb-4">
+							Select Body Weight
+						</Text>
+						<Picker
+							options={weightOptions}
+							selectedIndex={selectedWeightIndex}
+							onOptionSelected={handleWeightIndexSelect}
+							variant="wheel"
+							style={{
+								height: 100,
+							}}
 						/>
 					</View>
 				</BottomSheet>
