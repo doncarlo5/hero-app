@@ -1,3 +1,4 @@
+import { BottomSheet } from "@expo/ui/swift-ui";
 import { format } from "date-fns";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
@@ -24,6 +25,7 @@ import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { Textarea } from "@/components/ui/textarea";
 import { fetchApi } from "@/lib/api-handler";
+import { Pressable } from "react-native-gesture-handler";
 
 type ExerciseType = {
 	_id: string;
@@ -76,6 +78,7 @@ export default function DoExercise() {
 	const [selectedExerciseIndex, setSelectedExerciseIndex] = useState<
 		number | null
 	>(null);
+	const [isExercisePickerOpen, setIsExercisePickerOpen] = useState(false);
 
 	const [formState, setFormState] = useState({
 		rep1: "",
@@ -294,34 +297,16 @@ export default function DoExercise() {
 							</Text>
 						</View>
 					) : (
-						<ScrollView horizontal showsHorizontalScrollIndicator={false}>
-							<View className="flex-row space-x-2">
-								{allExerciseTypes.map((type, index) => (
-									<TouchableOpacity
-										key={type._id}
-										onPress={() => {
-											setSelectedExerciseIndex(index);
-											onExerciseTypeChange(type);
-										}}
-										className={`px-4 py-3 rounded-lg border ${
-											selectedExerciseIndex === index
-												? "bg-primary border-primary"
-												: "bg-muted/30 border-muted"
-										}`}
-									>
-										<Text
-											className={`${
-												selectedExerciseIndex === index
-													? "text-primary-foreground"
-													: "text-foreground"
-											}`}
-										>
-											{type.name}
-										</Text>
-									</TouchableOpacity>
-								))}
-							</View>
-						</ScrollView>
+						<Button
+							onPress={() => setIsExercisePickerOpen(true)}
+							variant="ghost"
+							className="flex-row w-full items-center dark:text-foreground-dark bg-gray-100 dark:bg-gray-700 rounded-md justify-between p-4"
+						>
+							<Text className="text-foreground dark:text-foreground-dark">
+								{oneExerciseType ? oneExerciseType.name : "Select an exercise"}
+							</Text>
+							<EditIcon size={20} color="#252525" strokeWidth={1.5} />
+						</Button>
 					)}
 				</View>
 
@@ -597,6 +582,48 @@ export default function DoExercise() {
 						)}
 					</Button>
 				</View>
+			)}
+
+			{/* Exercise Picker BottomSheet */}
+			{isExercisePickerOpen && (
+				<BottomSheet
+					isOpened={isExercisePickerOpen}
+					onIsOpenedChange={(e: boolean) => {
+						setIsExercisePickerOpen(e);
+					}}
+				>
+					<View className="bg-background dark:bg-background-dark p-6">
+						<View className="w-12 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-4" />
+						<Text className="text-lg font-bold text-foreground dark:text-foreground-dark mb-4">
+							Select Exercise
+						</Text>
+						<ScrollView showsVerticalScrollIndicator={false}>
+							<View className="space-y-2">
+								{allExerciseTypes.map((type, index) => (
+									<Pressable
+										key={type._id}
+										onPress={() => {
+											setSelectedExerciseIndex(index);
+											onExerciseTypeChange(type);
+											setIsExercisePickerOpen(false);
+										}}
+										className="border-b bg-red-400"
+									>
+										<Text
+											className={`text-center p-3 rounded-lg ${
+												selectedExerciseIndex === index
+													? "text-primary font-semibold"
+													: "text-foreground dark:text-foreground-dark"
+											}`}
+										>
+											{type.name}
+										</Text>
+									</Pressable>
+								))}
+							</View>
+						</ScrollView>
+					</View>
+				</BottomSheet>
 			)}
 		</SafeAreaView>
 	);
