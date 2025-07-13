@@ -40,7 +40,7 @@ export default function TabsLayout() {
 				name="index"
 				options={{
 					title: "Home",
-					tabBarIcon: ({ color, size }) => (
+					tabBarIcon: ({ color }) => (
 						<HomeIcon strokeWidth={1.7} size={26} color={color} />
 					),
 				}}
@@ -49,7 +49,7 @@ export default function TabsLayout() {
 				name="settings"
 				options={{
 					title: "Settings",
-					tabBarIcon: ({ color, size }) => (
+					tabBarIcon: ({ color }) => (
 						<SettingsIcon strokeWidth={1.7} size={26} color={color} />
 					),
 				}}
