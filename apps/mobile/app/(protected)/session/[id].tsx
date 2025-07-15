@@ -23,6 +23,7 @@ import {
 	CheckCircleIcon,
 	ChevronRightIcon,
 	Gauge,
+	InfoIcon,
 	PlusIcon,
 	SaveIcon,
 	TrashIcon,
@@ -79,6 +80,7 @@ export default function SessionDetail() {
 	const [refreshing, setRefreshing] = useState(false);
 	const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 	const [isWeightPickerOpen, setIsWeightPickerOpen] = useState(false);
+	const [isExerciseInfoOpen, setIsExerciseInfoOpen] = useState(false);
 
 	const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 	const [selectedWeight, setSelectedWeight] = useState<string>("");
@@ -314,10 +316,16 @@ export default function SessionDetail() {
 				>
 					{/* Session Header */}
 					<View className="flex-row items-center justify-between mb-4">
-						<View className="flex-1">
-							<Text className="text-2xl font-bold text-foreground dark:text-foreground-dark mb-1">
-								{session.type_session}
-							</Text>
+						<View className="">
+							<Pressable
+								onPress={() => setIsExerciseInfoOpen(true)}
+								className="flex-row w-fit items-center gap-3 active:opacity-50"
+							>
+								<Text className="text-2xl font-bold text-foreground dark:text-foreground-dark mb-1">
+									{session.type_session}
+								</Text>
+								<InfoIcon size={15} color="gray" strokeWidth={1.7} />
+							</Pressable>
 							<Text className="text-sm text-muted-foreground dark:text-muted-foreground-dark">
 								{format(new Date(session.date_session), "EEEE d MMMM yyyy", {
 									locale: fr,
@@ -487,7 +495,7 @@ export default function SessionDetail() {
 					</View>
 
 					{/* Bottom Action Buttons */}
-					<View className="flex-row gap-2 mb-6">
+					<View className="flex-row gap-2 mt-6">
 						<Button
 							variant="outline"
 							onPress={handleDeleteSession}
@@ -596,6 +604,89 @@ export default function SessionDetail() {
 					</View>
 				</BottomSheet>
 			)}
+
+			{/* Exercise Info BottomSheet */}
+			{isExerciseInfoOpen && (
+				<BottomSheet
+					isOpened={isExerciseInfoOpen}
+					onIsOpenedChange={(e) => {
+						setIsExerciseInfoOpen(e);
+					}}
+				>
+					<View className="bg-background dark:bg-background-dark p-6">
+						<View className="w-12 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-4" />
+						<Text className="text-lg font-bold text-foreground dark:text-foreground-dark mb-4">
+							{session?.type_session} Exercises
+						</Text>
+						<View>
+							{getSessionExercises(session?.type_session || "").map(
+								(exercise, index) => (
+									<View
+										key={index}
+										className="flex-row items-center gap-3 mb-1"
+									>
+										<View className="w-6 h-6 rounded-full bg-primary/10 dark:bg-primary-dark/10 items-center justify-center">
+											<Text className="text-xs font-bold text-primary dark:text-primary-dark">
+												{index + 1}
+											</Text>
+										</View>
+										<Text className="text-foreground dark:text-foreground-dark flex-1">
+											{exercise}
+										</Text>
+									</View>
+								),
+							)}
+						</View>
+					</View>
+				</BottomSheet>
+			)}
 		</View>
 	);
 }
+
+const getSessionExercises = (sessionType: string) => {
+	switch (sessionType) {
+		case "Upper A":
+			return [
+				"Développé Incliné",
+				"Tractions Lestées",
+				"Élévations Frontales",
+				"Curl Incliné",
+				"Élévations Latérales",
+			];
+		case "Lower":
+			return [
+				"Squat",
+				"Fentes ou Presse",
+				"Leg Curl/Leg Extension",
+				"Extensions Mollets",
+				"Upright Row Penché",
+			];
+		case "Upper B":
+			return [
+				"Overhead Press",
+				"Développé Couché",
+				"Tractions Neutres",
+				"Oiseau Assis Prise Neutre",
+				"Upright Row",
+			];
+		case "Séance A":
+			return [
+				"Développé incliné",
+				"Traction prise neutre",
+				"ATG Split Squat",
+				"Upright Row",
+				"Curl incliné",
+			];
+		case "Séance B":
+			return [
+				"Dips lestés",
+				"Rowing bucheron",
+				"Romanian deadlift",
+				"Upright Row",
+				"Extension Triceps Nuque",
+			];
+		default:
+			return [];
+	}
+};
