@@ -46,7 +46,7 @@ export default function ProtectedLayout() {
 						presentation: "card",
 						headerShown: true,
 						headerTitle: "Session",
-						headerBackTitle: params?.fromExercise === "true" ? "" : undefined,
+						headerBackTitle: params?.fromExercise === "true" ? "" : "List",
 						headerBackVisible: params?.fromExercise !== "true",
 					};
 				}}
