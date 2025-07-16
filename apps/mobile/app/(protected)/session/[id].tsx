@@ -354,7 +354,7 @@ export default function SessionDetail() {
 					{/* Editable Fields */}
 					<View className="space-y-4 mb-6">
 						{/* Date Picker */}
-						<View className="flex-row items-center gap-2">
+						<View className="flex-row items-center gap-2 mb-2">
 							<View className="flex-1">
 								<Button
 									onPress={() => {
@@ -391,7 +391,7 @@ export default function SessionDetail() {
 
 						{/* Comment with last session reference */}
 						<View>
-							<Text className="text-sm font-medium text-muted-foreground dark:text-muted-foreground-dark mb-2">
+							<Text className="text-sm font-medium text-muted-foreground dark:text-muted-foreground-dark mb-1">
 								Session Notes
 							</Text>
 							<Textarea
@@ -405,14 +405,14 @@ export default function SessionDetail() {
 										: "Add notes about your session..."
 								}
 								className="text-foreground dark:text-foreground-dark"
-								numberOfLines={4}
+								numberOfLines={2}
 							/>
 						</View>
 					</View>
 
 					{/* EXERCISES */}
 					<View>
-						<View className="flex-row items-center justify-between mb-6">
+						<View className="flex-row items-center justify-between">
 							<View className="flex-1">
 								<Text className="text-2xl font-bold text-foreground dark:text-foreground-dark">
 									Exercises
@@ -424,14 +424,12 @@ export default function SessionDetail() {
 							</View>
 						</View>
 
-						{/* Add New Exercise Button */}
-
 						<Button
 							onPress={() =>
 								router.push(`/(protected)/do-exercise?sessionId=${session._id}`)
 							}
 							variant="default"
-							className="flex-row items-center justify-center gap-2"
+							className="flex-row items-center justify-center gap-2 my-4"
 						>
 							<PlusIcon size={16} color="white" />
 							<Text>Add an exercise</Text>
@@ -495,7 +493,7 @@ export default function SessionDetail() {
 					</View>
 
 					{/* Bottom Action Buttons */}
-					<View className="flex-row gap-2 mt-6">
+					<View className="flex-row gap-2 mt-4">
 						<Button
 							variant="outline"
 							onPress={handleDeleteSession}
@@ -539,7 +537,7 @@ export default function SessionDetail() {
 							disabled={isSaving}
 							className={`w-14 h-14 rounded-full items-center justify-center shadow-lg ${
 								isSaving
-									? "bg-muted dark:bg-muted-dark"
+									? "bg-primary/50 dark:bg-primary-dark/50"
 									: "bg-primary dark:bg-primary-dark"
 							}`}
 						>
