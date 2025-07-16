@@ -1,7 +1,7 @@
-import BottomSheet, { BottomSheetView } from "@gorhom/bottom-sheet";
+import { BottomSheet } from "@expo/ui/swift-ui";
 import { useRouter } from "expo-router";
 import { Zap } from "lucide-react-native";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { useState } from "react";
 import { ActivityIndicator, Image, Pressable, Text, View } from "react-native";
 
 import { Switch } from "@/components/ui/switch";
@@ -21,20 +21,6 @@ export default function NewSessionButton() {
 	const [isSheetOpen, setIsSheetOpen] = useState(false);
 
 	const router = useRouter();
-
-	// ref
-	const bottomSheetRef = useRef<BottomSheet>(null);
-
-	// variables
-	const snapPoints = useMemo(() => ["25%"], []);
-
-	// callbacks
-	const handleSheetChanges = useCallback((index: number) => {
-		// index === -1  ➜ fully closed   (collapsed)
-		// index >= 0    ➜ one of your snap points
-		setIsSheetOpen(index >= 0);
-		console.log("handleSheetChanges", index);
-	}, []);
 
 	const handleCreateSession = async (userChoice: string) => {
 		setIsLoading(true);
@@ -67,7 +53,6 @@ export default function NewSessionButton() {
 				<Pressable
 					onPress={() => {
 						setIsSheetOpen(true);
-						bottomSheetRef.current?.expand();
 					}}
 					className="absolute bottom-10 right-10 z-50"
 				>
@@ -77,15 +62,15 @@ export default function NewSessionButton() {
 				</Pressable>
 			)}
 
-			{/* Bottom-sheet starts closed with index = -1 */}
+			{/* Bottom-sheet */}
 			<BottomSheet
-				ref={bottomSheetRef}
-				index={-1}
-				snapPoints={snapPoints}
-				onChange={handleSheetChanges}
-				enablePanDownToClose
+				isOpened={isSheetOpen}
+				onIsOpenedChange={(opened: boolean) => {
+					setIsSheetOpen(opened);
+				}}
 			>
-				<BottomSheetView className="flex-1 px-4 pb-4">
+				<View className="flex-1 p-4 bg-background dark:bg-background-dark">
+					<View className="w-12 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-4" />
 					{isLoading ? (
 						<View className="flex-1 pt-14 items-center justify-center">
 							<ActivityIndicator size="large" />
@@ -187,7 +172,7 @@ export default function NewSessionButton() {
 							</View>
 						</View>
 					)}
-				</BottomSheetView>
+				</View>
 			</BottomSheet>
 		</>
 	);
