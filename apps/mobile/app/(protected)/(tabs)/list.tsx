@@ -9,6 +9,7 @@ import {
 
 import NewSessionButton from "@/components/new-session-button";
 import { Text } from "@/components/ui/text";
+import { TypeSessionBadge } from "@/components/ui/type-session-badge";
 import { colors } from "@/constants/colors";
 import { fetchApi } from "@/lib/api-handler";
 import { MessageSquareText } from "lucide-react-native";
@@ -67,19 +68,7 @@ export default function List() {
 							<Text className="mr-3 text-foreground dark:text-foreground-dark">
 								{new Date(item.date_session).toLocaleDateString("fr-FR")}
 							</Text>
-							<Text
-								className={`mr-3 px-2 py-1 rounded-md font-medium text-xs ${
-									item.type_session === "Upper A"
-										? "bg-blue-200/30 text-blue-600 dark:bg-blue-800/20 dark:text-blue-200"
-										: item.type_session === "Upper B"
-											? "bg-violet-400/20 text-violet-500 dark:bg-violet-600/50 dark:text-violet-200"
-											: item.type_session === "Lower"
-												? "bg-green-600/10 text-green-700 dark:bg-green-800/50 dark:text-green-200"
-												: "bg-gray-200/50 text-gray-800 dark:bg-gray-700/50 dark:text-gray-200"
-								}`}
-							>
-								{item.type_session}
-							</Text>
+							<TypeSessionBadge type_session={item.type_session} />
 							<Text className="text-center mr-3 text-foreground dark:text-foreground-dark">
 								{item.exercise_user_list.length}
 							</Text>
