@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAudioPlayer } from "expo-audio";
 import {
 	PlayIcon,
@@ -23,6 +24,22 @@ export function CountDownTimer({ exerciseTypeTimer }: CountDownTimerProps) {
 	const [hasCompleted, setHasCompleted] = useState(false);
 	const [isMuted, setIsMuted] = useState(false);
 	const player = useAudioPlayer(audioSource);
+
+	// Load muted state from AsyncStorage on component mount
+	useEffect(() => {
+		const loadMutedState = async () => {
+			try {
+				const savedMutedState = await AsyncStorage.getItem("timer_isMuted");
+				if (savedMutedState !== null) {
+					setIsMuted(JSON.parse(savedMutedState));
+				}
+			} catch (error) {
+				console.error("Error loading muted state:", error);
+			}
+		};
+
+		loadMutedState();
+	}, []);
 
 	// Handle timer completion
 	useEffect(() => {
@@ -83,8 +100,19 @@ export function CountDownTimer({ exerciseTypeTimer }: CountDownTimerProps) {
 		setHasCompleted(false);
 	};
 
-	const toggleSound = () => {
-		setIsMuted(!isMuted);
+	const toggleSound = async () => {
+		const newMutedState = !isMuted;
+		setIsMuted(newMutedState);
+
+		// Save to AsyncStorage
+		try {
+			await AsyncStorage.setItem(
+				"timer_isMuted",
+				JSON.stringify(newMutedState),
+			);
+		} catch (error) {
+			console.error("Error saving muted state:", error);
+		}
 	};
 
 	return (
