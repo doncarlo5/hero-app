@@ -13,6 +13,7 @@ import {
 import Svg, { Circle, Defs, LinearGradient, Stop } from "react-native-svg";
 
 import { TypeSessionBadge } from "@/components/ui/type-session-badge";
+import WeekActivityCarousel from "@/components/week-activity-carousel";
 import { fetchApi } from "@/lib/api-handler";
 
 type User = {
@@ -209,6 +210,8 @@ export default function Home() {
 							)}
 						</View>
 					</View>
+
+					<WeekActivityCarousel />
 
 					<Text className="text-2xl font-bold mb-3">Progression</Text>
 
