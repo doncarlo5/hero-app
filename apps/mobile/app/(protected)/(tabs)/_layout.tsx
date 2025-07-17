@@ -1,3 +1,4 @@
+import * as Haptics from "expo-haptics";
 import { Tabs } from "expo-router";
 import React from "react";
 
@@ -7,6 +8,10 @@ import { AlignJustifyIcon, HomeIcon, SettingsIcon } from "lucide-react-native";
 
 export default function TabsLayout() {
 	const { colorScheme } = useColorScheme();
+
+	const handleTabPress = () => {
+		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+	};
 
 	return (
 		<Tabs
@@ -34,6 +39,9 @@ export default function TabsLayout() {
 				tabBarIconStyle: {
 					marginBottom: 3,
 				},
+			}}
+			screenListeners={{
+				tabPress: handleTabPress,
 			}}
 		>
 			<Tabs.Screen
