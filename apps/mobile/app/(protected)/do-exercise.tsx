@@ -276,7 +276,7 @@ export default function DoExercise() {
 		>
 			{isChecked && (
 				<View className="flex-1 items-center justify-center">
-					<CheckIcon size={20} color="white" />
+					<CheckIcon size={20} color="white" strokeWidth={4} />
 				</View>
 			)}
 		</TouchableOpacity>
@@ -590,11 +590,11 @@ export default function DoExercise() {
 				>
 					<View className="bg-background dark:bg-background-dark p-6">
 						<View className="w-12 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-4" />
-						<Text className="text-lg font-bold text-foreground dark:text-foreground-dark mb-4">
+						<Text className="text-xl font-bold text-foreground dark:text-foreground-dark mb-4">
 							Select Exercise
 						</Text>
 						<ScrollView showsVerticalScrollIndicator={false}>
-							<View className="space-y-2">
+							<View>
 								{allExerciseTypes.map((type, index) => (
 									<Pressable
 										key={type._id}
@@ -603,17 +603,25 @@ export default function DoExercise() {
 											onExerciseTypeChange(type);
 											setIsExercisePickerOpen(false);
 										}}
-										className="border-b bg-red-400"
 									>
-										<Text
-											className={`text-center p-3 rounded-lg ${
-												selectedExerciseIndex === index
-													? "text-primary font-semibold"
-													: "text-foreground dark:text-foreground-dark"
-											}`}
-										>
-											{type.name}
-										</Text>
+										<View className="flex-row items-center p-3">
+											<View
+												className={`rounded-full border border-gray-300 dark:border-gray-600 p-2 ${
+													selectedExerciseIndex === index
+														? "bg-gray-700 dark:bg-gray-500"
+														: "bg-transparent"
+												}`}
+											/>
+											<Text
+												className={`ml-2 ${
+													selectedExerciseIndex === index
+														? "text-primary font-semibold"
+														: "text-foreground dark:text-foreground-dark"
+												}`}
+											>
+												{type.name}
+											</Text>
+										</View>
 									</Pressable>
 								))}
 							</View>
