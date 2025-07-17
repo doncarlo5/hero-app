@@ -3,7 +3,7 @@ import React from "react";
 
 import { colors } from "@/constants/colors";
 import { useColorScheme } from "@/lib/useColorScheme";
-import { HomeIcon, SettingsIcon } from "lucide-react-native";
+import { AlignJustifyIcon, HomeIcon, SettingsIcon } from "lucide-react-native";
 
 export default function TabsLayout() {
 	const { colorScheme } = useColorScheme();
@@ -42,6 +42,15 @@ export default function TabsLayout() {
 					title: "Home",
 					tabBarIcon: ({ color }) => (
 						<HomeIcon strokeWidth={1.7} size={26} color={color} />
+					),
+				}}
+			/>
+			<Tabs.Screen
+				name="list"
+				options={{
+					title: "Séances",
+					tabBarIcon: ({ color }) => (
+						<AlignJustifyIcon strokeWidth={1.7} size={26} color={color} />
 					),
 				}}
 			/>
