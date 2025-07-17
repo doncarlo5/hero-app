@@ -336,13 +336,8 @@ export default function DoExercise() {
 					</View>
 				)}
 
-				{/* Full-width countdown timer at top */}
 				{oneExerciseType && (
-					<View className="mb-4 w-full rounded-2xl bg-slate-50 dark:bg-slate-900/40 px-4 py-6">
-						<View className="flex items-center justify-center">
-							<CountDownTimer exerciseTypeTimer={oneExerciseType.timer} />
-						</View>
-					</View>
+					<CountDownTimer exerciseTypeTimer={oneExerciseType.timer} />
 				)}
 
 				{/* Exercise Form */}

@@ -1,5 +1,10 @@
 import { useAudioPlayer } from "expo-audio";
-import { PlayIcon, RotateCcwIcon } from "lucide-react-native";
+import {
+	PlayIcon,
+	RotateCcwIcon,
+	Volume2Icon,
+	VolumeXIcon,
+} from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 import { CountdownCircleTimer } from "react-native-countdown-circle-timer";
@@ -16,12 +21,13 @@ export function CountDownTimer({ exerciseTypeTimer }: CountDownTimerProps) {
 	const [isTimerPlaying, setIsTimerPlaying] = useState(false);
 	const [key, setKey] = useState(0);
 	const [hasCompleted, setHasCompleted] = useState(false);
+	const [isMuted, setIsMuted] = useState(false);
 	const player = useAudioPlayer(audioSource);
 
 	// Handle timer completion
 	useEffect(() => {
-		if (hasCompleted) {
-			// Play sound when timer completes
+		if (hasCompleted && !isMuted) {
+			// Play sound when timer completes (only if not muted)
 			player.seekTo(0);
 			player.play();
 
@@ -32,8 +38,16 @@ export function CountDownTimer({ exerciseTypeTimer }: CountDownTimerProps) {
 			}, 3000);
 
 			return () => clearTimeout(timer);
+		} else if (hasCompleted && isMuted) {
+			// Reset after 3 seconds without playing sound
+			const timer = setTimeout(() => {
+				setKey((prevKey) => prevKey + 1);
+				setHasCompleted(false);
+			}, 3000);
+
+			return () => clearTimeout(timer);
 		}
-	}, [hasCompleted, player]);
+	}, [hasCompleted, player, isMuted]);
 
 	const renderTime = ({ remainingTime }: { remainingTime: number }) => {
 		if (remainingTime === 0) {
@@ -69,157 +83,64 @@ export function CountDownTimer({ exerciseTypeTimer }: CountDownTimerProps) {
 		setHasCompleted(false);
 	};
 
-	return (
-		<View className="flex flex-row items-center gap-10">
-			<CountdownCircleTimer
-				isPlaying={isTimerPlaying}
-				duration={exerciseTypeTimer}
-				colors={["#0F766E", "#0F766E", "#760f17", "#760f17"]}
-				colorsTime={[7, 5, 2, 0]}
-				size={120}
-				strokeWidth={8}
-				rotation="counterclockwise"
-				isGrowing={true}
-				trailColor="#d9d9d9"
-				key={key}
-				onComplete={() => {
-					setHasCompleted(true);
-					setIsTimerPlaying(false);
-					return {
-						shouldRepeat: false,
-						delay: 1,
-						newInitialRemainingTime: exerciseTypeTimer,
-					};
-				}}
-			>
-				{renderTime}
-			</CountdownCircleTimer>
+	const toggleSound = () => {
+		setIsMuted(!isMuted);
+	};
 
+	return (
+		<View className="mb-4 w-full flex items-center justify-center relative rounded-2xl bg-slate-50 dark:bg-slate-900/40 px-4 py-6">
 			<TouchableOpacity
-				onPress={() => {
-					if (isTimerPlaying) {
-						restartFunction();
-					} else {
-						setIsTimerPlaying(true);
-					}
-				}}
-				className="flex h-12 w-20 items-center justify-center rounded-full pl-1 bg-teal-700 shadow-md"
+				onPress={toggleSound}
+				className="absolute top-2 left-2 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-gray-50 shadow-sm"
 			>
-				{isTimerPlaying ? (
-					<RotateCcwIcon size={24} color="white" />
+				{isMuted ? (
+					<VolumeXIcon size={20} color="#6B7280" />
 				) : (
-					<PlayIcon size={24} color="white" />
+					<Volume2Icon size={20} color="#0F766E" />
 				)}
 			</TouchableOpacity>
-		</View>
-	);
-}
 
-interface MiniCountDownTimerProps {
-	exerciseTypeTimer: number;
-}
-
-export function MiniCountDownTimer({
-	exerciseTypeTimer,
-}: MiniCountDownTimerProps) {
-	const [isTimerPlaying, setIsTimerPlaying] = useState(false);
-	const [key, setKey] = useState(0);
-	const [hasCompleted, setHasCompleted] = useState(false);
-	const player = useAudioPlayer(audioSource);
-
-	// Handle timer completion
-	useEffect(() => {
-		if (hasCompleted) {
-			// Play sound when timer completes
-			player.seekTo(0);
-			player.play();
-
-			// Reset after 3 seconds
-			const timer = setTimeout(() => {
-				setKey((prevKey) => prevKey + 1);
-				setHasCompleted(false);
-			}, 3000);
-
-			return () => clearTimeout(timer);
-		}
-	}, [hasCompleted, player]);
-
-	const renderTime = ({ remainingTime }: { remainingTime: number }) => {
-		if (remainingTime === 0) {
-			return (
-				<View className="flex items-center justify-center">
-					<Text className="text-sm font-bold text-teal-600">GO!</Text>
-				</View>
-			);
-		}
-
-		if (Number.isNaN(remainingTime)) {
-			return (
-				<View className="flex items-center justify-center">
-					<Text className="text-xs text-gray-500">--:--</Text>
-				</View>
-			);
-		}
-
-		const minutes = Math.floor(remainingTime / 60);
-		const seconds = remainingTime % 60;
-		const formattedSeconds = seconds < 10 ? `0${seconds}` : `${seconds}`;
-
-		return (
-			<View className="flex items-center justify-center">
-				<Text className="text-sm font-semibold">{`${minutes}:${formattedSeconds}`}</Text>
+			<View className="flex flex-row items-center gap-10">
+				<CountdownCircleTimer
+					isPlaying={isTimerPlaying}
+					duration={exerciseTypeTimer}
+					colors={["#0F766E", "#0F766E", "#760f17", "#760f17"]}
+					colorsTime={[7, 5, 2, 0]}
+					size={120}
+					strokeWidth={8}
+					rotation="counterclockwise"
+					isGrowing={true}
+					trailColor="#d9d9d9"
+					key={key}
+					onComplete={() => {
+						setHasCompleted(true);
+						setIsTimerPlaying(false);
+						return {
+							shouldRepeat: false,
+							delay: 1,
+							newInitialRemainingTime: exerciseTypeTimer,
+						};
+					}}
+				>
+					{renderTime}
+				</CountdownCircleTimer>
+				<TouchableOpacity
+					onPress={() => {
+						if (isTimerPlaying) {
+							restartFunction();
+						} else {
+							setIsTimerPlaying(true);
+						}
+					}}
+					className="flex h-12 w-20 items-center justify-center rounded-full pl-1 bg-teal-700 shadow-md"
+				>
+					{isTimerPlaying ? (
+						<RotateCcwIcon size={24} color="white" />
+					) : (
+						<PlayIcon size={24} color="white" />
+					)}
+				</TouchableOpacity>
 			</View>
-		);
-	};
-
-	const restartFunction = () => {
-		setKey((prevKey) => prevKey + 1);
-		setIsTimerPlaying(false);
-		setHasCompleted(false);
-	};
-
-	return (
-		<View className="flex flex-row items-center gap-2">
-			<CountdownCircleTimer
-				isPlaying={isTimerPlaying}
-				duration={exerciseTypeTimer}
-				colors={["#0F766E", "#0F766E", "#760f17", "#760f17"]}
-				colorsTime={[7, 5, 2, 0]}
-				size={50}
-				strokeWidth={4}
-				rotation="counterclockwise"
-				isGrowing={true}
-				trailColor="#d9d9d9"
-				key={key}
-				onComplete={() => {
-					setHasCompleted(true);
-					setIsTimerPlaying(false);
-					return {
-						shouldRepeat: false,
-						delay: 1,
-						newInitialRemainingTime: exerciseTypeTimer,
-					};
-				}}
-			>
-				{renderTime}
-			</CountdownCircleTimer>
-
-			<TouchableOpacity
-				onPress={() => {
-					if (isTimerPlaying) {
-						restartFunction();
-					} else {
-						setIsTimerPlaying(true);
-					}
-				}}
-				className="flex h-8 w-8 items-center justify-center rounded-full bg-teal-700 shadow-sm"
-			>
-				{isTimerPlaying ? (
-					<RotateCcwIcon size={16} color="white" />
-				) : (
-					<PlayIcon size={16} color="white" />
-				)}
-			</TouchableOpacity>
 		</View>
 	);
 }
