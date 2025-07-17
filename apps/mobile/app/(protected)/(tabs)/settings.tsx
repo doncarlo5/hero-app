@@ -2,15 +2,14 @@ import {
 	Activity,
 	BarChart3,
 	LogOut,
+	LucidePencilRuler,
 	MessageSquareText,
 	Settings as SettingsIcon,
 	Timer,
 	Trophy,
-	User,
 } from "lucide-react-native";
-import { View } from "react-native";
+import { Pressable, View } from "react-native";
 
-import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { H1 } from "@/components/ui/typography";
 import { useAuth } from "@/context/supabase-provider";
@@ -25,84 +24,83 @@ export default function Settings() {
 					Paramètres
 				</H1>
 
-				<View className="flex-1 justify-center">
+				<View className="flex-1">
 					<View className="flex-row flex-wrap">
 						<View className="w-1/2 pr-1 pb-2">
-							<Button variant="outline" className="h-24 rounded-md">
-								<View className="flex flex-col items-center justify-center gap-1">
-									<User size={32} />
-									<Text className="text-xs">Profil</Text>
+							<Pressable className="h-24 rounded-md border flex items-center justify-center border-border dark:border-border-dark bg-background dark:bg-background-dark">
+								<View className="flex flex-col items-center gap-1">
+									<LucidePencilRuler size={32} strokeWidth={1.1} />
+									<Text>Mes exercices</Text>
 								</View>
-							</Button>
+							</Pressable>
 						</View>
 
 						<View className="w-1/2 pl-1 pb-2">
-							<Button variant="outline" className="h-24 rounded-md">
-								<View className="flex flex-col items-center justify-center gap-1">
-									<BarChart3 size={32} />
-									<Text className="text-xs">Statistiques</Text>
+							<Pressable className="h-24 rounded-md border flex items-center justify-center border-border dark:border-border-dark bg-background dark:bg-background-dark">
+								<View className="flex flex-col items-center gap-1">
+									<BarChart3 size={32} strokeWidth={1.1} />
+									<Text>Statistiques</Text>
 								</View>
-							</Button>
+							</Pressable>
 						</View>
 
 						<View className="w-1/2 pr-1 pb-2">
-							<Button variant="outline" className="h-24 rounded-md">
-								<View className="flex flex-col items-center justify-center gap-1">
-									<Trophy size={32} />
-									<Text className="text-xs">Trophées</Text>
+							<Pressable className="h-24 rounded-md border flex items-center justify-center border-border dark:border-border-dark bg-background dark:bg-background-dark">
+								<View className="flex flex-col items-center gap-1">
+									<Trophy size={32} strokeWidth={1.1} />
+									<Text>Trophées</Text>
 								</View>
-							</Button>
+							</Pressable>
 						</View>
 
 						<View className="w-1/2 pl-1 pb-2">
-							<Button variant="outline" className="h-24 rounded-md">
-								<View className="flex flex-col items-center justify-center gap-1">
-									<Timer size={32} />
-									<Text className="text-xs">Timer</Text>
+							<Pressable className="h-24 rounded-md border flex items-center justify-center border-border dark:border-border-dark bg-background dark:bg-background-dark">
+								<View className="flex flex-col items-center gap-1">
+									<Timer size={32} strokeWidth={1.1} />
+									<Text>Timer</Text>
 								</View>
-							</Button>
+							</Pressable>
 						</View>
 
 						<View className="w-1/2 pr-1 pb-2">
-							<Button variant="outline" className="h-24 rounded-md">
-								<View className="flex flex-col items-center justify-center gap-1">
-									<SettingsIcon size={32} />
-									<Text className="text-xs">Préférences</Text>
+							<Pressable className="h-24 rounded-md border flex items-center justify-center border-border dark:border-border-dark bg-background dark:bg-background-dark">
+								<View className="flex flex-col items-center gap-1">
+									<SettingsIcon size={32} strokeWidth={1.1} />
+									<Text>Préférences</Text>
 								</View>
-							</Button>
+							</Pressable>
 						</View>
 
 						<View className="w-1/2 pl-1 pb-2">
-							<Button variant="outline" className="h-24 rounded-md">
-								<View className="flex flex-col items-center justify-center gap-1">
-									<Activity size={32} />
-									<Text className="text-xs">Programme</Text>
+							<Pressable className="h-24 rounded-md border flex items-center justify-center border-border dark:border-border-dark bg-background dark:bg-background-dark">
+								<View className="flex flex-col items-center gap-1">
+									<Activity size={32} strokeWidth={1.1} />
+									<Text>Programme</Text>
 								</View>
-							</Button>
+							</Pressable>
 						</View>
 
 						<View className="w-1/2 pr-1 pb-2">
-							<Button variant="outline" className="h-24 rounded-md">
-								<View className="flex flex-col items-center justify-center gap-1">
-									<MessageSquareText size={32} />
-									<Text className="text-xs">Feedback</Text>
+							<Pressable className="h-24 rounded-md border flex items-center justify-center border-border dark:border-border-dark bg-background dark:bg-background-dark">
+								<View className="flex flex-col items-center gap-1">
+									<MessageSquareText size={32} strokeWidth={1.1} />
+									<Text>Feedback</Text>
 								</View>
-							</Button>
+							</Pressable>
 						</View>
 
 						<View className="w-1/2 pl-1 pb-2">
-							<Button
-								variant="outline"
-								className="h-24 rounded-md"
+							<Pressable
+								className="h-24 rounded-md border flex items-center justify-center border-border dark:border-border-dark bg-background dark:bg-background-dark"
 								onPress={async () => {
 									await signOut();
 								}}
 							>
-								<View className="flex flex-col items-center justify-center gap-1">
-									<LogOut size={32} />
-									<Text className="text-xs">Déconnexion</Text>
+								<View className="flex flex-col items-center gap-1">
+									<LogOut size={32} strokeWidth={1.1} />
+									<Text>Déconnexion</Text>
 								</View>
-							</Button>
+							</Pressable>
 						</View>
 					</View>
 				</View>
