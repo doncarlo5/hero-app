@@ -141,7 +141,7 @@ const WeekActivityCarousel = () => {
 										{isActive ? (
 											<Circle
 												size={24}
-												fill="rgba(20, 184, 166, 0.5)"
+												fill="rgba(20, 184, 166, 0.4)"
 												color="rgb(20, 184, 166)"
 												strokeWidth={2}
 												className="mb-1"
