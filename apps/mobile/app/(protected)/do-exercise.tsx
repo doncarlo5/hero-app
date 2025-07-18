@@ -175,6 +175,10 @@ export default function DoExercise() {
 						(type: ExerciseType) => type._id === exerciseTypeId,
 					);
 					if (selectedExerciseType) {
+						const selectedIndex = exerciseTypes.findIndex(
+							(type: ExerciseType) => type._id === exerciseTypeId,
+						);
+						setSelectedExerciseIndex(selectedIndex);
 						await onExerciseTypeChange(selectedExerciseType);
 					}
 				}
