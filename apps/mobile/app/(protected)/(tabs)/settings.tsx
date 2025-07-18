@@ -12,15 +12,20 @@ import { Pressable, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
 import { useAuth } from "@/context/supabase-provider";
+import { useRouter } from "expo-router";
 
 export default function Settings() {
 	const { signOut } = useAuth();
+	const router = useRouter();
 
 	return (
 		<View className="flex-1 bg-background dark:bg-background-dark p-4 flex flex-col gap-4 justify-center">
 			<View className="flex-row flex-wrap">
 				<View className="w-1/2 pr-1 pb-2">
-					<Pressable className="h-32 rounded-md border flex items-center justify-center border-border dark:border-border-dark bg-background dark:bg-background-dark">
+					<Pressable
+						onPress={() => router.push("/(protected)/exercise-types")}
+						className="h-32 rounded-md border flex items-center justify-center border-border dark:border-border-dark bg-background dark:bg-background-dark"
+					>
 						<View className="flex flex-col items-center gap-1">
 							<LucidePencilRuler size={32} strokeWidth={1.1} />
 							<Text>Mes exercices</Text>

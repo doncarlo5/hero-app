@@ -88,6 +88,25 @@ export default function ProtectedLayout() {
 					headerBackTitle: "Back",
 				}}
 			/>
+			<Stack.Screen
+				name="exercise-types"
+				options={{
+					headerStyle: {
+						backgroundColor:
+							colorScheme === "dark"
+								? colors.dark.background
+								: colors.light.background,
+					},
+					headerTintColor:
+						colorScheme === "dark"
+							? colors.dark.foreground
+							: colors.light.foreground,
+					presentation: "card",
+					headerShown: true,
+					headerTitle: "Mes exercices type",
+					headerBackTitle: "Settings",
+				}}
+			/>
 		</Stack>
 	);
 }
