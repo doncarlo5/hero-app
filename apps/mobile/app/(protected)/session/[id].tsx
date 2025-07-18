@@ -22,6 +22,7 @@ import {
 	CalendarIcon,
 	CheckCircleIcon,
 	ChevronRightIcon,
+	ChevronsRight,
 	Gauge,
 	InfoIcon,
 	PlusIcon,
@@ -32,6 +33,7 @@ import {
 type ExerciseUser = {
 	_id: string;
 	type: {
+		_id: string;
 		name: string;
 		advice?: string;
 		timer: number;
@@ -64,6 +66,21 @@ type FormState = {
 	date_session: string;
 };
 
+type ProgramExercise = {
+	exerciseType: {
+		_id: string;
+		name: string;
+	};
+	alternatives?: {
+		_id: string;
+		name: string;
+	}[];
+};
+
+type Program = {
+	exercises: ProgramExercise[];
+};
+
 export default function SessionDetail() {
 	const { id } = useLocalSearchParams<{
 		id: string;
@@ -73,6 +90,8 @@ export default function SessionDetail() {
 
 	const [session, setSession] = useState<Session | null>(null);
 	const [lastSession, setLastSession] = useState<Session | null>(null);
+	const [program, setProgram] = useState<Program | null>(null);
+	const [skippedExercises, setSkippedExercises] = useState<string[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [isSaving, setIsSaving] = useState(false);
 	const [isCompleting, setIsCompleting] = useState(false);
@@ -116,6 +135,39 @@ export default function SessionDetail() {
 		}
 	};
 
+	const fetchProgram = async (typeSession: string) => {
+		try {
+			const response = await fetchApi(`/api/program/${typeSession}`);
+			setProgram(response);
+		} catch (error) {
+			console.error("Error fetching program:", error);
+		}
+	};
+
+	const getNextExercise = () => {
+		if (!program || !session) return null;
+
+		const completedExerciseIds = session.exercise_user_list.map(
+			(exercise) => exercise.type._id,
+		);
+
+		// Find the next exercise that hasn't been completed or skipped
+		const nextExercise = program.exercises.find(
+			(exercise) =>
+				!completedExerciseIds.includes(exercise.exerciseType._id) &&
+				!skippedExercises.includes(exercise.exerciseType._id),
+		);
+
+		return nextExercise;
+	};
+
+	const handleSkipExercise = () => {
+		const nextExercise = getNextExercise();
+		if (nextExercise && nextExercise.exerciseType) {
+			setSkippedExercises([...skippedExercises, nextExercise.exerciseType._id]);
+		}
+	};
+
 	const fetchSession = async () => {
 		if (!id) return;
 		try {
@@ -138,6 +190,9 @@ export default function SessionDetail() {
 				(option) => option === `${parseFloat(weightValue).toFixed(1)} kg`,
 			);
 			setSelectedWeightIndex(weightIndex >= 0 ? weightIndex : 400); // Default to 70.0kg (index 400)
+
+			// Fetch program for this session type
+			await fetchProgram(response.type_session);
 		} catch (error) {
 			console.error("Fetch session error:", error);
 		} finally {
@@ -490,6 +545,68 @@ export default function SessionDetail() {
 							)}
 							scrollEnabled={false}
 						/>
+
+						{/* Next Exercise Suggestion */}
+						{program && getNextExercise() && (
+							<View className="mt-6">
+								<Text className="text-lg font-semibold text-foreground dark:text-foreground-dark mb-3">
+									Next Exercise:
+								</Text>
+
+								{/* Main exercise button */}
+								<View className="flex-row gap-2 mb-3">
+									<Button
+										onPress={() => {
+											const nextExercise = getNextExercise();
+											if (nextExercise && nextExercise.exerciseType) {
+												router.push(
+													`/(protected)/do-exercise?sessionId=${session._id}&exerciseTypeId=${nextExercise.exerciseType._id}`,
+												);
+											}
+										}}
+										variant="outline"
+										className="flex-1 flex-row items-center justify-center gap-2 border-2 border-dotted bg-slate-100/20 dark:bg-slate-900/20"
+									>
+										<Text className="text-foreground dark:text-foreground-dark">
+											{getNextExercise()?.exerciseType?.name}
+										</Text>
+									</Button>
+
+									{/* Skip button */}
+									<Button
+										onPress={handleSkipExercise}
+										variant="outline"
+										className="w-20 flex-row items-center justify-center gap-1 border-none bg-slate-100/60 dark:bg-slate-900/60"
+									>
+										<Text className="text-sm italic text-gray-400">Skip</Text>
+										<ChevronsRight size={16} color="#9ca3af" />
+									</Button>
+								</View>
+
+								{/* Alternative exercises */}
+								{(getNextExercise()?.alternatives?.length ?? 0) > 0 && (
+									<View className="mb-3">
+										<Text className="text-sm font-medium text-gray-500 mb-2">
+											Alternatives:
+										</Text>
+										{getNextExercise()?.alternatives?.map((alt) => (
+											<Button
+												key={alt._id}
+												onPress={() =>
+													router.push(
+														`/(protected)/do-exercise?sessionId=${session._id}&exerciseTypeId=${alt._id}`,
+													)
+												}
+												variant="outline"
+												className="mb-2 flex-row items-center justify-center gap-2 border-2 border-dotted bg-slate-100/20 dark:bg-slate-900/20"
+											>
+												<Text className="text-gray-500">{alt.name}</Text>
+											</Button>
+										))}
+									</View>
+								)}
+							</View>
+						)}
 					</View>
 
 					{/* Bottom Action Buttons */}
