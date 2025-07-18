@@ -47,7 +47,8 @@ export default function ExerciseTypeDetail() {
 	const { id } = useLocalSearchParams<{ id: string }>();
 	const router = useRouter();
 
-	const [isLoading, setIsLoading] = useState(true);
+	const isCreating = id === "new";
+	const [isLoading, setIsLoading] = useState(!isCreating);
 	const [isSaving, setIsSaving] = useState(false);
 	const [exerciseType, setExerciseType] = useState<ExerciseType | null>(null);
 	const [addRepRange4, setAddRepRange4] = useState(false);
@@ -66,7 +67,7 @@ export default function ExerciseTypeDetail() {
 	});
 
 	const fetchExerciseType = async () => {
-		if (!id) return;
+		if (!id || isCreating) return;
 		try {
 			const response: ExerciseType = await fetchApi(`/api/exercise-type/${id}`);
 			setExerciseType(response);
@@ -93,8 +94,10 @@ export default function ExerciseTypeDetail() {
 	};
 
 	useEffect(() => {
-		fetchExerciseType();
-	}, [id]);
+		if (!isCreating) {
+			fetchExerciseType();
+		}
+	}, [id, isCreating]);
 
 	const handleInputChange = (field: string, value: string) => {
 		setFormState((prev) => ({ ...prev, [field]: value }));
@@ -110,7 +113,24 @@ export default function ExerciseTypeDetail() {
 	};
 
 	const handleSave = async () => {
-		if (!exerciseType) return;
+		if (formState.name.trim() === "") {
+			Alert.alert("Error", "Exercise name is required.");
+			return;
+		}
+
+		if (formState.timer.trim() === "") {
+			Alert.alert("Error", "Rest time is required.");
+			return;
+		}
+
+		if (
+			formState.repRange1.trim() === "" ||
+			formState.repRange2.trim() === "" ||
+			formState.repRange3.trim() === ""
+		) {
+			Alert.alert("Error", "All rep ranges are required.");
+			return;
+		}
 
 		if (formState.type_session.length === 0) {
 			Alert.alert("Error", "You must select at least one session type.");
@@ -120,31 +140,67 @@ export default function ExerciseTypeDetail() {
 		setIsSaving(true);
 		try {
 			const timerValue = parseInt(formState.timer);
-			await fetchApi(`/api/exercise-type/${exerciseType._id}`, {
-				method: "PUT",
-				body: JSON.stringify({
-					name: formState.name,
-					advice: formState.advice,
-					timer: timerValue,
-					repRange1: formState.repRange1,
-					repRange2: formState.repRange2,
-					repRange3: formState.repRange3,
-					repRange4: formState.repRange4,
-					type_session: formState.type_session,
-				}),
-			});
-			await fetchExerciseType();
-			Alert.alert("Success", "Exercise type updated successfully!");
+
+			if (isCreating) {
+				// Create new exercise type
+				await fetchApi(`/api/exercise-type`, {
+					method: "POST",
+					body: JSON.stringify({
+						name: formState.name,
+						advice: formState.advice,
+						timer: timerValue,
+						repRange1: formState.repRange1,
+						repRange2: formState.repRange2,
+						repRange3: formState.repRange3,
+						repRange4: formState.repRange4,
+						type_session: formState.type_session,
+					}),
+				});
+				Alert.alert("Success", "Exercise type created successfully!", [
+					{
+						text: "OK",
+						onPress: () => router.back(),
+					},
+				]);
+			} else {
+				// Update existing exercise type
+				if (!exerciseType) return;
+				await fetchApi(`/api/exercise-type/${exerciseType._id}`, {
+					method: "PUT",
+					body: JSON.stringify({
+						name: formState.name,
+						advice: formState.advice,
+						timer: timerValue,
+						repRange1: formState.repRange1,
+						repRange2: formState.repRange2,
+						repRange3: formState.repRange3,
+						repRange4: formState.repRange4,
+						type_session: formState.type_session,
+					}),
+				});
+				await fetchExerciseType();
+				Alert.alert("Success", "Exercise type updated successfully!");
+			}
 		} catch (error) {
-			console.error("Update exercise type error:", error);
-			Alert.alert("Error", "Failed to update exercise type");
+			console.error(
+				isCreating
+					? "Create exercise type error:"
+					: "Update exercise type error:",
+				error,
+			);
+			Alert.alert(
+				"Error",
+				isCreating
+					? "Failed to create exercise type"
+					: "Failed to update exercise type",
+			);
 		} finally {
 			setIsSaving(false);
 		}
 	};
 
 	const handleDelete = () => {
-		if (!exerciseType) return;
+		if (!exerciseType || isCreating) return;
 
 		Alert.alert(
 			"Delete Exercise Type",
@@ -178,7 +234,7 @@ export default function ExerciseTypeDetail() {
 		);
 	}
 
-	if (!exerciseType) {
+	if (!isCreating && !exerciseType) {
 		return (
 			<View className="flex-1 bg-background dark:bg-background-dark items-center justify-center">
 				<Text>Exercise type not found</Text>
@@ -189,9 +245,21 @@ export default function ExerciseTypeDetail() {
 	return (
 		<View className="flex-1 bg-background dark:bg-background-dark">
 			<ScrollView className="flex-1 p-4">
+				{/* Header for create mode */}
+				{isCreating && (
+					<View className="mb-6">
+						<Text className="text-2xl font-bold mb-2">New Exercise Type</Text>
+						<Text className="text-sm text-gray-500 dark:text-gray-400">
+							Create a new exercise type for your workouts
+						</Text>
+					</View>
+				)}
 				{/* Name */}
 				<View className="mb-4">
-					<Text className="text-sm font-medium mb-2">Exercise Name</Text>
+					<Text className="text-sm font-medium mb-2">
+						Exercise Name{" "}
+						{isCreating && <Text className="text-red-500">*</Text>}
+					</Text>
 					<Input
 						value={formState.name}
 						onChangeText={(value) => handleInputChange("name", value)}
@@ -202,7 +270,10 @@ export default function ExerciseTypeDetail() {
 
 				{/* Session Types */}
 				<View className="mb-4">
-					<Text className="text-sm font-medium mb-2">Session Types</Text>
+					<Text className="text-sm font-medium mb-2">
+						Session Types{" "}
+						{isCreating && <Text className="text-red-500">*</Text>}
+					</Text>
 					<View className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
 						<View className="flex-row justify-between">
 							<View className="flex-1">
@@ -265,7 +336,10 @@ export default function ExerciseTypeDetail() {
 
 				{/* Timer */}
 				<View className="mb-4">
-					<Text className="text-sm font-medium mb-2">Rest Time (seconds)</Text>
+					<Text className="text-sm font-medium mb-2">
+						Rest Time (seconds){" "}
+						{isCreating && <Text className="text-red-500">*</Text>}
+					</Text>
 					<Input
 						value={formState.timer}
 						onChangeText={(value) => handleInputChange("timer", value)}
@@ -291,7 +365,9 @@ export default function ExerciseTypeDetail() {
 					</View>
 
 					<View className="mb-2">
-						<Text className="text-sm font-medium mb-1">Set 1</Text>
+						<Text className="text-sm font-medium mb-1">
+							Set 1 {isCreating && <Text className="text-red-500">*</Text>}
+						</Text>
 						<Input
 							value={formState.repRange1}
 							onChangeText={(value) => handleInputChange("repRange1", value)}
@@ -300,7 +376,9 @@ export default function ExerciseTypeDetail() {
 					</View>
 
 					<View className="mb-2">
-						<Text className="text-sm font-medium mb-1">Set 2</Text>
+						<Text className="text-sm font-medium mb-1">
+							Set 2 {isCreating && <Text className="text-red-500">*</Text>}
+						</Text>
 						<Input
 							value={formState.repRange2}
 							onChangeText={(value) => handleInputChange("repRange2", value)}
@@ -309,7 +387,9 @@ export default function ExerciseTypeDetail() {
 					</View>
 
 					<View className="mb-2">
-						<Text className="text-sm font-medium mb-1">Set 3</Text>
+						<Text className="text-sm font-medium mb-1">
+							Set 3 {isCreating && <Text className="text-red-500">*</Text>}
+						</Text>
 						<Input
 							value={formState.repRange3}
 							onChangeText={(value) => handleInputChange("repRange3", value)}
@@ -343,19 +423,24 @@ export default function ExerciseTypeDetail() {
 
 				{/* Action Buttons */}
 				<View className="flex-row gap-2 mb-20">
-					<Button
-						variant="outline"
-						onPress={handleDelete}
-						className="flex-row w-1/2 gap-2 items-center justify-center"
-					>
-						<Trash2 size={20} color="#EF4444" strokeWidth={1.7} />
-						<Text className="text-red-600 dark:text-red-500">Delete</Text>
-					</Button>
+					{!isCreating && (
+						<Button
+							variant="outline"
+							onPress={handleDelete}
+							className="flex-row w-1/2 gap-2 items-center justify-center"
+						>
+							<Trash2 size={20} color="#EF4444" strokeWidth={1.7} />
+							<Text className="text-red-600 dark:text-red-500">Delete</Text>
+						</Button>
+					)}
 					<Button
 						variant="default"
 						onPress={handleSave}
 						disabled={isSaving}
-						className="flex-row w-1/2 items-center justify-center gap-2"
+						className={cn(
+							"flex-row items-center justify-center gap-2",
+							isCreating ? "w-full" : "w-1/2",
+						)}
 					>
 						{isSaving ? (
 							<ActivityIndicator size="small" color="white" />
@@ -363,7 +448,13 @@ export default function ExerciseTypeDetail() {
 							<Check color="#fff" strokeWidth={1.7} size={20} />
 						)}
 						<Text className="text-white">
-							{isSaving ? "Saving..." : "Save"}
+							{isSaving
+								? isCreating
+									? "Creating..."
+									: "Saving..."
+								: isCreating
+									? "Create Exercise Type"
+									: "Save"}
 						</Text>
 					</Button>
 				</View>

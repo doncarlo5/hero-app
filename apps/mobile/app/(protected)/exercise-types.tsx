@@ -59,8 +59,7 @@ export default function ExerciseTypes() {
 	};
 
 	const handleCreateExercise = () => {
-		// Navigate to create exercise page
-		// router.push("/do-exercise");
+		router.push("/exercise-type/new");
 	};
 
 	if (!isLoading && exerciseTypes.length === 0) {
