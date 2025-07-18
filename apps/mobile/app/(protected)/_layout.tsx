@@ -70,6 +70,25 @@ export default function ProtectedLayout() {
 				}}
 			/>
 			<Stack.Screen
+				name="exercise-type/[id]"
+				options={{
+					headerStyle: {
+						backgroundColor:
+							colorScheme === "dark"
+								? colors.dark.background
+								: colors.light.background,
+					},
+					headerTintColor:
+						colorScheme === "dark"
+							? colors.dark.foreground
+							: colors.light.foreground,
+					presentation: "card",
+					headerShown: true,
+					headerTitle: "Exercise Type",
+					headerBackTitle: "Mes types",
+				}}
+			/>
+			<Stack.Screen
 				name="do-exercise"
 				options={{
 					headerStyle: {

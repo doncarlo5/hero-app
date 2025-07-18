@@ -55,8 +55,7 @@ export default function ExerciseTypes() {
 	};
 
 	const handleExerciseTypePress = (exerciseType: ExerciseType) => {
-		// Navigate to exercise type detail page
-		router.push(`/exercise/${exerciseType._id}`);
+		router.push(`/exercise-type/${exerciseType._id}`);
 	};
 
 	const handleCreateExercise = () => {
