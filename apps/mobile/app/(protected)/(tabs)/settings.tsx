@@ -4,10 +4,10 @@ import {
 	Lock,
 	LogOut,
 	LucidePencilRuler,
-	MessageSquareText,
-	Settings as SettingsIcon,
+	Star,
 	Timer,
 	Trophy,
+	UserCog,
 } from "lucide-react-native";
 import { Alert, Pressable, View } from "react-native";
 
@@ -75,8 +75,8 @@ export default function Settings() {
 				<View className="w-1/2 pr-1 pb-2">
 					<Pressable className="h-32 rounded-md border flex items-center justify-center border-border dark:border-border-dark bg-background dark:bg-background-dark">
 						<View className="flex flex-col items-center gap-1">
-							<SettingsIcon size={32} strokeWidth={1.1} />
-							<Text>Préférences</Text>
+							<UserCog size={32} strokeWidth={1.1} />
+							<Text>Informations</Text>
 						</View>
 					</Pressable>
 				</View>
@@ -93,7 +93,7 @@ export default function Settings() {
 				<View className="w-1/2 pr-1 pb-2">
 					<Pressable className="h-32 rounded-md border flex items-center justify-center border-border dark:border-border-dark bg-background dark:bg-background-dark">
 						<View className="flex flex-col items-center gap-1">
-							<MessageSquareText size={32} strokeWidth={1.1} />
+							<Star size={32} strokeWidth={1.1} />
 							<Text>Feedback</Text>
 						</View>
 					</Pressable>
