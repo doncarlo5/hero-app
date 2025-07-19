@@ -92,13 +92,13 @@ export default function ExerciseTypes() {
 
 				{/* Exercise Types List */}
 				{isLoading ? (
-					<View className="flex flex-col items-center space-y-2">
+					<View className="flex flex-col items-center gap-2">
 						{Array(5)
 							.fill(0)
 							.map((_, index) => (
 								<View
 									key={index}
-									className="h-20 w-full rounded-lg bg-gray-200 dark:bg-gray-800"
+									className="h-32 w-full rounded-lg bg-gray-200 dark:bg-gray-800"
 								/>
 							))}
 					</View>
