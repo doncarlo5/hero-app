@@ -5,12 +5,15 @@ import {
 	PropsWithChildren,
 	useContext,
 	useEffect,
+	useMemo,
 	useState,
 } from "react";
 
 import { Session } from "@supabase/supabase-js";
 
 import { supabase } from "@/config/supabase";
+import { fetchApi } from "@/lib/api-handler";
+import { UserType } from "@/types/user.type";
 
 import { makeRedirectUri } from "expo-auth-session";
 import * as QueryParams from "expo-auth-session/build/QueryParams";
@@ -23,6 +26,10 @@ WebBrowser.maybeCompleteAuthSession();
 type AuthState = {
 	initialized: boolean;
 	session: Session | null;
+	user: UserType | null;
+	setUser: (user: UserType | null) => void;
+	authenticated: boolean;
+	isLoading: boolean;
 	signUp: (
 		email: string,
 		password: string,
@@ -38,6 +45,12 @@ type AuthState = {
 export const AuthContext = createContext<AuthState>({
 	initialized: false,
 	session: null,
+	user: null,
+	setUser: () => {
+		throw new Error("setUser used outside AuthProvider");
+	},
+	authenticated: false,
+	isLoading: true,
 	signUp: async () => ({ error: null }),
 	signIn: async () => ({ error: null }),
 	signInWithGoogle: async () => ({ error: null }),
@@ -49,12 +62,37 @@ export const useAuth = () => useContext(AuthContext);
 export function AuthProvider({ children }: PropsWithChildren) {
 	const [initialized, setInitialized] = useState(false);
 	const [session, setSession] = useState<Session | null>(null);
+	const [user, setUser] = useState<UserType | null>(null);
+	const [authenticated, setAuthenticated] = useState(false);
+	const [isLoading, setIsLoading] = useState(true);
 	const router = useRouter();
 
 	const oauthRedirectUrl = makeRedirectUri({
 		scheme: "com.doncarlos.heroapp",
 		path: "auth",
 	});
+
+	const getSession = async () => {
+		try {
+			const {
+				data: { session },
+				error: _error,
+			} = await supabase.auth.getSession();
+			setSession(session);
+			if (_error) throw _error;
+			setAuthenticated(session !== null);
+			if (session) {
+				const response = await fetchApi("/api/auth/verify");
+				setUser(response.user);
+			} else {
+				setUser(null);
+			}
+		} catch {
+			setUser(null);
+		} finally {
+			setIsLoading(false);
+		}
+	};
 
 	const signUp = async (email: string, password: string) => {
 		const { data, error } = await supabase.auth.signUp({
@@ -70,6 +108,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
 		if (data.session) {
 			setSession(data.session);
+			setAuthenticated(true);
 		}
 
 		return { error: null };
@@ -88,6 +127,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
 		if (data.session) {
 			setSession(data.session);
+			setAuthenticated(true);
 		}
 
 		return { error: null };
@@ -142,32 +182,51 @@ export function AuthProvider({ children }: PropsWithChildren) {
 	};
 
 	const signOut = async () => {
-		const { error } = await supabase.auth.signOut();
+		try {
+			setIsLoading(true);
+			setUser(null);
+			setSession(null);
+			const { error } = await supabase.auth.signOut();
 
-		if (error) {
-			console.error("Error signing out:", error);
+			if (error) {
+				console.error("Error signing out:", error);
+				return { error: error.message };
+			}
+
+			setAuthenticated(false);
+			return { error: null };
+		} catch (error: any) {
+			console.error(error);
 			return { error: error.message };
+		} finally {
+			setIsLoading(false);
 		}
-
-		return { error: null };
 	};
 
 	useEffect(() => {
-		supabase.auth.getSession().then(({ data: { session } }) => {
-			setSession(session);
-		});
+		getSession();
 
 		const {
 			data: { subscription },
-		} = supabase.auth.onAuthStateChange((event, session) => {
+		} = supabase.auth.onAuthStateChange(async (event, session) => {
 			// Handle token refresh failure
 			if (event === ("TOKEN_REFRESH_FAILED" as any)) {
 				setSession(null);
+				setUser(null);
+				setAuthenticated(false);
 				// Force logout by clearing the session
 				supabase.auth.signOut();
 				return;
 			}
 
+			if (session) {
+				const response = await fetchApi("/api/auth/verify");
+				setUser(response.user);
+				setAuthenticated(session !== null);
+			} else {
+				setAuthenticated(false);
+				setUser(null);
+			}
 			setSession(session);
 		});
 
@@ -179,7 +238,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 	}, []);
 
 	useEffect(() => {
-		if (initialized) {
+		if (initialized && !isLoading) {
 			SplashScreen.hideAsync();
 			if (session) {
 				router.replace("/");
@@ -188,19 +247,26 @@ export function AuthProvider({ children }: PropsWithChildren) {
 			}
 		}
 		// eslint-disable-next-line
-	}, [initialized, session]);
+	}, [initialized, isLoading, session]);
+
+	const authContextValue = useMemo(
+		() => ({
+			initialized,
+			session,
+			user,
+			setUser,
+			authenticated,
+			isLoading,
+			signUp,
+			signIn,
+			signInWithGoogle,
+			signOut,
+		}),
+		[initialized, session, user, authenticated, isLoading],
+	);
 
 	return (
-		<AuthContext.Provider
-			value={{
-				initialized,
-				session,
-				signUp,
-				signIn,
-				signInWithGoogle,
-				signOut,
-			}}
-		>
+		<AuthContext.Provider value={authContextValue}>
 			{children}
 		</AuthContext.Provider>
 	);
