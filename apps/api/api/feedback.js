@@ -7,7 +7,7 @@ const router = express.Router();
 
 // POST /api/feedback - Submit feedback
 router.post("/", async (req, res) => {
-  const { userId, message } = req.body;
+  const { userId, message, subject } = req.body;
 
   try {
     // Ensure user exists
@@ -15,8 +15,6 @@ router.post("/", async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
-
-    const { subject, message } = req.body;
 
     // Create and save the feedback
     const feedback = new Feedback({
@@ -28,7 +26,8 @@ router.post("/", async (req, res) => {
     await feedback.save();
     res.json(feedback);
   } catch (error) {
-    next(error);
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
