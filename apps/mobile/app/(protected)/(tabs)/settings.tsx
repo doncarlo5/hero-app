@@ -1,7 +1,6 @@
 import {
 	Activity,
 	BarChart3,
-	Lock,
 	LogOut,
 	LucidePencilRuler,
 	Star,
@@ -10,7 +9,7 @@ import {
 	UserCog,
 } from "lucide-react-native";
 import { useState } from "react";
-import { Alert, Pressable, View } from "react-native";
+import { Pressable, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
 import { useAuth } from "@/context/supabase-provider";
@@ -39,17 +38,12 @@ export default function Settings() {
 
 				<View className="w-1/2 pl-1 pb-2">
 					<Pressable
-						onPress={() => {
-							Alert.alert("Stats", "Stats are coming soon!");
-						}}
-						className="h-32 bg-gray-100 rounded-md border flex items-center justify-center border-border dark:border-border-dark dark:bg-background-dark relative"
+						onPress={() => router.push("/(protected)/stats")}
+						className="h-32 rounded-md border flex items-center justify-center border-border dark:border-border-dark bg-background dark:bg-background-dark"
 					>
 						<View className="flex flex-col items-center gap-1">
-							<BarChart3 color="#6C7180" size={32} strokeWidth={1.5} />
-							<Text className="text-gray-500 dark:text-gray-400">Stats</Text>
-						</View>
-						<View className="absolute top-2 right-2">
-							<Lock size={16} strokeWidth={2} />
+							<BarChart3 size={32} strokeWidth={1.1} />
+							<Text>Stats</Text>
 						</View>
 					</Pressable>
 				</View>

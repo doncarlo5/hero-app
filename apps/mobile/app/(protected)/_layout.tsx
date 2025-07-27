@@ -126,6 +126,25 @@ export default function ProtectedLayout() {
 					headerBackTitle: "Settings",
 				}}
 			/>
+			<Stack.Screen
+				name="stats"
+				options={{
+					headerStyle: {
+						backgroundColor:
+							colorScheme === "dark"
+								? colors.dark.background
+								: colors.light.background,
+					},
+					headerTintColor:
+						colorScheme === "dark"
+							? colors.dark.foreground
+							: colors.light.foreground,
+					presentation: "card",
+					headerShown: true,
+					headerTitle: "Statistiques",
+					headerBackTitle: "Back",
+				}}
+			/>
 		</Stack>
 	);
 }
