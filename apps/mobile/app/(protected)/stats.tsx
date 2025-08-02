@@ -317,9 +317,9 @@ export default function Stats() {
 
 				{/* No Data State */}
 				{exercise.length === 0 && !isLoading && (
-					<View className="mt-4 text-center py-20">
+					<View className=" text-center">
 						<Text className="text-gray-500 dark:text-gray-400">
-							Il n&apos;y a pas de données pour cet exercice.
+							Aucun historique disponible sur cet exercice.
 						</Text>
 					</View>
 				)}
