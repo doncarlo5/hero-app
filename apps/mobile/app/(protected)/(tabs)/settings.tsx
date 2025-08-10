@@ -49,7 +49,10 @@ export default function Settings() {
 				</View>
 
 				<View className="w-1/2 pr-1 pb-2">
-					<Pressable className="h-32 rounded-md border flex items-center justify-center border-border dark:border-border-dark bg-background dark:bg-background-dark">
+					<Pressable
+						onPress={() => router.push("/(protected)/trophy")}
+						className="h-32 rounded-md border flex items-center justify-center border-border dark:border-border-dark bg-background dark:bg-background-dark"
+					>
 						<View className="flex flex-col items-center gap-1">
 							<Trophy size={32} strokeWidth={1.1} />
 							<Text>Trophées</Text>
@@ -70,7 +73,10 @@ export default function Settings() {
 				</View>
 
 				<View className="w-1/2 pr-1 pb-2">
-					<Pressable className="h-32 rounded-md border flex items-center justify-center border-border dark:border-border-dark bg-background dark:bg-background-dark">
+					<Pressable
+						onPress={() => router.push("/(protected)/informations")}
+						className="h-32 rounded-md border flex items-center justify-center border-border dark:border-border-dark bg-background dark:bg-background-dark"
+					>
 						<View className="flex flex-col items-center gap-1">
 							<UserCog size={32} strokeWidth={1.1} />
 							<Text>Informations</Text>
