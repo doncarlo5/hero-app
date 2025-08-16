@@ -145,6 +145,25 @@ export default function ProtectedLayout() {
 					headerBackTitle: "Back",
 				}}
 			/>
+			<Stack.Screen
+				name="trophy"
+				options={{
+					headerStyle: {
+						backgroundColor:
+							colorScheme === "dark"
+								? colors.dark.background
+								: colors.light.background,
+					},
+					headerTintColor:
+						colorScheme === "dark"
+							? colors.dark.foreground
+							: colors.light.foreground,
+					presentation: "card",
+					headerShown: true,
+					headerTitle: "Trophées",
+					headerBackTitle: "Settings",
+				}}
+			/>
 		</Stack>
 	);
 }
