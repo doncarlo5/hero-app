@@ -78,14 +78,17 @@ export default function Settings() {
 					</Pressable>
 				</View>
 
-				<View className="w-1/2 pl-1 pb-2">
-					<Pressable className="h-32 rounded-md border flex items-center justify-center border-border dark:border-border-dark bg-background dark:bg-background-dark">
-						<View className="flex flex-col items-center gap-1">
-							<Activity size={32} strokeWidth={1.1} />
-							<Text>Programme</Text>
-						</View>
-					</Pressable>
-				</View>
+                                <View className="w-1/2 pl-1 pb-2">
+                                        <Pressable
+                                                onPress={() => router.push("/(protected)/program")}
+                                                className="h-32 rounded-md border flex items-center justify-center border-border dark:border-border-dark bg-background dark:bg-background-dark"
+                                        >
+                                                <View className="flex flex-col items-center gap-1">
+                                                        <Activity size={32} strokeWidth={1.1} />
+                                                        <Text>Programme</Text>
+                                                </View>
+                                        </Pressable>
+                                </View>
 
 				<View className="w-1/2 pr-1 pb-2">
 					<Pressable
