@@ -13,6 +13,9 @@ dist/
 /apps/mobile/dist
 /apps/mobile/.expo
 /apps/api/dist
+/apps/admin/.next/
+/apps/admin/out/
+/apps/admin/build
 
 # Vite cache and dev files
 .vite/
@@ -53,6 +56,8 @@ coverage/
 # Dependency directories
 jspm_packages/
 
+# Testing
+/coverage
 
 # Optional eslint cache
 .eslintcache
