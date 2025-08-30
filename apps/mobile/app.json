@@ -2,7 +2,7 @@
 	"expo": {
 		"name": "Hero App",
 		"slug": "hero-app",
-		"scheme": "com.julienthomas.heroapp",
+		"scheme": "com.doncarlos.heroapp",
 		"version": "1.0.0",
 		"orientation": "portrait",
 		"icon": "./assets/icon.png",
@@ -28,7 +28,7 @@
 				"dark": "./assets/icon-dark.png",
 				"light": "./assets/icon.png"
 			},
-			"bundleIdentifier": "com.julienthomas.heroapp"
+			"bundleIdentifier": "com.doncarlos.heroapp"
 		},
 		"android": {
 			"edgeToEdgeEnabled": true,
@@ -45,7 +45,7 @@
 					"image": "./assets/splash-dark.png"
 				}
 			},
-			"package": "com.julienthomas.heroapp"
+			"package": "com.doncarlos.heroapp"
 		},
 		"experiments": {
 			"typedRoutes": true
@@ -57,6 +57,6 @@
 				"projectId": "d832f74d-83c2-4d98-aa11-bdf11856d5f8"
 			}
 		},
-		"owner": "julienthomas"
+		"owner": "doncarlos"
 	}
 }
