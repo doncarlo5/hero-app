@@ -14,9 +14,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 	extra: {
 		...(config as any)?.expo?.extra,
 		apiUrl: process.env.EXPO_PUBLIC_API_URL,
-		eas: {
-			projectId: "d832f74d-83c2-4d98-aa11-bdf11856d5f8",
-		},
 		EXPO_ROUTER_APP_ROOT: "./app",
 	},
 	ios: {
