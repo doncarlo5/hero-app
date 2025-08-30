@@ -68,7 +68,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 	const router = useRouter();
 
 	const oauthRedirectUrl = makeRedirectUri({
-		scheme: "com.doncarlos.heroapp",
+		scheme: "com.julienthomas.heroapp",
 		path: "auth",
 	});
 
