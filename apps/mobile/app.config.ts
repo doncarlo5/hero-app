@@ -36,7 +36,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 			dark: "./assets/icon-dark.png",
 			light: "./assets/icon.png",
 		},
-		bundleIdentifier: "com.doncarlos.heroapp",
+		bundleIdentifier: "com.doncarlos.heroapp-mobile",
 		buildNumber: "2",
 	},
 	android: {
@@ -54,7 +54,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 				image: "./assets/splash-dark.png",
 			},
 		},
-		package: "com.doncarlos.heroapp",
+		package: "com.doncarlos.heroapp-mobile",
 	},
 	experiments: {
 		typedRoutes: true,

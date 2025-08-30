@@ -28,7 +28,7 @@
 				"dark": "./assets/icon-dark.png",
 				"light": "./assets/icon.png"
 			},
-			"bundleIdentifier": "com.doncarlos.heroapp"
+			"bundleIdentifier": "com.doncarlos.heroapp-mobile"
 		},
 		"android": {
 			"edgeToEdgeEnabled": true,
