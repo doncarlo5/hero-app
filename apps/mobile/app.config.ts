@@ -10,7 +10,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 	icon: "./assets/icon.png",
 	userInterfaceStyle: "automatic",
 	assetBundlePatterns: ["**/*"],
-	newArchEnabled: false,
+	newArchEnabled: true,
 	extra: {
 		...(config as any)?.expo?.extra,
 		apiUrl: process.env.EXPO_PUBLIC_API_URL,
