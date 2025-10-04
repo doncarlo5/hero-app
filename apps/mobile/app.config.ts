@@ -54,7 +54,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 				image: "./assets/splash-dark.png",
 			},
 		},
-		package: "com.doncarlos.heroapp-mobile",
+		package: "com.doncarlos.heroapp",
 	},
 	experiments: {
 		typedRoutes: true,
