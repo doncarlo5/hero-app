@@ -1,7 +1,7 @@
-import { BottomSheet } from "@expo/ui/swift-ui";
+import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { useRouter } from "expo-router";
 import { Zap } from "lucide-react-native";
-import React, { useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { ActivityIndicator, Image, Pressable, Text, View } from "react-native";
 
 import { Switch } from "@/components/ui/switch";
@@ -18,9 +18,25 @@ export default function NewSessionButton() {
 	const [showMinimaliste, setShowMinimaliste] = useState(false);
 	const [isLoading, setIsLoading] = useState(false);
 	const [bodyWeight, setBodyWeight] = useState(0);
-	const [isSheetOpen, setIsSheetOpen] = useState(false);
+	const [open, setOpen] = useState(false);
+
+	// Bottom sheet ref and snap points
+	const sheetRef = useRef<BottomSheet>(null);
 
 	const router = useRouter();
+
+	// Bottom sheet callbacks
+	const handleSheetChange = useCallback((index: number) => {
+		console.log("handleSheetChange", index);
+	}, []);
+
+	const handleSnapPress = useCallback((index: number) => {
+		sheetRef.current?.snapToIndex(index);
+	}, []);
+
+	const handleClosePress = useCallback(() => {
+		sheetRef.current?.close();
+	}, []);
 
 	const handleCreateSession = async (userChoice: string) => {
 		setIsLoading(true);
@@ -48,11 +64,12 @@ export default function NewSessionButton() {
 
 	return (
 		<>
-			{/* FAB — render it only when the sheet is closed */}
-			{!isSheetOpen && (
+			{/* FAB */}
+			{!open && (
 				<Pressable
 					onPress={() => {
-						setIsSheetOpen(true);
+						sheetRef.current?.snapToIndex(0); // Open to content size
+						setOpen(true);
 					}}
 					className="absolute bottom-10 right-10 z-50"
 				>
@@ -64,115 +81,125 @@ export default function NewSessionButton() {
 
 			{/* Bottom-sheet */}
 			<BottomSheet
-				isOpened={isSheetOpen}
-				onIsOpenedChange={(opened: boolean) => {
-					setIsSheetOpen(opened);
-				}}
+				ref={sheetRef}
+				index={-1}
+				enableDynamicSizing={true}
+				enablePanDownToClose={true}
+				maxDynamicContentSize={600}
+				onChange={handleSheetChange}
+				onClose={() => setOpen(false)}
 			>
-				<View className="flex-1 p-4 bg-background dark:bg-background-dark">
-					<View className="w-12 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-4" />
-					{isLoading ? (
-						<View className="flex-1 pt-14 items-center justify-center">
-							<ActivityIndicator size="large" />
-						</View>
-					) : (
-						<View className="flex-1">
-							{/* Header */}
-							<View className="mb-4">
-								<Text className="text-xl font-bold text-foreground dark:text-foreground-dark">
-									Nouvelle séance
-								</Text>
-								<View className="flex-row items-center justify-between mt-2">
-									<Text className="text-sm text-muted-foreground dark:text-muted-foreground-dark flex-1 mr-2">
-										{showMinimaliste
-											? "Entrainement minimaliste (2x/semaine)"
-											: "Entrainement complet (3x/semaine)"}
+				<BottomSheetScrollView
+					contentContainerStyle={{
+						padding: 16,
+						backgroundColor: "transparent",
+						flexGrow: 1,
+					}}
+				>
+					<View className="bg-background dark:bg-background-dark">
+						{isLoading ? (
+							<View className="pt-14 items-center justify-center">
+								<ActivityIndicator size="large" />
+							</View>
+						) : (
+							<View>
+								{/* Header */}
+								<View className="mb-4">
+									<Text className="text-xl font-bold text-foreground dark:text-foreground-dark">
+										Nouvelle séance
 									</Text>
-									<Switch
-										checked={showMinimaliste}
-										onCheckedChange={setShowMinimaliste}
-									/>
+									<View className="flex-row items-center justify-between mt-2">
+										<Text className="text-sm text-muted-foreground dark:text-muted-foreground-dark flex-1 mr-2">
+											{showMinimaliste
+												? "Entrainement minimaliste (2x/semaine)"
+												: "Entrainement complet (3x/semaine)"}
+										</Text>
+										<Switch
+											checked={showMinimaliste}
+											onCheckedChange={setShowMinimaliste}
+										/>
+									</View>
+								</View>
+
+								{/* Session Type Buttons */}
+								<View className="flex-row justify-evenly">
+									{showMinimaliste ? (
+										<>
+											<Pressable
+												onPress={() => handleCreateSession("Séance A")}
+												className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border dark:border-border-dark bg-background dark:bg-background-dark"
+											>
+												<Text className="mt-2 text-lg font-medium text-foreground dark:text-foreground-dark">
+													Séance A
+												</Text>
+												<Image
+													source={bodyFront}
+													className="h-14 w-9"
+													resizeMode="contain"
+												/>
+											</Pressable>
+											<Pressable
+												onPress={() => handleCreateSession("Séance B")}
+												className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border dark:border-border-dark bg-background dark:bg-background-dark"
+											>
+												<Text className="mt-2 text-lg font-medium text-foreground dark:text-foreground-dark">
+													Séance B
+												</Text>
+												<Image
+													source={bodyBack}
+													className="h-14 w-9"
+													resizeMode="contain"
+												/>
+											</Pressable>
+										</>
+									) : (
+										<>
+											<Pressable
+												onPress={() => handleCreateSession("Upper A")}
+												className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border dark:border-border-dark bg-background dark:bg-background-dark"
+											>
+												<Text className="mb-1 mt-2 text-lg font-medium text-foreground dark:text-foreground-dark">
+													Upper A
+												</Text>
+												<Image
+													source={upperFront}
+													className="mb-1 h-14 w-14"
+													resizeMode="contain"
+												/>
+											</Pressable>
+											<Pressable
+												onPress={() => handleCreateSession("Lower")}
+												className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border dark:border-border-dark bg-background dark:bg-background-dark"
+											>
+												<Text className="mb-1 mt-2 text-lg font-medium text-foreground dark:text-foreground-dark">
+													Lower
+												</Text>
+												<Image
+													source={lower}
+													className="mb-1 h-14 w-12"
+													resizeMode="contain"
+												/>
+											</Pressable>
+											<Pressable
+												onPress={() => handleCreateSession("Upper B")}
+												className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border dark:border-border-dark bg-background dark:bg-background-dark"
+											>
+												<Text className="mb-1 mt-2 text-lg font-medium text-foreground dark:text-foreground-dark">
+													Upper B
+												</Text>
+												<Image
+													source={upperBack}
+													className="mb-1 h-14 w-14"
+													resizeMode="contain"
+												/>
+											</Pressable>
+										</>
+									)}
 								</View>
 							</View>
-
-							{/* Session Type Buttons */}
-							<View className="flex-row justify-evenly">
-								{showMinimaliste ? (
-									<>
-										<Pressable
-											onPress={() => handleCreateSession("Séance A")}
-											className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border dark:border-border-dark bg-background dark:bg-background-dark"
-										>
-											<Text className="mt-2 text-lg font-medium text-foreground dark:text-foreground-dark">
-												Séance A
-											</Text>
-											<Image
-												source={bodyFront}
-												className="h-14 w-9"
-												resizeMode="contain"
-											/>
-										</Pressable>
-										<Pressable
-											onPress={() => handleCreateSession("Séance B")}
-											className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border dark:border-border-dark bg-background dark:bg-background-dark"
-										>
-											<Text className="mt-2 text-lg font-medium text-foreground dark:text-foreground-dark">
-												Séance B
-											</Text>
-											<Image
-												source={bodyBack}
-												className="h-14 w-9"
-												resizeMode="contain"
-											/>
-										</Pressable>
-									</>
-								) : (
-									<>
-										<Pressable
-											onPress={() => handleCreateSession("Upper A")}
-											className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border dark:border-border-dark bg-background dark:bg-background-dark"
-										>
-											<Text className="mb-1 mt-2 text-lg font-medium text-foreground dark:text-foreground-dark">
-												Upper A
-											</Text>
-											<Image
-												source={upperFront}
-												className="mb-1 h-14 w-14"
-												resizeMode="contain"
-											/>
-										</Pressable>
-										<Pressable
-											onPress={() => handleCreateSession("Lower")}
-											className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border dark:border-border-dark bg-background dark:bg-background-dark"
-										>
-											<Text className="mb-1 mt-2 text-lg font-medium text-foreground dark:text-foreground-dark">
-												Lower
-											</Text>
-											<Image
-												source={lower}
-												className="mb-1 h-14 w-12"
-												resizeMode="contain"
-											/>
-										</Pressable>
-										<Pressable
-											onPress={() => handleCreateSession("Upper B")}
-											className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border dark:border-border-dark bg-background dark:bg-background-dark"
-										>
-											<Text className="mb-1 mt-2 text-lg font-medium text-foreground dark:text-foreground-dark">
-												Upper B
-											</Text>
-											<Image
-												source={upperBack}
-												className="mb-1 h-14 w-14"
-												resizeMode="contain"
-											/>
-										</Pressable>
-									</>
-								)}
-							</View>
-						</View>
-					)}
-				</View>
+						)}
+					</View>
+				</BottomSheetScrollView>
 			</BottomSheet>
 		</>
 	);
