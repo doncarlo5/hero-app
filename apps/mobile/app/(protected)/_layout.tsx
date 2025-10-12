@@ -103,7 +103,7 @@ export default function ProtectedLayout() {
 							: colors.light.foreground,
 					presentation: "card",
 					headerShown: true,
-					headerTitle: "Add Exercise",
+					headerTitle: "New Exercise",
 					headerBackTitle: "Back",
 				}}
 			/>

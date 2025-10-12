@@ -81,9 +81,12 @@ export default function SignIn() {
 	}
 
 	return (
-		<SafeAreaView className="flex-1 bg-background p-4" edges={["bottom"]}>
+		<SafeAreaView
+			className="flex-1 bg-background dark:bg-background-dark p-4"
+			edges={["bottom"]}
+		>
 			<View className="flex-1 gap-4 web:m-4">
-				<H1 className="self-start ">Sign In</H1>
+				<H1 className="self-start">Sign In</H1>
 
 				{/* Apple Sign In Button - Only show on iOS when available */}
 				{isAppleAvailable && (
