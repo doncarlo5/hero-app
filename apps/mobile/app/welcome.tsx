@@ -18,7 +18,7 @@ export default function WelcomeScreen() {
 			: require("../assets/icon-dark.png");
 
 	return (
-		<SafeAreaView className="flex flex-1 bg-background p-4">
+		<SafeAreaView className="flex flex-1 bg-background dark:bg-background-dark p-4">
 			<View className="flex flex-1 items-center justify-center gap-y-4 web:m-4">
 				<View className="flex flex-row items-center gap-x-2">
 					<Image source={appIcon} className="w-20 h-20 rounded-xl" />

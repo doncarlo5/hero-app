@@ -20,7 +20,9 @@ import {
 import { SafeAreaView } from "@/components/safe-area-view";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
+import { colors } from "@/constants/colors";
 import { fetchApi } from "@/lib/api-handler";
+import { useColorScheme } from "@/lib/useColorScheme";
 import { Pressable } from "react-native-gesture-handler";
 
 interface ExerciseType {
@@ -38,6 +40,8 @@ interface ExerciseProgram {
 const sessionOptions = ["Upper A", "Lower", "Upper B", "Séance A", "Séance B"];
 
 export default function ProgramPage() {
+	const { colorScheme } = useColorScheme();
+
 	const [sessionType, setSessionType] = useState("Upper A");
 	const [exercises, setExercises] = useState<ExerciseProgram[]>([]);
 	const [availableExercises, setAvailableExercises] = useState<ExerciseType[]>(
@@ -190,13 +194,26 @@ export default function ProgramPage() {
 					title: "Programme",
 					headerShown: true,
 					headerBackTitle: "Back",
+					headerStyle: {
+						backgroundColor:
+							colorScheme === "dark"
+								? colors.dark.background
+								: colors.light.background,
+					},
+					headerTintColor:
+						colorScheme === "dark"
+							? colors.dark.foreground
+							: colors.light.foreground,
 				}}
 			/>
-			<SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
+			<SafeAreaView
+				className="flex-1 bg-background dark:bg-background-dark"
+				edges={["bottom"]}
+			>
 				<ScrollView className="flex-1 px-4 pt-4">
 					{/* Session Type Selection */}
 					<View className="mb-4">
-						<Text className="text-lg font-semibold text-foreground mb-3">
+						<Text className="text-lg font-semibold text-foreground dark:text-foreground-dark mb-3">
 							Session Type
 						</Text>
 						<ScrollView
@@ -212,14 +229,14 @@ export default function ProgramPage() {
 										className={`px-4 py-2 rounded-lg border ${
 											sessionType === type
 												? "bg-primary border-primary"
-												: "border-border bg-muted/30"
+												: "border-border dark:border-border-dark bg-muted/30 dark:bg-muted-dark/30"
 										}`}
 									>
 										<Text
 											className={
 												sessionType === type
 													? "text-white font-medium"
-													: "text-foreground"
+													: "text-foreground dark:text-foreground-dark"
 											}
 										>
 											{type}
@@ -243,13 +260,13 @@ export default function ProgramPage() {
 					{isLoading ? (
 						<View className="flex-1 items-center justify-center py-8">
 							<ActivityIndicator size="large" />
-							<Text className="text-muted-foreground mt-2">
+							<Text className="text-muted-foreground dark:text-gray-400 mt-2">
 								Loading program...
 							</Text>
 						</View>
 					) : exercises.length === 0 ? (
-						<View className="bg-muted/30 rounded-lg p-6 items-center">
-							<Text className="text-muted-foreground text-center">
+						<View className="bg-muted/30 dark:bg-muted-dark/30 rounded-lg p-6 items-center">
+							<Text className="text-muted-foreground dark:text-gray-400 text-center">
 								No exercises in this program yet. Add your first exercise!
 							</Text>
 						</View>
@@ -258,11 +275,11 @@ export default function ProgramPage() {
 							{exercises.map((exercise, index) => (
 								<View
 									key={index}
-									className="mb-3 rounded-xl border border-border bg-card p-4"
+									className="mb-3 rounded-xl border border-border dark:border-border-dark bg-card dark:bg-card-dark p-4"
 								>
 									<View className="flex-row items-center justify-between">
 										<View className="flex-1">
-											<Text className="text-lg font-semibold text-foreground">
+											<Text className="text-lg font-semibold text-foreground dark:text-foreground-dark">
 												{exercise.order}. {exercise.exerciseType.name}
 											</Text>
 										</View>
@@ -317,9 +334,9 @@ export default function ProgramPage() {
 											{exercise.alternatives.map((alt, altIndex) => (
 												<View
 													key={alt._id}
-													className="flex-row items-center justify-between border-l-2 border-border py-2 px-3 bg-muted/20 rounded-r-lg"
+													className="flex-row items-center justify-between border-l-2 border-border dark:border-border-dark py-2 px-3 bg-muted/20 dark:bg-muted-dark/20 rounded-r-lg"
 												>
-													<Text className="text-foreground flex-1">
+													<Text className="text-foreground dark:text-foreground-dark flex-1">
 														{exercise.order}.{altIndex + 1}. {alt.name}
 													</Text>
 													<View className="flex-row items-center gap-1">
@@ -408,13 +425,13 @@ export default function ProgramPage() {
 							{isLoadingTypes ? (
 								<View className="items-center py-8">
 									<ActivityIndicator size="large" />
-									<Text className="text-muted-foreground mt-2">
+									<Text className="text-muted-foreground dark:text-gray-400 mt-2">
 										Loading exercises...
 									</Text>
 								</View>
 							) : availableExercises.length === 0 ? (
-								<View className="bg-muted/30 rounded-lg p-6 items-center">
-									<Text className="text-muted-foreground text-center">
+								<View className="bg-muted/30 dark:bg-muted-dark/30 rounded-lg p-6 items-center">
+									<Text className="text-muted-foreground dark:text-gray-400 text-center">
 										No exercises available for this session type.
 									</Text>
 								</View>
@@ -423,7 +440,7 @@ export default function ProgramPage() {
 									<View>
 										{availableExercises.map((ex) => (
 											<Pressable key={ex._id} onPress={() => handleSelect(ex)}>
-												<View className="flex-row items-center p-3 border-b border-border">
+												<View className="flex-row items-center p-3 border-b border-border dark:border-border-dark">
 													<Text className="text-foreground dark:text-foreground-dark flex-1">
 														{ex.name}
 													</Text>

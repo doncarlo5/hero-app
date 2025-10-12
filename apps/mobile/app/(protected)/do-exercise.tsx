@@ -287,17 +287,20 @@ export default function DoExercise() {
 	);
 
 	return (
-		<SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
+		<SafeAreaView
+			className="flex-1 bg-background dark:bg-background-dark"
+			edges={["bottom"]}
+		>
 			<ScrollView className="flex-1 px-4 pt-4">
 				{/* Exercise Type Selection */}
 				<View className="mb-4">
 					{isLoadingTypes ? (
-						<View className="bg-muted/30 rounded-lg p-4">
+						<View className="bg-muted/30 dark:bg-muted-dark/30 rounded-lg p-4">
 							<ActivityIndicator size="small" />
 						</View>
 					) : allExerciseTypes.length === 0 ? (
-						<View className="bg-muted/30 rounded-lg p-4">
-							<Text className="text-muted-foreground text-center">
+						<View className="bg-muted/30 dark:bg-muted-dark/30 rounded-lg p-4">
+							<Text className="text-muted-foreground dark:text-gray-400 text-center">
 								Please create an exercise for this session type.
 							</Text>
 						</View>
@@ -319,7 +322,7 @@ export default function DoExercise() {
 				{lastExercise && (
 					<View className="flex-row items-center justify-end gap-1 px-2 py-1 mb-3">
 						<HistoryIcon size={14} color="#6b7280" />
-						<Text className="text-sm text-muted-foreground">
+						<Text className="text-sm text-muted-foreground dark:text-gray-400">
 							{isLoadingLastExercise
 								? "Loading..."
 								: format(
@@ -375,7 +378,7 @@ export default function DoExercise() {
 							<View className="flex-row justify-between gap-1 px-2">
 								{/* Reps Column */}
 								<View className="flex-1 max-w-[25%]">
-									<Text className="text-sm text-muted-foreground text-center mb-2">
+									<Text className="text-sm text-muted-foreground dark:text-gray-400 text-center mb-2">
 										Reps
 									</Text>
 									<View className="gap-1">
@@ -416,7 +419,7 @@ export default function DoExercise() {
 
 								{/* Weight Column */}
 								<View className="flex-1 max-w-[35%]">
-									<Text className="text-sm text-muted-foreground text-center mb-2">
+									<Text className="text-sm text-muted-foreground dark:text-gray-400 text-center mb-2">
 										KG
 									</Text>
 									<View className="gap-1">
@@ -463,28 +466,28 @@ export default function DoExercise() {
 
 								{/* Range Column */}
 								<View className="flex-1 max-w-[20%]">
-									<Text className="text-sm text-muted-foreground text-center mb-2">
+									<Text className="text-sm text-muted-foreground dark:text-gray-400 text-center mb-2">
 										Range
 									</Text>
 									<View className="gap-1">
 										<View className="h-12 items-center justify-center">
-											<Text className="text-gray-700 font-light">
+											<Text className="text-gray-700 dark:text-gray-300 font-light">
 												{oneExerciseType.repRange1}
 											</Text>
 										</View>
 										<View className="h-12 items-center justify-center">
-											<Text className="text-gray-700 font-light">
+											<Text className="text-gray-700 dark:text-gray-300 font-light">
 												{oneExerciseType.repRange2}
 											</Text>
 										</View>
 										<View className="h-12 items-center justify-center">
-											<Text className="text-gray-700 font-light">
+											<Text className="text-gray-700 dark:text-gray-300 font-light">
 												{oneExerciseType.repRange3}
 											</Text>
 										</View>
 										{(addRep4 || oneExerciseType.repRange4) && (
 											<View className="h-12 items-center justify-center">
-												<Text className="text-gray-700 font-light">
+												<Text className="text-gray-700 dark:text-gray-300 font-light">
 													{oneExerciseType.repRange4}
 												</Text>
 											</View>
@@ -494,7 +497,7 @@ export default function DoExercise() {
 
 								{/* Checkbox Column */}
 								<View className="flex-1 max-w-[20%]">
-									<Text className="text-sm text-muted-foreground text-center mb-2">
+									<Text className="text-sm text-muted-foreground dark:text-gray-400 text-center mb-2">
 										Set
 									</Text>
 									<View className="gap-1">
@@ -534,7 +537,7 @@ export default function DoExercise() {
 									onPress={() => setAddRep4(!addRep4)}
 									className="mt-4 items-center"
 								>
-									<Text className="text-xs italic text-gray-400">
+									<Text className="text-xs italic text-gray-400 dark:text-gray-500">
 										{addRep4 ? "Reduce by one set ↑" : "Add one set ↓"}
 									</Text>
 								</TouchableOpacity>
@@ -545,7 +548,9 @@ export default function DoExercise() {
 						<View className="bg-slate-50 dark:bg-slate-900/40 rounded-2xl p-4 mb-20">
 							<View className="flex-row items-center gap-2 mb-3">
 								<EditIcon size={16} color="#6b7280" />
-								<Text className="text-muted-foreground">Notes</Text>
+								<Text className="text-muted-foreground dark:text-gray-400">
+									Notes
+								</Text>
 								{lastExercise?.comment && (
 									<View className="w-2 h-2 bg-teal-500 rounded-full" />
 								)}

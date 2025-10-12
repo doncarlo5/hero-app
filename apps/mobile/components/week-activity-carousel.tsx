@@ -11,6 +11,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { fetchApi } from "@/lib/api-handler";
+import { useColorScheme } from "@/lib/useColorScheme";
 
 interface SessionType {
 	_id: string;
@@ -20,6 +21,7 @@ interface SessionType {
 }
 
 const WeekActivityCarousel = () => {
+	const { isDarkColorScheme } = useColorScheme();
 	const [sessions, setSessions] = useState<SessionType[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
 	const [currentPage, setCurrentPage] = useState(2);
@@ -77,6 +79,14 @@ const WeekActivityCarousel = () => {
 			};
 		});
 
+		// Define colors based on color scheme
+		const activeColor = isDarkColorScheme
+			? "rgb(45 212 191)"
+			: "rgb(20 184 166)"; // teal-400 : teal-500
+		const inactiveColor = isDarkColorScheme
+			? "rgb(71 85 105)"
+			: "rgb(209 213 219)"; // slate-600 : gray-300
+
 		return (
 			<Animated.View
 				style={[
@@ -85,7 +95,7 @@ const WeekActivityCarousel = () => {
 						height: 8,
 						borderRadius: 4,
 						backgroundColor:
-							currentPage === index ? "rgb(20 184 166)" : "rgb(209 213 219)",
+							currentPage === index ? activeColor : inactiveColor,
 						marginHorizontal: 4,
 					},
 					animatedStyle,
@@ -100,8 +110,8 @@ const WeekActivityCarousel = () => {
 				<View className="flex-row justify-between">
 					{[0, 1, 2, 3, 4, 5, 6].map((day) => (
 						<View key={day} className="items-center">
-							<View className="h-6 w-6 rounded-full bg-gray-200 mb-1" />
-							<View className="h-4 w-4 bg-gray-200" />
+							<View className="h-6 w-6 rounded-full bg-gray-200 dark:bg-slate-700 mb-1" />
+							<View className="h-4 w-4 bg-gray-200 dark:bg-slate-700" />
 						</View>
 					))}
 				</View>
@@ -109,7 +119,7 @@ const WeekActivityCarousel = () => {
 					{[0, 1, 2].map((index) => (
 						<View
 							key={index}
-							className="h-2 w-2 rounded-full bg-gray-200"
+							className="h-2 w-2 rounded-full bg-gray-200 dark:bg-slate-700"
 							style={{ marginHorizontal: 4 }}
 						/>
 					))}
@@ -121,6 +131,17 @@ const WeekActivityCarousel = () => {
 	if (isLoading) {
 		return renderSkeletonLoader();
 	}
+
+	// Define colors based on color scheme
+	const activeFillColor = isDarkColorScheme
+		? "rgba(45, 212, 191, 0.3)" // teal-400 with opacity
+		: "rgba(20, 184, 166, 0.4)"; // teal-500 with opacity
+	const activeStrokeColor = isDarkColorScheme
+		? "rgb(45 212 191)" // teal-400
+		: "rgb(20 184 166)"; // teal-500
+	const inactiveStrokeColor = isDarkColorScheme
+		? "rgb(71 85 105)" // slate-600
+		: "rgb(209 213 219)"; // gray-300
 
 	return (
 		<View>
@@ -141,15 +162,15 @@ const WeekActivityCarousel = () => {
 										{isActive ? (
 											<Circle
 												size={24}
-												fill="rgba(20, 184, 166, 0.4)"
-												color="rgb(20, 184, 166)"
+												fill={activeFillColor}
+												color={activeStrokeColor}
 												strokeWidth={2}
 												className="mb-1"
 											/>
 										) : (
 											<CircleDashed
 												size={24}
-												color="rgb(209 213 219)"
+												color={inactiveStrokeColor}
 												strokeWidth={1}
 												className="mb-1"
 											/>
