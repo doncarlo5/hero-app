@@ -1,7 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useState } from "react";
+import * as AppleAuthentication from "expo-apple-authentication";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { ActivityIndicator, View } from "react-native";
+import { ActivityIndicator, Platform, View } from "react-native";
 import * as z from "zod";
 
 import { SafeAreaView } from "@/components/safe-area-view";
@@ -10,6 +11,7 @@ import { Form, FormField, FormInput } from "@/components/ui/form";
 import { Text } from "@/components/ui/text";
 import { H1 } from "@/components/ui/typography";
 import { useAuth } from "@/context/supabase-provider";
+import { AppleIcon } from "@/lib/icons/apple";
 import { GoogleIcon } from "@/lib/icons/google";
 
 const formSchema = z
@@ -40,8 +42,10 @@ const formSchema = z
 	});
 
 export default function SignUp() {
-	const { signUp, signInWithGoogle } = useAuth();
+	const { signUp, signInWithGoogle, signInWithApple } = useAuth();
 	const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+	const [isAppleLoading, setIsAppleLoading] = useState(false);
+	const [isAppleAvailable, setIsAppleAvailable] = useState(false);
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -51,6 +55,16 @@ export default function SignUp() {
 			confirmPassword: "",
 		},
 	});
+
+	useEffect(() => {
+		const checkAppleAvailability = async () => {
+			if (Platform.OS === "ios") {
+				const available = await AppleAuthentication.isAvailableAsync();
+				setIsAppleAvailable(available);
+			}
+		};
+		checkAppleAvailability();
+	}, []);
 
 	async function onSubmit(data: z.infer<typeof formSchema>) {
 		try {
@@ -73,17 +87,52 @@ export default function SignUp() {
 		}
 	}
 
+	async function handleAppleSignIn() {
+		try {
+			setIsAppleLoading(true);
+			await signInWithApple();
+		} catch (error: Error | any) {
+			console.error("Apple sign in error:", error.message);
+		} finally {
+			setIsAppleLoading(false);
+		}
+	}
+
 	return (
 		<SafeAreaView className="flex-1 bg-background p-4" edges={["bottom"]}>
 			<View className="flex-1 gap-4 web:m-4">
 				<H1 className="self-start">Sign Up</H1>
+
+				{/* Apple Sign Up Button - Only show on iOS when available */}
+				{isAppleAvailable && (
+					<Button
+						size="default"
+						variant="outline"
+						onPress={handleAppleSignIn}
+						disabled={
+							isAppleLoading || isGoogleLoading || form.formState.isSubmitting
+						}
+						className="flex-row items-center justify-center gap-2"
+					>
+						{isAppleLoading ? (
+							<ActivityIndicator size="small" />
+						) : (
+							<>
+								<AppleIcon size={16} />
+								<Text>Continue with Apple</Text>
+							</>
+						)}
+					</Button>
+				)}
 
 				{/* Google Sign Up Button */}
 				<Button
 					size="default"
 					variant="outline"
 					onPress={handleGoogleSignIn}
-					disabled={isGoogleLoading || form.formState.isSubmitting}
+					disabled={
+						isGoogleLoading || isAppleLoading || form.formState.isSubmitting
+					}
 					className="flex-row items-center justify-center gap-2"
 				>
 					{isGoogleLoading ? (

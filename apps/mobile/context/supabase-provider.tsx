@@ -1,3 +1,5 @@
+// supabase-provider.tsx
+
 import { SplashScreen, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import {
@@ -15,8 +17,10 @@ import { supabase } from "@/config/supabase";
 import { fetchApi } from "@/lib/api-handler";
 import { UserType } from "@/types/user.type";
 
+import * as AppleAuthentication from "expo-apple-authentication";
 import { makeRedirectUri } from "expo-auth-session";
 import * as QueryParams from "expo-auth-session/build/QueryParams";
+import * as Crypto from "expo-crypto";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -39,6 +43,7 @@ type AuthState = {
 		password: string,
 	) => Promise<{ error: string | null }>;
 	signInWithGoogle: () => Promise<{ error: string | null }>;
+	signInWithApple: () => Promise<{ error: string | null }>;
 	signOut: () => Promise<{ error: string | null }>;
 };
 
@@ -54,6 +59,7 @@ export const AuthContext = createContext<AuthState>({
 	signUp: async () => ({ error: null }),
 	signIn: async () => ({ error: null }),
 	signInWithGoogle: async () => ({ error: null }),
+	signInWithApple: async () => ({ error: null }),
 	signOut: async () => ({ error: null }),
 });
 
@@ -181,6 +187,52 @@ export function AuthProvider({ children }: PropsWithChildren) {
 		}
 	};
 
+	const signInWithApple = async () => {
+		try {
+			const nonce = Math.random().toString(36).substring(2, 10);
+			const hashedNonce = await Crypto.digestStringAsync(
+				Crypto.CryptoDigestAlgorithm.SHA256,
+				nonce,
+			);
+
+			const credential = await AppleAuthentication.signInAsync({
+				requestedScopes: [
+					AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+					AppleAuthentication.AppleAuthenticationScope.EMAIL,
+				],
+				nonce: hashedNonce,
+			});
+
+			const { error, data } = await supabase.auth.signInWithIdToken({
+				provider: "apple",
+				token: credential.identityToken!,
+				nonce,
+			});
+
+			if (error) {
+				console.error("Error signing in with Apple:", error);
+				return { error: error.message };
+			}
+
+			if (data.session) {
+				setSession(data.session);
+				setAuthenticated(true);
+			}
+
+			return { error: null };
+		} catch (error: any) {
+			if (error.code === "ERR_REQUEST_CANCELED") {
+				// User canceled the sign-in flow
+				return { error: "Sign in canceled" };
+			}
+			console.error("Error signing in with Apple:", error);
+			return {
+				error:
+					error instanceof Error ? error.message : "Unknown error occurred",
+			};
+		}
+	};
+
 	const signOut = async () => {
 		try {
 			setIsLoading(true);
@@ -246,7 +298,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
 				router.replace("/welcome");
 			}
 		}
-		// eslint-disable-next-line
 	}, [initialized, isLoading, session]);
 
 	const authContextValue = useMemo(
@@ -260,6 +311,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 			signUp,
 			signIn,
 			signInWithGoogle,
+			signInWithApple,
 			signOut,
 		}),
 		[initialized, session, user, authenticated, isLoading],
