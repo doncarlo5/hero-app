@@ -19,7 +19,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 	},
 	ios: {
 		supportsTablet: true,
-		usesAppleSignIn: true,
 		config: {
 			usesNonExemptEncryption: false,
 		},
