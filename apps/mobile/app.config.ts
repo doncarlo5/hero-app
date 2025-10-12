@@ -40,6 +40,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 			light: "./assets/icon.png",
 		},
 		bundleIdentifier: "com.doncarlos.heroapp-mobile",
+		entitlements: {
+			"com.apple.developer.applesignin": ["Default"],
+		},
 		buildNumber: "2",
 	},
 	android: {
