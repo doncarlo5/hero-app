@@ -1,3 +1,5 @@
+// sign-up.tsx
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as AppleAuthentication from "expo-apple-authentication";
 import React, { useEffect, useState } from "react";

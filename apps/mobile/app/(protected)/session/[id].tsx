@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { Textarea } from "@/components/ui/textarea";
 import { fetchApi } from "@/lib/api-handler";
+import { useColorScheme } from "@/lib/useColorScheme";
 import {
 	ArrowLeftIcon,
 	CalendarIcon,
@@ -87,6 +88,7 @@ export default function SessionDetail() {
 		fromExercise?: string;
 	}>();
 	const router = useRouter();
+	const { isDarkColorScheme } = useColorScheme();
 
 	const [session, setSession] = useState<Session | null>(null);
 	const [lastSession, setLastSession] = useState<Session | null>(null);
@@ -379,7 +381,11 @@ export default function SessionDetail() {
 								<Text className="text-2xl font-bold text-foreground dark:text-foreground-dark mb-1">
 									{session.type_session}
 								</Text>
-								<InfoIcon size={15} color="gray" strokeWidth={1.7} />
+								<InfoIcon
+									size={15}
+									color={isDarkColorScheme ? "#9CA3AF" : "gray"}
+									strokeWidth={1.7}
+								/>
 							</Pressable>
 							<Text className="text-sm text-muted-foreground dark:text-muted-foreground-dark">
 								{format(new Date(session.date_session), "EEEE d MMMM yyyy", {
@@ -423,7 +429,11 @@ export default function SessionDetail() {
 											? format(selectedDate, "d MMM yyyy", { locale: fr })
 											: "Select date"}
 									</Text>
-									<CalendarIcon size={20} color="#252525" strokeWidth={1.5} />
+									<CalendarIcon
+										size={20}
+										color={isDarkColorScheme ? "#9CA3AF" : "#252525"}
+										strokeWidth={1.5}
+									/>
 								</Button>
 							</View>
 
@@ -439,7 +449,11 @@ export default function SessionDetail() {
 									<Text className="text-foreground dark:text-foreground-dark">
 										{selectedWeight ? `${selectedWeight} kg` : "Select weight"}
 									</Text>
-									<Gauge size={20} color="#252525" strokeWidth={1.5} />
+									<Gauge
+										size={20}
+										color={isDarkColorScheme ? "#9CA3AF" : "#252525"}
+										strokeWidth={1.5}
+									/>
 								</Button>
 							</View>
 						</View>
@@ -505,7 +519,10 @@ export default function SessionDetail() {
 												{item.type.name}
 											</Text>
 										</View>
-										<ChevronRightIcon size={20} color="#6b7280" />
+										<ChevronRightIcon
+											size={20}
+											color={isDarkColorScheme ? "#9CA3AF" : "#6b7280"}
+										/>
 									</View>
 
 									<View className="mb-3">
@@ -578,8 +595,13 @@ export default function SessionDetail() {
 										variant="outline"
 										className="w-20 flex-row items-center justify-center gap-1 border-none bg-slate-100/60 dark:bg-slate-900/60"
 									>
-										<Text className="text-sm italic text-gray-400">Skip</Text>
-										<ChevronsRight size={16} color="#9ca3af" />
+										<Text className="text-sm italic text-gray-400 dark:text-gray-500">
+											Skip
+										</Text>
+										<ChevronsRight
+											size={16}
+											color={isDarkColorScheme ? "#6B7280" : "#9ca3af"}
+										/>
 									</Button>
 								</View>
 

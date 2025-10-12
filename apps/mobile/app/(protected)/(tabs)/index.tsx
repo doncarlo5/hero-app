@@ -118,6 +118,7 @@ const CircularProgress = ({
 };
 
 export default function Home() {
+	const { isDarkColorScheme } = useColorScheme();
 	const [user, setUser] = useState<User | null>(null);
 	const [lastSession, setLastSession] = useState<Session | null>(null);
 	const [allSessions, setAllSessions] = useState<Session[]>([]);
@@ -246,7 +247,7 @@ export default function Home() {
 							<View className="rounded-2xl gap-1 bg-slate-100/80 dark:bg-slate-900/80 shadow-md p-3 justify-between h-20">
 								<View className="flex-row items-center gap-1">
 									<Flame
-										color="rgb(71 85 105)"
+										color={isDarkColorScheme ? "#94a3b8" : "rgb(71 85 105)"}
 										height={17}
 										width={17}
 										strokeWidth={2.2}
@@ -263,7 +264,7 @@ export default function Home() {
 							<View className="rounded-2xl bg-slate-100/80 dark:bg-slate-900/80 shadow-md p-3 flex-1 justify-between">
 								<View className="flex-row items-center gap-1.5 mb-3">
 									<Trophy
-										color="rgb(71 85 105)"
+										color={isDarkColorScheme ? "#94a3b8" : "rgb(71 85 105)"}
 										height={17}
 										width={17}
 										strokeWidth={2.2}
@@ -301,7 +302,7 @@ export default function Home() {
 										height={30}
 										width={30}
 										strokeWidth={1.5}
-										color="rgb(71 85 105)"
+										color={isDarkColorScheme ? "#94a3b8" : "rgb(71 85 105)"}
 									/>
 								</View>
 							</View>
@@ -309,7 +310,7 @@ export default function Home() {
 							<View className="rounded-2xl bg-slate-100/80 dark:bg-slate-900/80 shadow-md p-3 h-24 justify-between">
 								<View className="flex-row gap-1.5">
 									<Gauge
-										color="rgb(71 85 105)"
+										color={isDarkColorScheme ? "#94a3b8" : "rgb(71 85 105)"}
 										height={17}
 										width={17}
 										strokeWidth={2.2}

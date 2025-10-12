@@ -40,7 +40,10 @@ export default function TimerPage() {
 					<View className="w-full max-w-xs ">
 						<View className="relative">
 							<View className="absolute top-1/2 left-0 flex items-center pl-3 z-10 -translate-y-1/2">
-								<LucideClock4 size={20} color="#9CA3AF" />
+								<LucideClock4
+									size={20}
+									color={colorScheme === "dark" ? "#6B7280" : "#9CA3AF"}
+								/>
 							</View>
 							<Input
 								value={customTimer.toString()}

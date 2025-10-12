@@ -26,6 +26,7 @@ import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { Textarea } from "@/components/ui/textarea";
 import { fetchApi } from "@/lib/api-handler";
+import { useColorScheme } from "@/lib/useColorScheme";
 import { Pressable } from "react-native-gesture-handler";
 
 type ExerciseType = {
@@ -60,6 +61,7 @@ type Session = {
 
 export default function DoExercise() {
 	const router = useRouter();
+	const { isDarkColorScheme } = useColorScheme();
 	const { sessionId, exerciseTypeId } = useLocalSearchParams<{
 		sessionId: string;
 		exerciseTypeId?: string;
@@ -313,7 +315,11 @@ export default function DoExercise() {
 							<Text className="text-foreground dark:text-foreground-dark">
 								{oneExerciseType ? oneExerciseType.name : "Select an exercise"}
 							</Text>
-							<AlignJustifyIcon size={20} color="#252525" strokeWidth={1.5} />
+							<AlignJustifyIcon
+								size={20}
+								color={isDarkColorScheme ? "#9CA3AF" : "#252525"}
+								strokeWidth={1.5}
+							/>
 						</Button>
 					)}
 				</View>
@@ -321,7 +327,10 @@ export default function DoExercise() {
 				{/* Last Exercise Date */}
 				{lastExercise && (
 					<View className="flex-row items-center justify-end gap-1 px-2 py-1 mb-3">
-						<HistoryIcon size={14} color="#6b7280" />
+						<HistoryIcon
+							size={14}
+							color={isDarkColorScheme ? "#9CA3AF" : "#6b7280"}
+						/>
 						<Text className="text-sm text-muted-foreground dark:text-gray-400">
 							{isLoadingLastExercise
 								? "Loading..."
@@ -336,7 +345,10 @@ export default function DoExercise() {
 				{/* Advice */}
 				{oneExerciseType?.advice && (
 					<View className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mb-5 flex-row items-start gap-2">
-						<InfoIcon size={16} color="#1e40af" />
+						<InfoIcon
+							size={16}
+							color={isDarkColorScheme ? "#60a5fa" : "#1e40af"}
+						/>
 						<Text className="text-sm text-blue-700 dark:text-blue-200 flex-1">
 							{oneExerciseType.advice}
 						</Text>
@@ -358,7 +370,10 @@ export default function DoExercise() {
 									onPress={handlePrefillWeights}
 									className="flex-1 flex-row items-center justify-center"
 								>
-									<StarIcon size={16} color="#6b7280" />
+									<StarIcon
+										size={16}
+										color={isDarkColorScheme ? "#9CA3AF" : "#6b7280"}
+									/>
 									<Text className="ml-1">
 										All sets to {formState.weight1} KG
 									</Text>
@@ -547,7 +562,10 @@ export default function DoExercise() {
 						{/* Notes Section */}
 						<View className="bg-slate-50 dark:bg-slate-900/40 rounded-2xl p-4 mb-20">
 							<View className="flex-row items-center gap-2 mb-3">
-								<EditIcon size={16} color="#6b7280" />
+								<EditIcon
+									size={16}
+									color={isDarkColorScheme ? "#9CA3AF" : "#6b7280"}
+								/>
 								<Text className="text-muted-foreground dark:text-gray-400">
 									Notes
 								</Text>
