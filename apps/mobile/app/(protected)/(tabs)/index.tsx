@@ -1,7 +1,7 @@
 import { format } from "date-fns";
 import { fr } from "date-fns/locale/fr";
 import { Flame, Gauge, Plus, Trophy } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
 	ActivityIndicator,
 	RefreshControl,
@@ -17,7 +17,7 @@ import { TypeSessionBadge } from "@/components/ui/type-session-badge";
 import WeekActivityCarousel from "@/components/week-activity-carousel";
 import { fetchApi } from "@/lib/api-handler";
 import { useColorScheme } from "@/lib/useColorScheme";
-import { router } from "expo-router";
+import { router, useFocusEffect } from "expo-router";
 
 type User = {
 	_id: string;
@@ -162,9 +162,9 @@ export default function Home() {
 		setRefreshing(false);
 	};
 
-	useEffect(() => {
+	useFocusEffect(() => {
 		fetchData();
-	}, []);
+	});
 
 	const achievedTrophies = trophies.filter((t) => t.achieved).length;
 

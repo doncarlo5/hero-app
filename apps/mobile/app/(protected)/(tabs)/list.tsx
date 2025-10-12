@@ -1,5 +1,5 @@
-import { useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import { useState } from "react";
 import {
 	ActivityIndicator,
 	FlatList,
@@ -37,9 +37,9 @@ export default function List() {
 		}
 	};
 
-	useEffect(() => {
+	useFocusEffect(() => {
 		fetchUserSessions();
-	}, []);
+	});
 
 	const handleSessionPress = (sessionId: string) => {
 		router.push(`/session/${sessionId}`);
