@@ -178,12 +178,12 @@ export default function Stats() {
 				{/* Exercise Type Selection */}
 				<View className="mb-4">
 					{isLoadingTypes ? (
-						<View className="bg-muted/30 rounded-lg p-4">
+						<View className="bg-muted/30 dark:bg-muted-dark/30 rounded-lg p-4">
 							<ActivityIndicator size="small" />
 						</View>
 					) : allExerciseTypes.length === 0 ? (
-						<View className="bg-muted/30 rounded-lg p-4">
-							<Text className="text-muted-foreground text-center">
+						<View className="bg-muted/30 dark:bg-muted-dark/30 rounded-lg p-4">
+							<Text className="text-muted-foreground dark:text-gray-400 text-center">
 								Aucun exercice disponible.
 							</Text>
 						</View>
@@ -207,7 +207,7 @@ export default function Stats() {
 				{isLoading && (
 					<View className="flex-1 items-center justify-center py-20">
 						<LucideLoader2 className="animate-spin" size={32} />
-						<Text className="mt-4 text-sm text-muted-foreground">
+						<Text className="mt-4 text-sm text-muted-foreground dark:text-gray-400">
 							Chargement...
 						</Text>
 					</View>
@@ -336,21 +336,27 @@ export default function Stats() {
 								<Text className="text-2xl font-bold text-foreground dark:text-foreground-dark">
 									{exercise.length}
 								</Text>
-								<Text className="text-sm text-muted-foreground">Séances</Text>
+								<Text className="text-sm text-muted-foreground dark:text-gray-400">
+									Séances
+								</Text>
 							</View>
 
 							<View className="items-center">
 								<Text className="text-2xl font-bold text-foreground dark:text-foreground-dark">
 									{maxWeight}
 								</Text>
-								<Text className="text-sm text-muted-foreground">Max (kg)</Text>
+								<Text className="text-sm text-muted-foreground dark:text-gray-400">
+									Max (kg)
+								</Text>
 							</View>
 
 							<View className="items-center">
 								<Text className="text-2xl font-bold text-foreground dark:text-foreground-dark">
 									{minWeight}
 								</Text>
-								<Text className="text-sm text-muted-foreground">Min (kg)</Text>
+								<Text className="text-sm text-muted-foreground dark:text-gray-400">
+									Min (kg)
+								</Text>
 							</View>
 						</View>
 					</View>
@@ -375,7 +381,7 @@ export default function Stats() {
 				>
 					{allExerciseTypes.length === 0 ? (
 						<View className="py-8 items-center">
-							<Text className="text-muted-foreground text-center">
+							<Text className="text-muted-foreground dark:text-gray-400 text-center">
 								Aucun exercice disponible
 							</Text>
 						</View>

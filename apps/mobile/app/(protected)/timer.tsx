@@ -6,8 +6,12 @@ import { View } from "react-native";
 import { CountDownTimer } from "@/components/countdown-timer";
 import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
+import { colors } from "@/constants/colors";
+import { useColorScheme } from "@/lib/useColorScheme";
 
 export default function TimerPage() {
+	const { colorScheme } = useColorScheme();
+
 	const [customTimer, setCustomTimer] = useState(120);
 
 	return (
@@ -17,10 +21,15 @@ export default function TimerPage() {
 					headerShown: true,
 					title: "Timer",
 					headerStyle: {
-						backgroundColor: "#ffffff",
+						backgroundColor:
+							colorScheme === "dark"
+								? colors.dark.background
+								: colors.light.background,
 					},
-					headerTintColor: "#000000",
-					headerBackTitle: "Settings",
+					headerTintColor:
+						colorScheme === "dark"
+							? colors.dark.foreground
+							: colors.light.foreground,
 				}}
 			/>
 			<View className="flex-1 bg-background dark:bg-background-dark">

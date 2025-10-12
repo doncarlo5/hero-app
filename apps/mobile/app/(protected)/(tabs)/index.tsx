@@ -16,6 +16,7 @@ import Svg, { Circle, Defs, LinearGradient, Stop } from "react-native-svg";
 import { TypeSessionBadge } from "@/components/ui/type-session-badge";
 import WeekActivityCarousel from "@/components/week-activity-carousel";
 import { fetchApi } from "@/lib/api-handler";
+import { useColorScheme } from "@/lib/useColorScheme";
 import { router } from "expo-router";
 
 type User = {
@@ -53,8 +54,17 @@ const CircularProgress = ({
 	size?: number;
 	strokeWidth?: number;
 }) => {
+	const { isDarkColorScheme } = useColorScheme();
 	const radius = (size - strokeWidth) / 2;
 	const circumference = radius * 2 * Math.PI; // Full circle
+
+	// Define colors based on color scheme
+	const backgroundStroke = isDarkColorScheme
+		? "rgb(51 65 85)" // slate-700
+		: "rgb(209 213 219)"; // gray-300
+
+	const gradientStart = isDarkColorScheme ? "#2dd4bf" : "#38b2ac"; // teal-400 : teal-500
+	const gradientEnd = isDarkColorScheme ? "#5eead4" : "#4fd1c5"; // teal-300 : teal-400
 
 	return (
 		<View className="items-center">
@@ -62,8 +72,8 @@ const CircularProgress = ({
 				<Svg width={size} height={size}>
 					<Defs>
 						<LinearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-							<Stop offset="0%" stopColor="#38b2ac" />
-							<Stop offset="100%" stopColor="#4fd1c5" />
+							<Stop offset="0%" stopColor={gradientStart} />
+							<Stop offset="100%" stopColor={gradientEnd} />
 						</LinearGradient>
 					</Defs>
 
@@ -72,7 +82,7 @@ const CircularProgress = ({
 						cx={size / 2}
 						cy={size / 2}
 						r={radius}
-						stroke="rgb(209 213 219)"
+						stroke={backgroundStroke}
 						strokeWidth={strokeWidth}
 						fill="transparent"
 						strokeDasharray={circumference}
@@ -161,7 +171,9 @@ export default function Home() {
 		return (
 			<SafeAreaView className="flex-1 items-center justify-center bg-background dark:bg-background-dark p-4">
 				<ActivityIndicator size="large" />
-				<Text className="mt-4 text-sm text-muted-foreground">Chargement…</Text>
+				<Text className="mt-4 text-sm text-muted-foreground dark:text-gray-400">
+					Chargement…
+				</Text>
 			</SafeAreaView>
 		);
 	}
@@ -181,7 +193,7 @@ export default function Home() {
 				}
 			>
 				<View className="">
-					<Text className="text-4xl font-bold tracking-tighter mb-4">
+					<Text className="text-4xl font-bold tracking-tighter mb-4 dark:text-gray-300">
 						Bienvenue {user?.firstName}
 					</Text>
 
@@ -225,7 +237,9 @@ export default function Home() {
 
 					<WeekActivityCarousel />
 
-					<Text className="text-2xl font-bold mb-3">Progression</Text>
+					<Text className="text-2xl font-bold mb-3 dark:text-gray-300">
+						Progression
+					</Text>
 
 					<View className="flex-row gap-3">
 						<View className="flex-1 gap-3">
@@ -241,7 +255,7 @@ export default function Home() {
 										Total séances
 									</Text>
 								</View>
-								<Text className="text-3xl font-extrabold tracking-tighter">
+								<Text className="text-3xl font-extrabold tracking-tighter dark:text-gray-300">
 									{allSessions.length}
 								</Text>
 							</View>
@@ -265,7 +279,7 @@ export default function Home() {
 										size={70}
 										strokeWidth={6}
 									/>
-									<Text className="text-xl font-extrabold text-center mt-2">
+									<Text className="text-xl font-extrabold text-center mt-2 dark:text-gray-300">
 										{achievedTrophies}/27
 									</Text>
 								</View>
@@ -279,7 +293,7 @@ export default function Home() {
 										<Text className="leading-4 text-gray-500 dark:text-gray-400 text-sm">
 											Créer un
 										</Text>
-										<Text className="font-bold leading-4 tracking-tighter text-sm">
+										<Text className="font-bold leading-4 tracking-tighter text-sm dark:text-gray-300">
 											NOUVEL EXERCICE
 										</Text>
 									</View>
@@ -305,10 +319,12 @@ export default function Home() {
 									</Text>
 								</View>
 								<View className="flex-row items-end space-x-1">
-									<Text className="text-3xl font-medium">
+									<Text className="text-3xl font-medium dark:text-gray-300">
 										{lastSession?.body_weight}
 									</Text>
-									<Text className="text-xl font-extralight">KG</Text>
+									<Text className="text-xl font-extralight dark:text-gray-400">
+										KG
+									</Text>
 								</View>
 								{lastSession && (
 									<Text className="text-[0.7rem] font-extralight capitalize text-slate-600 dark:text-gray-400">
