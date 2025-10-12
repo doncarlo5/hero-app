@@ -13,7 +13,6 @@ import { Form, FormField, FormInput } from "@/components/ui/form";
 import { Text } from "@/components/ui/text";
 import { H1 } from "@/components/ui/typography";
 import { useAuth } from "@/context/supabase-provider";
-import { AppleIcon } from "@/lib/icons/apple";
 import { GoogleIcon } from "@/lib/icons/google";
 
 const formSchema = z
@@ -110,24 +109,25 @@ export default function SignUp() {
 
 				{/* Apple Sign Up Button - Only show on iOS when available */}
 				{isAppleAvailable && (
-					<Button
-						size="default"
-						variant="outline"
-						onPress={handleAppleSignIn}
-						disabled={
-							isAppleLoading || isGoogleLoading || form.formState.isSubmitting
-						}
-						className="flex-row items-center justify-center gap-2"
-					>
+					<View className="w-full">
 						{isAppleLoading ? (
-							<ActivityIndicator size="small" />
+							<View className="h-11 items-center justify-center border border-border dark:border-border-dark rounded-lg">
+								<ActivityIndicator size="small" />
+							</View>
 						) : (
-							<>
-								<AppleIcon size={16} />
-								<Text>Continue with Apple</Text>
-							</>
+							<AppleAuthentication.AppleAuthenticationButton
+								buttonType={
+									AppleAuthentication.AppleAuthenticationButtonType.SIGN_UP
+								}
+								buttonStyle={
+									AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
+								}
+								cornerRadius={8}
+								style={{ width: "100%", height: 44 }}
+								onPress={handleAppleSignIn}
+							/>
 						)}
-					</Button>
+					</View>
 				)}
 
 				{/* Google Sign Up Button */}
