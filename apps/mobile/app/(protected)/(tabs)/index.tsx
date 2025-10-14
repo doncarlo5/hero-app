@@ -1,7 +1,7 @@
 import { format } from "date-fns";
 import { fr } from "date-fns/locale/fr";
 import { Flame, Gauge, Plus, Trophy } from "lucide-react-native";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
 	ActivityIndicator,
 	RefreshControl,
@@ -17,7 +17,7 @@ import { TypeSessionBadge } from "@/components/ui/type-session-badge";
 import WeekActivityCarousel from "@/components/week-activity-carousel";
 import { fetchApi } from "@/lib/api-handler";
 import { useColorScheme } from "@/lib/useColorScheme";
-import { router, useFocusEffect } from "expo-router";
+import { router } from "expo-router";
 
 type User = {
 	_id: string;
@@ -126,45 +126,53 @@ export default function Home() {
 	const [isLoading, setIsLoading] = useState(true);
 	const [refreshing, setRefreshing] = useState(false);
 
-	const fetchData = async () => {
+	const inFlightRef = useRef(false);
+
+	const fetchData = useCallback(async () => {
+		if (inFlightRef.current) return; // prevent overlap
+		inFlightRef.current = true;
 		try {
 			setIsLoading(true);
 
-			// Fetch user data
-			const userResponse = await fetchApi("/api/auth/verify");
-			setUser(userResponse.user);
+			const userResponse = await fetchApi("/api/auth/verify", {
+				noStore: true,
+			});
+			setUser(userResponse?.user ?? null);
 
-			// Fetch last session
 			const lastSessionResponse = await fetchApi(
 				"/api/sessions?limit=1&sortBy=date_session:desc",
+				{ noStore: true },
 			);
-			setLastSession(lastSessionResponse[0] || null);
+			setLastSession(lastSessionResponse?.[0] ?? null);
 
-			// Fetch all sessions
+			// ⚠️ This is heavy. Either delay it or move it to the History screen.
 			const allSessionsResponse = await fetchApi(
 				"/api/sessions?limit=1000&sortBy=date_session:desc",
+				{ noStore: true },
 			);
-			setAllSessions(allSessionsResponse);
+			setAllSessions(allSessionsResponse ?? []);
 
-			// Fetch trophies
-			const trophiesResponse = await fetchApi("/api/trophies");
-			setTrophies(trophiesResponse);
-		} catch (error) {
-			console.error("Error fetching data:", error);
+			const trophiesResponse = await fetchApi("/api/trophies", {
+				noStore: true,
+			});
+			setTrophies(trophiesResponse ?? []);
+		} catch (e) {
+			console.error(e);
 		} finally {
 			setIsLoading(false);
+			inFlightRef.current = false;
 		}
-	};
+	}, []);
 
-	const onRefresh = async () => {
+	useEffect(() => {
+		fetchData(); // run once on mount
+	}, [fetchData]);
+
+	const onRefresh = useCallback(async () => {
 		setRefreshing(true);
 		await fetchData();
 		setRefreshing(false);
-	};
-
-	useFocusEffect(() => {
-		fetchData();
-	});
+	}, [fetchData]);
 
 	const achievedTrophies = trophies.filter((t) => t.achieved).length;
 

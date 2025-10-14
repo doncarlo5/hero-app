@@ -21,14 +21,22 @@ const getAuthHeaders = async () => {
 	};
 };
 
-export const fetchApi = async (endpoint: string, options: RequestInit = {}) => {
+interface FetchApiOptions extends RequestInit {
+	noStore?: boolean;
+}
+
+export const fetchApi = async (
+	endpoint: string,
+	options: FetchApiOptions = {},
+) => {
 	const headers = await getAuthHeaders();
+	const { noStore, ...fetchOptions } = options;
 
 	const response = await fetch(`${baseURL}${endpoint}`, {
-		...options,
+		...fetchOptions,
 		headers: {
 			...headers,
-			...options.headers,
+			...fetchOptions.headers,
 		},
 	});
 
