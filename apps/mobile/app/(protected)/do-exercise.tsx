@@ -599,9 +599,15 @@ export default function DoExercise() {
 						className="h-16 w-16 rounded-full items-center justify-center p-0"
 					>
 						{isLoading ? (
-							<ActivityIndicator size="small" color="white" />
+							<ActivityIndicator
+								size="small"
+								color={isDarkColorScheme ? "#000000" : "#ffffff"}
+							/>
 						) : (
-							<CheckIcon size={28} color="white" />
+							<CheckIcon
+								size={28}
+								color={isDarkColorScheme ? "#000000" : "#ffffff"}
+							/>
 						)}
 					</Button>
 				</View>

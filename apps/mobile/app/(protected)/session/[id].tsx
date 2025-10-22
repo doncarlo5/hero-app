@@ -500,8 +500,13 @@ export default function SessionDetail() {
 							variant="default"
 							className="flex-row items-center justify-center gap-2 my-4"
 						>
-							<PlusIcon size={16} color="white" />
-							<Text>Add an exercise</Text>
+							<PlusIcon
+								size={16}
+								color={isDarkColorScheme ? "#000000" : "#ffffff"}
+							/>
+							<Text className="text-primary-foreground dark:text-primary-foreground-dark">
+								Add an exercise
+							</Text>
 						</Button>
 
 						<FlatList
