@@ -649,20 +649,28 @@ export default function SessionDetail() {
 							<Button
 								onPress={handleCompleteSession}
 								disabled={isCompleting}
-								className="flex-1 dark:bg-transparent flex-row items-center justify-center dark:bg-background-dark dark:text-foreground-dark"
+								className="flex-1 flex-row items-center justify-center"
 							>
-								<CheckCircleIcon size={16} color="white" />
-								<Text className="ml-2">
+								<CheckCircleIcon
+									size={16}
+									color={isDarkColorScheme ? "#000000" : "#ffffff"}
+								/>
+								<Text className="ml-2 text-primary-foreground dark:text-primary-foreground-dark">
 									{isCompleting ? "Completing..." : "Complete"}
 								</Text>
 							</Button>
 						) : (
 							<Button
 								onPress={() => router.replace("/(protected)/(tabs)")}
-								className="flex-1 dark:bg-transparent flex-row items-center justify-center dark:bg-background-dark dark:text-foreground-dark"
+								className="flex-1 flex-row items-center justify-center"
 							>
-								<ArrowLeftIcon size={16} color="white" />
-								<Text className="ml-2">Go back to list</Text>
+								<ArrowLeftIcon
+									size={16}
+									color={isDarkColorScheme ? "#000000" : "#ffffff"}
+								/>
+								<Text className="ml-2 text-primary-foreground dark:text-primary-foreground-dark">
+									Go back to list
+								</Text>
 							</Button>
 						)}
 					</View>
@@ -681,9 +689,15 @@ export default function SessionDetail() {
 							}`}
 						>
 							{isSaving ? (
-								<ActivityIndicator size="small" color="white" />
+								<ActivityIndicator
+									size="small"
+									color={isDarkColorScheme ? "#000000" : "#ffffff"}
+								/>
 							) : (
-								<SaveIcon size={24} color="white" />
+								<SaveIcon
+									size={24}
+									color={isDarkColorScheme ? "#000000" : "#ffffff"}
+								/>
 							)}
 						</Pressable>
 					</View>
