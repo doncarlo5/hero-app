@@ -228,14 +228,14 @@ export default function ProgramPage() {
 										onPress={() => setSessionType(type)}
 										className={`px-4 py-2 rounded-lg border ${
 											sessionType === type
-												? "bg-primary border-primary"
+												? "bg-primary border-primary dark:bg-primary-dark dark:border-primary-dark"
 												: "border-border dark:border-border-dark bg-muted/30 dark:bg-muted-dark/30"
 										}`}
 									>
 										<Text
 											className={
 												sessionType === type
-													? "text-white font-medium"
+													? "text-primary-foreground dark:text-primary-foreground-dark font-medium"
 													: "text-foreground dark:text-foreground-dark"
 											}
 										>
@@ -252,8 +252,13 @@ export default function ProgramPage() {
 						onPress={openAddExercise}
 						className="mb-4 flex-row items-center justify-center"
 					>
-						<PlusCircle size={18} color="white" />
-						<Text className="ml-2 text-white font-medium">Add Exercise</Text>
+						<PlusCircle
+							size={18}
+							color={colorScheme === "dark" ? "#000000" : "#ffffff"}
+						/>
+						<Text className="ml-2 text-primary-foreground dark:text-primary-foreground-dark font-medium">
+							Add Exercise
+						</Text>
 					</Button>
 
 					{/* Exercises List */}
@@ -288,7 +293,10 @@ export default function ProgramPage() {
 												onPress={() => openAddAlternative(index)}
 												className="p-2 rounded-lg bg-primary/10"
 											>
-												<PlusCircle size={16} color="#0891b2" />
+												<PlusCircle
+													size={16}
+													color={colorScheme === "dark" ? "#0891b2" : "#0891b2"}
+												/>
 											</TouchableOpacity>
 											<TouchableOpacity
 												disabled={index === 0}
@@ -322,9 +330,12 @@ export default function ProgramPage() {
 											</TouchableOpacity>
 											<TouchableOpacity
 												onPress={() => removeExercise(index)}
-												className="p-2 rounded-lg bg-red-100"
+												className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30"
 											>
-												<Minus size={16} color="#dc2626" />
+												<Minus
+													size={16}
+													color={colorScheme === "dark" ? "#fca5a5" : "#dc2626"}
+												/>
 											</TouchableOpacity>
 										</View>
 									</View>
@@ -376,9 +387,14 @@ export default function ProgramPage() {
 														</TouchableOpacity>
 														<TouchableOpacity
 															onPress={() => removeAlternative(index, altIndex)}
-															className="p-1 rounded bg-red-100"
+															className="p-1 rounded bg-red-100 dark:bg-red-900/30"
 														>
-															<Minus size={14} color="#dc2626" />
+															<Minus
+																size={14}
+																color={
+																	colorScheme === "dark" ? "#fca5a5" : "#dc2626"
+																}
+															/>
 														</TouchableOpacity>
 													</View>
 												</View>
@@ -400,9 +416,15 @@ export default function ProgramPage() {
 						className="h-16 w-16 rounded-full items-center justify-center p-0"
 					>
 						{isSaving ? (
-							<ActivityIndicator size="small" color="white" />
+							<ActivityIndicator
+								size="small"
+								color={colorScheme === "dark" ? "#000000" : "#ffffff"}
+							/>
 						) : (
-							<SaveIcon size={28} color="white" />
+							<SaveIcon
+								size={28}
+								color={colorScheme === "dark" ? "#000000" : "#ffffff"}
+							/>
 						)}
 					</Button>
 				</View>
