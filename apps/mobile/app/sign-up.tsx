@@ -14,6 +14,7 @@ import { Text } from "@/components/ui/text";
 import { H1 } from "@/components/ui/typography";
 import { useAuth } from "@/context/supabase-provider";
 import { GoogleIcon } from "@/lib/icons/google";
+import { useColorScheme } from "@/lib/useColorScheme";
 
 const formSchema = z
 	.object({
@@ -44,6 +45,8 @@ const formSchema = z
 
 export default function SignUp() {
 	const { signUp, signInWithGoogle, signInWithApple } = useAuth();
+	const { isDarkColorScheme } = useColorScheme();
+
 	const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 	const [isAppleLoading, setIsAppleLoading] = useState(false);
 	const [isAppleAvailable, setIsAppleAvailable] = useState(false);
@@ -120,7 +123,10 @@ export default function SignUp() {
 									AppleAuthentication.AppleAuthenticationButtonType.SIGN_UP
 								}
 								buttonStyle={
-									AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
+									isDarkColorScheme
+										? AppleAuthentication.AppleAuthenticationButtonStyle
+												.WHITE_OUTLINE
+										: AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
 								}
 								cornerRadius={8}
 								style={{ width: "100%", height: 44 }}

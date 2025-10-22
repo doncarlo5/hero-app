@@ -14,6 +14,7 @@ import { Text } from "@/components/ui/text";
 import { H1 } from "@/components/ui/typography";
 import { useAuth } from "@/context/supabase-provider";
 import { GoogleIcon } from "@/lib/icons/google";
+import { useColorScheme } from "@/lib/useColorScheme";
 
 const formSchema = z.object({
 	email: z.string().email("Please enter a valid email address."),
@@ -25,6 +26,7 @@ const formSchema = z.object({
 
 export default function SignIn() {
 	const { signIn, signInWithGoogle, signInWithApple } = useAuth();
+	const { isDarkColorScheme } = useColorScheme();
 	const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 	const [isAppleLoading, setIsAppleLoading] = useState(false);
 	const [isAppleAvailable, setIsAppleAvailable] = useState(false);
@@ -100,7 +102,10 @@ export default function SignIn() {
 									AppleAuthentication.AppleAuthenticationButtonType.CONTINUE
 								}
 								buttonStyle={
-									AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
+									isDarkColorScheme
+										? AppleAuthentication.AppleAuthenticationButtonStyle
+												.WHITE_OUTLINE
+										: AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
 								}
 								cornerRadius={8}
 								style={{ width: "100%", height: 44 }}
