@@ -7,7 +7,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 	name: "Hero App",
 	slug: "hero-app",
 	scheme: "hero-app",
-	version: "1.0.2",
+	version: "1.0.3",
 	orientation: "portrait",
 	icon: "./assets/icon.png",
 	userInterfaceStyle: "automatic",
