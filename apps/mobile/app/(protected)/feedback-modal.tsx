@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { useAuth } from "@/context/supabase-provider";
 import { fetchApi } from "@/lib/api-handler";
+import { useColorScheme } from "@/lib/useColorScheme";
 
 interface FeedbackModalProps {
 	visible: boolean;
@@ -24,6 +25,7 @@ export default function FeedbackModal({
 	onClose,
 }: FeedbackModalProps) {
 	const { user } = useAuth();
+	const { isDarkColorScheme } = useColorScheme();
 	const [formState, setFormState] = useState({ subject: "", message: "" });
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
@@ -83,9 +85,11 @@ export default function FeedbackModal({
 					style={{ maxHeight: "80%" }}
 				>
 					<View className="flex-row justify-between items-center mb-4">
-						<Text className="text-lg font-semibold">Feedback</Text>
+						<Text className="text-lg font-semibold text-foreground dark:text-foreground-dark">
+							Feedback
+						</Text>
 						<Pressable onPress={onClose}>
-							<X size={24} />
+							<X size={24} color={isDarkColorScheme ? "#ffffff" : "#000000"} />
 						</Pressable>
 					</View>
 
@@ -134,27 +138,35 @@ export default function FeedbackModal({
 							<View className="flex-row flex-wrap gap-2 mb-4">
 								<Pressable
 									onPress={() => addToMessage("Bug")}
-									className="px-4 py-2 dark:bg-background-dark bg-gray-100 rounded-md"
+									className="px-4 py-2 bg-muted dark:bg-muted-dark rounded-md border border-border dark:border-border-dark"
 								>
-									<Text className="text-blue-500">+ Bug</Text>
+									<Text className="text-primary dark:text-primary-dark">
+										+ Bug
+									</Text>
 								</Pressable>
 								<Pressable
 									onPress={() => addToMessage("Feature")}
-									className="px-4 py-2 dark:bg-background-dark bg-gray-100 rounded-md"
+									className="px-4 py-2 bg-muted dark:bg-muted-dark rounded-md border border-border dark:border-border-dark"
 								>
-									<Text className="text-blue-500">+ Feature</Text>
+									<Text className="text-primary dark:text-primary-dark">
+										+ Feature
+									</Text>
 								</Pressable>
 								<Pressable
 									onPress={() => addToMessage("Séance")}
-									className="px-4 py-2 dark:bg-background-dark bg-gray-100 rounded-md"
+									className="px-4 py-2 bg-muted dark:bg-muted-dark rounded-md border border-border dark:border-border-dark"
 								>
-									<Text className="text-blue-500">+ Séance</Text>
+									<Text className="text-primary dark:text-primary-dark">
+										+ Séance
+									</Text>
 								</Pressable>
 								<Pressable
 									onPress={() => addToMessage("Design")}
-									className="px-4 py-2 dark:bg-background-dark bg-gray-100 rounded-md"
+									className="px-4 py-2 bg-muted dark:bg-muted-dark rounded-md border border-border dark:border-border-dark"
 								>
-									<Text className="text-blue-500">+ Design</Text>
+									<Text className="text-primary dark:text-primary-dark">
+										+ Design
+									</Text>
 								</Pressable>
 							</View>
 
@@ -164,8 +176,11 @@ export default function FeedbackModal({
 								disabled={loading}
 								className="flex-row items-center gap-2"
 							>
-								<Send size={16} color="white" />
-								<Text className="text-white">
+								<Send
+									size={16}
+									color={isDarkColorScheme ? "#000000" : "#ffffff"}
+								/>
+								<Text className="text-primary-foreground dark:text-primary-foreground-dark">
 									{loading ? "Envoi en cours..." : "Envoyer"}
 								</Text>
 							</Button>
