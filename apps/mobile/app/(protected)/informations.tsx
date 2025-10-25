@@ -95,7 +95,7 @@ export default function Informations() {
 			<Stack.Screen
 				options={{
 					headerShown: true,
-					title: "Modifier ton profil",
+					title: "Modifier mon profil",
 					headerBackTitle: "Retour",
 					headerStyle: {
 						backgroundColor:
@@ -109,7 +109,7 @@ export default function Informations() {
 							: colors.light.foreground,
 				}}
 			/>
-			<View className="flex-1 bg-background dark:bg-background-dark">
+			<View className="flex-1">
 				{/* Form */}
 				<ScrollView className="flex-1 p-4" showsVerticalScrollIndicator={false}>
 					<View style={{ gap: 24 }}>
