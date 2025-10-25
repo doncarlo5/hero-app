@@ -269,7 +269,11 @@ export default function Home() {
 								</Text>
 							</View>
 
-							<View className="rounded-2xl bg-slate-100/80 dark:bg-slate-900/80 shadow-md p-3 flex-1 justify-between">
+							<TouchableOpacity
+								onPress={() => router.push("/(protected)/trophy")}
+								activeOpacity={0.7}
+								className="rounded-2xl bg-slate-100/80 dark:bg-slate-900/80 shadow-md p-3 flex-1 justify-between"
+							>
 								<View className="flex-row items-center gap-1.5 mb-3">
 									<Trophy
 										color={isDarkColorScheme ? "#94a3b8" : "rgb(71 85 105)"}
@@ -292,7 +296,7 @@ export default function Home() {
 										{achievedTrophies}/27
 									</Text>
 								</View>
-							</View>
+							</TouchableOpacity>
 						</View>
 
 						<View className="flex-1 gap-3">
