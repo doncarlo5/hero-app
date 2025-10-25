@@ -1,8 +1,7 @@
 const mongoose = require("mongoose");
-const Trophy = require("../models/trophy.model");
 const ExerciseType = require("../models/exercise-type.model");
 const User = require("../models/user.model");
-const TrophyConstants = require("../constants/TrophiesConstant");
+const { initializeTrophyProgressForUser } = require("../src/trophy-progress");
 const MONGODB_URI = process.env.MONGODB_URI;
 
 console.log("Connecting to MongoDB...", `${MONGODB_URI}`);
@@ -25,28 +24,7 @@ const initializeTrophies = async () => {
     const exerciseTypes = await ExerciseType.find({ owner: userId });
     console.log("Exercise types found:", exerciseTypes);
 
-    for (const exerciseType of exerciseTypes) {
-      console.log(`Initializing trophies for ${exerciseType.name}...`);
-      const trophies = TrophyConstants[exerciseType.name];
-      if (trophies) {
-        for (const trophy of trophies) {
-          await Trophy.create({
-            name: trophy.name,
-            exerciseType: exerciseType._id,
-            exerciseUser: null,
-            trophyType: trophy.trophyType,
-            repsGoal: trophy.repsGoal,
-            weightMultiplier: trophy.weightMultiplier,
-            description: trophy.description,
-            level: trophy.level,
-            awardedAt: null,
-            achieved: false,
-            owner: userId,
-          });
-          console.log(`Trophy ${trophy.name} initialized successfully!`);
-        }
-      }
-    }
+    await initializeTrophyProgressForUser(userId, exerciseTypes);
     console.log("Trophies initialized successfully!");
   } catch (error) {
     console.error("Error initializing trophies:", error);
