@@ -1,4 +1,4 @@
-import { BottomSheet } from "@expo/ui/swift-ui";
+import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { format } from "date-fns";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
@@ -10,7 +10,7 @@ import {
 	StarIcon,
 	XIcon,
 } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
 	ActivityIndicator,
 	Alert,
@@ -25,6 +25,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { Textarea } from "@/components/ui/textarea";
+import { colors } from "@/constants/colors";
 import { fetchApi } from "@/lib/api-handler";
 import { useColorScheme } from "@/lib/useColorScheme";
 import { Pressable } from "react-native-gesture-handler";
@@ -61,11 +62,14 @@ type Session = {
 
 export default function DoExercise() {
 	const router = useRouter();
-	const { isDarkColorScheme } = useColorScheme();
+	const { isDarkColorScheme, colorScheme } = useColorScheme();
 	const { sessionId, exerciseTypeId } = useLocalSearchParams<{
 		sessionId: string;
 		exerciseTypeId?: string;
 	}>();
+
+	// Bottom sheet ref
+	const bottomSheetRef = useRef<BottomSheet>(null);
 
 	const [oneExerciseType, setOneExerciseType] = useState<ExerciseType | null>(
 		null,
@@ -82,6 +86,11 @@ export default function DoExercise() {
 		number | null
 	>(null);
 	const [isExercisePickerOpen, setIsExercisePickerOpen] = useState(false);
+
+	// Handle sheet changes
+	const handleSheetChange = useCallback((index: number) => {
+		setIsExercisePickerOpen(index >= 0);
+	}, []);
 
 	const [formState, setFormState] = useState({
 		rep1: "",
@@ -308,7 +317,10 @@ export default function DoExercise() {
 						</View>
 					) : (
 						<Button
-							onPress={() => setIsExercisePickerOpen(true)}
+							onPress={() => {
+								bottomSheetRef.current?.snapToIndex(0);
+								setIsExercisePickerOpen(true);
+							}}
 							variant="ghost"
 							className="flex-row w-full items-center dark:text-foreground-dark bg-gray-100 dark:bg-gray-700 rounded-md justify-between p-4"
 						>
@@ -614,54 +626,65 @@ export default function DoExercise() {
 			)}
 
 			{/* Exercise Picker BottomSheet */}
-			{isExercisePickerOpen && (
-				<BottomSheet
-					isOpened={isExercisePickerOpen}
-					onIsOpenedChange={(e: boolean) => {
-						setIsExercisePickerOpen(e);
+			<BottomSheet
+				ref={bottomSheetRef}
+				index={-1}
+				enableDynamicSizing={true}
+				enablePanDownToClose={true}
+				maxDynamicContentSize={600}
+				onChange={handleSheetChange}
+				onClose={() => setIsExercisePickerOpen(false)}
+				backgroundStyle={{
+					backgroundColor:
+						colorScheme === "dark" ? colors.dark.card : colors.light.card,
+				}}
+				handleIndicatorStyle={{
+					backgroundColor: colorScheme === "dark" ? "#6B7280" : "#9CA3AF",
+				}}
+			>
+				<BottomSheetScrollView
+					contentContainerStyle={{
+						padding: 24,
+						paddingBottom: 24,
+						backgroundColor:
+							colorScheme === "dark" ? colors.dark.card : colors.light.card,
+						flexGrow: 1,
 					}}
 				>
-					<View className="bg-background dark:bg-background-dark p-6">
-						<View className="w-12 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-4" />
-						<Text className="text-xl font-bold text-foreground dark:text-foreground-dark mb-4">
-							Select Exercise
-						</Text>
-						<ScrollView showsVerticalScrollIndicator={false}>
-							<View>
-								{allExerciseTypes.map((type, index) => (
-									<Pressable
-										key={type._id}
-										onPress={() => {
-											setSelectedExerciseIndex(index);
-											onExerciseTypeChange(type);
-											setIsExercisePickerOpen(false);
-										}}
+					<Text className="text-xl font-bold mb-4">Select Exercise</Text>
+					<View>
+						{allExerciseTypes.map((type, index) => (
+							<Pressable
+								key={type._id}
+								onPress={() => {
+									setSelectedExerciseIndex(index);
+									onExerciseTypeChange(type);
+									bottomSheetRef.current?.close();
+								}}
+							>
+								<View className="flex-row items-center p-3">
+									<View
+										className={`rounded-full border border-gray-300 dark:border-gray-600 p-2 ${
+											selectedExerciseIndex === index
+												? "bg-gray-700 dark:bg-gray-500"
+												: "bg-transparent"
+										}`}
+									/>
+									<Text
+										className={`ml-2 ${
+											selectedExerciseIndex === index
+												? "text-primary font-semibold"
+												: "text-foreground dark:text-foreground-dark"
+										}`}
 									>
-										<View className="flex-row items-center p-3">
-											<View
-												className={`rounded-full border border-gray-300 dark:border-gray-600 p-2 ${
-													selectedExerciseIndex === index
-														? "bg-gray-700 dark:bg-gray-500"
-														: "bg-transparent"
-												}`}
-											/>
-											<Text
-												className={`ml-2 ${
-													selectedExerciseIndex === index
-														? "text-primary font-semibold"
-														: "text-foreground dark:text-foreground-dark"
-												}`}
-											>
-												{type.name}
-											</Text>
-										</View>
-									</Pressable>
-								))}
-							</View>
-						</ScrollView>
+										{type.name}
+									</Text>
+								</View>
+							</Pressable>
+						))}
 					</View>
-				</BottomSheet>
-			)}
+				</BottomSheetScrollView>
+			</BottomSheet>
 		</SafeAreaView>
 	);
 }

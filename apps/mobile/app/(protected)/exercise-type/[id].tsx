@@ -6,6 +6,7 @@ import {
 	Alert,
 	Pressable,
 	ScrollView,
+	Switch,
 	View,
 } from "react-native";
 
@@ -14,8 +15,8 @@ import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { Textarea } from "@/components/ui/textarea";
 import { fetchApi } from "@/lib/api-handler";
+import { useColorScheme } from "@/lib/useColorScheme";
 import { cn } from "@/lib/utils";
-import { Switch } from "@expo/ui/swift-ui";
 
 interface ExerciseType {
 	_id: string;
@@ -46,6 +47,7 @@ interface FormState {
 export default function ExerciseTypeDetail() {
 	const { id } = useLocalSearchParams<{ id: string }>();
 	const router = useRouter();
+	const { isDarkColorScheme } = useColorScheme();
 
 	const isCreating = id === "new";
 	const [isLoading, setIsLoading] = useState(!isCreating);
@@ -283,7 +285,6 @@ export default function ExerciseTypeDetail() {
 										onValueChange={(checked: boolean) =>
 											handleCheckboxChange(checked, "Upper A")
 										}
-										variant="switch"
 									/>
 									<Text className="ml-2">Upper A</Text>
 								</View>
@@ -293,7 +294,6 @@ export default function ExerciseTypeDetail() {
 										onValueChange={(checked: boolean) =>
 											handleCheckboxChange(checked, "Lower")
 										}
-										variant="switch"
 									/>
 									<Text className="ml-2">Lower</Text>
 								</View>
@@ -303,7 +303,6 @@ export default function ExerciseTypeDetail() {
 										onValueChange={(checked: boolean) =>
 											handleCheckboxChange(checked, "Upper B")
 										}
-										variant="switch"
 									/>
 									<Text className="ml-2">Upper B</Text>
 								</View>
@@ -315,7 +314,6 @@ export default function ExerciseTypeDetail() {
 										onValueChange={(checked: boolean) =>
 											handleCheckboxChange(checked, "Séance A")
 										}
-										variant="switch"
 									/>
 									<Text className="ml-2">Séance A</Text>
 								</View>
@@ -325,7 +323,6 @@ export default function ExerciseTypeDetail() {
 										onValueChange={(checked: boolean) =>
 											handleCheckboxChange(checked, "Séance B")
 										}
-										variant="switch"
 									/>
 									<Text className="ml-2">Séance B</Text>
 								</View>
@@ -443,11 +440,18 @@ export default function ExerciseTypeDetail() {
 						)}
 					>
 						{isSaving ? (
-							<ActivityIndicator size="small" color="white" />
+							<ActivityIndicator
+								size="small"
+								color={isDarkColorScheme ? "#1F2937" : "white"}
+							/>
 						) : (
-							<Check color="#fff" strokeWidth={1.7} size={20} />
+							<Check
+								color={isDarkColorScheme ? "#1F2937" : "#fff"}
+								strokeWidth={1.7}
+								size={20}
+							/>
 						)}
-						<Text className="text-white">
+						<Text className="text-primary-foreground">
 							{isSaving
 								? isCreating
 									? "Creating..."

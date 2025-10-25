@@ -1,8 +1,9 @@
-import { BottomSheet, DateTimePicker, Picker } from "@expo/ui/swift-ui";
+import { DateTimePicker, Picker } from "@expo/ui/swift-ui";
+import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale/fr";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
 	ActivityIndicator,
 	Alert,
@@ -16,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { Textarea } from "@/components/ui/textarea";
+import { colors } from "@/constants/colors";
 import { fetchApi } from "@/lib/api-handler";
 import { useColorScheme } from "@/lib/useColorScheme";
 import {
@@ -88,7 +90,12 @@ export default function SessionDetail() {
 		fromExercise?: string;
 	}>();
 	const router = useRouter();
-	const { isDarkColorScheme } = useColorScheme();
+	const { isDarkColorScheme, colorScheme } = useColorScheme();
+
+	// Bottom sheet refs
+	const calendarBottomSheetRef = useRef<BottomSheet>(null);
+	const weightBottomSheetRef = useRef<BottomSheet>(null);
+	const exerciseInfoBottomSheetRef = useRef<BottomSheet>(null);
 
 	const [session, setSession] = useState<Session | null>(null);
 	const [lastSession, setLastSession] = useState<Session | null>(null);
@@ -102,6 +109,19 @@ export default function SessionDetail() {
 	const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 	const [isWeightPickerOpen, setIsWeightPickerOpen] = useState(false);
 	const [isExerciseInfoOpen, setIsExerciseInfoOpen] = useState(false);
+
+	// Handle sheet changes
+	const handleCalendarSheetChange = useCallback((index: number) => {
+		setIsCalendarOpen(index >= 0);
+	}, []);
+
+	const handleWeightSheetChange = useCallback((index: number) => {
+		setIsWeightPickerOpen(index >= 0);
+	}, []);
+
+	const handleExerciseInfoSheetChange = useCallback((index: number) => {
+		setIsExerciseInfoOpen(index >= 0);
+	}, []);
 
 	const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 	const [selectedWeight, setSelectedWeight] = useState<string>("");
@@ -375,7 +395,10 @@ export default function SessionDetail() {
 					<View className="flex-row items-center justify-between mb-4">
 						<View className="">
 							<Pressable
-								onPress={() => setIsExerciseInfoOpen(true)}
+								onPress={() => {
+									exerciseInfoBottomSheetRef.current?.snapToIndex(0);
+									setIsExerciseInfoOpen(true);
+								}}
 								className="flex-row w-fit items-center gap-3 active:opacity-50"
 							>
 								<Text className="text-2xl font-bold text-foreground dark:text-foreground-dark mb-1">
@@ -419,6 +442,7 @@ export default function SessionDetail() {
 							<View className="flex-1">
 								<Button
 									onPress={() => {
+										calendarBottomSheetRef.current?.snapToIndex(0);
 										setIsCalendarOpen(true);
 									}}
 									variant="ghost"
@@ -441,6 +465,7 @@ export default function SessionDetail() {
 							<View className="flex-1">
 								<Button
 									onPress={() => {
+										weightBottomSheetRef.current?.snapToIndex(0);
 										setIsWeightPickerOpen(true);
 									}}
 									variant="ghost"
@@ -709,93 +734,131 @@ export default function SessionDetail() {
 				)}
 			</View>
 
-			{/* Calendar BottomSheet - Moved outside main content */}
-			{isCalendarOpen && (
-				<BottomSheet
-					isOpened={isCalendarOpen}
-					onIsOpenedChange={(e) => {
-						setIsCalendarOpen(e);
+			{/* Calendar BottomSheet */}
+			<BottomSheet
+				ref={calendarBottomSheetRef}
+				index={-1}
+				enableDynamicSizing={true}
+				enablePanDownToClose={true}
+				maxDynamicContentSize={600}
+				onChange={handleCalendarSheetChange}
+				onClose={() => setIsCalendarOpen(false)}
+				backgroundStyle={{
+					backgroundColor:
+						colorScheme === "dark" ? colors.dark.card : colors.light.card,
+				}}
+				handleIndicatorStyle={{
+					backgroundColor: colorScheme === "dark" ? "#6B7280" : "#9CA3AF",
+				}}
+			>
+				<BottomSheetScrollView
+					contentContainerStyle={{
+						padding: 24,
+						paddingBottom: 24,
+						backgroundColor:
+							colorScheme === "dark" ? colors.dark.card : colors.light.card,
+						flexGrow: 1,
 					}}
 				>
-					<View className="bg-background dark:bg-background-dark p-6">
-						<View className="w-12 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-4" />
-						<Text className="text-lg font-bold text-foreground dark:text-foreground-dark">
-							Date of the session
-						</Text>
-						<DateTimePicker
-							onDateSelected={handleDateSelect}
-							displayedComponents="date"
-							initialDate={
-								selectedDate?.toISOString() || new Date().toISOString()
-							}
-							variant="wheel"
-							title=""
-						/>
-					</View>
-				</BottomSheet>
-			)}
+					<Text className="text-lg font-bold mb-4">Date of the session</Text>
+					<DateTimePicker
+						onDateSelected={handleDateSelect}
+						displayedComponents="date"
+						initialDate={
+							selectedDate?.toISOString() || new Date().toISOString()
+						}
+						variant="wheel"
+						title=""
+					/>
+				</BottomSheetScrollView>
+			</BottomSheet>
 
-			{/* Weight Picker BottomSheet - Moved outside main content */}
-			{isWeightPickerOpen && (
-				<BottomSheet
-					isOpened={isWeightPickerOpen}
-					onIsOpenedChange={(e) => {
-						setIsWeightPickerOpen(e);
+			{/* Weight Picker BottomSheet */}
+			<BottomSheet
+				ref={weightBottomSheetRef}
+				index={-1}
+				enableDynamicSizing={true}
+				enablePanDownToClose={true}
+				maxDynamicContentSize={600}
+				onChange={handleWeightSheetChange}
+				onClose={() => setIsWeightPickerOpen(false)}
+				backgroundStyle={{
+					backgroundColor:
+						colorScheme === "dark" ? colors.dark.card : colors.light.card,
+				}}
+				handleIndicatorStyle={{
+					backgroundColor: colorScheme === "dark" ? "#6B7280" : "#9CA3AF",
+				}}
+			>
+				<BottomSheetScrollView
+					contentContainerStyle={{
+						padding: 24,
+						paddingBottom: 24,
+						backgroundColor:
+							colorScheme === "dark" ? colors.dark.card : colors.light.card,
+						flexGrow: 1,
 					}}
 				>
-					<View className="bg-background dark:bg-background-dark p-6">
-						<View className="w-12 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-4" />
-						<Text className="text-lg font-bold text-foreground dark:text-foreground-dark mb-4">
-							Select Body Weight
-						</Text>
-						<Picker
-							options={weightOptions}
-							selectedIndex={selectedWeightIndex}
-							onOptionSelected={handleWeightIndexSelect}
-							variant="wheel"
-							style={{
-								height: 100,
-							}}
-						/>
-					</View>
-				</BottomSheet>
-			)}
+					<Text className="text-lg font-bold mb-4">Select Body Weight</Text>
+					<Picker
+						options={weightOptions}
+						selectedIndex={selectedWeightIndex}
+						onOptionSelected={handleWeightIndexSelect}
+						variant="wheel"
+						style={{
+							height: 100,
+						}}
+					/>
+				</BottomSheetScrollView>
+			</BottomSheet>
 
 			{/* Exercise Info BottomSheet */}
-			{isExerciseInfoOpen && (
-				<BottomSheet
-					isOpened={isExerciseInfoOpen}
-					onIsOpenedChange={(e) => {
-						setIsExerciseInfoOpen(e);
+			<BottomSheet
+				ref={exerciseInfoBottomSheetRef}
+				index={-1}
+				enableDynamicSizing={true}
+				enablePanDownToClose={true}
+				maxDynamicContentSize={600}
+				onChange={handleExerciseInfoSheetChange}
+				onClose={() => setIsExerciseInfoOpen(false)}
+				backgroundStyle={{
+					backgroundColor:
+						colorScheme === "dark" ? colors.dark.card : colors.light.card,
+				}}
+				handleIndicatorStyle={{
+					backgroundColor: colorScheme === "dark" ? "#6B7280" : "#9CA3AF",
+				}}
+			>
+				<BottomSheetScrollView
+					contentContainerStyle={{
+						padding: 24,
+						paddingBottom: 24,
+						backgroundColor:
+							colorScheme === "dark" ? colors.dark.card : colors.light.card,
+						flexGrow: 1,
 					}}
 				>
-					<View className="bg-background dark:bg-background-dark p-6">
-						<View className="w-12 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-4" />
-						<Text className="text-lg font-bold text-foreground dark:text-foreground-dark mb-4">
-							{session?.type_session} Exercises
-						</Text>
-						<View>
-							{getSessionExercises(session?.type_session || "").map(
-								(exercise, index) => (
-									<View
-										key={index}
-										className="flex-row items-center gap-3 mb-1"
-									>
-										<View className="w-6 h-6 rounded-full bg-primary/10 dark:bg-primary-dark/10 items-center justify-center">
-											<Text className="text-xs font-bold text-primary dark:text-primary-dark">
-												{index + 1}
-											</Text>
-										</View>
-										<Text className="text-foreground dark:text-foreground-dark flex-1">
-											{exercise}
+					<Text className="text-lg font-bold mb-4">
+						{session?.type_session} Exercises
+					</Text>
+					<View>
+						{getSessionExercises(session?.type_session || "").map(
+							(exercise, index) => (
+								<View key={index} className="flex-row items-center gap-3 mb-1">
+									<View className="w-6 h-6 rounded-full bg-primary/10 dark:bg-primary-dark/10 items-center justify-center">
+										<Text className="text-xs font-bold text-primary dark:text-primary-dark">
+											{index + 1}
 										</Text>
 									</View>
-								),
-							)}
-						</View>
+									<Text className="text-foreground dark:text-foreground-dark flex-1">
+										{exercise}
+									</Text>
+								</View>
+							),
+						)}
 					</View>
-				</BottomSheet>
-			)}
+				</BottomSheetScrollView>
+			</BottomSheet>
 		</View>
 	);
 }

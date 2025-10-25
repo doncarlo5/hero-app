@@ -1,4 +1,4 @@
-import { BottomSheet } from "@expo/ui/swift-ui";
+import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { Stack, useRouter } from "expo-router";
 import {
 	ChevronDown,
@@ -8,7 +8,7 @@ import {
 	SaveIcon,
 	XIcon,
 } from "lucide-react-native";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
 	ActivityIndicator,
 	Alert,
@@ -42,6 +42,9 @@ const sessionOptions = ["Upper A", "Lower", "Upper B", "Séance A", "Séance B"]
 export default function ProgramPage() {
 	const { colorScheme } = useColorScheme();
 
+	// Bottom sheet ref
+	const bottomSheetRef = useRef<BottomSheet>(null);
+
 	const [sessionType, setSessionType] = useState("Upper A");
 	const [exercises, setExercises] = useState<ExerciseProgram[]>([]);
 	const [availableExercises, setAvailableExercises] = useState<ExerciseType[]>(
@@ -49,6 +52,11 @@ export default function ProgramPage() {
 	);
 	const [isExercisePickerOpen, setIsExercisePickerOpen] = useState(false);
 	const [targetExercise, setTargetExercise] = useState<number | null>(null);
+
+	// Handle sheet changes
+	const handleSheetChange = useCallback((index: number) => {
+		setIsExercisePickerOpen(index >= 0);
+	}, []);
 	const [isLoading, setIsLoading] = useState(false);
 	const [isLoadingTypes, setIsLoadingTypes] = useState(true);
 	const [isSaving, setIsSaving] = useState(false);
@@ -87,11 +95,13 @@ export default function ProgramPage() {
 
 	const openAddExercise = () => {
 		setTargetExercise(null);
+		bottomSheetRef.current?.snapToIndex(0);
 		setIsExercisePickerOpen(true);
 	};
 
 	const openAddAlternative = (index: number) => {
 		setTargetExercise(index);
+		bottomSheetRef.current?.snapToIndex(0);
 		setIsExercisePickerOpen(true);
 	};
 
@@ -107,7 +117,7 @@ export default function ProgramPage() {
 			updated[targetExercise].alternatives.push(exercise);
 			setExercises(updated);
 		}
-		setIsExercisePickerOpen(false);
+		bottomSheetRef.current?.close();
 	};
 
 	const moveExerciseUp = (index: number) => {
@@ -430,59 +440,72 @@ export default function ProgramPage() {
 				</View>
 
 				{/* Exercise Picker BottomSheet */}
-				{isExercisePickerOpen && (
-					<BottomSheet
-						isOpened={isExercisePickerOpen}
-						onIsOpenedChange={(e: boolean) => {
-							setIsExercisePickerOpen(e);
+				<BottomSheet
+					ref={bottomSheetRef}
+					index={-1}
+					enableDynamicSizing={true}
+					enablePanDownToClose={true}
+					maxDynamicContentSize={600}
+					onChange={handleSheetChange}
+					onClose={() => setIsExercisePickerOpen(false)}
+					backgroundStyle={{
+						backgroundColor:
+							colorScheme === "dark" ? colors.dark.card : colors.light.card,
+					}}
+					handleIndicatorStyle={{
+						backgroundColor: colorScheme === "dark" ? "#6B7280" : "#9CA3AF",
+					}}
+				>
+					<BottomSheetScrollView
+						contentContainerStyle={{
+							padding: 24,
+							paddingBottom: 24,
+							backgroundColor:
+								colorScheme === "dark" ? colors.dark.card : colors.light.card,
+							flexGrow: 1,
 						}}
 					>
-						<View className="bg-background dark:bg-background-dark p-6">
-							<View className="w-12 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mb-4" />
-							<Text className="text-xl font-bold text-foreground dark:text-foreground-dark mb-4">
-								{targetExercise === null
-									? "Select Exercise"
-									: "Select Alternative"}
-							</Text>
-							{isLoadingTypes ? (
-								<View className="items-center py-8">
-									<ActivityIndicator size="large" />
-									<Text className="text-muted-foreground dark:text-gray-400 mt-2">
-										Loading exercises...
-									</Text>
-								</View>
-							) : availableExercises.length === 0 ? (
-								<View className="bg-muted/30 dark:bg-muted-dark/30 rounded-lg p-6 items-center">
-									<Text className="text-muted-foreground dark:text-gray-400 text-center">
-										No exercises available for this session type.
-									</Text>
-								</View>
-							) : (
-								<ScrollView showsVerticalScrollIndicator={false}>
-									<View>
-										{availableExercises.map((ex) => (
-											<Pressable key={ex._id} onPress={() => handleSelect(ex)}>
-												<View className="flex-row items-center p-3 border-b border-border dark:border-border-dark">
-													<Text className="text-foreground dark:text-foreground-dark flex-1">
-														{ex.name}
-													</Text>
-												</View>
-											</Pressable>
-										))}
-									</View>
-								</ScrollView>
-							)}
-							<Button
-								onPress={() => setIsExercisePickerOpen(false)}
-								variant="outline"
-								className="mt-4"
-							>
-								<XIcon size={16} color="#6b7280" />
-								<Text className="ml-2">Close</Text>
-							</Button>
-						</View>
-					</BottomSheet>
-				)}
+						<Text className="text-xl font-bold mb-4">
+							{targetExercise === null
+								? "Select Exercise"
+								: "Select Alternative"}
+						</Text>
+						{isLoadingTypes ? (
+							<View className="items-center py-8">
+								<ActivityIndicator size="large" />
+								<Text className="text-muted-foreground dark:text-gray-400 mt-2">
+									Loading exercises...
+								</Text>
+							</View>
+						) : availableExercises.length === 0 ? (
+							<View className="bg-muted/30 dark:bg-muted-dark/30 rounded-lg p-6 items-center">
+								<Text className="text-muted-foreground dark:text-gray-400 text-center">
+									No exercises available for this session type.
+								</Text>
+							</View>
+						) : (
+							<View>
+								{availableExercises.map((ex) => (
+									<Pressable key={ex._id} onPress={() => handleSelect(ex)}>
+										<View className="flex-row items-center p-3 border-b border-border dark:border-border-dark">
+											<Text className="text-foreground dark:text-foreground-dark flex-1">
+												{ex.name}
+											</Text>
+										</View>
+									</Pressable>
+								))}
+							</View>
+						)}
+						<Button
+							onPress={() => bottomSheetRef.current?.close()}
+							variant="outline"
+							className="mt-4"
+						>
+							<XIcon size={16} color="#6b7280" />
+							<Text className="ml-2">Close</Text>
+						</Button>
+					</BottomSheetScrollView>
+				</BottomSheet>
 			</SafeAreaView>
 		</>
 	);
