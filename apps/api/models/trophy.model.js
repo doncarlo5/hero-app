@@ -2,6 +2,10 @@ const { Schema, model } = require("mongoose");
 
 const trophySchema = new Schema(
   {
+    definition: {
+      type: Schema.Types.ObjectId,
+      ref: "TrophyDefinition",
+    },
     name: { type: String, required: true },
     exerciseType: {
       type: Schema.Types.ObjectId,
