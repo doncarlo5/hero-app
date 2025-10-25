@@ -296,7 +296,11 @@ export default function Home() {
 						</View>
 
 						<View className="flex-1 gap-3">
-							<View className="rounded-2xl bg-slate-100/80 dark:bg-slate-900/80 shadow-md p-3 flex-1 items-center justify-center">
+							<TouchableOpacity
+								onPress={() => router.push("/(protected)/exercise-type/new")}
+								activeOpacity={0.7}
+								className="rounded-2xl bg-slate-100/80 dark:bg-slate-900/80 shadow-md p-3 flex-1 items-center justify-center"
+							>
 								<View className="items-center gap-2">
 									<View className="items-center">
 										<Text className="leading-4 text-gray-500 dark:text-gray-400 text-sm">
@@ -313,7 +317,7 @@ export default function Home() {
 										color={isDarkColorScheme ? "#94a3b8" : "rgb(71 85 105)"}
 									/>
 								</View>
-							</View>
+							</TouchableOpacity>
 
 							<View className="rounded-2xl bg-slate-100/80 dark:bg-slate-900/80 shadow-md p-3 h-24 justify-between">
 								<View className="flex-row gap-1.5">
