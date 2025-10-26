@@ -6,11 +6,10 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user.model");
 const ExerciseType = require("../models/exercise-type.model");
 const isAuthenticated = require("../src/is-authenticated");
-const Trophy = require("../models/trophy.model");
-const TrophiesConstant = require("../constants/TrophiesConstant");
 const defaultExerciseTypesContant = require("../constants/DefaultExerciseTypesConstant");
 const salt = 10;
 const SECRET_TOKEN = process.env.SECRET_TOKEN;
+const { initializeTrophyProgressForUser } = require("../src/trophy-progress");
 
 //* Sign Up
 
@@ -50,32 +49,7 @@ router.post("/signup", async (req, res, next) => {
       }))
     );
 
-    // Function to seed trophies for a new user
-    const seedTrophiesForUser = async (userId, exerciseTypes) => {
-      for (const exerciseType of exerciseTypes) {
-        const trophies = TrophiesConstant[exerciseType.name];
-        if (trophies) {
-          for (const trophy of trophies) {
-            await Trophy.create({
-              name: trophy.name,
-              exerciseType: exerciseType._id,
-              exerciseUser: null,
-              trophyType: trophy.trophyType,
-              repsGoal: trophy.repsGoal,
-              weightMultiplier: trophy.weightMultiplier,
-              description: trophy.description,
-              level: trophy.level,
-              awardedAt: null,
-              achieved: false,
-              rewardText: trophy.rewardText,
-              owner: userId,
-            });
-          }
-        }
-      }
-    };
-
-    await seedTrophiesForUser(newUser._id, createdExerciseTypes);
+    await initializeTrophyProgressForUser(newUser._id, createdExerciseTypes);
 
     // Create the token to log in
     const token = jwt.sign({ _id: newUser._id }, SECRET_TOKEN, {
