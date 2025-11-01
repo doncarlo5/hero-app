@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const ExerciseType = require("../models/exercise-type.model");
+const trophyService = require("../services/trophy-service");
 
 // Get all exercise types
 router.get("/", async (req, res, next) => {
@@ -75,6 +76,20 @@ router.post("/", async (req, res, next) => {
       type_session,
       owner: req.user._id,
     });
+
+    // Initialize trophies for this new exercise type if it has trophy definitions
+    try {
+      await trophyService.initializeTrophiesForExerciseType(
+        req.user._id,
+        createExerciseType._id
+      );
+    } catch (error) {
+      // Log error but don't fail exercise type creation if trophy initialization fails
+      console.error(
+        `Error initializing trophies for exercise type ${createExerciseType.name}:`,
+        error
+      );
+    }
 
     res.status(201).json({ id: createExerciseType._id });
   } catch (error) {

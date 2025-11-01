@@ -19,6 +19,8 @@ const trophySchema = new Schema(
     level: { type: Number },
     repsUser: { type: Number },
     weightUser: { type: Number },
+    bestReps: { type: Number, default: 0 },
+    bestWeight: { type: Number, default: 0 },
     awardedAt: { type: Date },
     rewardText: { type: String },
     bodyWeight: { type: Number },
@@ -32,6 +34,10 @@ const trophySchema = new Schema(
     timestamps: true,
   }
 );
+
+// Add indexes for faster lookups
+trophySchema.index({ owner: 1, exerciseType: 1, level: 1 });
+trophySchema.index({ owner: 1, exerciseType: 1 });
 
 const Trophy = model("Trophy", trophySchema);
 

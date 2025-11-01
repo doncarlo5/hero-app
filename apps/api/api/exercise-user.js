@@ -3,6 +3,7 @@ const router = express.Router();
 
 const ExerciseUser = require("../models/exercise-user.model");
 const { checkAndAwardTrophies } = require("./trophy");
+const trophyService = require("../services/trophy-service");
 
 // Get all exercise-user by his ID
 
@@ -132,10 +133,9 @@ router.put("/:id", async (req, res, next) => {
 });
 
 // Delete an exercise-user
-
 router.delete("/:id", async (req, res, next) => {
   try {
-    const deleteExerciseUser = await ExerciseUser.findOneAndDelete({
+    const deleteExerciseUser = await ExerciseUser.findOne({
       _id: req.params.id,
       owner: req.user._id,
     });
@@ -145,6 +145,26 @@ router.delete("/:id", async (req, res, next) => {
         message: "Trying to delete Exercise User - Unauthorized or not found",
       });
     }
+
+    // Store exercise type ID before deletion for trophy re-evaluation
+    const exerciseTypeId = deleteExerciseUser.type;
+
+    // Delete the exercise-user
+    await ExerciseUser.findByIdAndDelete(req.params.id);
+
+    // Re-evaluate trophies in case the deleted exercise was the one that earned a trophy
+    if (exerciseTypeId) {
+      try {
+        await trophyService.evaluateTrophyForExerciseType(
+          req.user._id,
+          exerciseTypeId
+        );
+      } catch (trophyError) {
+        // Log error but don't fail the delete operation
+        console.error("Error re-evaluating trophies after delete:", trophyError);
+      }
+    }
+
     res.status(204).json(deleteExerciseUser);
   } catch (error) {
     next(error);
