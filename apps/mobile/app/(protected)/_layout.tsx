@@ -48,6 +48,7 @@ export default function ProtectedLayout() {
 						headerTitle: "Session",
 						headerBackTitle: params?.fromExercise === "true" ? "" : "List",
 						headerBackVisible: params?.fromExercise !== "true",
+						headerShadowVisible: true,
 					};
 				}}
 			/>
@@ -67,6 +68,7 @@ export default function ProtectedLayout() {
 					presentation: "card",
 					headerShown: true,
 					headerTitle: "Exercise",
+					headerShadowVisible: true,
 				}}
 			/>
 			<Stack.Screen
@@ -86,6 +88,7 @@ export default function ProtectedLayout() {
 					headerShown: true,
 					headerTitle: "Exercise Type",
 					headerBackTitle: "Mes types",
+					headerShadowVisible: true,
 				}}
 			/>
 			<Stack.Screen
@@ -105,6 +108,7 @@ export default function ProtectedLayout() {
 					headerShown: true,
 					headerTitle: "New Exercise",
 					headerBackTitle: "Back",
+					headerShadowVisible: true,
 				}}
 			/>
 			<Stack.Screen
@@ -124,6 +128,7 @@ export default function ProtectedLayout() {
 					headerShown: true,
 					headerTitle: "Mes exercices type",
 					headerBackTitle: "Settings",
+					headerShadowVisible: true,
 				}}
 			/>
 			<Stack.Screen
@@ -143,6 +148,7 @@ export default function ProtectedLayout() {
 					headerShown: true,
 					headerTitle: "Statistiques",
 					headerBackTitle: "Back",
+					headerShadowVisible: true,
 				}}
 			/>
 			<Stack.Screen
@@ -162,6 +168,7 @@ export default function ProtectedLayout() {
 					headerShown: true,
 					headerTitle: "Trophées",
 					headerBackTitle: "Settings",
+					headerShadowVisible: true,
 				}}
 			/>
 		</Stack>

@@ -30,6 +30,7 @@ export default function TimerPage() {
 						colorScheme === "dark"
 							? colors.dark.foreground
 							: colors.light.foreground,
+					headerShadowVisible: true,
 				}}
 			/>
 			<View className="flex-1 bg-background dark:bg-background-dark">

@@ -107,6 +107,7 @@ export default function Informations() {
 						colorScheme === "dark"
 							? colors.dark.foreground
 							: colors.light.foreground,
+					headerShadowVisible: true,
 				}}
 			/>
 			<View className="flex-1">

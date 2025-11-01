@@ -33,6 +33,7 @@ export default function AppLayout() {
 								colorScheme === "dark"
 									? colors.dark.foreground
 									: colors.light.foreground,
+							headerShadowVisible: true,
 							gestureEnabled: true,
 						}}
 					/>
@@ -52,6 +53,7 @@ export default function AppLayout() {
 								colorScheme === "dark"
 									? colors.dark.foreground
 									: colors.light.foreground,
+							headerShadowVisible: true,
 							gestureEnabled: true,
 						}}
 					/>

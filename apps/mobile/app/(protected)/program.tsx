@@ -214,6 +214,7 @@ export default function ProgramPage() {
 						colorScheme === "dark"
 							? colors.dark.foreground
 							: colors.light.foreground,
+					headerShadowVisible: true,
 				}}
 			/>
 			<SafeAreaView
