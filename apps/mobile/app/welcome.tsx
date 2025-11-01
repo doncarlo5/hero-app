@@ -6,7 +6,7 @@ import { Image } from "@/components/image";
 import { SafeAreaView } from "@/components/safe-area-view";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { H1, Muted } from "@/components/ui/typography";
+import { Muted } from "@/components/ui/typography";
 import { useColorScheme } from "@/lib/useColorScheme";
 
 export default function WelcomeScreen() {
@@ -22,9 +22,22 @@ export default function WelcomeScreen() {
 			<View className="flex flex-1 items-center justify-center gap-y-4 web:m-4">
 				<View className="flex flex-row items-center gap-x-2">
 					<Image source={appIcon} className="w-20 h-20 rounded-xl" />
-					<View className="flex flex-col">
-						<H1 className="tracking-tight text-[2.7rem]">Hero</H1>
-						<H1 className="tracking-tight -mt-5 text-[2.7rem]">App</H1>
+					<View style={{ gap: 0 }}>
+						<Text
+							style={{
+								fontSize: 43.2,
+								fontWeight: "800",
+								lineHeight: 40.2,
+								marginBottom: -9,
+							}}
+						>
+							Hero
+						</Text>
+						<Text
+							style={{ fontSize: 43.2, fontWeight: "800", lineHeight: 40.2 }}
+						>
+							App
+						</Text>
 					</View>
 				</View>
 
