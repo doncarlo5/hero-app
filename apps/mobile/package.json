@@ -1,6 +1,6 @@
 {
 	"name": "hero-app-mobile",
-	"version": "1.0.4",
+	"version": "1.0.5",
 	"main": "expo-router/entry",
 	"packageManager": "npm@10.0.0",
 	"scripts": {
