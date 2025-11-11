@@ -3,7 +3,6 @@ import { fr } from "date-fns/locale/fr";
 import { Flame, Gauge, Plus, Trophy } from "lucide-react-native";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-	ActivityIndicator,
 	RefreshControl,
 	SafeAreaView,
 	ScrollView,
@@ -175,17 +174,8 @@ export default function Home() {
 	}, [fetchData]);
 
 	const achievedTrophies = trophies.filter((t) => t.achieved).length;
-
-	if (isLoading) {
-		return (
-			<SafeAreaView className="flex-1 items-center justify-center bg-background dark:bg-background-dark p-4">
-				<ActivityIndicator size="large" />
-				<Text className="mt-4 text-sm text-muted-foreground dark:text-gray-400">
-					Chargement…
-				</Text>
-			</SafeAreaView>
-		);
-	}
+	const isLoadingTrophies = isLoading && trophies.length === 0;
+	const isLoadingSession = isLoading && !lastSession;
 
 	return (
 		<SafeAreaView className="flex-1 bg-background dark:bg-background-dark">
@@ -203,46 +193,63 @@ export default function Home() {
 			>
 				<View className="">
 					<Text className="text-4xl font-bold tracking-tighter mb-4 dark:text-gray-300">
-						Bienvenue {user?.firstName}
+						Bienvenue {user?.firstName || ""}
 					</Text>
 
-					<TouchableOpacity
-						onPress={() => {
-							if (lastSession) {
-								router.push("/(protected)/(tabs)/list");
-							}
-						}}
-						disabled={!lastSession}
-						activeOpacity={lastSession ? 0.7 : 1}
-					>
+					{isLoadingSession ? (
 						<View className="rounded-2xl bg-slate-100/80 dark:bg-slate-900/80 shadow-md p-3 mb-6">
 							<View className="flex-col justify-between gap-4">
 								<View className="flex-row items-center justify-between">
-									<Text className="text-xs font-semibold uppercase tracking-tight text-gray-500 dark:text-gray-400">
-										{lastSession ? "Séance précédente" : "Aucune séance"}
-									</Text>
-									<View className="bg-slate-800/30 rounded-full h-5 w-5 flex justify-center items-center">
-										<Text className="text-xs text-white dark:text-gray-400">
-											↗
-										</Text>
-									</View>
+									<View className="h-5 w-32 rounded bg-gray-200 dark:bg-slate-700" />
+									<View className="h-4 w-5 rounded-full bg-gray-200 dark:bg-slate-700" />
 								</View>
-
-								{lastSession && (
-									<View className="flex-row items-center gap-2">
-										<TypeSessionBadge type_session={lastSession.type_session} />
-										<Text className="capitalize text-slate-600 dark:text-gray-400 text-sm">
-											{format(
-												new Date(lastSession.date_session),
-												"EEE d MMMM yyyy",
-												{ locale: fr },
-											)}
-										</Text>
-									</View>
-								)}
+								<View className="flex-row items-center gap-2">
+									<View className="h-7 w-16 rounded bg-gray-200 dark:bg-slate-700" />
+									<View className="h-4 w-28 rounded bg-gray-200 dark:bg-slate-700" />
+								</View>
 							</View>
 						</View>
-					</TouchableOpacity>
+					) : (
+						<TouchableOpacity
+							onPress={() => {
+								if (lastSession) {
+									router.push("/(protected)/(tabs)/list");
+								}
+							}}
+							disabled={!lastSession}
+							activeOpacity={lastSession ? 0.7 : 1}
+						>
+							<View className="rounded-2xl bg-slate-100/80 dark:bg-slate-900/80 shadow-md p-3 mb-6">
+								<View className="flex-col justify-between gap-4">
+									<View className="flex-row items-center justify-between">
+										<Text className="text-xs font-semibold uppercase tracking-tight text-gray-500 dark:text-gray-400">
+											{lastSession ? "Séance précédente" : "Aucune séance"}
+										</Text>
+										<View className="bg-slate-800/30 rounded-full h-5 w-5 flex justify-center items-center">
+											<Text className="text-xs text-white dark:text-gray-400">
+												↗
+											</Text>
+										</View>
+									</View>
+
+									{lastSession && (
+										<View className="flex-row items-center gap-2">
+											<TypeSessionBadge
+												type_session={lastSession.type_session}
+											/>
+											<Text className="capitalize text-slate-600 dark:text-gray-400 text-sm">
+												{format(
+													new Date(lastSession.date_session),
+													"EEE d MMMM yyyy",
+													{ locale: fr },
+												)}
+											</Text>
+										</View>
+									)}
+								</View>
+							</View>
+						</TouchableOpacity>
+					)}
 
 					<WeekActivityCarousel />
 
@@ -269,34 +276,48 @@ export default function Home() {
 								</Text>
 							</View>
 
-							<TouchableOpacity
-								onPress={() => router.push("/(protected)/trophy")}
-								activeOpacity={0.7}
-								className="rounded-2xl bg-slate-100/80 dark:bg-slate-900/80 shadow-md p-3 flex-1 justify-between"
-							>
-								<View className="flex-row items-center gap-1.5 mb-3">
-									<Trophy
-										color={isDarkColorScheme ? "#94a3b8" : "rgb(71 85 105)"}
-										height={17}
-										width={17}
-										strokeWidth={2.2}
-									/>
-									<Text className="text-slate-600 dark:text-gray-400 text-sm">
-										Total trophées
-									</Text>
-								</View>
+							{isLoadingTrophies ? (
+								<View className="rounded-2xl bg-slate-100/80 dark:bg-slate-900/80 shadow-md p-3 flex-1 justify-between">
+									<View className="flex-row items-center gap-1.5 mb-3">
+										<View className="h-[17px] w-[17px] rounded bg-gray-200 dark:bg-slate-700" />
+										<View className="h-4 w-24 rounded bg-gray-200 dark:bg-slate-700" />
+									</View>
 
-								<View className="items-center">
-									<CircularProgress
-										progress={(achievedTrophies / 27) * 100}
-										size={70}
-										strokeWidth={6}
-									/>
-									<Text className="text-xl font-extrabold text-center mt-2 dark:text-gray-300">
-										{achievedTrophies}/27
-									</Text>
+									<View className="items-center">
+										<View className="h-[74px] w-[70px] rounded-full bg-gray-200 dark:bg-slate-700" />
+										<View className="h-6 w-12 rounded bg-gray-200 dark:bg-slate-700 mt-2" />
+									</View>
 								</View>
-							</TouchableOpacity>
+							) : (
+								<TouchableOpacity
+									onPress={() => router.push("/(protected)/trophy")}
+									activeOpacity={0.7}
+									className="rounded-2xl bg-slate-100/80 dark:bg-slate-900/80 shadow-md p-3 flex-1 justify-between"
+								>
+									<View className="flex-row items-center gap-1.5 mb-3">
+										<Trophy
+											color={isDarkColorScheme ? "#94a3b8" : "rgb(71 85 105)"}
+											height={17}
+											width={17}
+											strokeWidth={2.2}
+										/>
+										<Text className="text-slate-600 dark:text-gray-400 text-sm">
+											Total trophées
+										</Text>
+									</View>
+
+									<View className="items-center">
+										<CircularProgress
+											progress={(achievedTrophies / 27) * 100}
+											size={70}
+											strokeWidth={6}
+										/>
+										<Text className="text-xl font-extrabold text-center mt-2 dark:text-gray-300">
+											{achievedTrophies}/27
+										</Text>
+									</View>
+								</TouchableOpacity>
+							)}
 						</View>
 
 						<View className="flex-1 gap-3">
