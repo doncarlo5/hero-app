@@ -1,16 +1,21 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 
 const PrivacyPolicyPage: React.FC = () => {
-  return (
-    <div className="container mx-auto max-w-3xl px-4 py-8">
-      <h1 className="mb-6 text-3xl font-bold">
-        Privacy Policy for Hero App Workout
-      </h1>
-      <p className="mb-4">Last updated: October 23, 2024</p>
+  useEffect(() => {
+    document.title = "Privacy Policy - Hero App";
+  }, []);
 
-      <div className="prose">
-        <h2 className="mb-4 mt-6 text-2xl font-semibold">
+  return (
+    <div className="min-h-screen bg-white">
+      <div className="container mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
+        <h1 className="mb-6 text-2xl font-bold sm:text-3xl">
+          Privacy Policy for Hero App Workout
+        </h1>
+        <p className="mb-4 text-sm sm:text-base">Last updated: November 11, 2025</p>
+
+        <div className="prose prose-sm sm:prose-base max-w-none">
+        <h2 className="mb-4 mt-6 text-xl font-semibold sm:text-2xl">
           About Hero App Workout
         </h2>
         <p>
@@ -19,7 +24,7 @@ const PrivacyPolicyPage: React.FC = () => {
           optimize your fitness journey.
         </p>
 
-        <h3 className="mb-2 mt-4 text-xl font-semibold">Key Features:</h3>
+        <h3 className="mb-2 mt-4 text-lg font-semibold sm:text-xl">Key Features:</h3>
         <ul className="list-inside list-disc">
           <li>
             Personalized workout plans tailored to your fitness level and goals
@@ -33,7 +38,7 @@ const PrivacyPolicyPage: React.FC = () => {
           </li>
         </ul>
 
-        <h2 className="mb-4 mt-6 text-2xl font-semibold">
+        <h2 className="mb-4 mt-6 text-xl font-semibold sm:text-2xl">
           Data Usage and Collection
         </h2>
         <p>
@@ -70,7 +75,7 @@ const PrivacyPolicyPage: React.FC = () => {
           Workout and is never sold to third parties.
         </p>
 
-        <h2 className="mb-4 mt-6 text-2xl font-semibold">
+        <h2 className="mb-4 mt-6 text-xl font-semibold sm:text-2xl">
           Detailed Privacy Policy
         </h2>
         <p>
@@ -86,10 +91,10 @@ const PrivacyPolicyPage: React.FC = () => {
           accordance with this Privacy Policy.
         </p>
 
-        <h2 className="mb-4 mt-6 text-2xl font-semibold">
+        <h2 className="mb-4 mt-6 text-xl font-semibold sm:text-2xl">
           Interpretation and Definitions
         </h2>
-        <h3 className="mb-2 mt-4 text-xl font-semibold">Interpretation</h3>
+        <h3 className="mb-2 mt-4 text-lg font-semibold sm:text-xl">Interpretation</h3>
         <p>
           The words of which the initial letter is capitalized have meanings
           defined under the following conditions. The following definitions
@@ -97,7 +102,7 @@ const PrivacyPolicyPage: React.FC = () => {
           singular or in plural.
         </p>
 
-        <h3 className="mb-2 mt-4 text-xl font-semibold">Definitions</h3>
+        <h3 className="mb-2 mt-4 text-lg font-semibold sm:text-xl">Definitions</h3>
         <ul className="list-inside list-disc">
           <li>
             <strong>Account</strong> means a unique account created for You to
@@ -137,10 +142,10 @@ const PrivacyPolicyPage: React.FC = () => {
           </li>
         </ul>
 
-        <h2 className="mb-4 mt-6 text-2xl font-semibold">
+        <h2 className="mb-4 mt-6 text-xl font-semibold sm:text-2xl">
           Collecting and Using Your Personal Data
         </h2>
-        <h3 className="mb-2 mt-4 text-xl font-semibold">
+        <h3 className="mb-2 mt-4 text-lg font-semibold sm:text-xl">
           Types of Data Collected
         </h3>
         <p>
@@ -167,7 +172,7 @@ const PrivacyPolicyPage: React.FC = () => {
           those pages, unique device identifiers, and other diagnostic data.
         </p>
 
-        <h2 className="mb-4 mt-6 text-2xl font-semibold">
+        <h2 className="mb-4 mt-6 text-xl font-semibold sm:text-2xl">
           Use of Your Personal Data
         </h2>
         <p>The Company may use Personal Data for the following purposes:</p>
@@ -182,7 +187,7 @@ const PrivacyPolicyPage: React.FC = () => {
           <li>To manage Your requests to Us.</li>
         </ul>
 
-        <h2 className="mb-4 mt-6 text-2xl font-semibold">
+        <h2 className="mb-4 mt-6 text-xl font-semibold sm:text-2xl">
           Retention of Your Personal Data
         </h2>
         <p>
@@ -191,7 +196,7 @@ const PrivacyPolicyPage: React.FC = () => {
           resolving disputes, and enforcing policies.
         </p>
 
-        <h2 className="mb-4 mt-6 text-2xl font-semibold">
+        <h2 className="mb-4 mt-6 text-xl font-semibold sm:text-2xl">
           Transfer of Your Personal Data
         </h2>
         <p>
@@ -200,7 +205,7 @@ const PrivacyPolicyPage: React.FC = () => {
           security of Your data.
         </p>
 
-        <h2 className="mb-4 mt-6 text-2xl font-semibold">
+        <h2 className="mb-4 mt-6 text-xl font-semibold sm:text-2xl">
           Delete Your Personal Data
         </h2>
         <p>
@@ -208,7 +213,7 @@ const PrivacyPolicyPage: React.FC = () => {
           assistance via Your Account or contact Us.
         </p>
 
-        <h2 className="mb-4 mt-6 text-2xl font-semibold">
+        <h2 className="mb-4 mt-6 text-xl font-semibold sm:text-2xl">
           Disclosure of Your Personal Data
         </h2>
         <p>
@@ -217,7 +222,7 @@ const PrivacyPolicyPage: React.FC = () => {
           legitimate interests.
         </p>
 
-        <h2 className="mb-4 mt-6 text-2xl font-semibold">
+        <h2 className="mb-4 mt-6 text-xl font-semibold sm:text-2xl">
           Security of Your Personal Data
         </h2>
         <p>
@@ -225,14 +230,14 @@ const PrivacyPolicyPage: React.FC = () => {
           electronic storage is completely secure.
         </p>
 
-        <h2 className="mb-4 mt-6 text-2xl font-semibold">Children's Privacy</h2>
+        <h2 className="mb-4 mt-6 text-xl font-semibold sm:text-2xl">Children's Privacy</h2>
         <p>
           Our Service does not target individuals under 13. We take steps to
           delete Personal Data provided by children without verified parental
           consent.
         </p>
 
-        <h2 className="mb-4 mt-6 text-2xl font-semibold">
+        <h2 className="mb-4 mt-6 text-xl font-semibold sm:text-2xl">
           Links to Other Websites
         </h2>
         <p>
@@ -240,7 +245,7 @@ const PrivacyPolicyPage: React.FC = () => {
           their privacy practices.
         </p>
 
-        <h2 className="mb-4 mt-6 text-2xl font-semibold">
+        <h2 className="mb-4 mt-6 text-xl font-semibold sm:text-2xl">
           Changes to this Privacy Policy
         </h2>
         <p>
@@ -248,19 +253,23 @@ const PrivacyPolicyPage: React.FC = () => {
           email or on the Service.
         </p>
 
-        <h2 className="mb-4 mt-6 text-2xl font-semibold">Contact Us</h2>
+        <h2 className="mb-4 mt-6 text-xl font-semibold sm:text-2xl">Contact Us</h2>
         <p>
           If you have any questions about this Privacy Policy or our data
           practices, you can contact us at:
         </p>
         <p>Email: pro.julien.thomas@gmail.com</p>
         <p>Address: 123 Fitness Street, 75001 Paris, France</p>
-      </div>
+        </div>
 
-      <div className="mt-8">
-        <Link to="/" className="text-blue-500 hover:underline">
-          Back to Home
-        </Link>
+        <div className="mt-8 pb-8">
+          <Link 
+            to="/" 
+            className="inline-block text-blue-600 hover:text-blue-800 hover:underline text-sm sm:text-base"
+          >
+            ← Back to Home
+          </Link>
+        </div>
       </div>
     </div>
   );
