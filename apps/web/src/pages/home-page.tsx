@@ -27,6 +27,10 @@ export function HomePage() {
           <Link to="/more-info" className="hover:underline">
             More Info
           </Link>
+          <span className="mx-2">•</span>
+          <a href="mailto:contact@hero-app.org" className="hover:underline">
+            Support
+          </a>
         </footer>
       </main>
     </div>
