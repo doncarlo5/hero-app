@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as AppleAuthentication from "expo-apple-authentication";
+import * as Haptics from "expo-haptics";
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { ActivityIndicator, Platform, View } from "react-native";
@@ -61,6 +62,7 @@ export default function SignIn() {
 
 	async function handleGoogleSignIn() {
 		try {
+			Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 			setIsGoogleLoading(true);
 			await signInWithGoogle();
 		} catch (error: Error | any) {
@@ -72,6 +74,7 @@ export default function SignIn() {
 
 	async function handleAppleSignIn() {
 		try {
+			Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 			setIsAppleLoading(true);
 			await signInWithApple();
 		} catch (error: Error | any) {
@@ -123,7 +126,7 @@ export default function SignIn() {
 					disabled={
 						isGoogleLoading || isAppleLoading || form.formState.isSubmitting
 					}
-					className="flex-row items-center justify-center gap-2"
+					className="flex-row items-center justify-center gap-2 rounded-lg"
 				>
 					{isGoogleLoading ? (
 						<ActivityIndicator size="small" />
