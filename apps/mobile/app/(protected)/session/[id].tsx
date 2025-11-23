@@ -1,5 +1,6 @@
-import { DateTimePicker, Picker } from "@expo/ui/swift-ui";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { Picker } from "@react-native-picker/picker";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale/fr";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -8,6 +9,8 @@ import {
 	ActivityIndicator,
 	Alert,
 	FlatList,
+	Modal,
+	Platform,
 	Pressable,
 	RefreshControl,
 	ScrollView,
@@ -31,6 +34,7 @@ import {
 	PlusIcon,
 	SaveIcon,
 	TrashIcon,
+	XIcon,
 } from "lucide-react-native";
 
 type ExerciseUser = {
@@ -93,8 +97,6 @@ export default function SessionDetail() {
 	const { isDarkColorScheme, colorScheme } = useColorScheme();
 
 	// Bottom sheet refs
-	const calendarBottomSheetRef = useRef<BottomSheet>(null);
-	const weightBottomSheetRef = useRef<BottomSheet>(null);
 	const exerciseInfoBottomSheetRef = useRef<BottomSheet>(null);
 
 	const [session, setSession] = useState<Session | null>(null);
@@ -111,14 +113,6 @@ export default function SessionDetail() {
 	const [isExerciseInfoOpen, setIsExerciseInfoOpen] = useState(false);
 
 	// Handle sheet changes
-	const handleCalendarSheetChange = useCallback((index: number) => {
-		setIsCalendarOpen(index >= 0);
-	}, []);
-
-	const handleWeightSheetChange = useCallback((index: number) => {
-		setIsWeightPickerOpen(index >= 0);
-	}, []);
-
 	const handleExerciseInfoSheetChange = useCallback((index: number) => {
 		setIsExerciseInfoOpen(index >= 0);
 	}, []);
@@ -343,13 +337,9 @@ export default function SessionDetail() {
 		}));
 	};
 
-	const handleWeightIndexSelect = ({
-		nativeEvent: { index },
-	}: {
-		nativeEvent: { index: number };
-	}) => {
-		setSelectedWeightIndex(index);
-		const selectedWeightValue = weightOptions[index].replace(" kg", "");
+	const handleWeightValueChange = (itemValue: string, itemIndex: number) => {
+		setSelectedWeightIndex(itemIndex);
+		const selectedWeightValue = itemValue.replace(" kg", "");
 		setSelectedWeight(selectedWeightValue);
 		setFormState((prev) => ({
 			...prev,
@@ -441,10 +431,7 @@ export default function SessionDetail() {
 						<View className="flex-row items-center gap-2 mb-2">
 							<View className="flex-1">
 								<Button
-									onPress={() => {
-										calendarBottomSheetRef.current?.snapToIndex(0);
-										setIsCalendarOpen(true);
-									}}
+									onPress={() => setIsCalendarOpen(true)}
 									variant="ghost"
 									className="flex-row w-full items-center dark:text-foreground-dark bg-gray-100 dark:bg-gray-700 rounded-md justify-between"
 								>
@@ -464,10 +451,7 @@ export default function SessionDetail() {
 							{/* Body Weight */}
 							<View className="flex-1">
 								<Button
-									onPress={() => {
-										weightBottomSheetRef.current?.snapToIndex(0);
-										setIsWeightPickerOpen(true);
-									}}
+									onPress={() => setIsWeightPickerOpen(true)}
 									variant="ghost"
 									className="flex-row w-full items-center dark:text-foreground-dark bg-gray-100 dark:bg-gray-700 rounded-md justify-between"
 								>
@@ -734,83 +718,142 @@ export default function SessionDetail() {
 				)}
 			</View>
 
-			{/* Calendar BottomSheet */}
-			<BottomSheet
-				ref={calendarBottomSheetRef}
-				index={-1}
-				enableDynamicSizing={true}
-				enablePanDownToClose={true}
-				maxDynamicContentSize={600}
-				onChange={handleCalendarSheetChange}
-				onClose={() => setIsCalendarOpen(false)}
-				backgroundStyle={{
-					backgroundColor:
-						colorScheme === "dark" ? colors.dark.card : colors.light.card,
-				}}
-				handleIndicatorStyle={{
-					backgroundColor: colorScheme === "dark" ? "#6B7280" : "#9CA3AF",
-				}}
+			{/* Calendar Modal */}
+			<Modal
+				visible={isCalendarOpen}
+				transparent={true}
+				animationType="fade"
+				onRequestClose={() => setIsCalendarOpen(false)}
 			>
-				<BottomSheetScrollView
-					contentContainerStyle={{
-						padding: 24,
-						paddingBottom: 24,
-						backgroundColor:
-							colorScheme === "dark" ? colors.dark.card : colors.light.card,
-						flexGrow: 1,
+				<Pressable
+					style={{
+						flex: 1,
+						backgroundColor: "rgba(0, 0, 0, 0.5)",
+						justifyContent: "center",
+						alignItems: "center",
 					}}
+					onPress={() => setIsCalendarOpen(false)}
 				>
-					<Text className="text-lg font-bold mb-4">Date of the session</Text>
-					<DateTimePicker
-						onDateSelected={handleDateSelect}
-						displayedComponents="date"
-						initialDate={
-							selectedDate?.toISOString() || new Date().toISOString()
-						}
-						variant="wheel"
-						title=""
-					/>
-				</BottomSheetScrollView>
-			</BottomSheet>
-
-			{/* Weight Picker BottomSheet */}
-			<BottomSheet
-				ref={weightBottomSheetRef}
-				index={-1}
-				enableDynamicSizing={true}
-				enablePanDownToClose={true}
-				maxDynamicContentSize={600}
-				onChange={handleWeightSheetChange}
-				onClose={() => setIsWeightPickerOpen(false)}
-				backgroundStyle={{
-					backgroundColor:
-						colorScheme === "dark" ? colors.dark.card : colors.light.card,
-				}}
-				handleIndicatorStyle={{
-					backgroundColor: colorScheme === "dark" ? "#6B7280" : "#9CA3AF",
-				}}
-			>
-				<BottomSheetScrollView
-					contentContainerStyle={{
-						padding: 24,
-						paddingBottom: 24,
-						backgroundColor:
-							colorScheme === "dark" ? colors.dark.card : colors.light.card,
-						flexGrow: 1,
-					}}
-				>
-					<Text className="text-lg font-bold mb-4">Select Body Weight</Text>
-					<Picker
-						options={weightOptions}
-						selectedIndex={selectedWeightIndex}
-						onOptionSelected={handleWeightIndexSelect}
-						variant="wheel"
+					<Pressable
 						style={{
-							height: 100,
+							backgroundColor:
+								colorScheme === "dark" ? colors.dark.card : colors.light.card,
+							borderRadius: 24,
+							padding: 24,
+							width: "90%",
+							maxWidth: 400,
 						}}
-					/>
-				</BottomSheetScrollView>
-			</BottomSheet>
+						onPress={(e) => e.stopPropagation()}
+					>
+						<View className="flex-row items-center justify-between mb-4">
+							<Text className="text-lg font-bold">Date of the session</Text>
+							<Pressable
+								onPress={() => setIsCalendarOpen(false)}
+								className="p-2"
+							>
+								<XIcon
+									size={20}
+									color={isDarkColorScheme ? "#9CA3AF" : "#252525"}
+									strokeWidth={2}
+								/>
+							</Pressable>
+						</View>
+						<DateTimePicker
+							value={selectedDate || new Date()}
+							mode="date"
+							onChange={(event, date) => {
+								if (date) {
+									handleDateSelect(date);
+									if (Platform.OS === "android") {
+										setIsCalendarOpen(false);
+									}
+								}
+							}}
+							display={Platform.OS === "ios" ? "spinner" : "default"}
+						/>
+						{Platform.OS === "ios" && (
+							<Button onPress={() => setIsCalendarOpen(false)} className="mt-4">
+								<Text className="text-primary-foreground dark:text-primary-foreground-dark">
+									Done
+								</Text>
+							</Button>
+						)}
+					</Pressable>
+				</Pressable>
+			</Modal>
+
+			{/* Weight Picker Modal */}
+			<Modal
+				visible={isWeightPickerOpen}
+				transparent={true}
+				animationType="fade"
+				onRequestClose={() => setIsWeightPickerOpen(false)}
+			>
+				<Pressable
+					style={{
+						flex: 1,
+						backgroundColor: "rgba(0, 0, 0, 0.5)",
+						justifyContent: "center",
+						alignItems: "center",
+					}}
+					onPress={() => setIsWeightPickerOpen(false)}
+				>
+					<Pressable
+						style={{
+							backgroundColor:
+								colorScheme === "dark" ? colors.dark.card : colors.light.card,
+							borderRadius: 24,
+							padding: 24,
+							width: "90%",
+							maxWidth: 400,
+							maxHeight: "70%",
+						}}
+						onPress={(e) => e.stopPropagation()}
+					>
+						<View className="flex-row items-center justify-between mb-4">
+							<Text className="text-lg font-bold">Select Body Weight</Text>
+							<Pressable
+								onPress={() => setIsWeightPickerOpen(false)}
+								className="p-2"
+							>
+								<XIcon
+									size={20}
+									color={isDarkColorScheme ? "#9CA3AF" : "#252525"}
+									strokeWidth={2}
+								/>
+							</Pressable>
+						</View>
+						<Picker
+							selectedValue={(() => {
+								if (selectedWeight) {
+									const formattedWeight = `${parseFloat(selectedWeight).toFixed(1)} kg`;
+									// Validate that the weight exists in options, otherwise fall back to validated index
+									return weightOptions.includes(formattedWeight)
+										? formattedWeight
+										: weightOptions[selectedWeightIndex];
+								}
+								return weightOptions[selectedWeightIndex];
+							})()}
+							onValueChange={handleWeightValueChange}
+							style={{
+								height: 200,
+							}}
+						>
+							{weightOptions.map((option, index) => (
+								<Picker.Item key={index} label={option} value={option} />
+							))}
+						</Picker>
+						<Button
+							onPress={() => setIsWeightPickerOpen(false)}
+							className="mt-4"
+						>
+							<Text className="text-primary-foreground dark:text-primary-foreground-dark">
+								Done
+							</Text>
+						</Button>
+					</Pressable>
+				</Pressable>
+			</Modal>
 
 			{/* Exercise Info BottomSheet */}
 			<BottomSheet
