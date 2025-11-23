@@ -1,4 +1,7 @@
-import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import BottomSheet, {
+	BottomSheetBackdrop,
+	BottomSheetScrollView,
+} from "@gorhom/bottom-sheet";
 import { format } from "date-fns";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
@@ -14,6 +17,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
 	ActivityIndicator,
 	Alert,
+	Keyboard,
 	ScrollView,
 	TouchableOpacity,
 	View,
@@ -91,6 +95,19 @@ export default function DoExercise() {
 	const handleSheetChange = useCallback((index: number) => {
 		setIsExercisePickerOpen(index >= 0);
 	}, []);
+
+	// Handle backdrop press to close sheet
+	const renderBackdrop = useCallback(
+		(props: any) => (
+			<BottomSheetBackdrop
+				{...props}
+				disappearsOnIndex={-1}
+				appearsOnIndex={0}
+				opacity={0.5}
+			/>
+		),
+		[],
+	);
 
 	const [formState, setFormState] = useState({
 		rep1: "",
@@ -414,6 +431,9 @@ export default function DoExercise() {
 											onChangeText={(value) => handleInputChange("rep1", value)}
 											placeholder={lastExercise?.rep[0]?.toString() || "0"}
 											keyboardType="numeric"
+											returnKeyType="done"
+											blurOnSubmit
+											onSubmitEditing={Keyboard.dismiss}
 											className="h-12 text-center text-3xl font-black"
 										/>
 										<Input
@@ -421,6 +441,9 @@ export default function DoExercise() {
 											onChangeText={(value) => handleInputChange("rep2", value)}
 											placeholder={lastExercise?.rep[1]?.toString() || "0"}
 											keyboardType="numeric"
+											returnKeyType="done"
+											blurOnSubmit
+											onSubmitEditing={Keyboard.dismiss}
 											className="h-12 text-center text-3xl font-black"
 										/>
 										<Input
@@ -428,6 +451,9 @@ export default function DoExercise() {
 											onChangeText={(value) => handleInputChange("rep3", value)}
 											placeholder={lastExercise?.rep[2]?.toString() || "0"}
 											keyboardType="numeric"
+											returnKeyType="done"
+											blurOnSubmit
+											onSubmitEditing={Keyboard.dismiss}
 											className="h-12 text-center text-3xl font-black"
 										/>
 										{(addRep4 || oneExerciseType.repRange4) && (
@@ -438,6 +464,9 @@ export default function DoExercise() {
 												}
 												placeholder={lastExercise?.rep[3]?.toString() || "0"}
 												keyboardType="numeric"
+												returnKeyType="done"
+												blurOnSubmit
+												onSubmitEditing={Keyboard.dismiss}
 												className="h-12 text-center text-3xl font-black"
 											/>
 										)}
@@ -457,6 +486,9 @@ export default function DoExercise() {
 											}
 											placeholder={lastExercise?.weight[0]?.toString() || "0"}
 											keyboardType="numeric"
+											returnKeyType="done"
+											blurOnSubmit
+											onSubmitEditing={Keyboard.dismiss}
 											className="h-12 text-center text-3xl font-black"
 										/>
 										<Input
@@ -466,6 +498,9 @@ export default function DoExercise() {
 											}
 											placeholder={lastExercise?.weight[1]?.toString() || "0"}
 											keyboardType="numeric"
+											returnKeyType="done"
+											blurOnSubmit
+											onSubmitEditing={Keyboard.dismiss}
 											className="h-12 text-center text-3xl font-black"
 										/>
 										<Input
@@ -475,6 +510,9 @@ export default function DoExercise() {
 											}
 											placeholder={lastExercise?.weight[2]?.toString() || "0"}
 											keyboardType="numeric"
+											returnKeyType="done"
+											blurOnSubmit
+											onSubmitEditing={Keyboard.dismiss}
 											className="h-12 text-center text-3xl font-black"
 										/>
 										{(addRep4 || oneExerciseType.repRange4) && (
@@ -485,6 +523,9 @@ export default function DoExercise() {
 												}
 												placeholder={lastExercise?.weight[3]?.toString() || "0"}
 												keyboardType="numeric"
+												returnKeyType="done"
+												blurOnSubmit
+												onSubmitEditing={Keyboard.dismiss}
 												className="h-12 text-center text-2xl font-bold"
 											/>
 										)}
@@ -634,6 +675,7 @@ export default function DoExercise() {
 				maxDynamicContentSize={600}
 				onChange={handleSheetChange}
 				onClose={() => setIsExercisePickerOpen(false)}
+				backdropComponent={renderBackdrop}
 				backgroundStyle={{
 					backgroundColor:
 						colorScheme === "dark" ? colors.dark.card : colors.light.card,
