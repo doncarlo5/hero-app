@@ -1,5 +1,3 @@
-// app.config.ts
-
 import { ConfigContext, ExpoConfig } from "expo/config";
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
@@ -7,7 +5,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 	name: "Hero App",
 	slug: "hero-app",
 	scheme: "hero-app",
-	version: "1.0.7",
+	version: "1.0.8",
 	orientation: "portrait",
 	icon: "./assets/icon.png",
 	userInterfaceStyle: "automatic",
@@ -43,7 +41,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 		entitlements: {
 			"com.apple.developer.applesignin": ["Default"],
 		},
-		buildNumber: "2",
+		buildNumber: "3",
 	},
 	android: {
 		edgeToEdgeEnabled: true,
