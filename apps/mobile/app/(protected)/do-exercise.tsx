@@ -271,8 +271,18 @@ export default function DoExercise() {
 			});
 
 			if (session) {
+				const existingExerciseIds = (session.exercise_user_list || []).map(
+					(exercise) =>
+						typeof exercise === "string"
+							? exercise
+							: exercise?._id || exercise?.id,
+				);
+
 				const updatedSession = {
-					exercise_user_list: [...session.exercise_user_list, response._id],
+					exercise_user_list: [
+						...existingExerciseIds.filter(Boolean),
+						response._id,
+					],
 				};
 
 				await fetchApi(`/api/sessions/${sessionId}`, {
