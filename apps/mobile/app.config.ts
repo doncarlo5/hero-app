@@ -59,6 +59,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 			},
 		},
 		package: "com.doncarlos.heroapp",
+		versionCode: 4,
 	},
 	experiments: {
 		typedRoutes: true,
