@@ -1,0 +1,36 @@
+---
+alwaysApply: true
+---
+
+# general.md - Hero App project
+
+## Project Overview
+
+Hero App is a tracking workout app base on a specific program.
+
+## Architecture
+
+- **apps/app** - App frontend (similar to mobile) (React.js + Vite) - Web app
+- **apps/api** - Express server (Node.js)
+- **apps/mobile** - React Native - Expo
+
+**Tech Stack**: React.js, TypeScript, MongoDB/Mongoose, Tailwind CSS
+
+## Code Conventions
+
+- **Files**: kebab-case (`component-name.tsx`, `component-client.tsx`)
+- **Imports**: Use `@/` absolute imports, named exports preferred
+
+## Important Patterns
+
+- **Styling for web**: Always use `className={cn(...)}`
+- **Props**: Always use `function Component(props: { attribute1: string; attribute2: boolean; ... })`
+- **Use props inside the component**: always use props.attribute1. NEVER destructure the props like const { attribute1 } = props
+- **Simplicity over performance**: Don't use `useCallback` or `useMemo`
+- **Simplicity over performance**: Don't use `useCallback`
+- **Dependency array of useEffect**: Only put the variables that will change in the dependency array of the useEffect
+- **Order in components**: useMainStore -> useState -> useRef -> const function -> useEffect -> JSX
+- **Don't use void**: Simply call the function updateLifts(map);
+- **Date handling**: Use `date-fns`
+- **API**: RESTful with TypeScript validation with `zod`
+- **Testing**: No automated tests yet
