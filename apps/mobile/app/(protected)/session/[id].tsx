@@ -1,14 +1,9 @@
-import BottomSheet, {
-	BottomSheetBackdrop,
-	BottomSheetScrollView,
-	BottomSheetTextInput,
-} from "@gorhom/bottom-sheet";
 import { LegendList } from "@legendapp/list";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale/fr";
-import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
 	ActivityIndicator,
@@ -18,6 +13,7 @@ import {
 	Pressable,
 	RefreshControl,
 	ScrollView,
+	TextInput,
 	View,
 } from "react-native";
 
@@ -98,10 +94,7 @@ export default function SessionDetail() {
 	const router = useRouter();
 	const { isDarkColorScheme, colorScheme } = useColorScheme();
 
-	// Bottom sheet refs
-	const exerciseInfoBottomSheetRef = useRef<BottomSheet>(null);
-	const commentBottomSheetRef = useRef<BottomSheet>(null);
-	const commentTextareaRef = useRef<any>(null);
+	const commentTextareaRef = useRef<TextInput>(null);
 
 	const [session, setSession] = useState<Session | null>(null);
 	const [lastSession, setLastSession] = useState<Session | null>(null);
@@ -118,45 +111,20 @@ export default function SessionDetail() {
 	const [isCommentSheetOpen, setIsCommentSheetOpen] = useState(false);
 	const [commentDraft, setCommentDraft] = useState<string>("");
 
-	// Handle sheet changes
-	const handleExerciseInfoSheetChange = (index: number) => {
-		setIsExerciseInfoOpen(index >= 0);
+	// Handle exercise info modal open
+	const handleOpenExerciseInfo = () => {
+		setIsExerciseInfoOpen(true);
 	};
 
-	// Render backdrop for exercise info bottom sheet
-	const renderExerciseInfoBackdrop = (props: any) => (
-		<BottomSheetBackdrop
-			{...props}
-			disappearsOnIndex={-1}
-			appearsOnIndex={0}
-			opacity={0.5}
-			onPress={() => {
-				exerciseInfoBottomSheetRef.current?.close();
-			}}
-		/>
-	);
-
-	// Render backdrop for comment bottom sheet
-	const renderCommentBackdrop = (props: any) => (
-		<BottomSheetBackdrop
-			{...props}
-			disappearsOnIndex={-1}
-			appearsOnIndex={0}
-			opacity={0.5}
-			onPress={() => {
-				commentBottomSheetRef.current?.close();
-			}}
-		/>
-	);
-
-	// Close bottom sheets when screen loses focus
-	useFocusEffect(() => {
-		return () => {
-			// Cleanup: close bottom sheets when screen loses focus
-			exerciseInfoBottomSheetRef.current?.close();
-			commentBottomSheetRef.current?.close();
-		};
-	});
+	// Handle comment modal open
+	const handleOpenCommentSheet = () => {
+		setIsCommentSheetOpen(true);
+		setCommentDraft(formState.comment);
+		// Auto focus textarea after a short delay
+		setTimeout(() => {
+			commentTextareaRef.current?.focus();
+		}, 150);
+	};
 
 	const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 	const [selectedWeight, setSelectedWeight] = useState<string>("");
@@ -299,29 +267,12 @@ export default function SessionDetail() {
 		}
 	};
 
-	// Handle comment sheet changes
-	const handleCommentSheetChange = (index: number) => {
-		const isOpen = index >= 0;
-		setIsCommentSheetOpen(isOpen);
-		if (isOpen) {
-			// Set draft when opening
-			setCommentDraft(formState.comment);
-			// Auto focus textarea after a short delay to ensure sheet is fully open
-			setTimeout(() => {
-				commentTextareaRef.current?.focus();
-			}, 150);
-		} else if (index === -1) {
-			// Only reset draft when actually closed (not just resizing)
-			setCommentDraft("");
-		}
-	};
-
 	// Handle comment save
 	const handleCommentSave = async () => {
 		if (!commentDraft.trim()) return;
 
 		setFormState((prev) => ({ ...prev, comment: commentDraft }));
-		commentBottomSheetRef.current?.close();
+		setIsCommentSheetOpen(false);
 
 		// Auto-save if there are changes
 		if (session && commentDraft !== originalFormState.comment) {
@@ -424,6 +375,46 @@ export default function SessionDetail() {
 		}));
 	};
 
+	const handleWeightDone = async () => {
+		// Get the current weight from the picker based on selectedWeightIndex
+		const currentWeightOption = weightOptions[selectedWeightIndex];
+		const currentWeightValue = currentWeightOption.replace(" kg", "");
+
+		// Update formState with the current selection
+		setSelectedWeight(currentWeightValue);
+		const updatedFormState = {
+			...formState,
+			body_weight: currentWeightValue,
+		};
+		setFormState(updatedFormState);
+
+		setIsWeightPickerOpen(false);
+
+		// Save the session if there are changes
+		if (session && currentWeightValue !== originalFormState.body_weight) {
+			try {
+				setIsSaving(true);
+				await fetchApi(`/api/sessions/${session._id}`, {
+					method: "PUT",
+					body: JSON.stringify({
+						body_weight: currentWeightValue,
+						comment: updatedFormState.comment,
+						date_session: updatedFormState.date_session,
+					}),
+				});
+
+				// Update original state after successful save
+				setOriginalFormState(updatedFormState);
+				await fetchSession(); // Refresh data
+			} catch (error) {
+				console.error("Save session error:", error);
+				Alert.alert("Error", "Failed to save changes. Please try again.");
+			} finally {
+				setIsSaving(false);
+			}
+		}
+	};
+
 	if (isLoading) {
 		return (
 			<View className="flex-1 items-center justify-center bg-background dark:bg-background-dark">
@@ -462,10 +453,9 @@ export default function SessionDetail() {
 					<View className="flex-row items-center justify-between mb-4">
 						<View className="">
 							<Pressable
-								onPress={() => {
-									exerciseInfoBottomSheetRef.current?.snapToIndex(0);
-									setIsExerciseInfoOpen(true);
-								}}
+								onPress={handleOpenExerciseInfo}
+								android_ripple={{ color: "rgba(0,0,0,0.1)" }}
+								hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
 								className="flex-row w-fit items-center gap-3 active:opacity-50"
 							>
 								<Text className="text-2xl font-bold text-foreground dark:text-foreground-dark mb-1">
@@ -544,11 +534,10 @@ export default function SessionDetail() {
 
 						{/* Comment with last session reference */}
 						<Pressable
-							onPress={() => {
-								commentBottomSheetRef.current?.snapToIndex(0);
-								setIsCommentSheetOpen(true);
-							}}
-							className="bg-muted dark:bg-muted-dark/20 rounded-lg py-3 px-4 active:opacity-70"
+							onPress={handleOpenCommentSheet}
+							android_ripple={{ color: "rgba(0,0,0,0.1)" }}
+							hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
+							className="bg-gray-100 dark:bg-gray-700 rounded-lg py-3 px-4 active:opacity-70"
 						>
 							<Text className="text-sm underline text-gray-500 font-semibold underline-gray-500 dark:text-muted-foreground-dark">
 								{formState.comment ||
@@ -915,165 +904,213 @@ export default function SessionDetail() {
 							))}
 						</Picker>
 						<Button
-							onPress={() => setIsWeightPickerOpen(false)}
+							onPress={handleWeightDone}
+							disabled={isSaving}
 							className="mt-4"
 						>
-							<Text className="text-primary-foreground dark:text-primary-foreground-dark">
-								Done
-							</Text>
+							{isSaving ? (
+								<ActivityIndicator
+									size="small"
+									color={isDarkColorScheme ? "#000000" : "#ffffff"}
+								/>
+							) : (
+								<Text className="text-primary-foreground dark:text-primary-foreground-dark">
+									Done
+								</Text>
+							)}
 						</Button>
 					</Pressable>
 				</Pressable>
 			</Modal>
 
-			{/* Exercise Info BottomSheet */}
-			<BottomSheet
-				ref={exerciseInfoBottomSheetRef}
-				index={-1}
-				enableDynamicSizing={true}
-				enablePanDownToClose={true}
-				maxDynamicContentSize={600}
-				onChange={handleExerciseInfoSheetChange}
-				onClose={() => setIsExerciseInfoOpen(false)}
-				backdropComponent={renderExerciseInfoBackdrop}
-				backgroundStyle={{
-					backgroundColor:
-						colorScheme === "dark" ? colors.dark.card : colors.light.card,
-				}}
-				handleIndicatorStyle={{
-					backgroundColor: colorScheme === "dark" ? "#6B7280" : "#9CA3AF",
-				}}
+			{/* Exercise Info Modal */}
+			<Modal
+				visible={isExerciseInfoOpen}
+				transparent={true}
+				animationType="fade"
+				onRequestClose={() => setIsExerciseInfoOpen(false)}
 			>
-				<BottomSheetScrollView
-					contentContainerStyle={{
-						padding: 24,
-						paddingBottom: 24,
-						backgroundColor:
-							colorScheme === "dark" ? colors.dark.card : colors.light.card,
-						flexGrow: 1,
+				<Pressable
+					style={{
+						flex: 1,
+						backgroundColor: "rgba(0, 0, 0, 0.5)",
+						justifyContent: "center",
+						alignItems: "center",
 					}}
+					onPress={() => setIsExerciseInfoOpen(false)}
 				>
-					<Text className="text-lg font-bold mb-4">
-						{session?.type_session} Exercises
-					</Text>
-					<View>
-						{getSessionExercises(session?.type_session || "").map(
-							(exercise, index) => (
-								<View key={index} className="flex-row items-center gap-3 mb-1">
-									<View className="w-6 h-6 rounded-full bg-primary/10 dark:bg-primary-dark/10 items-center justify-center">
-										<Text className="text-xs font-bold text-primary dark:text-primary-dark">
-											{index + 1}
-										</Text>
-									</View>
-									<Text className="text-foreground dark:text-foreground-dark flex-1">
-										{exercise}
-									</Text>
-								</View>
-							),
-						)}
-					</View>
-				</BottomSheetScrollView>
-			</BottomSheet>
-
-			{/* Comment BottomSheet */}
-			<BottomSheet
-				ref={commentBottomSheetRef}
-				index={-1}
-				enableDynamicSizing={true}
-				enablePanDownToClose={true}
-				maxDynamicContentSize={600}
-				onChange={handleCommentSheetChange}
-				onClose={() => setIsCommentSheetOpen(false)}
-				backdropComponent={renderCommentBackdrop}
-				keyboardBehavior="interactive"
-				keyboardBlurBehavior="restore"
-				android_keyboardInputMode="adjustResize"
-				enableContentPanningGesture={false}
-				enableHandlePanningGesture={true}
-				enableOverDrag={false}
-				backgroundStyle={{
-					backgroundColor:
-						colorScheme === "dark" ? colors.dark.card : colors.light.card,
-				}}
-				handleIndicatorStyle={{
-					backgroundColor: colorScheme === "dark" ? "#6B7280" : "#9CA3AF",
-				}}
-			>
-				<BottomSheetScrollView
-					contentContainerStyle={{
-						padding: 24,
-						paddingBottom: 100,
-						backgroundColor:
-							colorScheme === "dark" ? colors.dark.card : colors.light.card,
-						flexGrow: 1,
-					}}
-					keyboardShouldPersistTaps="handled"
-				>
-					<Text className="text-lg font-bold mb-4 text-foreground dark:text-foreground-dark">
-						Add note
-					</Text>
-
-					<View style={{ marginBottom: 16 }}>
-						<BottomSheetTextInput
-							ref={commentTextareaRef}
-							value={commentDraft}
-							onChangeText={setCommentDraft}
-							style={{
-								minHeight: 60,
-								maxHeight: 120,
-								padding: 12,
-								borderRadius: 8,
-								borderWidth: 1,
-								borderColor: colorScheme === "dark" ? "#374151" : "#D1D5DB",
-								backgroundColor:
-									colorScheme === "dark"
-										? colors.dark.background
-										: colors.light.background,
-								color:
-									colorScheme === "dark"
-										? colors.dark.foreground
-										: colors.light.foreground,
-								fontSize: 16,
-								textAlignVertical: "top",
-							}}
-							placeholderTextColor={
-								colorScheme === "dark" ? "#9CA3AF" : "#6B7280"
-							}
-							multiline={true}
-							numberOfLines={2}
-							blurOnSubmit={false}
-						/>
-					</View>
-
-					<View className="flex-row gap-3">
-						<Button
-							onPress={handleCommentClear}
-							variant="outline"
-							disabled={!commentDraft.trim()}
-							className="flex-1"
-						>
-							<Text
-								className={
-									commentDraft.trim()
-										? "text-foreground dark:text-foreground-dark"
-										: "text-muted-foreground dark:text-muted-foreground-dark"
-								}
+					<Pressable
+						style={{
+							backgroundColor:
+								colorScheme === "dark" ? colors.dark.card : colors.light.card,
+							borderRadius: 24,
+							padding: 24,
+							width: "90%",
+							maxWidth: 400,
+							maxHeight: "70%",
+						}}
+						onPress={(e) => e.stopPropagation()}
+					>
+						<View className="flex-row items-center justify-between mb-4">
+							<Text className="text-lg font-bold text-foreground dark:text-foreground-dark">
+								{session?.type_session} Exercises
+							</Text>
+							<Pressable
+								onPress={() => setIsExerciseInfoOpen(false)}
+								className="p-2"
 							>
-								Clear
-							</Text>
-						</Button>
-						<Button
-							onPress={handleCommentSave}
-							disabled={!commentDraft.trim()}
-							className="flex-1"
+								<XIcon
+									size={20}
+									color={isDarkColorScheme ? "#9CA3AF" : "#252525"}
+									strokeWidth={2}
+								/>
+							</Pressable>
+						</View>
+						<ScrollView
+							contentContainerStyle={{
+								paddingBottom: 24,
+							}}
 						>
-							<Text className="text-primary-foreground dark:text-primary-foreground-dark">
-								Save
+							<View>
+								{getSessionExercises(session?.type_session || "").map(
+									(exercise, index) => (
+										<View
+											key={index}
+											className="flex-row items-center gap-3 mb-1"
+										>
+											<View className="w-6 h-6 rounded-full bg-primary/10 dark:bg-primary-dark/10 items-center justify-center">
+												<Text className="text-xs font-bold text-primary dark:text-primary-dark">
+													{index + 1}
+												</Text>
+											</View>
+											<Text className="text-foreground dark:text-foreground-dark flex-1">
+												{exercise}
+											</Text>
+										</View>
+									),
+								)}
+							</View>
+						</ScrollView>
+					</Pressable>
+				</Pressable>
+			</Modal>
+
+			{/* Comment Modal */}
+			<Modal
+				visible={isCommentSheetOpen}
+				transparent={true}
+				animationType="fade"
+				onRequestClose={() => {
+					setIsCommentSheetOpen(false);
+					setCommentDraft("");
+				}}
+			>
+				<Pressable
+					style={{
+						flex: 1,
+						backgroundColor: "rgba(0, 0, 0, 0.5)",
+						justifyContent: "center",
+						alignItems: "center",
+					}}
+					onPress={() => {
+						setIsCommentSheetOpen(false);
+						setCommentDraft("");
+					}}
+				>
+					<Pressable
+						style={{
+							backgroundColor:
+								colorScheme === "dark" ? colors.dark.card : colors.light.card,
+							borderRadius: 24,
+							padding: 24,
+							width: "90%",
+							maxWidth: 400,
+							maxHeight: "70%",
+						}}
+						onPress={(e) => e.stopPropagation()}
+					>
+						<View className="flex-row items-center justify-between mb-4">
+							<Text className="text-lg font-bold text-foreground dark:text-foreground-dark">
+								Add note
 							</Text>
-						</Button>
-					</View>
-				</BottomSheetScrollView>
-			</BottomSheet>
+							<Pressable
+								onPress={() => {
+									setIsCommentSheetOpen(false);
+									setCommentDraft("");
+								}}
+								className="p-2"
+							>
+								<XIcon
+									size={20}
+									color={isDarkColorScheme ? "#9CA3AF" : "#252525"}
+									strokeWidth={2}
+								/>
+							</Pressable>
+						</View>
+
+						<View style={{ marginBottom: 16 }}>
+							<TextInput
+								ref={commentTextareaRef}
+								value={commentDraft}
+								onChangeText={setCommentDraft}
+								placeholder="Enter your note..."
+								style={{
+									minHeight: 60,
+									maxHeight: 120,
+									padding: 12,
+									borderRadius: 8,
+									borderWidth: 1,
+									borderColor: colorScheme === "dark" ? "#374151" : "#D1D5DB",
+									backgroundColor:
+										colorScheme === "dark"
+											? colors.dark.background
+											: colors.light.background,
+									color:
+										colorScheme === "dark"
+											? colors.dark.foreground
+											: colors.light.foreground,
+									fontSize: 16,
+									textAlignVertical: "top",
+								}}
+								placeholderTextColor={
+									colorScheme === "dark" ? "#9CA3AF" : "#6B7280"
+								}
+								multiline={true}
+								numberOfLines={2}
+								blurOnSubmit={false}
+							/>
+						</View>
+
+						<View className="flex-row gap-3">
+							<Button
+								onPress={handleCommentClear}
+								variant="outline"
+								disabled={!commentDraft.trim()}
+								className="flex-1"
+							>
+								<Text
+									className={
+										commentDraft.trim()
+											? "text-foreground dark:text-foreground-dark"
+											: "text-muted-foreground dark:text-muted-foreground-dark"
+									}
+								>
+									Clear
+								</Text>
+							</Button>
+							<Button
+								onPress={handleCommentSave}
+								disabled={!commentDraft.trim()}
+								className="flex-1"
+							>
+								<Text className="text-primary-foreground dark:text-primary-foreground-dark">
+									Save
+								</Text>
+							</Button>
+						</View>
+					</Pressable>
+				</Pressable>
+			</Modal>
 		</View>
 	);
 }
