@@ -254,17 +254,36 @@ export default function DoExercise() {
 		try {
 			setIsLoading(true);
 
+			// Helper function to convert string to number, handling commas and empty strings
+			const parseNumber = (value: string): number => {
+				if (!value || value.trim() === "") return 0;
+				// Replace comma with dot for decimal numbers
+				const normalizedValue = value.replace(",", ".");
+				const parsed = parseFloat(normalizedValue);
+				return isNaN(parsed) ? 0 : parsed;
+			};
+
+			// Convert rep and weight strings to numbers
+			const repArray = [
+				parseNumber(formState.rep1),
+				parseNumber(formState.rep2),
+				parseNumber(formState.rep3),
+				parseNumber(formState.rep4),
+			];
+
+			const weightArray = [
+				parseNumber(formState.weight1),
+				parseNumber(formState.weight2),
+				parseNumber(formState.weight3),
+				parseNumber(formState.weight4),
+			];
+
 			const response = await fetchApi("/api/exercise-user", {
 				method: "POST",
 				body: JSON.stringify({
 					type: oneExerciseType._id,
-					rep: [formState.rep1, formState.rep2, formState.rep3, formState.rep4],
-					weight: [
-						formState.weight1,
-						formState.weight2,
-						formState.weight3,
-						formState.weight4,
-					],
+					rep: repArray,
+					weight: weightArray,
 					comment: formState.comment,
 					session: sessionId,
 				}),
