@@ -1,8 +1,8 @@
+import { LegendList } from "@legendapp/list";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
 	ActivityIndicator,
-	FlatList,
 	RefreshControl,
 	TouchableOpacity,
 	View,
@@ -24,51 +24,97 @@ type Session = {
 	exercise_user_list: any[];
 };
 
+const PAGE_SIZE = 30;
+
 export default function List() {
 	const router = useRouter();
 	const [isLoading, setIsLoading] = useState(false);
 	const [refreshing, setRefreshing] = useState(false);
 	const [sessions, setSessions] = useState<Session[]>([]);
+	const [hasMore, setHasMore] = useState(true);
+	const [isLoadingMore, setIsLoadingMore] = useState(false);
+	const currentPageRef = useRef(1);
 
 	// If you never change this, it can be a const instead of state
 	const sortField = "date_session";
 	const sortOrder = "desc";
 
 	const inFlightRef = useRef(false);
+	const loadingMoreRef = useRef(false);
 
-	const fetchUserSessions = useCallback(async (signal?: AbortSignal) => {
-		if (inFlightRef.current) return;
-		inFlightRef.current = true;
-		try {
-			setIsLoading(true);
-			const res = await fetchApi(
-				`/api/sessions?limit=1000&sortBy=${sortField}:${sortOrder}`,
-				{ noStore: true, signal },
-			);
-			setSessions(res ?? []);
-		} catch (error: any) {
-			if (error?.name !== "AbortError") {
-				console.error("Fetch error: ", error);
+	const fetchUserSessions = useCallback(
+		async (page: number = 1, signal?: AbortSignal, append: boolean = false) => {
+			if (inFlightRef.current || (append && loadingMoreRef.current)) return;
+			if (append) {
+				loadingMoreRef.current = true;
+			} else {
+				inFlightRef.current = true;
 			}
-		} finally {
-			setIsLoading(false);
-			inFlightRef.current = false;
-		}
-	}, []);
+			try {
+				if (!append) {
+					setIsLoading(true);
+				} else {
+					setIsLoadingMore(true);
+				}
+				const res = await fetchApi(
+					`/api/sessions?page=${page}&limit=${PAGE_SIZE}&sortBy=${sortField}:${sortOrder}`,
+					{ noStore: true, signal },
+				);
+				const newSessions = res ?? [];
+
+				if (append) {
+					setSessions((prev) => [...prev, ...newSessions]);
+				} else {
+					setSessions(newSessions);
+					currentPageRef.current = 1;
+				}
+
+				// If we got fewer items than requested, we've reached the end
+				setHasMore(newSessions.length === PAGE_SIZE);
+				if (append) {
+					currentPageRef.current = page;
+				}
+			} catch (error: any) {
+				if (error?.name !== "AbortError") {
+					console.error("Fetch error: ", error);
+				}
+			} finally {
+				if (!append) {
+					setIsLoading(false);
+					inFlightRef.current = false;
+				} else {
+					setIsLoadingMore(false);
+					loadingMoreRef.current = false;
+				}
+			}
+		},
+		[],
+	);
 
 	// Run once on mount
 	useEffect(() => {
 		const ac = new AbortController();
-		fetchUserSessions(ac.signal);
+		fetchUserSessions(1, ac.signal, false);
 		return () => ac.abort();
 	}, [fetchUserSessions]);
 
 	const onRefresh = useCallback(async () => {
 		setRefreshing(true);
+		setHasMore(true);
 		const ac = new AbortController();
-		await fetchUserSessions(ac.signal);
+		await fetchUserSessions(1, ac.signal, false);
 		setRefreshing(false);
 	}, [fetchUserSessions]);
+
+	const loadMore = useCallback(
+		async (info?: { distanceFromEnd: number }) => {
+			if (!hasMore || isLoadingMore || loadingMoreRef.current) return;
+			const nextPage = currentPageRef.current + 1;
+			const ac = new AbortController();
+			await fetchUserSessions(nextPage, ac.signal, true);
+		},
+		[hasMore, isLoadingMore, fetchUserSessions],
+	);
 
 	const handleSessionPress = useCallback(
 		(sessionId: string) => {
@@ -82,10 +128,13 @@ export default function List() {
 			{isLoading && sessions.length === 0 ? (
 				<ActivityIndicator size="large" color={colors.light.primary} />
 			) : (
-				<FlatList
+				<LegendList
 					className="w-full"
 					data={sessions}
 					keyExtractor={(item) => item._id}
+					estimatedItemSize={60}
+					onEndReached={loadMore}
+					onEndReachedThreshold={0.5}
 					refreshControl={
 						<RefreshControl
 							refreshing={refreshing}
@@ -121,6 +170,13 @@ export default function List() {
 							<Text className="text-center text-foreground dark:text-foreground-dark py-6">
 								Aucune séance pour le moment.
 							</Text>
+						) : null
+					}
+					ListFooterComponent={
+						isLoadingMore ? (
+							<View className="py-4">
+								<ActivityIndicator size="small" color={colors.light.primary} />
+							</View>
 						) : null
 					}
 				/>

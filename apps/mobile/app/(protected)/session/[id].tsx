@@ -5,16 +5,16 @@ import { format } from "date-fns";
 import { fr } from "date-fns/locale/fr";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { LegendList } from "@legendapp/list";
 import {
-	ActivityIndicator,
-	Alert,
-	FlatList,
-	Modal,
-	Platform,
-	Pressable,
-	RefreshControl,
-	ScrollView,
-	View,
+        ActivityIndicator,
+        Alert,
+        Modal,
+        Platform,
+        Pressable,
+        RefreshControl,
+        ScrollView,
+        View,
 } from "react-native";
 
 import { Button } from "@/components/ui/button";
@@ -518,10 +518,10 @@ export default function SessionDetail() {
 							</Text>
 						</Button>
 
-						<FlatList
-							data={session.exercise_user_list}
-							keyExtractor={(item) => item._id}
-							renderItem={({ item }) => (
+                                                <LegendList
+                                                        data={session.exercise_user_list}
+                                                        keyExtractor={(item) => item._id}
+                                                        renderItem={({ item }) => (
 								<Pressable
 									onPress={() => router.push(`/exercise/${item._id}`)}
 									className="mb-4 overflow-hidden rounded-xl bg-background dark:bg-background-dark shadow-sm border border-muted/20 dark:border-muted-dark/20"
@@ -536,7 +536,7 @@ export default function SessionDetail() {
 										<ChevronRightIcon
 											size={20}
 											color={isDarkColorScheme ? "#9CA3AF" : "#6b7280"}
-										/>
+                                                />
 									</View>
 
 									<View className="mb-3">
