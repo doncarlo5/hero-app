@@ -1,25 +1,28 @@
-import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import BottomSheet, {
+	BottomSheetBackdrop,
+	BottomSheetScrollView,
+	BottomSheetTextInput,
+} from "@gorhom/bottom-sheet";
+import { LegendList } from "@legendapp/list";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale/fr";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { LegendList } from "@legendapp/list";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useRef, useState } from "react";
 import {
-        ActivityIndicator,
-        Alert,
-        Modal,
-        Platform,
-        Pressable,
-        RefreshControl,
-        ScrollView,
-        View,
+	ActivityIndicator,
+	Alert,
+	Modal,
+	Platform,
+	Pressable,
+	RefreshControl,
+	ScrollView,
+	View,
 } from "react-native";
 
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { Textarea } from "@/components/ui/textarea";
 import { colors } from "@/constants/colors";
 import { fetchApi } from "@/lib/api-handler";
 import { useColorScheme } from "@/lib/useColorScheme";
@@ -30,7 +33,6 @@ import {
 	ChevronRightIcon,
 	ChevronsRight,
 	Gauge,
-	InfoIcon,
 	PlusIcon,
 	SaveIcon,
 	TrashIcon,
@@ -98,6 +100,8 @@ export default function SessionDetail() {
 
 	// Bottom sheet refs
 	const exerciseInfoBottomSheetRef = useRef<BottomSheet>(null);
+	const commentBottomSheetRef = useRef<BottomSheet>(null);
+	const commentTextareaRef = useRef<any>(null);
 
 	const [session, setSession] = useState<Session | null>(null);
 	const [lastSession, setLastSession] = useState<Session | null>(null);
@@ -111,11 +115,48 @@ export default function SessionDetail() {
 	const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 	const [isWeightPickerOpen, setIsWeightPickerOpen] = useState(false);
 	const [isExerciseInfoOpen, setIsExerciseInfoOpen] = useState(false);
+	const [isCommentSheetOpen, setIsCommentSheetOpen] = useState(false);
+	const [commentDraft, setCommentDraft] = useState<string>("");
 
 	// Handle sheet changes
-	const handleExerciseInfoSheetChange = useCallback((index: number) => {
+	const handleExerciseInfoSheetChange = (index: number) => {
 		setIsExerciseInfoOpen(index >= 0);
-	}, []);
+	};
+
+	// Render backdrop for exercise info bottom sheet
+	const renderExerciseInfoBackdrop = (props: any) => (
+		<BottomSheetBackdrop
+			{...props}
+			disappearsOnIndex={-1}
+			appearsOnIndex={0}
+			opacity={0.5}
+			onPress={() => {
+				exerciseInfoBottomSheetRef.current?.close();
+			}}
+		/>
+	);
+
+	// Render backdrop for comment bottom sheet
+	const renderCommentBackdrop = (props: any) => (
+		<BottomSheetBackdrop
+			{...props}
+			disappearsOnIndex={-1}
+			appearsOnIndex={0}
+			opacity={0.5}
+			onPress={() => {
+				commentBottomSheetRef.current?.close();
+			}}
+		/>
+	);
+
+	// Close bottom sheets when screen loses focus
+	useFocusEffect(() => {
+		return () => {
+			// Cleanup: close bottom sheets when screen loses focus
+			exerciseInfoBottomSheetRef.current?.close();
+			commentBottomSheetRef.current?.close();
+		};
+	});
 
 	const [selectedDate, setSelectedDate] = useState<Date | null>(null);
 	const [selectedWeight, setSelectedWeight] = useState<string>("");
@@ -223,13 +264,13 @@ export default function SessionDetail() {
 	}, [id]);
 
 	// Enhanced form state management - track dirty state
-	const hasChanges = useCallback(() => {
+	const hasChanges = () => {
 		return (
 			formState.body_weight !== originalFormState.body_weight ||
 			formState.comment !== originalFormState.comment ||
 			formState.date_session !== originalFormState.date_session
 		);
-	}, [formState, originalFormState]);
+	};
 
 	// Auto-save functionality
 	const handleSave = async () => {
@@ -256,6 +297,42 @@ export default function SessionDetail() {
 		} finally {
 			setIsSaving(false);
 		}
+	};
+
+	// Handle comment sheet changes
+	const handleCommentSheetChange = (index: number) => {
+		const isOpen = index >= 0;
+		setIsCommentSheetOpen(isOpen);
+		if (isOpen) {
+			// Set draft when opening
+			setCommentDraft(formState.comment);
+			// Auto focus textarea after a short delay to ensure sheet is fully open
+			setTimeout(() => {
+				commentTextareaRef.current?.focus();
+			}, 150);
+		} else if (index === -1) {
+			// Only reset draft when actually closed (not just resizing)
+			setCommentDraft("");
+		}
+	};
+
+	// Handle comment save
+	const handleCommentSave = async () => {
+		if (!commentDraft.trim()) return;
+
+		setFormState((prev) => ({ ...prev, comment: commentDraft }));
+		commentBottomSheetRef.current?.close();
+
+		// Auto-save if there are changes
+		if (session && commentDraft !== originalFormState.comment) {
+			await handleSave();
+		}
+	};
+
+	// Handle comment clear
+	const handleCommentClear = () => {
+		setCommentDraft("");
+		commentTextareaRef.current?.focus();
 	};
 
 	const handleCompleteSession = async () => {
@@ -394,11 +471,9 @@ export default function SessionDetail() {
 								<Text className="text-2xl font-bold text-foreground dark:text-foreground-dark mb-1">
 									{session.type_session}
 								</Text>
-								<InfoIcon
-									size={15}
-									color={isDarkColorScheme ? "#9CA3AF" : "gray"}
-									strokeWidth={1.7}
-								/>
+								<Text className="text-sm text-muted-foreground dark:text-muted-foreground-dark">
+									What{"'"}s next?
+								</Text>
 							</Pressable>
 							<Text className="text-sm text-muted-foreground dark:text-muted-foreground-dark">
 								{format(new Date(session.date_session), "EEEE d MMMM yyyy", {
@@ -468,24 +543,20 @@ export default function SessionDetail() {
 						</View>
 
 						{/* Comment with last session reference */}
-						<View>
-							<Text className="text-sm font-medium text-muted-foreground dark:text-muted-foreground-dark mb-1">
-								Session Notes
+						<Pressable
+							onPress={() => {
+								commentBottomSheetRef.current?.snapToIndex(0);
+								setIsCommentSheetOpen(true);
+							}}
+							className="bg-muted dark:bg-muted-dark/20 rounded-lg py-3 px-4 active:opacity-70"
+						>
+							<Text className="text-sm underline text-gray-500 font-semibold underline-gray-500 dark:text-muted-foreground-dark">
+								{formState.comment ||
+									(lastSession?.comment
+										? `Your last notes: ${lastSession.comment}`
+										: "Add note")}
 							</Text>
-							<Textarea
-								value={formState.comment}
-								onChangeText={(text) =>
-									setFormState((prev) => ({ ...prev, comment: text }))
-								}
-								placeholder={
-									lastSession?.comment
-										? `Previous session: ${lastSession.comment}`
-										: "Add notes about your session..."
-								}
-								className="text-foreground dark:text-foreground-dark"
-								numberOfLines={2}
-							/>
-						</View>
+						</Pressable>
 					</View>
 
 					{/* EXERCISES */}
@@ -518,10 +589,10 @@ export default function SessionDetail() {
 							</Text>
 						</Button>
 
-                                                <LegendList
-                                                        data={session.exercise_user_list}
-                                                        keyExtractor={(item) => item._id}
-                                                        renderItem={({ item }) => (
+						<LegendList
+							data={session.exercise_user_list}
+							keyExtractor={(item) => item._id}
+							renderItem={({ item }) => (
 								<Pressable
 									onPress={() => router.push(`/exercise/${item._id}`)}
 									className="mb-4 overflow-hidden rounded-xl bg-background dark:bg-background-dark shadow-sm border border-muted/20 dark:border-muted-dark/20"
@@ -536,7 +607,7 @@ export default function SessionDetail() {
 										<ChevronRightIcon
 											size={20}
 											color={isDarkColorScheme ? "#9CA3AF" : "#6b7280"}
-                                                />
+										/>
 									</View>
 
 									<View className="mb-3">
@@ -864,6 +935,7 @@ export default function SessionDetail() {
 				maxDynamicContentSize={600}
 				onChange={handleExerciseInfoSheetChange}
 				onClose={() => setIsExerciseInfoOpen(false)}
+				backdropComponent={renderExerciseInfoBackdrop}
 				backgroundStyle={{
 					backgroundColor:
 						colorScheme === "dark" ? colors.dark.card : colors.light.card,
@@ -899,6 +971,106 @@ export default function SessionDetail() {
 								</View>
 							),
 						)}
+					</View>
+				</BottomSheetScrollView>
+			</BottomSheet>
+
+			{/* Comment BottomSheet */}
+			<BottomSheet
+				ref={commentBottomSheetRef}
+				index={-1}
+				enableDynamicSizing={true}
+				enablePanDownToClose={true}
+				maxDynamicContentSize={600}
+				onChange={handleCommentSheetChange}
+				onClose={() => setIsCommentSheetOpen(false)}
+				backdropComponent={renderCommentBackdrop}
+				keyboardBehavior="interactive"
+				keyboardBlurBehavior="restore"
+				android_keyboardInputMode="adjustResize"
+				enableContentPanningGesture={false}
+				enableHandlePanningGesture={true}
+				enableOverDrag={false}
+				backgroundStyle={{
+					backgroundColor:
+						colorScheme === "dark" ? colors.dark.card : colors.light.card,
+				}}
+				handleIndicatorStyle={{
+					backgroundColor: colorScheme === "dark" ? "#6B7280" : "#9CA3AF",
+				}}
+			>
+				<BottomSheetScrollView
+					contentContainerStyle={{
+						padding: 24,
+						paddingBottom: 100,
+						backgroundColor:
+							colorScheme === "dark" ? colors.dark.card : colors.light.card,
+						flexGrow: 1,
+					}}
+					keyboardShouldPersistTaps="handled"
+				>
+					<Text className="text-lg font-bold mb-4 text-foreground dark:text-foreground-dark">
+						Add note
+					</Text>
+
+					<View style={{ marginBottom: 16 }}>
+						<BottomSheetTextInput
+							ref={commentTextareaRef}
+							value={commentDraft}
+							onChangeText={setCommentDraft}
+							style={{
+								minHeight: 60,
+								maxHeight: 120,
+								padding: 12,
+								borderRadius: 8,
+								borderWidth: 1,
+								borderColor: colorScheme === "dark" ? "#374151" : "#D1D5DB",
+								backgroundColor:
+									colorScheme === "dark"
+										? colors.dark.background
+										: colors.light.background,
+								color:
+									colorScheme === "dark"
+										? colors.dark.foreground
+										: colors.light.foreground,
+								fontSize: 16,
+								textAlignVertical: "top",
+							}}
+							placeholderTextColor={
+								colorScheme === "dark" ? "#9CA3AF" : "#6B7280"
+							}
+							multiline={true}
+							numberOfLines={2}
+							blurOnSubmit={false}
+						/>
+					</View>
+
+					<View className="flex-row gap-3">
+						<Button
+							onPress={handleCommentClear}
+							variant="outline"
+							disabled={!commentDraft.trim()}
+							className="flex-1"
+						>
+							<Text
+								className={
+									commentDraft.trim()
+										? "text-foreground dark:text-foreground-dark"
+										: "text-muted-foreground dark:text-muted-foreground-dark"
+								}
+							>
+								Clear
+							</Text>
+						</Button>
+						<Button
+							onPress={handleCommentSave}
+							disabled={!commentDraft.trim()}
+							className="flex-1"
+						>
+							<Text className="text-primary-foreground dark:text-primary-foreground-dark">
+								Save
+							</Text>
+						</Button>
 					</View>
 				</BottomSheetScrollView>
 			</BottomSheet>
