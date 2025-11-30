@@ -18,6 +18,8 @@ import {
 	ActivityIndicator,
 	Alert,
 	Keyboard,
+	KeyboardAvoidingView,
+	Platform,
 	ScrollView,
 	TouchableOpacity,
 	View,
@@ -57,11 +59,16 @@ type LastExercise = {
 	};
 };
 
+type ExerciseUserSummary = {
+	_id?: string;
+	id?: string;
+};
+
 type Session = {
 	_id: string;
 	name?: string;
 	type_session: string;
-	exercise_user_list: string[];
+	exercise_user_list: (string | ExerciseUserSummary)[];
 };
 
 export default function DoExercise() {
@@ -74,6 +81,8 @@ export default function DoExercise() {
 
 	// Bottom sheet ref
 	const bottomSheetRef = useRef<BottomSheet>(null);
+	// ScrollView ref for keyboard handling
+	const scrollViewRef = useRef<ScrollView>(null);
 
 	const [oneExerciseType, setOneExerciseType] = useState<ExerciseType | null>(
 		null,
@@ -262,8 +271,18 @@ export default function DoExercise() {
 			});
 
 			if (session) {
+				const existingExerciseIds = (session.exercise_user_list || []).map(
+					(exercise) =>
+						typeof exercise === "string"
+							? exercise
+							: exercise?._id || exercise?.id,
+				);
+
 				const updatedSession = {
-					exercise_user_list: [...session.exercise_user_list, response._id],
+					exercise_user_list: [
+						...existingExerciseIds.filter(Boolean),
+						response._id,
+					],
 				};
 
 				await fetchApi(`/api/sessions/${sessionId}`, {
@@ -319,328 +338,350 @@ export default function DoExercise() {
 			className="flex-1 bg-background dark:bg-background-dark"
 			edges={["bottom"]}
 		>
-			<ScrollView className="flex-1 px-4 pt-4">
-				{/* Exercise Type Selection */}
-				<View className="mb-4">
-					{isLoadingTypes ? (
-						<View className="bg-muted/30 dark:bg-muted-dark/30 rounded-lg p-4">
-							<ActivityIndicator size="small" />
-						</View>
-					) : allExerciseTypes.length === 0 ? (
-						<View className="bg-muted/30 dark:bg-muted-dark/30 rounded-lg p-4">
-							<Text className="text-muted-foreground dark:text-gray-400 text-center">
-								Please create an exercise for this session type.
-							</Text>
-						</View>
-					) : (
-						<Button
-							onPress={() => {
-								bottomSheetRef.current?.snapToIndex(0);
-								setIsExercisePickerOpen(true);
-							}}
-							variant="ghost"
-							className="flex-row w-full items-center dark:text-foreground-dark bg-gray-100 dark:bg-gray-700 rounded-md justify-between p-4"
-						>
-							<Text className="text-foreground dark:text-foreground-dark">
-								{oneExerciseType ? oneExerciseType.name : "Select an exercise"}
-							</Text>
-							<AlignJustifyIcon
-								size={20}
-								color={isDarkColorScheme ? "#9CA3AF" : "#252525"}
-								strokeWidth={1.5}
-							/>
-						</Button>
-					)}
-				</View>
-
-				{/* Last Exercise Date */}
-				{lastExercise && (
-					<View className="flex-row items-center justify-end gap-1 px-2 py-1 mb-3">
-						<HistoryIcon
-							size={14}
-							color={isDarkColorScheme ? "#9CA3AF" : "#6b7280"}
-						/>
-						<Text className="text-sm text-muted-foreground dark:text-gray-400">
-							{isLoadingLastExercise
-								? "Loading..."
-								: format(
-										new Date(lastExercise.session.date_session),
-										"dd/MM/yyyy",
-									)}
-						</Text>
-					</View>
-				)}
-
-				{/* Advice */}
-				{oneExerciseType?.advice && (
-					<View className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mb-5 flex-row items-start gap-2">
-						<InfoIcon
-							size={16}
-							color={isDarkColorScheme ? "#60a5fa" : "#1e40af"}
-						/>
-						<Text className="text-sm text-blue-700 dark:text-blue-200 flex-1">
-							{oneExerciseType.advice}
-						</Text>
-					</View>
-				)}
-
-				{oneExerciseType && (
-					<CountDownTimer exerciseTypeTimer={oneExerciseType.timer} />
-				)}
-
-				{/* Exercise Form */}
-				{oneExerciseType && (
-					<View>
-						{/* Prefill Button */}
-						{showPrefillButton && (
-							<View className="flex-row gap-2 mb-2">
-								<Button
-									variant="outline"
-									onPress={handlePrefillWeights}
-									className="flex-1 flex-row items-center justify-center"
-								>
-									<StarIcon
-										size={16}
-										color={isDarkColorScheme ? "#9CA3AF" : "#6b7280"}
-									/>
-									<Text className="ml-1">
-										All sets to {formState.weight1} KG
-									</Text>
-								</Button>
-								<Button
-									variant="outline"
-									size="icon"
-									onPress={() => setShowPrefillButton(false)}
-								>
-									<XIcon size={16} color="#6b7280" />
-								</Button>
+			<KeyboardAvoidingView
+				behavior={Platform.OS === "ios" ? "padding" : "height"}
+				className="flex-1"
+				keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+			>
+				<ScrollView
+					ref={scrollViewRef}
+					className="flex-1 px-4 pt-4"
+					keyboardShouldPersistTaps="handled"
+					contentContainerStyle={{ paddingBottom: 100 }}
+					showsVerticalScrollIndicator={true}
+				>
+					{/* Exercise Type Selection */}
+					<View className="mb-4">
+						{isLoadingTypes ? (
+							<View className="bg-muted/30 dark:bg-muted-dark/30 rounded-lg p-4">
+								<ActivityIndicator size="small" />
 							</View>
+						) : allExerciseTypes.length === 0 ? (
+							<View className="bg-muted/30 dark:bg-muted-dark/30 rounded-lg p-4">
+								<Text className="text-muted-foreground dark:text-gray-400 text-center">
+									Please create an exercise for this session type.
+								</Text>
+							</View>
+						) : (
+							<Button
+								onPress={() => {
+									bottomSheetRef.current?.snapToIndex(0);
+									setIsExercisePickerOpen(true);
+								}}
+								variant="ghost"
+								className="flex-row w-full items-center dark:text-foreground-dark bg-gray-100 dark:bg-gray-700 rounded-md justify-between p-4"
+							>
+								<Text className="text-foreground dark:text-foreground-dark">
+									{oneExerciseType
+										? oneExerciseType.name
+										: "Select an exercise"}
+								</Text>
+								<AlignJustifyIcon
+									size={20}
+									color={isDarkColorScheme ? "#9CA3AF" : "#252525"}
+									strokeWidth={1.5}
+								/>
+							</Button>
 						)}
+					</View>
 
-						{/* Sets Form */}
-						<View className="bg-slate-50 dark:bg-slate-900/40 rounded-2xl py-4 px-2 mb-5">
-							<View className="flex-row justify-between gap-1 px-2">
-								{/* Reps Column */}
-								<View className="flex-1 max-w-[25%]">
-									<Text className="text-sm text-muted-foreground dark:text-gray-400 text-center mb-2">
-										Reps
-									</Text>
-									<View className="gap-1">
-										<Input
-											value={formState.rep1}
-											onChangeText={(value) => handleInputChange("rep1", value)}
-											placeholder={lastExercise?.rep[0]?.toString() || "0"}
-											keyboardType="numeric"
-											returnKeyType="done"
-											blurOnSubmit
-											onSubmitEditing={Keyboard.dismiss}
-											className="h-12 text-center text-3xl font-black"
+					{/* Last Exercise Date */}
+					{lastExercise && (
+						<View className="flex-row items-center justify-end gap-1 px-2 py-1 mb-3">
+							<HistoryIcon
+								size={14}
+								color={isDarkColorScheme ? "#9CA3AF" : "#6b7280"}
+							/>
+							<Text className="text-sm text-muted-foreground dark:text-gray-400">
+								{isLoadingLastExercise
+									? "Loading..."
+									: format(
+											new Date(lastExercise.session.date_session),
+											"dd/MM/yyyy",
+										)}
+							</Text>
+						</View>
+					)}
+
+					{/* Advice */}
+					{oneExerciseType?.advice && (
+						<View className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mb-5 flex-row items-start gap-2">
+							<InfoIcon
+								size={16}
+								color={isDarkColorScheme ? "#60a5fa" : "#1e40af"}
+							/>
+							<Text className="text-sm text-blue-700 dark:text-blue-200 flex-1">
+								{oneExerciseType.advice}
+							</Text>
+						</View>
+					)}
+
+					{oneExerciseType && (
+						<CountDownTimer exerciseTypeTimer={oneExerciseType.timer} />
+					)}
+
+					{/* Exercise Form */}
+					{oneExerciseType && (
+						<View>
+							{/* Prefill Button */}
+							{showPrefillButton && (
+								<View className="flex-row gap-2 mb-2">
+									<Button
+										variant="outline"
+										onPress={handlePrefillWeights}
+										className="flex-1 flex-row items-center justify-center"
+									>
+										<StarIcon
+											size={16}
+											color={isDarkColorScheme ? "#9CA3AF" : "#6b7280"}
 										/>
-										<Input
-											value={formState.rep2}
-											onChangeText={(value) => handleInputChange("rep2", value)}
-											placeholder={lastExercise?.rep[1]?.toString() || "0"}
-											keyboardType="numeric"
-											returnKeyType="done"
-											blurOnSubmit
-											onSubmitEditing={Keyboard.dismiss}
-											className="h-12 text-center text-3xl font-black"
-										/>
-										<Input
-											value={formState.rep3}
-											onChangeText={(value) => handleInputChange("rep3", value)}
-											placeholder={lastExercise?.rep[2]?.toString() || "0"}
-											keyboardType="numeric"
-											returnKeyType="done"
-											blurOnSubmit
-											onSubmitEditing={Keyboard.dismiss}
-											className="h-12 text-center text-3xl font-black"
-										/>
-										{(addRep4 || oneExerciseType.repRange4) && (
+										<Text className="ml-1">
+											All sets to {formState.weight1} KG
+										</Text>
+									</Button>
+									<Button
+										variant="outline"
+										size="icon"
+										onPress={() => setShowPrefillButton(false)}
+									>
+										<XIcon size={16} color="#6b7280" />
+									</Button>
+								</View>
+							)}
+
+							{/* Sets Form */}
+							<View className="bg-slate-50 dark:bg-slate-900/40 rounded-2xl py-4 px-2 mb-5">
+								<View className="flex-row justify-between gap-1 px-2">
+									{/* Reps Column */}
+									<View className="flex-1 max-w-[25%]">
+										<Text className="text-sm text-muted-foreground dark:text-gray-400 text-center mb-2">
+											Reps
+										</Text>
+										<View className="gap-1">
 											<Input
-												value={formState.rep4}
+												value={formState.rep1}
 												onChangeText={(value) =>
-													handleInputChange("rep4", value)
+													handleInputChange("rep1", value)
 												}
-												placeholder={lastExercise?.rep[3]?.toString() || "0"}
+												placeholder={lastExercise?.rep[0]?.toString() || "0"}
 												keyboardType="numeric"
 												returnKeyType="done"
 												blurOnSubmit
 												onSubmitEditing={Keyboard.dismiss}
 												className="h-12 text-center text-3xl font-black"
 											/>
-										)}
-									</View>
-								</View>
-
-								{/* Weight Column */}
-								<View className="flex-1 max-w-[35%]">
-									<Text className="text-sm text-muted-foreground dark:text-gray-400 text-center mb-2">
-										KG
-									</Text>
-									<View className="gap-1">
-										<Input
-											value={formState.weight1}
-											onChangeText={(value) =>
-												handleInputChange("weight1", value)
-											}
-											placeholder={lastExercise?.weight[0]?.toString() || "0"}
-											keyboardType="numeric"
-											returnKeyType="done"
-											blurOnSubmit
-											onSubmitEditing={Keyboard.dismiss}
-											className="h-12 text-center text-3xl font-black"
-										/>
-										<Input
-											value={formState.weight2}
-											onChangeText={(value) =>
-												handleInputChange("weight2", value)
-											}
-											placeholder={lastExercise?.weight[1]?.toString() || "0"}
-											keyboardType="numeric"
-											returnKeyType="done"
-											blurOnSubmit
-											onSubmitEditing={Keyboard.dismiss}
-											className="h-12 text-center text-3xl font-black"
-										/>
-										<Input
-											value={formState.weight3}
-											onChangeText={(value) =>
-												handleInputChange("weight3", value)
-											}
-											placeholder={lastExercise?.weight[2]?.toString() || "0"}
-											keyboardType="numeric"
-											returnKeyType="done"
-											blurOnSubmit
-											onSubmitEditing={Keyboard.dismiss}
-											className="h-12 text-center text-3xl font-black"
-										/>
-										{(addRep4 || oneExerciseType.repRange4) && (
 											<Input
-												value={formState.weight4}
+												value={formState.rep2}
 												onChangeText={(value) =>
-													handleInputChange("weight4", value)
+													handleInputChange("rep2", value)
 												}
-												placeholder={lastExercise?.weight[3]?.toString() || "0"}
+												placeholder={lastExercise?.rep[1]?.toString() || "0"}
 												keyboardType="numeric"
 												returnKeyType="done"
 												blurOnSubmit
 												onSubmitEditing={Keyboard.dismiss}
-												className="h-12 text-center text-2xl font-bold"
+												className="h-12 text-center text-3xl font-black"
 											/>
-										)}
+											<Input
+												value={formState.rep3}
+												onChangeText={(value) =>
+													handleInputChange("rep3", value)
+												}
+												placeholder={lastExercise?.rep[2]?.toString() || "0"}
+												keyboardType="numeric"
+												returnKeyType="done"
+												blurOnSubmit
+												onSubmitEditing={Keyboard.dismiss}
+												className="h-12 text-center text-3xl font-black"
+											/>
+											{(addRep4 || oneExerciseType.repRange4) && (
+												<Input
+													value={formState.rep4}
+													onChangeText={(value) =>
+														handleInputChange("rep4", value)
+													}
+													placeholder={lastExercise?.rep[3]?.toString() || "0"}
+													keyboardType="numeric"
+													returnKeyType="done"
+													blurOnSubmit
+													onSubmitEditing={Keyboard.dismiss}
+													className="h-12 text-center text-3xl font-black"
+												/>
+											)}
+										</View>
 									</View>
-								</View>
 
-								{/* Range Column */}
-								<View className="flex-1 max-w-[20%]">
-									<Text className="text-sm text-muted-foreground dark:text-gray-400 text-center mb-2">
-										Range
-									</Text>
-									<View className="gap-1">
-										<View className="h-12 items-center justify-center">
-											<Text className="text-gray-700 dark:text-gray-300 font-light">
-												{oneExerciseType.repRange1}
-											</Text>
+									{/* Weight Column */}
+									<View className="flex-1 max-w-[35%]">
+										<Text className="text-sm text-muted-foreground dark:text-gray-400 text-center mb-2">
+											KG
+										</Text>
+										<View className="gap-1">
+											<Input
+												value={formState.weight1}
+												onChangeText={(value) =>
+													handleInputChange("weight1", value)
+												}
+												placeholder={lastExercise?.weight[0]?.toString() || "0"}
+												keyboardType="numeric"
+												returnKeyType="done"
+												blurOnSubmit
+												onSubmitEditing={Keyboard.dismiss}
+												className="h-12 text-center text-3xl font-black"
+											/>
+											<Input
+												value={formState.weight2}
+												onChangeText={(value) =>
+													handleInputChange("weight2", value)
+												}
+												placeholder={lastExercise?.weight[1]?.toString() || "0"}
+												keyboardType="numeric"
+												returnKeyType="done"
+												blurOnSubmit
+												onSubmitEditing={Keyboard.dismiss}
+												className="h-12 text-center text-3xl font-black"
+											/>
+											<Input
+												value={formState.weight3}
+												onChangeText={(value) =>
+													handleInputChange("weight3", value)
+												}
+												placeholder={lastExercise?.weight[2]?.toString() || "0"}
+												keyboardType="numeric"
+												returnKeyType="done"
+												blurOnSubmit
+												onSubmitEditing={Keyboard.dismiss}
+												className="h-12 text-center text-3xl font-black"
+											/>
+											{(addRep4 || oneExerciseType.repRange4) && (
+												<Input
+													value={formState.weight4}
+													onChangeText={(value) =>
+														handleInputChange("weight4", value)
+													}
+													placeholder={
+														lastExercise?.weight[3]?.toString() || "0"
+													}
+													keyboardType="numeric"
+													returnKeyType="done"
+													blurOnSubmit
+													onSubmitEditing={Keyboard.dismiss}
+													className="h-12 text-center text-2xl font-bold"
+												/>
+											)}
 										</View>
-										<View className="h-12 items-center justify-center">
-											<Text className="text-gray-700 dark:text-gray-300 font-light">
-												{oneExerciseType.repRange2}
-											</Text>
-										</View>
-										<View className="h-12 items-center justify-center">
-											<Text className="text-gray-700 dark:text-gray-300 font-light">
-												{oneExerciseType.repRange3}
-											</Text>
-										</View>
-										{(addRep4 || oneExerciseType.repRange4) && (
+									</View>
+
+									{/* Range Column */}
+									<View className="flex-1 max-w-[20%]">
+										<Text className="text-sm text-muted-foreground dark:text-gray-400 text-center mb-2">
+											Range
+										</Text>
+										<View className="gap-1">
 											<View className="h-12 items-center justify-center">
 												<Text className="text-gray-700 dark:text-gray-300 font-light">
-													{oneExerciseType.repRange4}
+													{oneExerciseType.repRange1}
 												</Text>
 											</View>
-										)}
+											<View className="h-12 items-center justify-center">
+												<Text className="text-gray-700 dark:text-gray-300 font-light">
+													{oneExerciseType.repRange2}
+												</Text>
+											</View>
+											<View className="h-12 items-center justify-center">
+												<Text className="text-gray-700 dark:text-gray-300 font-light">
+													{oneExerciseType.repRange3}
+												</Text>
+											</View>
+											{(addRep4 || oneExerciseType.repRange4) && (
+												<View className="h-12 items-center justify-center">
+													<Text className="text-gray-700 dark:text-gray-300 font-light">
+														{oneExerciseType.repRange4}
+													</Text>
+												</View>
+											)}
+										</View>
 									</View>
-								</View>
 
-								{/* Checkbox Column */}
-								<View className="flex-1 max-w-[20%]">
-									<Text className="text-sm text-muted-foreground dark:text-gray-400 text-center mb-2">
-										Set
-									</Text>
-									<View className="gap-1">
-										<View className="h-12 items-center justify-center">
-											<CheckboxComponent
-												isChecked={completedSets.set1}
-												onPress={() => toggleSet(1)}
-											/>
-										</View>
-										<View className="h-12 items-center justify-center">
-											<CheckboxComponent
-												isChecked={completedSets.set2}
-												onPress={() => toggleSet(2)}
-											/>
-										</View>
-										<View className="h-12 items-center justify-center">
-											<CheckboxComponent
-												isChecked={completedSets.set3}
-												onPress={() => toggleSet(3)}
-											/>
-										</View>
-										{(addRep4 || oneExerciseType.repRange4) && (
+									{/* Checkbox Column */}
+									<View className="flex-1 max-w-[20%]">
+										<Text className="text-sm text-muted-foreground dark:text-gray-400 text-center mb-2">
+											Set
+										</Text>
+										<View className="gap-1">
 											<View className="h-12 items-center justify-center">
 												<CheckboxComponent
-													isChecked={completedSets.set4}
-													onPress={() => toggleSet(4)}
+													isChecked={completedSets.set1}
+													onPress={() => toggleSet(1)}
 												/>
 											</View>
-										)}
+											<View className="h-12 items-center justify-center">
+												<CheckboxComponent
+													isChecked={completedSets.set2}
+													onPress={() => toggleSet(2)}
+												/>
+											</View>
+											<View className="h-12 items-center justify-center">
+												<CheckboxComponent
+													isChecked={completedSets.set3}
+													onPress={() => toggleSet(3)}
+												/>
+											</View>
+											{(addRep4 || oneExerciseType.repRange4) && (
+												<View className="h-12 items-center justify-center">
+													<CheckboxComponent
+														isChecked={completedSets.set4}
+														onPress={() => toggleSet(4)}
+													/>
+												</View>
+											)}
+										</View>
 									</View>
 								</View>
-							</View>
 
-							{/* Add/Remove Set 4 Button */}
-							{!oneExerciseType.repRange4 && (
-								<TouchableOpacity
-									onPress={() => setAddRep4(!addRep4)}
-									className="mt-4 items-center"
-								>
-									<Text className="text-xs italic text-gray-400 dark:text-gray-500">
-										{addRep4 ? "Reduce by one set ↑" : "Add one set ↓"}
-									</Text>
-								</TouchableOpacity>
-							)}
-						</View>
-
-						{/* Notes Section */}
-						<View className="bg-slate-50 dark:bg-slate-900/40 rounded-2xl p-4 mb-20">
-							<View className="flex-row items-center gap-2 mb-3">
-								<EditIcon
-									size={16}
-									color={isDarkColorScheme ? "#9CA3AF" : "#6b7280"}
-								/>
-								<Text className="text-muted-foreground dark:text-gray-400">
-									Notes
-								</Text>
-								{lastExercise?.comment && (
-									<View className="w-2 h-2 bg-teal-500 rounded-full" />
+								{/* Add/Remove Set 4 Button */}
+								{!oneExerciseType.repRange4 && (
+									<TouchableOpacity
+										onPress={() => setAddRep4(!addRep4)}
+										className="mt-4 items-center"
+									>
+										<Text className="text-xs italic text-gray-400 dark:text-gray-500">
+											{addRep4 ? "Reduce by one set ↑" : "Add one set ↓"}
+										</Text>
+									</TouchableOpacity>
 								)}
 							</View>
-							<Textarea
-								value={formState.comment}
-								onChangeText={(value) => handleInputChange("comment", value)}
-								placeholder={
-									lastExercise?.comment
-										? `Previous note: ${lastExercise.comment}`
-										: "Previous note: None."
-								}
-								maxLength={200}
-								className="min-h-[80px]"
-							/>
+
+							{/* Notes Section */}
+							<View className="bg-slate-50 dark:bg-slate-900/40 rounded-2xl p-4 mb-20">
+								<View className="flex-row items-center gap-2 mb-3">
+									<EditIcon
+										size={16}
+										color={isDarkColorScheme ? "#9CA3AF" : "#6b7280"}
+									/>
+									<Text className="text-muted-foreground dark:text-gray-400">
+										Notes
+									</Text>
+									{lastExercise?.comment && (
+										<View className="w-2 h-2 bg-teal-500 rounded-full" />
+									)}
+								</View>
+								<Textarea
+									value={formState.comment}
+									onChangeText={(value) => handleInputChange("comment", value)}
+									placeholder={
+										lastExercise?.comment
+											? `Previous note: ${lastExercise.comment}`
+											: "Previous note: None."
+									}
+									maxLength={200}
+									className="min-h-[80px]"
+								/>
+							</View>
 						</View>
-					</View>
-				)}
-			</ScrollView>
+					)}
+				</ScrollView>
+			</KeyboardAvoidingView>
 
 			{/* Submit Button */}
 			{oneExerciseType && (
