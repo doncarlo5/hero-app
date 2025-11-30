@@ -269,14 +269,31 @@ export default function SessionDetail() {
 
 	// Handle comment save
 	const handleCommentSave = async () => {
-		if (!commentDraft.trim()) return;
-
 		setFormState((prev) => ({ ...prev, comment: commentDraft }));
 		setIsCommentSheetOpen(false);
 
-		// Auto-save if there are changes
-		if (session && commentDraft !== originalFormState.comment) {
-			await handleSave();
+		// Always save the session
+		if (session) {
+			try {
+				setIsSaving(true);
+				await fetchApi(`/api/sessions/${session._id}`, {
+					method: "PUT",
+					body: JSON.stringify({
+						body_weight: formState.body_weight,
+						comment: commentDraft,
+						date_session: formState.date_session,
+					}),
+				});
+
+				// Update original state after successful save
+				setOriginalFormState((prev) => ({ ...prev, comment: commentDraft }));
+				await fetchSession(); // Refresh data
+			} catch (error) {
+				console.error("Save session error:", error);
+				Alert.alert("Error", "Failed to save changes. Please try again.");
+			} finally {
+				setIsSaving(false);
+			}
 		}
 	};
 
@@ -1100,12 +1117,19 @@ export default function SessionDetail() {
 							</Button>
 							<Button
 								onPress={handleCommentSave}
-								disabled={!commentDraft.trim()}
+								disabled={isSaving}
 								className="flex-1"
 							>
-								<Text className="text-primary-foreground dark:text-primary-foreground-dark">
-									Save
-								</Text>
+								{isSaving ? (
+									<ActivityIndicator
+										size="small"
+										color={isDarkColorScheme ? "#000000" : "#ffffff"}
+									/>
+								) : (
+									<Text className="text-primary-foreground dark:text-primary-foreground-dark">
+										Done
+									</Text>
+								)}
 							</Button>
 						</View>
 					</Pressable>
