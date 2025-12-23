@@ -3,7 +3,7 @@
 /**
  * This script generates a TypeScript file containing color variables
  * extracted from a global CSS file. It reads the CSS file, extracts
- * HSL color variables defined in the :root and .dark:root selectors,
+ * HSL color variables defined in @variant light/@variant dark blocks,
  * and writes them to a TypeScript file in a structured format.
  */
 
@@ -24,9 +24,30 @@ if (!fs.existsSync(globalCssPath)) {
 
 const cssContent = fs.readFileSync(globalCssPath, "utf-8");
 
-// Extract HSL variables from both :root and .dark:root
+// Extract HSL variables from @variant light/@variant dark blocks
 const rootRegex = /:root\s*{([^}]*)}/;
 const darkRootRegex = /\.dark:root\s*{([^}]*)}/;
+
+const extractVariantBlock = (css, variant) => {
+	const marker = `@variant ${variant}`;
+	const markerIndex = css.indexOf(marker);
+	if (markerIndex === -1) return null;
+
+	const braceStart = css.indexOf("{", markerIndex);
+	if (braceStart === -1) return null;
+
+	let depth = 0;
+	for (let i = braceStart; i < css.length; i += 1) {
+		const char = css[i];
+		if (char === "{") depth += 1;
+		if (char === "}") depth -= 1;
+		if (depth === 0) {
+			return css.slice(braceStart + 1, i);
+		}
+	}
+
+	return null;
+};
 
 // Helper function to convert kebab-case to camelCase
 const toCamelCase = (str) =>
@@ -46,11 +67,22 @@ const extractColors = (cssBlock) => {
 	return colors;
 };
 
+const lightVariantBlock = extractVariantBlock(cssContent, "light");
+const darkVariantBlock = extractVariantBlock(cssContent, "dark");
+
 const rootMatch = rootRegex.exec(cssContent);
 const darkRootMatch = darkRootRegex.exec(cssContent);
 
-const rootColors = rootMatch ? extractColors(rootMatch[1]) : {};
-const darkRootColors = darkRootMatch ? extractColors(darkRootMatch[1]) : {};
+const rootColors = lightVariantBlock
+	? extractColors(lightVariantBlock)
+	: rootMatch
+		? extractColors(rootMatch[1])
+		: {};
+const darkRootColors = darkVariantBlock
+	? extractColors(darkVariantBlock)
+	: darkRootMatch
+		? extractColors(darkRootMatch[1])
+		: {};
 
 // Combine colors into a single object
 const colors = {

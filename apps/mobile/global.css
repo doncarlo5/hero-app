@@ -1,49 +1,129 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@import "uniwind";
 
-@layer base {
+@layer theme {
 	:root {
-		--background: 0 0% 100%;
-		--foreground: 0 0% 14.5%;
-		--card: 0 0% 100%;
-		--card-foreground: 0 0% 14.5%;
-		--popover: 0 0% 100%;
-		--popover-foreground: 0 0% 14.5%;
-		--primary: 0 0% 20.5%;
-		--primary-foreground: 0 0% 98.5%;
-		--secondary: 0 0% 97%;
-		--secondary-foreground: 0 0% 20.5%;
-		--muted: 0 0% 97%;
-		--muted-foreground: 0 0% 55.6%;
-		--accent: 0 0% 97%;
-		--accent-foreground: 0 0% 20.5%;
-		--destructive: 0 80% 57.7%;
-		--destructive-foreground: 0 0% 100%;
-		--border: 0 0% 92.2%;
-		--input: 0 0% 92.2%;
-		--ring: 0 0% 70.8%;
-	}
+		@variant light {
+			--background: 0 0% 100%;
+			--foreground: 0 0% 14.5%;
+			--card: 0 0% 100%;
+			--card-foreground: 0 0% 14.5%;
+			--popover: 0 0% 100%;
+			--popover-foreground: 0 0% 14.5%;
+			--primary: 0 0% 20.5%;
+			--primary-foreground: 0 0% 98.5%;
+			--secondary: 0 0% 97%;
+			--secondary-foreground: 0 0% 20.5%;
+			--muted: 0 0% 97%;
+			--muted-foreground: 0 0% 55.6%;
+			--accent: 0 0% 97%;
+			--accent-foreground: 0 0% 20.5%;
+			--destructive: 0 80% 57.7%;
+			--destructive-foreground: 0 0% 100%;
+			--border: 0 0% 92.2%;
+			--input: 0 0% 92.2%;
+			--ring: 0 0% 70.8%;
+			--background-dark: 240 10% 3.9%;
+			--foreground-dark: 0 0% 98%;
+			--card-dark: 240 10% 3.9%;
+			--card-foreground-dark: 0 0% 98%;
+			--popover-dark: 240 10% 3.9%;
+			--popover-foreground-dark: 0 0% 98%;
+			--primary-dark: 0 0% 98%;
+			--primary-foreground-dark: 240 5.9% 10%;
+			--secondary-dark: 240 3.7% 15.9%;
+			--secondary-foreground-dark: 0 0% 98%;
+			--muted-dark: 240 3.7% 15.9%;
+			--muted-foreground-dark: 240 5% 64.9%;
+			--accent-dark: 240 3.7% 15.9%;
+			--accent-foreground-dark: 0 0% 98%;
+			--destructive-dark: 0 62.8% 30.6%;
+			--destructive-foreground-dark: 0 85.7% 97.3%;
+			--border-dark: 240 3.7% 15.9%;
+			--input-dark: 240 3.7% 15.9%;
+			--ring-dark: 240 4.9% 83.9%;
+		}
 
-	.dark:root {
-		--background: 240 10% 3.9%;
-		--foreground: 0 0% 98%;
-		--card: 240 10% 3.9%;
-		--card-foreground: 0 0% 98%;
-		--popover: 240 10% 3.9%;
-		--popover-foreground: 0 0% 98%;
-		--primary: 0 0% 98%;
-		--primary-foreground: 240 5.9% 10%;
-		--secondary: 240 3.7% 15.9%;
-		--secondary-foreground: 0 0% 98%;
-		--muted: 240 3.7% 15.9%;
-		--muted-foreground: 240 5% 64.9%;
-		--accent: 240 3.7% 15.9%;
-		--accent-foreground: 0 0% 98%;
-		--destructive: 0 62.8% 30.6%;
-		--destructive-foreground: 0 85.7% 97.3%;
-		--border: 240 3.7% 15.9%;
-		--input: 240 3.7% 15.9%;
-		--ring: 240 4.9% 83.9%;
+		@variant dark {
+			--background: 240 10% 3.9%;
+			--foreground: 0 0% 98%;
+			--card: 240 10% 3.9%;
+			--card-foreground: 0 0% 98%;
+			--popover: 240 10% 3.9%;
+			--popover-foreground: 0 0% 98%;
+			--primary: 0 0% 98%;
+			--primary-foreground: 240 5.9% 10%;
+			--secondary: 240 3.7% 15.9%;
+			--secondary-foreground: 0 0% 98%;
+			--muted: 240 3.7% 15.9%;
+			--muted-foreground: 240 5% 64.9%;
+			--accent: 240 3.7% 15.9%;
+			--accent-foreground: 0 0% 98%;
+			--destructive: 0 62.8% 30.6%;
+			--destructive-foreground: 0 85.7% 97.3%;
+			--border: 240 3.7% 15.9%;
+			--input: 240 3.7% 15.9%;
+			--ring: 240 4.9% 83.9%;
+			--background-dark: 240 10% 3.9%;
+			--foreground-dark: 0 0% 98%;
+			--card-dark: 240 10% 3.9%;
+			--card-foreground-dark: 0 0% 98%;
+			--popover-dark: 240 10% 3.9%;
+			--popover-foreground-dark: 0 0% 98%;
+			--primary-dark: 0 0% 98%;
+			--primary-foreground-dark: 240 5.9% 10%;
+			--secondary-dark: 240 3.7% 15.9%;
+			--secondary-foreground-dark: 0 0% 98%;
+			--muted-dark: 240 3.7% 15.9%;
+			--muted-foreground-dark: 240 5% 64.9%;
+			--accent-dark: 240 3.7% 15.9%;
+			--accent-foreground-dark: 0 0% 98%;
+			--destructive-dark: 0 62.8% 30.6%;
+			--destructive-foreground-dark: 0 85.7% 97.3%;
+			--border-dark: 240 3.7% 15.9%;
+			--input-dark: 240 3.7% 15.9%;
+			--ring-dark: 240 4.9% 83.9%;
+		}
 	}
+}
+
+@theme {
+	--color-background: hsl(var(--background));
+	--color-foreground: hsl(var(--foreground));
+	--color-card: hsl(var(--card));
+	--color-card-foreground: hsl(var(--card-foreground));
+	--color-popover: hsl(var(--popover));
+	--color-popover-foreground: hsl(var(--popover-foreground));
+	--color-primary: hsl(var(--primary));
+	--color-primary-foreground: hsl(var(--primary-foreground));
+	--color-secondary: hsl(var(--secondary));
+	--color-secondary-foreground: hsl(var(--secondary-foreground));
+	--color-muted: hsl(var(--muted));
+	--color-muted-foreground: hsl(var(--muted-foreground));
+	--color-accent: hsl(var(--accent));
+	--color-accent-foreground: hsl(var(--accent-foreground));
+	--color-destructive: hsl(var(--destructive));
+	--color-destructive-foreground: hsl(var(--destructive-foreground));
+	--color-border: hsl(var(--border));
+	--color-input: hsl(var(--input));
+	--color-ring: hsl(var(--ring));
+	--color-background-dark: hsl(var(--background-dark));
+	--color-foreground-dark: hsl(var(--foreground-dark));
+	--color-card-dark: hsl(var(--card-dark));
+	--color-card-foreground-dark: hsl(var(--card-foreground-dark));
+	--color-popover-dark: hsl(var(--popover-dark));
+	--color-popover-foreground-dark: hsl(var(--popover-foreground-dark));
+	--color-primary-dark: hsl(var(--primary-dark));
+	--color-primary-foreground-dark: hsl(var(--primary-foreground-dark));
+	--color-secondary-dark: hsl(var(--secondary-dark));
+	--color-secondary-foreground-dark: hsl(var(--secondary-foreground-dark));
+	--color-muted-dark: hsl(var(--muted-dark));
+	--color-muted-foreground-dark: hsl(var(--muted-foreground-dark));
+	--color-accent-dark: hsl(var(--accent-dark));
+	--color-accent-foreground-dark: hsl(var(--accent-foreground-dark));
+	--color-destructive-dark: hsl(var(--destructive-dark));
+	--color-destructive-foreground-dark: hsl(var(--destructive-foreground-dark));
+	--color-border-dark: hsl(var(--border-dark));
+	--color-input-dark: hsl(var(--input-dark));
+	--color-ring-dark: hsl(var(--ring-dark));
 }
