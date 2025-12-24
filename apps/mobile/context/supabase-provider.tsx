@@ -1,6 +1,4 @@
-// supabase-provider.tsx
-
-import { SplashScreen, useRouter } from "expo-router";
+import { SplashScreen } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import {
 	createContext,
@@ -14,8 +12,6 @@ import {
 import { Session } from "@supabase/supabase-js";
 
 import { supabase } from "@/config/supabase";
-import { fetchApi } from "@/lib/api-handler";
-import { UserType } from "@/types/user.type";
 
 import * as AppleAuthentication from "expo-apple-authentication";
 import { makeRedirectUri } from "expo-auth-session";
@@ -30,8 +26,6 @@ WebBrowser.maybeCompleteAuthSession();
 type AuthState = {
 	initialized: boolean;
 	session: Session | null;
-	user: UserType | null;
-	setUser: (user: UserType | null) => void;
 	authenticated: boolean;
 	isLoading: boolean;
 	signUp: (
@@ -50,10 +44,6 @@ type AuthState = {
 export const AuthContext = createContext<AuthState>({
 	initialized: false,
 	session: null,
-	user: null,
-	setUser: () => {
-		throw new Error("setUser used outside AuthProvider");
-	},
 	authenticated: false,
 	isLoading: true,
 	signUp: async () => ({ error: null }),
@@ -68,39 +58,16 @@ export const useAuth = () => useContext(AuthContext);
 export function AuthProvider({ children }: PropsWithChildren) {
 	const [initialized, setInitialized] = useState(false);
 	const [session, setSession] = useState<Session | null>(null);
-	const [user, setUser] = useState<UserType | null>(null);
 	const [authenticated, setAuthenticated] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
-	const router = useRouter();
 
 	const oauthRedirectUrl = makeRedirectUri({
-		scheme: "com.doncarlos.heroapp",
+		scheme: "hero-app",
 		path: "auth",
 	});
 
-	const getSession = async () => {
-		try {
-			const {
-				data: { session },
-				error: _error,
-			} = await supabase.auth.getSession();
-			setSession(session);
-			if (_error) throw _error;
-			setAuthenticated(session !== null);
-			if (session) {
-				const response = await fetchApi("/api/auth/verify");
-				setUser(response.user);
-			} else {
-				setUser(null);
-			}
-		} catch {
-			setUser(null);
-		} finally {
-			setIsLoading(false);
-		}
-	};
-
 	const signUp = async (email: string, password: string) => {
+		setIsLoading(true);
 		const { data, error } = await supabase.auth.signUp({
 			email,
 			password,
@@ -109,18 +76,22 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
 		if (error) {
 			console.error("Error signing up:", error);
+			setIsLoading(false);
 			return { error: error.message };
 		}
 
 		if (data.session) {
 			setSession(data.session);
 			setAuthenticated(true);
+			return { error: null };
 		}
 
+		setIsLoading(false);
 		return { error: null };
 	};
 
 	const signIn = async (email: string, password: string) => {
+		setIsLoading(true);
 		const { data, error } = await supabase.auth.signInWithPassword({
 			email,
 			password,
@@ -128,6 +99,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
 		if (error) {
 			console.error("Error signing in:", error);
+			setIsLoading(false);
 			return { error: error.message };
 		}
 
@@ -140,6 +112,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 	};
 
 	const signInWithGoogle = async () => {
+		setIsLoading(true);
 		try {
 			const { data, error } = await supabase.auth.signInWithOAuth({
 				provider: "google",
@@ -155,6 +128,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
 			if (error) {
 				console.error("Error creating OAuth URL:", error);
+				setIsLoading(false);
 				return { error: error.message };
 			}
 
@@ -165,21 +139,42 @@ export function AuthProvider({ children }: PropsWithChildren) {
 			);
 
 			if (result.type === "success") {
-				// Supabase puts tokens in the hash. Convert # → ? so QueryParams can read it.
-				const fixedUrl = result.url.replace("#", "?");
-				const { params } = QueryParams.getQueryParams(fixedUrl);
+				const { params: queryParams } = QueryParams.getQueryParams(result.url);
 
-				if ("access_token" in params && "refresh_token" in params) {
-					await supabase.auth.setSession({
-						access_token: params.access_token,
-						refresh_token: params.refresh_token,
-					}); // ✅ updates the onAuthStateChange listener
+				if ("code" in queryParams) {
+					const { error: exchangeError } =
+						await supabase.auth.exchangeCodeForSession(
+							String(queryParams.code),
+						);
+					if (exchangeError) {
+						console.error("Error exchanging code for session:", exchangeError);
+						setIsLoading(false);
+						return { error: exchangeError.message };
+					}
+					return { error: null };
 				}
+
+				// Supabase may put tokens in the hash. Convert # → ? so QueryParams can read it.
+				const fixedUrl = result.url.replace("#", "?");
+				const { params: hashParams } = QueryParams.getQueryParams(fixedUrl);
+
+				if ("access_token" in hashParams && "refresh_token" in hashParams) {
+					await supabase.auth.setSession({
+						access_token: String(hashParams.access_token),
+						refresh_token: String(hashParams.refresh_token),
+					}); // ✅ updates the onAuthStateChange listener
+					return { error: null };
+				}
+
+				setIsLoading(false);
+				return { error: "Missing OAuth code or tokens in redirect URL" };
 			}
 
-			return { error: null };
+			setIsLoading(false);
+			return { error: "OAuth sign-in was canceled or failed" };
 		} catch (error) {
 			console.error("Error signing in with Google:", error);
+			setIsLoading(false);
 			return {
 				error:
 					error instanceof Error ? error.message : "Unknown error occurred",
@@ -188,6 +183,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 	};
 
 	const signInWithApple = async () => {
+		setIsLoading(true);
 		try {
 			const nonce = Math.random().toString(36).substring(2, 10);
 			const hashedNonce = await Crypto.digestStringAsync(
@@ -211,21 +207,26 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
 			if (error) {
 				console.error("Error signing in with Apple:", error);
+				setIsLoading(false);
 				return { error: error.message };
 			}
 
 			if (data.session) {
 				setSession(data.session);
 				setAuthenticated(true);
+				return { error: null };
 			}
 
+			setIsLoading(false);
 			return { error: null };
 		} catch (error: any) {
 			if (error.code === "ERR_REQUEST_CANCELED") {
 				// User canceled the sign-in flow
+				setIsLoading(false);
 				return { error: "Sign in canceled" };
 			}
 			console.error("Error signing in with Apple:", error);
+			setIsLoading(false);
 			return {
 				error:
 					error instanceof Error ? error.message : "Unknown error occurred",
@@ -236,7 +237,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
 	const signOut = async () => {
 		try {
 			setIsLoading(true);
-			setUser(null);
 			setSession(null);
 			const { error } = await supabase.auth.signOut();
 
@@ -256,15 +256,12 @@ export function AuthProvider({ children }: PropsWithChildren) {
 	};
 
 	useEffect(() => {
-		getSession();
-
 		const {
 			data: { subscription },
 		} = supabase.auth.onAuthStateChange(async (event, session) => {
 			// Handle token refresh failure
 			if (event === ("TOKEN_REFRESH_FAILED" as any)) {
 				setSession(null);
-				setUser(null);
 				setAuthenticated(false);
 				// Force logout by clearing the session
 				supabase.auth.signOut();
@@ -272,14 +269,15 @@ export function AuthProvider({ children }: PropsWithChildren) {
 			}
 
 			if (session) {
-				const response = await fetchApi("/api/auth/verify");
-				setUser(response.user);
-				setAuthenticated(session !== null);
+				setSession(session);
+				setAuthenticated(true);
 			} else {
+				// not logged in
+				setSession(null);
 				setAuthenticated(false);
-				setUser(null);
 			}
-			setSession(session);
+
+			setIsLoading(false);
 		});
 
 		setInitialized(true);
@@ -292,20 +290,13 @@ export function AuthProvider({ children }: PropsWithChildren) {
 	useEffect(() => {
 		if (initialized && !isLoading) {
 			SplashScreen.hideAsync();
-			if (session) {
-				router.replace("/");
-			} else {
-				router.replace("/welcome");
-			}
 		}
-	}, [initialized, isLoading, session]);
+	}, [initialized, isLoading]);
 
 	const authContextValue = useMemo(
 		() => ({
 			initialized,
 			session,
-			user,
-			setUser,
 			authenticated,
 			isLoading,
 			signUp,
@@ -314,7 +305,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 			signInWithApple,
 			signOut,
 		}),
-		[initialized, session, user, authenticated, isLoading],
+		[initialized, session, authenticated, isLoading],
 	);
 
 	return (

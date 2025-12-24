@@ -11,8 +11,8 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { useAuth } from "@/context/supabase-provider";
 import { fetchApi } from "@/lib/api-handler";
+import { useProfile } from "@/lib/hooks/use-profile";
 import { useColorScheme } from "@/lib/useColorScheme";
 
 interface FeedbackModalProps {
@@ -24,7 +24,7 @@ export default function FeedbackModal({
 	visible,
 	onClose,
 }: FeedbackModalProps) {
-	const { user } = useAuth();
+	const { user } = useProfile();
 	const { isDarkColorScheme } = useColorScheme();
 	const [formState, setFormState] = useState({ subject: "", message: "" });
 	const [loading, setLoading] = useState(false);

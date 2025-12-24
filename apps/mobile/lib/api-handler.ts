@@ -1,25 +1,6 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { supabase } from "@/config/supabase";
 
 const baseURL = process.env.EXPO_PUBLIC_BASE_URL as string;
-
-const getAuthHeaders = async () => {
-	let token: { access_token: string; refresh_token: string } | null = null;
-
-	try {
-		const raw = await AsyncStorage.getItem(
-			"sb-qmhziwpyeqpwllseache-auth-token",
-		);
-		if (raw) token = JSON.parse(raw);
-	} catch (error) {
-		console.error("Error parsing token", error);
-	}
-
-	return {
-		Authorization: token ? `Bearer ${token.access_token}` : "",
-		RefreshToken: token?.refresh_token ?? "",
-		"Content-Type": "application/json",
-	};
-};
 
 interface FetchApiOptions extends RequestInit {
 	noStore?: boolean;
@@ -59,6 +40,32 @@ export const fetchApi = async (
 	}
 
 	return response.json();
+};
+
+const getAuthHeaders = async () => {
+	let token: { access_token: string } | null = null;
+
+	try {
+		const {
+			data: { session },
+			error,
+		} = await supabase.auth.getSession();
+		if (error) {
+			console.error("Error reading claims", error);
+		}
+		if (session) {
+			token = {
+				access_token: session.access_token,
+			};
+		}
+	} catch (error) {
+		console.error("Error reading session", error);
+	}
+
+	return {
+		Authorization: token ? `Bearer ${token.access_token}` : "",
+		"Content-Type": "application/json",
+	};
 };
 
 export default fetchApi;

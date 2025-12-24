@@ -14,16 +14,17 @@ const salt = 10;
 const SECRET_TOKEN = process.env.SECRET_TOKEN;
 
 const createUser = async (sessionData) => {
-  const supabaseId = sessionData.user.id;
+  const supabaseId = sessionData.claims.sub;
   let firstName = "";
   let lastName = "";
-  if (sessionData.user.user_metadata.full_name) {
-    [firstName, lastName] = sessionData.user.user_metadata.full_name.split(" ");
+  if (sessionData.claims.user_metadata.full_name) {
+    [firstName, lastName] =
+      sessionData.claims.user_metadata.full_name.split(" ");
   } else {
-    firstName = sessionData.user.user_metadata.firstName;
-    lastName = sessionData.user.user_metadata.lastName;
+    firstName = sessionData.claims.user_metadata.firstName;
+    lastName = sessionData.claims.user_metadata.lastName;
   }
-  const email = sessionData.user.email;
+  const email = sessionData.claims.email;
 
   // Create the user
   const newUser = await User.create({

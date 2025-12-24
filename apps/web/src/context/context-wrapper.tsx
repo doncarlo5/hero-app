@@ -49,7 +49,7 @@ const AuthContextWrapper = ({ children }: WrapperProps) => {
       if (_error) throw _error;
       setIsLoggedIn(session !== null);
       if (session) {
-        const response = await fetchApi("/api/auth/verify");
+        const response = await fetchApi("/api/auth/get-user");
         setUser(response.user);
       } else {
         setUser(null);
@@ -68,7 +68,7 @@ const AuthContextWrapper = ({ children }: WrapperProps) => {
     const { data: listener } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         if (session) {
-          const response = await fetchApi("/api/auth/verify");
+          const response = await fetchApi("/api/auth/get-user");
           setUser(response.user);
           setIsLoggedIn(session !== null);
           redirect("/main");

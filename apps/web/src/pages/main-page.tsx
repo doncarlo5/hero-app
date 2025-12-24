@@ -30,7 +30,6 @@ export function MainPage() {
       try {
         const response: TrophyType[] = await fetchApi("/api/trophies");
         setTrophies(response);
-        console.log("Trophies", response);
       } catch (error) {
         console.error("Error fetching trophies:", error);
       }
@@ -87,12 +86,12 @@ export function MainPage() {
         <OnboardingModal onClose={() => setShowOnboarding(false)} />
       )}
       <Navbar />
-      <main className="container mx-auto my-0 flex h-dvh max-w-lg flex-col ">
-        <div className="pt-10  ">
+      <main className="container mx-auto my-0 flex h-dvh max-w-lg flex-col">
+        <div className="pt-10">
           <h1 className="mb-5 text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl/none">
             Bienvenue {user?.firstName}
           </h1>
-          <div className="flex flex-col gap-4 pb-4 ">
+          <div className="flex flex-col gap-4 pb-4">
             {isLoading ? (
               <div className="flex h-20 animate-pulse flex-col justify-between rounded-2xl bg-slate-100 px-3 py-2 shadow-lg">
                 <div className="mb-4 h-6 w-24 rounded-full bg-gray-200"></div>
@@ -102,15 +101,15 @@ export function MainPage() {
               <div className="flex h-20 flex-col justify-between rounded-2xl bg-slate-100 px-3 py-2 shadow-lg dark:bg-slate-900 dark:bg-opacity-80">
                 <div className="flex items-center justify-between">
                   {lastSession ? (
-                    <h2 className="text-sm font-semibold uppercase tracking-tighter text-gray-500 ">
+                    <h2 className="text-sm font-semibold uppercase tracking-tighter text-gray-500">
                       Séance précédente
                     </h2>
                   ) : (
-                    <h2 className="text-sm font-semibold uppercase tracking-tighter text-gray-500 ">
+                    <h2 className="text-sm font-semibold uppercase tracking-tighter text-gray-500">
                       Aucune séance
                     </h2>
                   )}
-                  <Link className=" flex" to="/history">
+                  <Link className="flex" to="/history">
                     <span className="jus flex rounded-full bg-gray-500/10 px-3 py-0.5 text-sm font-medium text-gray-800 hover:underline">
                       Voir plus →
                     </span>
@@ -137,7 +136,7 @@ export function MainPage() {
                         {lastSession.type_session}
                       </Badge>
                     )}
-                    <p className=" text-sm capitalize">
+                    <p className="text-sm capitalize">
                       {lastSession?.date_session &&
                         format(
                           new Date(lastSession?.date_session),
@@ -155,11 +154,11 @@ export function MainPage() {
           </div>
 
           <div className="flex flex-col gap-4 pb-2">
-            <h1 className=" text-2xl font-bold">Progression</h1>
+            <h1 className="text-2xl font-bold">Progression</h1>
           </div>
           <div className="flex flex-col gap-3 pb-20">
-            <div className=" flex h-64 gap-3   ">
-              <div className=" flex w-1/2 flex-col gap-3 ">
+            <div className="flex h-64 gap-3">
+              <div className="flex w-1/2 flex-col gap-3">
                 {isLoading ? (
                   <div className="flex h-16 animate-pulse flex-col justify-between rounded-2xl bg-slate-100 px-3 py-2 shadow-lg">
                     <div className="mb-4 h-6 w-24 rounded-full bg-gray-200"></div>
@@ -180,19 +179,19 @@ export function MainPage() {
                       />
                       <p>Total séances</p>
                     </div>
-                    <div className=" text-3xl font-extrabold leading-none">
+                    <div className="text-3xl font-extrabold leading-none">
                       <AnimatedCounter from={0} to={allSessions.length} />
                     </div>
                   </Link>
                 )}
                 {isLoading ? (
                   <div className="flex h-full animate-pulse flex-col justify-between rounded-2xl bg-slate-100 px-3 py-2 shadow-lg">
-                    <div className="mb-4 h-6 w-24 rounded-full bg-gray-200 "></div>
-                    <div className="h-5 w-32 rounded-full bg-gray-200 "></div>
+                    <div className="mb-4 h-6 w-24 rounded-full bg-gray-200"></div>
+                    <div className="h-5 w-32 rounded-full bg-gray-200"></div>
                   </div>
                 ) : (
                   <Link
-                    className="group flex h-full flex-col  justify-between gap-2 rounded-2xl bg-slate-100 px-3 py-2 shadow-lg active:translate-y-0.5 active:shadow-inner dark:bg-slate-900 dark:bg-opacity-80"
+                    className="group flex h-full flex-col justify-between gap-2 rounded-2xl bg-slate-100 px-3 py-2 shadow-lg active:translate-y-0.5 active:shadow-inner dark:bg-slate-900 dark:bg-opacity-80"
                     to="/profile/trophy"
                   >
                     <div className="flex items-center gap-2 text-sm text-slate-600">
@@ -206,7 +205,7 @@ export function MainPage() {
                       Total trophées
                     </div>
                     <TrophyChart />
-                    <div className=" text-center text-xl font-extrabold">
+                    <div className="text-center text-xl font-extrabold">
                       <AnimatedCounter
                         from={0}
                         to={calculateAchievedTrophies(trophies)}
@@ -216,25 +215,25 @@ export function MainPage() {
                   </Link>
                 )}
               </div>
-              <div className=" flex w-1/2 flex-col gap-3">
+              <div className="flex w-1/2 flex-col gap-3">
                 {isLoading ? (
                   <div className="flex h-40 animate-pulse flex-col justify-between rounded-2xl bg-slate-100 px-3 py-2 shadow-lg">
-                    <div className="mb-4 h-6 w-24 rounded-full bg-gray-200 "></div>
-                    <div className="h-5 w-32 rounded-full bg-gray-200 "></div>
+                    <div className="mb-4 h-6 w-24 rounded-full bg-gray-200"></div>
+                    <div className="h-5 w-32 rounded-full bg-gray-200"></div>
                   </div>
                 ) : (
                   <Link
-                    className="group flex h-full  flex-col justify-between rounded-2xl bg-slate-100 px-3 py-2 shadow-lg active:translate-y-0.5 active:shadow-inner dark:bg-slate-900 dark:bg-opacity-80"
+                    className="group flex h-full flex-col justify-between rounded-2xl bg-slate-100 px-3 py-2 shadow-lg active:translate-y-0.5 active:shadow-inner dark:bg-slate-900 dark:bg-opacity-80"
                     to="/profile/type/new-type"
                   >
-                    <div className=" my-auto flex flex-col items-center justify-center gap-2 text-sm text-slate-600">
-                      <div className=" text-center">
-                        <p className=" leading-4 text-gray-500">Create a</p>{" "}
+                    <div className="my-auto flex flex-col items-center justify-center gap-2 text-sm text-slate-600">
+                      <div className="text-center">
+                        <p className="leading-4 text-gray-500">Create a</p>{" "}
                         <p className="font-bold leading-4 tracking-tighter">
                           NEW EXERCISE
                         </p>
                       </div>
-                      <div className=" flex-none">
+                      <div className="flex-none">
                         <LucidePlus
                           color="rgb(71 85 105)"
                           className=""
@@ -266,13 +265,13 @@ export function MainPage() {
                       />
                       Poids
                     </div>
-                    <div className=" text-3xl font-medium leading-none">
+                    <div className="text-3xl font-medium leading-none">
                       {lastSession?.body_weight}{" "}
-                      <span className=" text-xl font-extralight leading-none">
+                      <span className="text-xl font-extralight leading-none">
                         KG
                       </span>
                     </div>
-                    <div className="text-[0.7rem] font-extralight capitalize leading-4 text-slate-600 ">
+                    <div className="text-[0.7rem] font-extralight capitalize leading-4 text-slate-600">
                       {lastSession?.date_session &&
                         format(
                           new Date(lastSession?.date_session),
@@ -312,7 +311,7 @@ export function MainPage() {
               </div>
             </div>
           </div>
-          <div className=" h-20 w-full"></div>
+          <div className="h-20 w-full"></div>
         </div>
       </main>
     </div>

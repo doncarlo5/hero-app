@@ -7,24 +7,20 @@ const createUser = require("../api/createUser");
 const isAuthenticated = async (req, res, next) => {
   try {
     const authHeader = req.headers["authorization"];
-    const refreshToken = req.headers["refreshtoken"];
     const accessToken = authHeader && authHeader.split(" ")[1];
 
-    if (!refreshToken || !accessToken) {
+    if (!accessToken) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    const { data, error } = await supabase.auth.setSession({
-      access_token: accessToken,
-      refresh_token: refreshToken,
-    });
+    const { data, error } = await supabase.auth.getClaims(accessToken);
 
     if (error) {
       console.log(error);
       next(error);
     }
 
-    const user = await User.findOne({ supabaseId: data.user.id });
+    const user = await User.findOne({ supabaseId: data.claims.sub });
     req.user = user;
 
     if (!user) {

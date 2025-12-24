@@ -9,12 +9,8 @@ export const unstable_settings = {
 };
 
 export default function ProtectedLayout() {
-	const { initialized, session } = useAuth();
+	const { session } = useAuth();
 	const { colorScheme } = useColorScheme();
-
-	if (!initialized) {
-		return null;
-	}
 
 	if (!session) {
 		return <Redirect href="/welcome" />;

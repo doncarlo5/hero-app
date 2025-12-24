@@ -10,7 +10,7 @@ const IsAuthenticated = () => {
     return (
       <div className="container flex flex-col items-center justify-center p-20">
         <div className="">
-          <LucideLoader2 className=" animate-spin " size={32} />
+          <LucideLoader2 className="animate-spin" size={32} />
         </div>
       </div>
     );

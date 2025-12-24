@@ -15,16 +15,9 @@ import Svg, { Circle, Defs, LinearGradient, Stop } from "react-native-svg";
 import { TypeSessionBadge } from "@/components/ui/type-session-badge";
 import WeekActivityCarousel from "@/components/week-activity-carousel";
 import { fetchApi } from "@/lib/api-handler";
+import { useProfile } from "@/lib/hooks/use-profile";
 import { useColorScheme } from "@/lib/useColorScheme";
 import { router } from "expo-router";
-
-type User = {
-	_id: string;
-	firstName: string;
-	lastName: string;
-	email: string;
-	hasSeenOnboarding: boolean;
-};
 
 type Session = {
 	_id: string;
@@ -34,14 +27,6 @@ type Session = {
 	is_done: boolean;
 	comment?: string;
 	exercise_user_list: string[];
-};
-
-type TrophyType = {
-	_id: string;
-	name: string;
-	achieved: boolean;
-	level: number;
-	description: string;
 };
 
 const CircularProgress = ({
@@ -118,12 +103,20 @@ const CircularProgress = ({
 
 export default function Home() {
 	const { isDarkColorScheme } = useColorScheme();
-	const [user, setUser] = useState<User | null>(null);
 	const [lastSession, setLastSession] = useState<Session | null>(null);
 	const [allSessions, setAllSessions] = useState<Session[]>([]);
-	const [trophies, setTrophies] = useState<TrophyType[]>([]);
+	const [trophies, setTrophies] = useState<
+		{
+			_id: string;
+			name: string;
+			achieved: boolean;
+			level: number;
+			description: string;
+		}[]
+	>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [refreshing, setRefreshing] = useState(false);
+	const { user } = useProfile();
 
 	const inFlightRef = useRef(false);
 
@@ -132,11 +125,6 @@ export default function Home() {
 		inFlightRef.current = true;
 		try {
 			setIsLoading(true);
-
-			const userResponse = await fetchApi("/api/auth/verify", {
-				noStore: true,
-			});
-			setUser(userResponse?.user ?? null);
 
 			const lastSessionResponse = await fetchApi(
 				"/api/sessions?limit=1&sortBy=date_session:desc",

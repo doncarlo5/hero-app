@@ -30,7 +30,6 @@ const WeekActivityCarousel = () => {
       setIsLoading(true);
       const response = await fetchApi(`/api/sessions/last-31-days`);
       setSessions(response);
-      console.log("last-31-days", response);
     } catch (error) {
       console.error("Error fetching sessions", error);
     } finally {

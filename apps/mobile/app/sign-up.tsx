@@ -73,9 +73,13 @@ export default function SignUp() {
 
 	async function onSubmit(data: z.infer<typeof formSchema>) {
 		try {
-			await signUp(data.email, data.password);
+			const result = await signUp(data.email, data.password);
 
-			form.reset();
+			if (!result.error) {
+				form.reset();
+				// Navigation will happen via useEffect when session updates
+				// Note: If email confirmation is required, session might be null
+			}
 		} catch (error: Error | any) {
 			console.error(error.message);
 		}
@@ -85,7 +89,11 @@ export default function SignUp() {
 		try {
 			Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 			setIsGoogleLoading(true);
-			await signInWithGoogle();
+			const result = await signInWithGoogle();
+			// Navigation will happen via useEffect when session updates
+			if (result.error) {
+				console.error("Google sign in error:", result.error);
+			}
 		} catch (error: Error | any) {
 			console.error("Google sign in error:", error.message);
 		} finally {
@@ -97,7 +105,11 @@ export default function SignUp() {
 		try {
 			Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 			setIsAppleLoading(true);
-			await signInWithApple();
+			const result = await signInWithApple();
+			// Navigation will happen via useEffect when session updates
+			if (result.error) {
+				console.error("Apple sign in error:", result.error);
+			}
 		} catch (error: Error | any) {
 			console.error("Apple sign in error:", error.message);
 		} finally {
