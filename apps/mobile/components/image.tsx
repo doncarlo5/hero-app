@@ -1,8 +1,6 @@
 import { Image } from "expo-image";
-import { cssInterop } from "nativewind";
+import { withUniwind } from "uniwind";
 
-const StyledImage = cssInterop(Image, {
-	className: "style",
-});
+const StyledImage = withUniwind(Image);
 
 export { StyledImage as Image };
