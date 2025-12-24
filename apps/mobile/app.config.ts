@@ -5,7 +5,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 	name: "Hero App",
 	slug: "hero-app",
 	scheme: "hero-app",
-	version: "1.0.9",
+	version: "1.1.0",
 	orientation: "portrait",
 	icon: "./assets/icon.png",
 	userInterfaceStyle: "automatic",
@@ -41,7 +41,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 		entitlements: {
 			"com.apple.developer.applesignin": ["Default"],
 		},
-		buildNumber: "4",
+		buildNumber: "5",
 	},
 	android: {
 		edgeToEdgeEnabled: true,
@@ -59,7 +59,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 			},
 		},
 		package: "com.doncarlos.heroapp",
-		versionCode: 4,
+		versionCode: 5,
 	},
 	experiments: {
 		typedRoutes: true,
