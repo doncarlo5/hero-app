@@ -120,9 +120,9 @@ router.post("/login", async (req, res, next) => {
   }
 });
 
-//* Verify Token
+//* Get User
 
-router.get("/verify", isAuthenticated, (req, res, next) => {
+router.get("/get-user", isAuthenticated, (req, res, next) => {
   const user = req.user;
   try {
     return res.status(200).json({ user, message: "Token is valid" });
