@@ -17,6 +17,9 @@ dist/
 /apps/admin/out/
 /apps/admin/build
 
+# midday
+/apps/api-midday/
+
 # Vite cache and dev files
 .vite/
 apps/*/node_modules/.vite/
