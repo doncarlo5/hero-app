@@ -1,29 +1,12 @@
-# Hero App 🏋️‍♂️ - by Julien THOMAS ~ Frontend
+# Hero App — website
 
-<a href="https://hero-app-frontend.vercel.app/"><img src="public/cover-img.png" width="60%" /></a>
+Marketing site for the Hero App mobile app (www.hero-app.org): landing page, support page and the privacy policy.
 
-### [Want to track your progress?](https://hero-app-frontend.vercel.app/) 💪
+- `/` landing page, `/support` support page, anything else shows a "page not found" that points former web app users to the mobile app.
+- `/privacy-policy` is the static page `public/privacy-policy/index.html` (linked from the stores), not a React route.
+- Store link and support email live in `src/links.ts`.
 
-# ⚡️ Introduction
-
-A React app to track your progress at the gym for specific exercises.
-
-# 🔥 Features
-
-💬 **Add/Update/Delete your exercise** <br />
-🌙 **Dark Mode** <br />
-📲 **Responsive** <br />
-
-# ⚙️ Behind the scene
-
-🖊️ **Typescript language** <br />
-✨ **Tailwind project** <br />
-🧩 **Radix primitive components** <br />
-📂 **Use separate backend** <br />
-
----
-
-# 🌐 Credits
-
-- Shadcn : [Website](https://ui.shadcn.com/)
-- Hero App Backend : [GitHub Repo](https://github.com/doncarlo5/hero-app-backend)
+```bash
+npm run dev
+npm run build
+```
