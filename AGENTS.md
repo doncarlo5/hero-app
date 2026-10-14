@@ -116,3 +116,13 @@ npm run format    # Format with Prettier
 2. JWT tokens stored in secure storage (mobile) or localStorage (web)
 3. API middleware validates JWT on protected routes
 4. User data synced between Supabase and MongoDB
+
+## Cursor Cloud specific instructions
+
+- Install from the repo root with `npm ci`. MongoDB Community 8.0 is installed from the official Ubuntu 24.04 `mongodb-org` apt repository. This environment has no systemd, so start the database with `sudo -u mongodb mongod --config /etc/mongod.conf --fork` and check it with `mongosh --quiet --eval 'db.runCommand({ ping: 1 })'`.
+- Boot writes gitignored env files: `apps/api/.env`, `apps/web/.env`, and `apps/mobile/.env`. Defaults are `mongodb://127.0.0.1:27017/hero-app`, `https://example.supabase.co`, `dev-anon-key`, and `dev-secret-token`. `MONGODB_URI`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SECRET_TOKEN`, `VITE_BACKEND_URL`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `EXPO_PUBLIC_SUPABASE_URL`, and `EXPO_PUBLIC_SUPABASE_ANON_KEY` override those defaults when they are set.
+- Root `npm run dev` starts the API on port 3000 and the Vite web app on port 5173. The Expo app is installed with the workspace; run `npm run web` in `apps/mobile` when you need it. It is not started on boot.
+- `POST /api/auth/signup` with `firstName`, `lastName`, `email`, and `password` creates a MongoDB user plus default exercise types and trophies without Supabase. `POST /api/auth/login` returns a JWT. `GET /` returns `{ "message": "All good here! 🚀" }`.
+- The web login and signup forms call Supabase, not those API routes. Without a real `SUPABASE_URL` and `SUPABASE_ANON_KEY`, submit fails with "Failed to fetch". The web API client reads the Supabase session from localStorage key `sb-qmhziwpyeqpwllseache-auth-token`.
+- `npm test` in `apps/api` runs. The unknown-route 404 test passes. The other three tests still expect the old starter responses (`GET /` unicorn message and `/api/v1`), which this API does not serve.
+- `npm run build` in `apps/web` (`tsc && vite build`) succeeds.
