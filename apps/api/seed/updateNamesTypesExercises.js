@@ -1,16 +1,14 @@
-require("dotenv").config({ path: require("path").resolve(__dirname, "../../../.env") });
+require("../config/load-env");
 const mongoose = require("mongoose");
-const MONGODB_URI = process.env.MONGODB_URI;
 const Exercise = require("../models/exercise-type.model");
 const defaultExerciseTypes = require("../constants/DefaultExerciseTypesConstant");
 
-mongoose.connect(
-  MONGODB_URI,
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  }
-);
+const MONGODB_URI = process.env.MONGODB_URI;
+
+mongoose.connect(MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 // List of exercises that should not be updated
 const doNotUpdate = [

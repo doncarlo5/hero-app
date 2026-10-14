@@ -1,17 +1,15 @@
-require("dotenv").config({ path: require("path").resolve(__dirname, "../../../.env") });
+require("../config/load-env");
 const mongoose = require("mongoose");
 const Program = require("../models/program.model");
 const ExerciseType = require("../models/exercise-type.model");
 const User = require("../models/user.model");
+
 const MONGODB_URI = process.env.MONGODB_URI;
 
-mongoose.connect(
-  MONGODB_URI,
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  }
-);
+mongoose.connect(MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 const programsData = {
   "Upper A": [

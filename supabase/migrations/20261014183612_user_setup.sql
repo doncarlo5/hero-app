@@ -1,7 +1,7 @@
--- Création du profil et des données par défaut d'un utilisateur (port de apps/api/api/createUser.js)
--- Déclenché à l'inscription (auth.users) ; ensure_profile() permet au client de rattraper un échec.
+-- Creates a user's profile and default data (port of apps/api/api/createUser.js)
+-- Runs on sign-up (auth.users); ensure_profile() lets the client recover from a failure.
 
--- Certains comptes (Apple, téléphone) n'ont pas d'email : il reste unique mais devient facultatif
+-- Some accounts (Apple, phone) have no email: it stays unique but becomes optional
 alter table public.profiles alter column email drop not null;
 
 create function private.setup_user(p_uid uuid)
@@ -40,18 +40,18 @@ begin
     values (p_uid, lower(v_email), v_first, v_last)
     on conflict (id) do nothing;
   exception when unique_violation then
-    -- email déjà pris par un autre profil : on crée le profil sans email
+    -- email already used by another profile: create the profile without email
     insert into public.profiles (id, email, first_name, last_name)
     values (p_uid, null, v_first, v_last)
     on conflict (id) do nothing;
   end;
 
-  -- Données par défaut uniquement pour un utilisateur qui n'a encore aucun type d'exercice
+  -- Default data only for a user who has no exercise type yet
   if exists (select 1 from public.exercise_types where owner_id = p_uid) then
     return;
   end if;
 
-  -- Les trophées sont initialisés par le trigger init_trophies sur exercise_types
+  -- Trophies are initialized by the init_trophies trigger on exercise_types
   insert into public.exercise_types (owner_id, name, advice, timer_seconds, rep_range_1, rep_range_2,
                                      rep_range_3, rep_range_4, session_types, trophy_locked, definition_key)
   select p_uid, d.name, d.advice, d.timer_seconds, d.rep_range_1, d.rep_range_2,
@@ -86,7 +86,7 @@ begin
 end;
 $$;
 
--- Trigger d'inscription : ne doit jamais bloquer la création du compte
+-- Sign-up trigger: must never block account creation
 create function private.on_auth_user_created()
 returns trigger
 language plpgsql
@@ -106,7 +106,7 @@ $$;
 create trigger on_auth_user_created after insert on auth.users
   for each row execute function private.on_auth_user_created();
 
--- RPC de rattrapage, à appeler par le client après connexion ; renvoie le profil
+-- Recovery RPC, called by the client after sign-in; returns the profile
 create function public.ensure_profile()
 returns public.profiles
 language plpgsql
@@ -127,7 +127,7 @@ $$;
 revoke execute on function public.ensure_profile() from public, anon;
 grant execute on function public.ensure_profile() to authenticated;
 
--- Rattrapage : comptes Auth sans profil (inscrits après la copie Mongo, ou jamais passés par l'API)
+-- Backfill: auth users without a profile (signed up after the Mongo copy, or never went through the API)
 select private.setup_user(u.id)
 from auth.users u
 where not exists (select 1 from public.profiles p where p.id = u.id);

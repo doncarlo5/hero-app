@@ -1,5 +1,5 @@
--- Baseline : schéma existant au 2026-10-14 (créé hors migrations lors de la copie Mongo → Supabase).
--- Déjà présent en prod : enregistré comme appliqué, ne pas rejouer sur la prod.
+-- Baseline: schema as it existed on 2026-10-14 (created outside migrations during the Mongo → Supabase copy).
+-- Already present in prod: registered as applied, do not replay it on prod.
 
 create type public.session_type as enum ('Upper A', 'Lower', 'Upper B', 'Other', 'Séance A', 'Séance B');
 
@@ -126,7 +126,7 @@ create table public.feedbacks (
 );
 create index feedbacks_owner_idx on public.feedbacks (owner_id);
 
--- RLS : chaque table en "own rows" (remplacé par 20261014183648_rls_hardening.sql)
+-- RLS: every table is "own rows" (replaced by 20261014183648_rls_hardening.sql)
 alter table public.profiles enable row level security;
 alter table public.exercise_types enable row level security;
 alter table public.sessions enable row level security;

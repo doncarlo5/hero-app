@@ -1,5 +1,5 @@
-// Généré depuis Supabase (projet Hero-App) — ne pas modifier à la main.
-// Régénérer après chaque migration de supabase/migrations.
+// Generated from Supabase (Hero-App project). Do not edit by hand.
+// Regenerate after every migration in supabase/migrations.
 
 export type Json =
   | string
@@ -461,8 +461,6 @@ export type Database = {
         Row: {
           achieved: boolean
           awarded_at: string | null
-          best_reps: number
-          best_weight: number
           body_weight: number | null
           created_at: string
           description: string
@@ -475,7 +473,7 @@ export type Database = {
           reps_goal: number | null
           reps_user: number
           reward_text: string | null
-          trophy_type: string
+          trophy_type: Database["public"]["Enums"]["trophy_type"]
           updated_at: string
           weight_multiplier: number | null
           weight_user: number
@@ -483,8 +481,6 @@ export type Database = {
         Insert: {
           achieved?: boolean
           awarded_at?: string | null
-          best_reps?: number
-          best_weight?: number
           body_weight?: number | null
           created_at?: string
           description: string
@@ -497,7 +493,7 @@ export type Database = {
           reps_goal?: number | null
           reps_user?: number
           reward_text?: string | null
-          trophy_type: string
+          trophy_type: Database["public"]["Enums"]["trophy_type"]
           updated_at?: string
           weight_multiplier?: number | null
           weight_user?: number
@@ -505,8 +501,6 @@ export type Database = {
         Update: {
           achieved?: boolean
           awarded_at?: string | null
-          best_reps?: number
-          best_weight?: number
           body_weight?: number | null
           created_at?: string
           description?: string
@@ -519,7 +513,7 @@ export type Database = {
           reps_goal?: number | null
           reps_user?: number
           reward_text?: string | null
-          trophy_type?: string
+          trophy_type?: Database["public"]["Enums"]["trophy_type"]
           updated_at?: string
           weight_multiplier?: number | null
           weight_user?: number
@@ -555,7 +549,7 @@ export type Database = {
           level: number
           reps_goal: number
           reward_text: string | null
-          trophy_type: string
+          trophy_type: Database["public"]["Enums"]["trophy_type"]
           weight_multiplier: number
         }
         Insert: {
@@ -564,7 +558,7 @@ export type Database = {
           level: number
           reps_goal: number
           reward_text?: string | null
-          trophy_type: string
+          trophy_type: Database["public"]["Enums"]["trophy_type"]
           weight_multiplier: number
         }
         Update: {
@@ -573,7 +567,7 @@ export type Database = {
           level?: number
           reps_goal?: number
           reward_text?: string | null
-          trophy_type?: string
+          trophy_type?: Database["public"]["Enums"]["trophy_type"]
           weight_multiplier?: number
         }
         Relationships: [
@@ -628,6 +622,14 @@ export type Database = {
         | "Other"
         | "Séance A"
         | "Séance B"
+      trophy_type:
+        | "silver"
+        | "gold"
+        | "platinum"
+        | "diamond"
+        | "master"
+        | "grand master"
+        | "challenger"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -762,6 +764,15 @@ export const Constants = {
         "Other",
         "Séance A",
         "Séance B",
+      ],
+      trophy_type: [
+        "silver",
+        "gold",
+        "platinum",
+        "diamond",
+        "master",
+        "grand master",
+        "challenger",
       ],
     },
   },

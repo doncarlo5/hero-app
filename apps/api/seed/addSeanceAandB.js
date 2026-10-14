@@ -1,16 +1,14 @@
-require("dotenv").config({ path: require("path").resolve(__dirname, "../../../.env") });
+require("../config/load-env");
 const mongoose = require("mongoose");
-const MONGODB_URI = process.env.MONGODB_URI;
 const ExerciseType = require("../models/exercise-type.model"); // Assuming you have an ExerciseType model
 const User = require("../models/user.model"); // Assuming you have a User model
 
-mongoose.connect(
-  MONGODB_URI,
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  }
-);
+const MONGODB_URI = process.env.MONGODB_URI;
+
+mongoose.connect(MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 // List of default exercise types (Séance A and Séance B only)
 const defaultExerciseTypes = [

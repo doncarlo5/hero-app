@@ -1,9 +1,9 @@
--- RLS durcie + index
--- * (select auth.uid()) : évalué une fois par requête au lieu d'une fois par ligne
--- * trophies : lecture seule côté client (écrits uniquement par les fonctions de private.*)
--- * vérifie que les références (séance, type d'exercice, programme) appartiennent à l'utilisateur
+-- Hardened RLS + indexes
+-- * (select auth.uid()): evaluated once per query instead of once per row
+-- * trophies: read-only for clients (written only by private.* functions)
+-- * checks that referenced rows (session, exercise type, program) belong to the user
 
--- Suppression des policies de la baseline -------------------------------------
+-- Drop the baseline policies --------------------------------------------------
 do $$
 declare p record;
 begin
@@ -17,7 +17,7 @@ begin
   end loop;
 end $$;
 
--- Helpers d'appartenance (security definer : évite la récursion RLS et reste rapide)
+-- Ownership helpers (security definer: avoids RLS recursion and stays fast)
 create function private.owns_session(p_id uuid)
 returns boolean language sql stable security definer set search_path = '' as $$
   select exists (select 1 from public.sessions where id = p_id and owner_id = (select auth.uid()));
@@ -43,7 +43,7 @@ returns boolean language sql stable security definer set search_path = '' as $$
   );
 $$;
 
--- Les policies appellent ces helpers avec les droits de l'utilisateur
+-- Policies call these helpers with the user's privileges
 grant usage on schema private to authenticated;
 revoke execute on all functions in schema private from public, anon, authenticated;
 grant execute on function private.owns_session(uuid), private.owns_exercise_type(uuid),
@@ -58,7 +58,7 @@ create policy profiles_insert_own on public.profiles for insert to authenticated
 create policy profiles_update_own on public.profiles for update to authenticated
   using (id = (select auth.uid())) with check (id = (select auth.uid()));
 
--- Tables simples "owner_id" ----------------------------------------------------
+-- Plain "owner_id" tables -----------------------------------------------------
 do $$
 declare t text;
 begin
@@ -70,7 +70,7 @@ begin
   end loop;
 end $$;
 
--- exercise_users : type et séance doivent appartenir à l'utilisateur ------------
+-- exercise_users: type and session must belong to the user --------------------
 create policy exercise_users_select_own on public.exercise_users for select to authenticated
   using (owner_id = (select auth.uid()));
 create policy exercise_users_insert_own on public.exercise_users for insert to authenticated
@@ -117,12 +117,12 @@ create policy program_alternatives_insert_own on public.program_exercise_alterna
 create policy program_alternatives_delete_own on public.program_exercise_alternatives for delete to authenticated
   using (private.owns_program_exercise(program_exercise_id));
 
--- trophies : lecture seule -----------------------------------------------------
+-- trophies: read-only ---------------------------------------------------------
 create policy trophies_select_own on public.trophies for select to authenticated
   using (owner_id = (select auth.uid()));
 
 -- Index ------------------------------------------------------------------------
--- Clés étrangères non indexées
+-- Unindexed foreign keys
 create index exercise_users_type_idx on public.exercise_users (type_id);
 create index exercise_users_session_idx on public.exercise_users (session_id);
 create index exercise_users_owner_type_idx on public.exercise_users (owner_id, type_id);
@@ -131,9 +131,9 @@ create index trophies_exercise_user_idx on public.trophies (exercise_user_id);
 create index program_exercises_program_idx on public.program_exercises (program_id);
 create index program_exercises_exercise_type_idx on public.program_exercises (exercise_type_id);
 create index program_exercise_alternatives_exercise_type_idx on public.program_exercise_alternatives (exercise_type_id);
--- Liste des séances par date
+-- Sessions listed by date
 create index sessions_owner_date_idx on public.sessions (owner_id, date_session desc);
 drop index public.sessions_owner_idx;
--- Doublons des contraintes uniques
+-- Duplicates of unique constraints
 drop index public.trophies_owner_exercise_type_level_idx;
 drop index public.exercise_sets_exercise_user_idx;

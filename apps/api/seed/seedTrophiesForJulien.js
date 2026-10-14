@@ -1,6 +1,5 @@
-require("dotenv").config({ path: require("path").resolve(__dirname, "../../../.env") });
+require("../config/load-env");
 const mongoose = require("mongoose");
-const MONGODB_URI = process.env.MONGODB_URI;
 const Trophy = require("../models/trophy.model");
 const User = require("../models/user.model");
 const ExerciseType = require("../models/exercise-type.model");
@@ -8,14 +7,13 @@ const ExerciseUser = require("../models/exercise-user.model");
 const Session = require("../models/session.model");
 const TrophiesConstants = require("../constants/TrophiesConstant");
 
+const MONGODB_URI = process.env.MONGODB_URI;
+
 // MongoDB connection
-mongoose.connect(
-  MONGODB_URI,
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  }
-);
+mongoose.connect(MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 // Main function to award trophies to a specific user by email
 const awardTrophiesToSpecificUser = async () => {

@@ -1,4 +1,4 @@
--- Données de référence (portées depuis apps/api/constants/*.js) + clé de définition sur exercise_types.
+-- Reference data (ported from apps/api/constants/*.js) + definition key on exercise_types.
 
 create table public.default_exercise_types (
   key text primary key,
@@ -33,7 +33,7 @@ create table public.trophy_definitions (
   primary key (exercise_key, level)
 );
 
--- Lecture seule pour les utilisateurs connectés, écriture réservée aux migrations
+-- Read-only for signed-in users, written by migrations only
 alter table public.default_exercise_types enable row level security;
 alter table public.default_program_exercises enable row level security;
 alter table public.trophy_definitions enable row level security;
@@ -83,7 +83,7 @@ insert into public.default_exercise_types (key, name, advice, timer_seconds, rep
   ('Upright Row - Haltères - Séance B', 'Upright Row - Haltères - Séance B', '', 60, '10-15', '10-15', '10-15', null, '{"Séance B"}'::public.session_type[], false, 39),
   ('Extension Triceps Nuque - Haltères', 'Extension Triceps Nuque - Haltères', '1 mega série - 10s entre chaque - 4 séries', 10, '10-15', '4-6', '4-6', null, '{"Séance B"}'::public.session_type[], false, 40);
 
--- Ignorés car absents des types par défaut (déjà ignorés par l'ancienne API) : Mollets - Barre, Mollets - Leg Press, Tractions lestées prise neutre, Dips lestés
+-- Skipped because missing from the default types (already skipped by the old API): Mollets - Barre, Mollets - Leg Press, Tractions lestées prise neutre, Dips lestés
 insert into public.default_program_exercises (session_type, position, exercise_key, alternative_keys) values
   ('Upper A', 1, 'Développé incliné - Barre', '{"Développé incliné - Haltères"}'::text[]),
   ('Upper A', 2, 'Tractions lestées', '{"Rowing Bucheron - Haltères"}'::text[]),
@@ -140,7 +140,7 @@ insert into public.trophy_definitions (exercise_key, level, trophy_type, weight_
   ('Développé couché - Barre', 6, 'grand master', 1.6, 5, '160% du poids de corps', 'Unbelievable!'),
   ('Développé couché - Barre', 7, 'challenger', 1.8, 5, '180% du poids de corps', 'Incredible!');
 
--- Lien stable entre un type d'exercice utilisateur et sa définition (survit au renommage)
+-- Stable link between a user exercise type and its definition (survives renaming)
 alter table public.exercise_types add column definition_key text references public.default_exercise_types (key) on delete set null;
 update public.exercise_types et set definition_key = et.name where exists (select 1 from public.default_exercise_types d where d.key = et.name);
 create index exercise_types_definition_key_idx on public.exercise_types (definition_key);

@@ -1,11 +1,12 @@
--- Logique des trophées en SQL (port de apps/api/services/trophy-service.js)
--- Les trophées sont recalculés par des triggers à chaque changement de séries, d'exercices ou de poids de corps.
--- Le client ne lit que la table trophies ; la RPC save_exercise renvoie les trophées nouvellement obtenus.
+-- Trophy logic in SQL (port of apps/api/services/trophy-service.js)
+-- Trophies are recomputed by triggers whenever sets, exercises or body weight change.
+-- Clients only read the trophies table; the save_exercise RPC returns newly awarded trophies.
+-- Also holds the generic updated_at triggers and the definition_key trigger used by trophy initialization.
 
 create schema if not exists private;
 revoke all on schema private from public, anon, authenticated;
 
--- updated_at automatique ------------------------------------------------------
+-- Automatic updated_at --------------------------------------------------------
 create function private.set_updated_at()
 returns trigger
 language plpgsql
@@ -26,7 +27,7 @@ begin
   end loop;
 end $$;
 
--- definition_key : rempli depuis le nom à la création (comme l'ancienne API, qui matchait par nom)
+-- definition_key: filled from the name on insert (the old API matched by name)
 create function private.set_definition_key()
 returns trigger
 language plpgsql
@@ -43,7 +44,7 @@ $$;
 create trigger set_definition_key before insert on public.exercise_types
   for each row execute function private.set_definition_key();
 
--- Initialisation des paliers d'un type d'exercice ----------------------------
+-- Tier initialization for an exercise type ------------------------------------
 create function private.init_trophies(p_owner uuid, p_type uuid)
 returns void
 language sql
@@ -60,8 +61,8 @@ as $$
   on conflict (owner_id, exercise_type_id, level) do nothing;
 $$;
 
--- Évaluation : pour chaque palier, meilleure série qualifiante (poids puis reps)
--- sur toutes les séances du type ; une séance sans poids de corps ne compte pas.
+-- Evaluation: for each tier, best qualifying set (weight then reps)
+-- across all sessions of the type; a session without body weight does not count.
 create function private.evaluate_trophies(p_owner uuid, p_type uuid)
 returns void
 language plpgsql
@@ -69,7 +70,7 @@ security definer
 set search_path = ''
 as $$
 begin
-  -- Type ou profil en cours de suppression (cascade) : rien à évaluer
+  -- Type or profile being deleted (cascade): nothing to evaluate
   if not exists (select 1 from public.exercise_types where id = p_type and owner_id = p_owner) then
     return;
   end if;
@@ -133,8 +134,8 @@ $$;
 create trigger init_trophies after insert on public.exercise_types
   for each row execute function private.on_exercise_type_insert();
 
--- Séries : un recalcul par (owner, type) touché, au niveau de l'instruction
--- (PG15 : une seule table de transition par trigger, d'où un trigger par événement)
+-- Sets: one evaluation per touched (owner, type), at statement level
+-- (PG15: a trigger with transition tables handles a single event, hence one trigger per event)
 create function private.on_exercise_sets_insert()
 returns trigger language plpgsql security definer set search_path = '' as $$
 declare r record;
@@ -169,7 +170,7 @@ create trigger evaluate_trophies_on_delete after delete on public.exercise_sets
   referencing old table as old_rows
   for each statement execute function private.on_exercise_sets_delete();
 
--- Exercices : suppression ou changement de type / séance
+-- Exercises: deletion or change of type / session
 create function private.on_exercise_users_delete()
 returns trigger language plpgsql security definer set search_path = '' as $$
 declare r record;
@@ -203,7 +204,7 @@ create trigger evaluate_trophies_on_update after update on public.exercise_users
   referencing old table as old_rows new table as new_rows
   for each statement execute function private.on_exercise_users_update();
 
--- Séances : changement de poids de corps
+-- Sessions: body weight change
 create function private.on_sessions_update()
 returns trigger language plpgsql security definer set search_path = '' as $$
 declare r record;
@@ -225,9 +226,9 @@ create trigger evaluate_trophies_on_update after update on public.sessions
   referencing old table as old_rows new table as new_rows
   for each statement execute function private.on_sessions_update();
 
--- RPC : enregistrer un exercice et ses séries en une transaction --------------
--- p_sets : [{"weight": 80, "reps": 10}, ...] dans l'ordre des séries.
--- Renvoie {"id": <exercise_user id>, "new_trophies": [<trophées obtenus par cet enregistrement>]}.
+-- RPC: save an exercise and its sets in one transaction -----------------------
+-- p_sets: [{"weight": 80, "reps": 10}, ...] in set order.
+-- Returns {"id": <exercise_user id>, "new_trophies": [<trophies awarded by this save>]}.
 create function public.save_exercise(
   p_type_id uuid,
   p_sets jsonb,
