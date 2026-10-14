@@ -33,3 +33,14 @@ The schema lives in `supabase/migrations/`; every change goes through a new migr
 
 - `20261014180000_baseline.sql` is a snapshot of the schema that existed before migrations; it is registered as applied and must not be replayed on prod.
 - Regenerate the mobile types after a migration: `apps/mobile/types/database.ts`.
+
+### Local Supabase
+
+Needs Docker running. `supabase start` applies every migration, then `supabase/seed.sql` creates a test account (`test@hero.local` / `hero-local-test`) with a few sessions and trophies.
+
+```bash
+supabase start
+supabase db reset   # re-apply migrations + seed
+```
+
+To point the mobile app at it, create `apps/mobile/.env.local` (gitignored) with `EXPO_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321` and the local anon key from `supabase status`.

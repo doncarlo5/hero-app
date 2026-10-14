@@ -33,7 +33,7 @@ export default function AuthCallback() {
 	}, [session, router, params]);
 
 	return (
-		<SafeAreaView className="flex-1 bg-background dark:bg-background-dark">
+		<SafeAreaView className="flex-1 bg-background">
 			<View className="flex-1 items-center justify-center gap-4">
 				<ActivityIndicator size="large" />
 				<Text className="text-center dark:text-gray-300">

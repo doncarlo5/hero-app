@@ -1,6 +1,7 @@
 import "react-native-reanimated";
 import "../global.css";
 
+import { QueryClientProvider } from "@tanstack/react-query";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
@@ -8,6 +9,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { colors } from "@/constants/colors";
 import { AuthProvider, useAuth } from "@/context/supabase-provider";
+import { queryClient } from "@/lib/queries/client";
 import { useColorScheme } from "@/lib/useColorScheme";
 
 export default function AppLayout() {
@@ -15,56 +17,60 @@ export default function AppLayout() {
 
 	return (
 		<GestureHandlerRootView style={{ flex: 1 }}>
-			<AuthProvider>
-				<View className="flex-1">
-					<Stack screenOptions={{ headerShown: false, gestureEnabled: false }}>
-						<Stack.Screen name="(protected)" />
-						<Stack.Screen name="welcome" />
-						<Stack.Screen
-							name="sign-up"
-							options={{
-								presentation: "modal",
-								headerShown: true,
-								headerTitle: "Sign Up",
-								headerStyle: {
-									backgroundColor:
+			<QueryClientProvider client={queryClient}>
+				<AuthProvider>
+					<View className="flex-1">
+						<Stack
+							screenOptions={{ headerShown: false, gestureEnabled: false }}
+						>
+							<Stack.Screen name="(protected)" />
+							<Stack.Screen name="welcome" />
+							<Stack.Screen
+								name="sign-up"
+								options={{
+									presentation: "modal",
+									headerShown: true,
+									headerTitle: "Sign Up",
+									headerStyle: {
+										backgroundColor:
+											colorScheme === "dark"
+												? colors.dark.background
+												: colors.light.background,
+									},
+									headerTintColor:
 										colorScheme === "dark"
-											? colors.dark.background
-											: colors.light.background,
-								},
-								headerTintColor:
-									colorScheme === "dark"
-										? colors.dark.foreground
-										: colors.light.foreground,
-								headerShadowVisible: true,
-								gestureEnabled: true,
-							}}
-						/>
-						<Stack.Screen
-							name="sign-in"
-							options={{
-								presentation: "modal",
-								headerShown: true,
-								headerTitle: "Sign In",
-								headerStyle: {
-									backgroundColor:
+											? colors.dark.foreground
+											: colors.light.foreground,
+									headerShadowVisible: true,
+									gestureEnabled: true,
+								}}
+							/>
+							<Stack.Screen
+								name="sign-in"
+								options={{
+									presentation: "modal",
+									headerShown: true,
+									headerTitle: "Sign In",
+									headerStyle: {
+										backgroundColor:
+											colorScheme === "dark"
+												? colors.dark.background
+												: colors.light.background,
+									},
+									headerTintColor:
 										colorScheme === "dark"
-											? colors.dark.background
-											: colors.light.background,
-								},
-								headerTintColor:
-									colorScheme === "dark"
-										? colors.dark.foreground
-										: colors.light.foreground,
-								headerShadowVisible: true,
-								gestureEnabled: true,
-							}}
-						/>
-					</Stack>
-					<AuthRedirector />
-					<AuthLoadingOverlay />
-				</View>
-			</AuthProvider>
+											? colors.dark.foreground
+											: colors.light.foreground,
+									headerShadowVisible: true,
+									gestureEnabled: true,
+								}}
+							/>
+						</Stack>
+						<AuthRedirector />
+						<AuthLoadingOverlay />
+					</View>
+				</AuthProvider>
+			</QueryClientProvider>
 		</GestureHandlerRootView>
 	);
 }
@@ -77,7 +83,7 @@ function AuthLoadingOverlay() {
 	}
 
 	return (
-		<View className="absolute inset-0 items-center justify-center bg-background/80 dark:bg-background-dark/80">
+		<View className="absolute inset-0 items-center justify-center bg-background/80">
 			<ActivityIndicator size="large" />
 		</View>
 	);

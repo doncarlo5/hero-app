@@ -96,10 +96,7 @@ export default function SignIn() {
 	}
 
 	return (
-		<SafeAreaView
-			className="flex-1 bg-background dark:bg-background-dark p-4"
-			edges={["bottom"]}
-		>
+		<SafeAreaView className="flex-1 bg-background p-4" edges={["bottom"]}>
 			<View className="flex-1 gap-4 web:m-4">
 				<H1 className="self-start">Sign In</H1>
 
@@ -107,7 +104,7 @@ export default function SignIn() {
 				{isAppleAvailable && (
 					<View className="w-full">
 						{isAppleLoading ? (
-							<View className="h-11 items-center justify-center border border-border dark:border-border-dark rounded-lg">
+							<View className="h-11 items-center justify-center border border-border rounded-lg">
 								<ActivityIndicator size="small" />
 							</View>
 						) : (

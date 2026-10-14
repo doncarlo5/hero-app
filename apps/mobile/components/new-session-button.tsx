@@ -2,11 +2,20 @@ import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { useRouter } from "expo-router";
 import { Zap } from "lucide-react-native";
 import React, { useCallback, useRef, useState } from "react";
-import { ActivityIndicator, Image, Pressable, Text, View } from "react-native";
+import {
+	ActivityIndicator,
+	Alert,
+	Image,
+	Pressable,
+	Text,
+	View,
+} from "react-native";
 
 // import { Switch } from "@/components/ui/switch"; // For minimalist feature - coming later
 import { colors } from "@/constants/colors";
-import { fetchApi } from "@/lib/api-handler";
+import { useAuth } from "@/context/supabase-provider";
+import { useCreateSession, useLastSession } from "@/lib/queries/sessions";
+import type { SessionType } from "@/lib/queries/types";
 import { useColorScheme } from "@/lib/useColorScheme";
 
 // Import body images (we'll add these assets)
@@ -18,8 +27,10 @@ const lower = require("../assets/lower.png");
 
 export default function NewSessionButton() {
 	// const [showMinimaliste, setShowMinimaliste] = useState(false); // Feature coming later
-	const [isLoading, setIsLoading] = useState(false);
-	const [bodyWeight, setBodyWeight] = useState(0);
+	const { session } = useAuth();
+	const createSession = useCreateSession();
+	const lastSession = useLastSession();
+	const isLoading = createSession.isPending;
 	const [open, setOpen] = useState(false);
 	const { isDarkColorScheme } = useColorScheme();
 
@@ -38,10 +49,6 @@ export default function NewSessionButton() {
 		: "rgba(243, 244, 246, 0.5)"; // slate-600/50 : gray-100/50
 
 	// Bottom sheet callbacks
-	const handleSheetChange = useCallback((index: number) => {
-		console.log("handleSheetChange", index);
-	}, []);
-
 	const handleSnapPress = useCallback((index: number) => {
 		sheetRef.current?.snapToIndex(index);
 	}, []);
@@ -50,28 +57,24 @@ export default function NewSessionButton() {
 		sheetRef.current?.close();
 	}, []);
 
-	const handleCreateSession = async (userChoice: string) => {
-		setIsLoading(true);
-		try {
-			const response = await fetchApi("/api/sessions", {
-				method: "POST",
-				body: JSON.stringify({
-					date_session: new Date(),
-					type_session: userChoice,
-					body_weight: bodyWeight,
-					exercise_user_list: [],
-					is_done: false,
-					comment: "",
-				}),
-			});
-			if (response.session) {
-				router.push(`/session/${response.session._id}`);
-			}
-		} catch (error: any) {
-			console.error(error);
-		} finally {
-			setIsLoading(false);
-		}
+	const handleCreateSession = (userChoice: SessionType) => {
+		if (!session || createSession.isPending) return;
+		createSession.mutate(
+			{
+				ownerId: session.user.id,
+				typeSession: userChoice,
+				// Start from the last known body weight; editable on the session screen
+				bodyWeight: lastSession.data?.body_weight ?? 0,
+			},
+			{
+				onSuccess: (created) => router.push(`/session/${created.id}`),
+				onError: (error) =>
+					Alert.alert(
+						"Erreur",
+						error.message || "Impossible de créer la séance.",
+					),
+			},
+		);
 	};
 
 	return (
@@ -104,7 +107,6 @@ export default function NewSessionButton() {
 				enableDynamicSizing={true}
 				enablePanDownToClose={true}
 				maxDynamicContentSize={600}
-				onChange={handleSheetChange}
 				onClose={() => setOpen(false)}
 				backgroundStyle={{
 					backgroundColor: isDarkColorScheme
@@ -124,7 +126,7 @@ export default function NewSessionButton() {
 						flexGrow: 1,
 					}}
 				>
-					<View className="bg-background dark:bg-background-dark">
+					<View className="bg-background">
 						{isLoading ? (
 							<View className="pt-14 items-center justify-center">
 								<ActivityIndicator size="large" />
@@ -133,12 +135,12 @@ export default function NewSessionButton() {
 							<View>
 								{/* Header */}
 								<View className="mb-4">
-									<Text className="text-xl font-bold text-foreground dark:text-foreground-dark">
+									<Text className="text-xl font-bold text-foreground">
 										Nouvelle séance
 									</Text>
 									{/* Minimalist training toggle - Coming soon */}
 									{/* <View className="flex-row items-center justify-between mt-2">
-										<Text className="text-sm text-muted-foreground dark:text-muted-foreground-dark flex-1 mr-2">
+										<Text className="text-sm text-muted-foreground flex-1 mr-2">
 											{showMinimaliste
 												? "Entrainement minimaliste (2x/semaine)"
 												: "Entrainement complet (3x/semaine)"}
@@ -157,9 +159,9 @@ export default function NewSessionButton() {
 										<>
 											<Pressable
 												onPress={() => handleCreateSession("Séance A")}
-												className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border dark:border-border-dark bg-card dark:bg-card-dark active:opacity-70"
+												className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border bg-card active:opacity-70"
 											>
-												<Text className="mt-2 text-lg font-medium text-foreground dark:text-foreground-dark">
+												<Text className="mt-2 text-lg font-medium text-foreground">
 													Séance A
 												</Text>
 												<Image
@@ -170,9 +172,9 @@ export default function NewSessionButton() {
 											</Pressable>
 											<Pressable
 												onPress={() => handleCreateSession("Séance B")}
-												className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border dark:border-border-dark bg-card dark:bg-card-dark active:opacity-70"
+												className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border bg-card active:opacity-70"
 											>
-												<Text className="mt-2 text-lg font-medium text-foreground dark:text-foreground-dark">
+												<Text className="mt-2 text-lg font-medium text-foreground">
 													Séance B
 												</Text>
 												<Image
@@ -186,9 +188,9 @@ export default function NewSessionButton() {
 									<>
 										<Pressable
 											onPress={() => handleCreateSession("Upper A")}
-											className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border dark:border-border-dark bg-card dark:bg-card-dark active:opacity-70"
+											className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border bg-card active:opacity-70"
 										>
-											<Text className="mb-1 mt-2 text-lg font-medium text-foreground dark:text-foreground-dark">
+											<Text className="mb-1 mt-2 text-lg font-medium text-foreground">
 												Upper A
 											</Text>
 											<Image
@@ -199,9 +201,9 @@ export default function NewSessionButton() {
 										</Pressable>
 										<Pressable
 											onPress={() => handleCreateSession("Lower")}
-											className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border dark:border-border-dark bg-card dark:bg-card-dark active:opacity-70"
+											className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border bg-card active:opacity-70"
 										>
-											<Text className="mb-1 mt-2 text-lg font-medium text-foreground dark:text-foreground-dark">
+											<Text className="mb-1 mt-2 text-lg font-medium text-foreground">
 												Lower
 											</Text>
 											<Image
@@ -212,9 +214,9 @@ export default function NewSessionButton() {
 										</Pressable>
 										<Pressable
 											onPress={() => handleCreateSession("Upper B")}
-											className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border dark:border-border-dark bg-card dark:bg-card-dark active:opacity-70"
+											className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border bg-card active:opacity-70"
 										>
-											<Text className="mb-1 mt-2 text-lg font-medium text-foreground dark:text-foreground-dark">
+											<Text className="mb-1 mt-2 text-lg font-medium text-foreground">
 												Upper B
 											</Text>
 											<Image

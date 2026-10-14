@@ -8,7 +8,7 @@ import {
 	SaveIcon,
 	XIcon,
 } from "lucide-react-native";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import {
 	ActivityIndicator,
 	Alert,
@@ -21,23 +21,21 @@ import { SafeAreaView } from "@/components/safe-area-view";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors";
-import { fetchApi } from "@/lib/api-handler";
+import { useExerciseTypes } from "@/lib/queries/exercise-types";
+import { useProgram, useSaveProgram } from "@/lib/queries/programs";
+import {
+	SESSION_TYPES,
+	type ExerciseTypeRef,
+	type SessionType,
+} from "@/lib/queries/types";
 import { useColorScheme } from "@/lib/useColorScheme";
 import { Pressable } from "react-native-gesture-handler";
 
-interface ExerciseType {
-	_id: string;
-	name: string;
-}
-
 interface ExerciseProgram {
-	exerciseType: ExerciseType;
-	alternatives: ExerciseType[];
+	exerciseType: ExerciseTypeRef;
+	alternatives: ExerciseTypeRef[];
 	order: number;
-	_id?: string;
 }
-
-const sessionOptions = ["Upper A", "Lower", "Upper B", "Séance A", "Séance B"];
 
 export default function ProgramPage() {
 	const { colorScheme } = useColorScheme();
@@ -45,67 +43,55 @@ export default function ProgramPage() {
 	// Bottom sheet ref
 	const bottomSheetRef = useRef<BottomSheet>(null);
 
-	const [sessionType, setSessionType] = useState("Upper A");
+	const [sessionType, setSessionType] = useState<SessionType>("Upper A");
+	const programQuery = useProgram(sessionType);
+	const exerciseTypesQuery = useExerciseTypes(sessionType);
+	const saveProgramMutation = useSaveProgram();
+	// Local draft, edited until saved
 	const [exercises, setExercises] = useState<ExerciseProgram[]>([]);
-	const [availableExercises, setAvailableExercises] = useState<ExerciseType[]>(
-		[],
-	);
-	const [isExercisePickerOpen, setIsExercisePickerOpen] = useState(false);
 	const [targetExercise, setTargetExercise] = useState<number | null>(null);
 
-	// Handle sheet changes
-	const handleSheetChange = useCallback((index: number) => {
-		setIsExercisePickerOpen(index >= 0);
-	}, []);
-	const [isLoading, setIsLoading] = useState(false);
-	const [isLoadingTypes, setIsLoadingTypes] = useState(true);
-	const [isSaving, setIsSaving] = useState(false);
+	const availableExercises = exerciseTypesQuery.data ?? [];
+	const isLoading = programQuery.isLoading;
+	const isLoadingTypes = exerciseTypesQuery.isLoading;
+	const isSaving = saveProgramMutation.isPending;
 	const router = useRouter();
 
-	const fetchAllExerciseTypes = async (type: string) => {
-		setIsLoadingTypes(true);
-		try {
-			const res = await fetchApi(
-				`/api/exercise-type?type_session=${type}&limit=1000`,
-			);
-			setAvailableExercises(res || []);
-		} catch (e) {
-			console.error("Error fetching exercise types", e);
-		} finally {
-			setIsLoadingTypes(false);
-		}
-	};
-
-	const fetchProgram = async () => {
-		setIsLoading(true);
-		try {
-			const res = await fetchApi(`/api/program/${sessionType}`);
-			setExercises(res?.exercises || []);
-		} catch (e) {
-			console.error("Error fetching program", e);
-		} finally {
-			setIsLoading(false);
-		}
-	};
-
-	useEffect(() => {
-		fetchProgram();
-		fetchAllExerciseTypes(sessionType);
-	}, [sessionType]);
+	// Reset the draft from the saved program when it loads, is saved, or the session
+	// type changes (an empty program is null for several session types)
+	const [draftFrom, setDraftFrom] = useState<{
+		sessionType: SessionType;
+		program: typeof programQuery.data;
+	} | null>(null);
+	if (
+		programQuery.data !== undefined &&
+		(draftFrom?.sessionType !== sessionType ||
+			draftFrom.program !== programQuery.data)
+	) {
+		setDraftFrom({ sessionType, program: programQuery.data });
+		const programExercises = programQuery.data?.program_exercises ?? [];
+		setExercises(
+			programExercises.map((programExercise, index) => ({
+				exerciseType: programExercise.exercise_types,
+				alternatives: programExercise.program_exercise_alternatives.map(
+					(alternative) => alternative.exercise_types,
+				),
+				order: index + 1,
+			})),
+		);
+	}
 
 	const openAddExercise = () => {
 		setTargetExercise(null);
 		bottomSheetRef.current?.snapToIndex(0);
-		setIsExercisePickerOpen(true);
 	};
 
 	const openAddAlternative = (index: number) => {
 		setTargetExercise(index);
 		bottomSheetRef.current?.snapToIndex(0);
-		setIsExercisePickerOpen(true);
 	};
 
-	const handleSelect = (exercise: ExerciseType) => {
+	const handleSelect = (exercise: ExerciseTypeRef) => {
 		if (targetExercise === null) {
 			const newOrder = exercises.length + 1;
 			setExercises([
@@ -173,28 +159,24 @@ export default function ProgramPage() {
 		setExercises(updated);
 	};
 
-	const saveProgram = async () => {
-		try {
-			setIsSaving(true);
-			await fetchApi("/api/program", {
-				method: "POST",
-				body: JSON.stringify({
-					sessionType,
-					exercises: exercises.map((ex) => ({
-						exerciseType: ex.exerciseType._id,
-						order: ex.order,
-						alternatives: ex.alternatives.map((alt) => alt._id),
-					})),
-				}),
-			});
-			Alert.alert("Success", "Program saved successfully");
-			router.back();
-		} catch (e) {
-			console.error("Error saving program", e);
-			Alert.alert("Error", "Failed to save program");
-		} finally {
-			setIsSaving(false);
-		}
+	const saveProgram = () => {
+		if (isSaving) return;
+		saveProgramMutation.mutate(
+			{
+				sessionType,
+				exercises: exercises.map((ex) => ({
+					exerciseTypeId: ex.exerciseType.id,
+					alternativeIds: ex.alternatives.map((alt) => alt.id),
+				})),
+			},
+			{
+				onSuccess: () => {
+					Alert.alert("Success", "Program saved successfully");
+					router.back();
+				},
+				onError: () => Alert.alert("Error", "Failed to save program"),
+			},
+		);
 	};
 
 	return (
@@ -217,14 +199,11 @@ export default function ProgramPage() {
 					headerShadowVisible: true,
 				}}
 			/>
-			<SafeAreaView
-				className="flex-1 bg-background dark:bg-background-dark"
-				edges={["bottom"]}
-			>
+			<SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
 				<ScrollView className="flex-1 px-4 pt-4">
 					{/* Session Type Selection */}
 					<View className="mb-4">
-						<Text className="text-lg font-semibold text-foreground dark:text-foreground-dark mb-3">
+						<Text className="text-lg font-semibold text-foreground mb-3">
 							Session Type
 						</Text>
 						<ScrollView
@@ -233,21 +212,21 @@ export default function ProgramPage() {
 							className="mb-4"
 						>
 							<View className="flex-row gap-2">
-								{sessionOptions.map((type) => (
+								{SESSION_TYPES.map((type) => (
 									<TouchableOpacity
 										key={type}
 										onPress={() => setSessionType(type)}
 										className={`px-4 py-2 rounded-lg border ${
 											sessionType === type
-												? "bg-primary border-primary dark:bg-primary-dark dark:border-primary-dark"
-												: "border-border dark:border-border-dark bg-muted/30 dark:bg-muted-dark/30"
+												? "bg-primary border-primary"
+												: "border-border bg-muted/30"
 										}`}
 									>
 										<Text
 											className={
 												sessionType === type
-													? "text-primary-foreground dark:text-primary-foreground-dark font-medium"
-													: "text-foreground dark:text-foreground-dark"
+													? "text-primary-foreground font-medium"
+													: "text-foreground"
 											}
 										>
 											{type}
@@ -267,7 +246,7 @@ export default function ProgramPage() {
 							size={18}
 							color={colorScheme === "dark" ? "#000000" : "#ffffff"}
 						/>
-						<Text className="ml-2 text-primary-foreground dark:text-primary-foreground-dark font-medium">
+						<Text className="ml-2 text-primary-foreground font-medium">
 							Add Exercise
 						</Text>
 					</Button>
@@ -281,7 +260,7 @@ export default function ProgramPage() {
 							</Text>
 						</View>
 					) : exercises.length === 0 ? (
-						<View className="bg-muted/30 dark:bg-muted-dark/30 rounded-lg p-6 items-center">
+						<View className="bg-muted/30 rounded-lg p-6 items-center">
 							<Text className="text-muted-foreground dark:text-gray-400 text-center">
 								No exercises in this program yet. Add your first exercise!
 							</Text>
@@ -291,11 +270,11 @@ export default function ProgramPage() {
 							{exercises.map((exercise, index) => (
 								<View
 									key={index}
-									className="mb-3 rounded-xl border border-border dark:border-border-dark bg-card dark:bg-card-dark p-4"
+									className="mb-3 rounded-xl border border-border bg-card p-4"
 								>
 									<View className="flex-row items-center justify-between">
 										<View className="flex-1">
-											<Text className="text-lg font-semibold text-foreground dark:text-foreground-dark">
+											<Text className="text-lg font-semibold text-foreground">
 												{exercise.order}. {exercise.exerciseType.name}
 											</Text>
 										</View>
@@ -355,10 +334,10 @@ export default function ProgramPage() {
 										<View className="mt-3 ml-4">
 											{exercise.alternatives.map((alt, altIndex) => (
 												<View
-													key={alt._id}
-													className="flex-row items-center justify-between border-l-2 border-border dark:border-border-dark py-2 px-3 bg-muted/20 dark:bg-muted-dark/20 rounded-r-lg"
+													key={alt.id}
+													className="flex-row items-center justify-between border-l-2 border-border py-2 px-3 bg-muted/20 rounded-r-lg"
 												>
-													<Text className="text-foreground dark:text-foreground-dark flex-1">
+													<Text className="text-foreground flex-1">
 														{exercise.order}.{altIndex + 1}. {alt.name}
 													</Text>
 													<View className="flex-row items-center gap-1">
@@ -447,8 +426,6 @@ export default function ProgramPage() {
 					enableDynamicSizing={true}
 					enablePanDownToClose={true}
 					maxDynamicContentSize={600}
-					onChange={handleSheetChange}
-					onClose={() => setIsExercisePickerOpen(false)}
 					backgroundStyle={{
 						backgroundColor:
 							colorScheme === "dark" ? colors.dark.card : colors.light.card,
@@ -479,7 +456,7 @@ export default function ProgramPage() {
 								</Text>
 							</View>
 						) : availableExercises.length === 0 ? (
-							<View className="bg-muted/30 dark:bg-muted-dark/30 rounded-lg p-6 items-center">
+							<View className="bg-muted/30 rounded-lg p-6 items-center">
 								<Text className="text-muted-foreground dark:text-gray-400 text-center">
 									No exercises available for this session type.
 								</Text>
@@ -487,11 +464,9 @@ export default function ProgramPage() {
 						) : (
 							<View>
 								{availableExercises.map((ex) => (
-									<Pressable key={ex._id} onPress={() => handleSelect(ex)}>
-										<View className="flex-row items-center p-3 border-b border-border dark:border-border-dark">
-											<Text className="text-foreground dark:text-foreground-dark flex-1">
-												{ex.name}
-											</Text>
+									<Pressable key={ex.id} onPress={() => handleSelect(ex)}>
+										<View className="flex-row items-center p-3 border-b border-border">
+											<Text className="text-foreground flex-1">{ex.name}</Text>
 										</View>
 									</Pressable>
 								))}

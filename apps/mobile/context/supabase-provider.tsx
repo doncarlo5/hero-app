@@ -12,6 +12,7 @@ import {
 import { Session } from "@supabase/supabase-js";
 
 import { supabase } from "@/config/supabase";
+import { queryClient } from "@/lib/queries/client";
 
 import * as AppleAuthentication from "expo-apple-authentication";
 import { makeRedirectUri } from "expo-auth-session";
@@ -24,7 +25,6 @@ SplashScreen.preventAutoHideAsync();
 WebBrowser.maybeCompleteAuthSession();
 
 type AuthState = {
-	initialized: boolean;
 	session: Session | null;
 	authenticated: boolean;
 	isLoading: boolean;
@@ -42,7 +42,6 @@ type AuthState = {
 };
 
 export const AuthContext = createContext<AuthState>({
-	initialized: false,
 	session: null,
 	authenticated: false,
 	isLoading: true,
@@ -56,7 +55,6 @@ export const AuthContext = createContext<AuthState>({
 export const useAuth = () => useContext(AuthContext);
 
 export function AuthProvider({ children }: PropsWithChildren) {
-	const [initialized, setInitialized] = useState(false);
 	const [session, setSession] = useState<Session | null>(null);
 	const [authenticated, setAuthenticated] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
@@ -185,7 +183,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 	const signInWithApple = async () => {
 		setIsLoading(true);
 		try {
-			const nonce = Math.random().toString(36).substring(2, 10);
+			const nonce = Crypto.randomUUID();
 			const hashedNonce = await Crypto.digestStringAsync(
 				Crypto.CryptoDigestAlgorithm.SHA256,
 				nonce,
@@ -272,7 +270,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
 				setSession(session);
 				setAuthenticated(true);
 			} else {
-				// not logged in
+				// not logged in: drop the previous user's cached data
+				queryClient.clear();
 				setSession(null);
 				setAuthenticated(false);
 			}
@@ -280,22 +279,20 @@ export function AuthProvider({ children }: PropsWithChildren) {
 			setIsLoading(false);
 		});
 
-		setInitialized(true);
-
 		return () => {
 			subscription?.unsubscribe();
 		};
 	}, []);
 
 	useEffect(() => {
-		if (initialized && !isLoading) {
+		// isLoading turns false once Supabase reported the initial session
+		if (!isLoading) {
 			SplashScreen.hideAsync();
 		}
-	}, [initialized, isLoading]);
+	}, [isLoading]);
 
 	const authContextValue = useMemo(
 		() => ({
-			initialized,
 			session,
 			authenticated,
 			isLoading,
@@ -305,7 +302,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 			signInWithApple,
 			signOut,
 		}),
-		[initialized, session, authenticated, isLoading],
+		[session, authenticated, isLoading],
 	);
 
 	return (

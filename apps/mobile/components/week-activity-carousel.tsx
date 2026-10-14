@@ -10,38 +10,16 @@ import Animated, {
 	withSpring,
 } from "react-native-reanimated";
 
-import { fetchApi } from "@/lib/api-handler";
+import { useRecentSessions } from "@/lib/queries/sessions";
 import { useColorScheme } from "@/lib/useColorScheme";
-
-interface SessionType {
-	_id: string;
-	date_session: string;
-	type_session: string;
-	is_done: boolean;
-}
 
 const WeekActivityCarousel = () => {
 	const { isDarkColorScheme } = useColorScheme();
-	const [sessions, setSessions] = useState<SessionType[]>([]);
-	const [isLoading, setIsLoading] = useState(false);
+	const recentSessions = useRecentSessions(31);
 	const [currentPage, setCurrentPage] = useState(2);
 	const pagerRef = React.useRef<PagerView>(null);
-
-	const fetchSessions = async () => {
-		try {
-			setIsLoading(true);
-			const response = await fetchApi(`/api/sessions/last-31-days`);
-			setSessions(response);
-		} catch (error) {
-			console.error("Error fetching sessions", error);
-		} finally {
-			setIsLoading(false);
-		}
-	};
-
-	useEffect(() => {
-		fetchSessions();
-	}, []);
+	const sessions = recentSessions.data ?? [];
+	const isLoading = recentSessions.isLoading;
 
 	const getWeeks = () => {
 		const today = new Date();

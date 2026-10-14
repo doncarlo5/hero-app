@@ -1,14 +1,7 @@
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { format } from "date-fns";
-import { useRouter } from "expo-router";
 import { AlignJustifyIcon, LucideLoader2 } from "lucide-react-native";
-import React, {
-	useCallback,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-} from "react";
+import React, { useRef, useState } from "react";
 import {
 	ActivityIndicator,
 	Dimensions,
@@ -28,121 +21,49 @@ import {
 import { SafeAreaView } from "@/components/safe-area-view";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { fetchApi } from "@/lib/api-handler";
+import { useExerciseHistory } from "@/lib/queries/exercises";
+import { useExerciseTypes } from "@/lib/queries/exercise-types";
+import { setsToArrays, type ExerciseType } from "@/lib/queries/types";
 
 const { width } = Dimensions.get("window");
 
-type ExerciseType = {
-	_id: string;
-	name: string;
-	advice?: string;
-	timer: number;
-	repRange1: string;
-	repRange2: string;
-	repRange3: string;
-	repRange4?: string;
-	type_session: string[];
-};
-
-type ExerciseData = {
-	_id: string;
-	rep: number[];
-	weight: number[];
-	comment?: string;
-	session: {
-		_id: string;
-		date_session: string;
-	};
-};
+// Snap points for the exercise picker (large lists)
+const SNAP_POINTS = ["50%", "90%"];
 
 export default function Stats() {
-	const router = useRouter();
 	const bottomSheetRef = useRef<BottomSheet>(null);
-	const [exercise, setExercise] = useState<ExerciseData[]>([]);
-	const [allExerciseTypes, setAllExerciseTypes] = useState<ExerciseType[]>([]);
-	const [selectedExerciseType, setSelectedExerciseType] =
-		useState<ExerciseType | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
-	const [isLoadingTypes, setIsLoadingTypes] = useState(true);
-	const [selectedExerciseIndex, setSelectedExerciseIndex] = useState<
-		number | null
-	>(null);
-	const [isExercisePickerOpen, setIsExercisePickerOpen] = useState(false);
+	const exerciseTypesQuery = useExerciseTypes();
+	const [pickedTypeId, setPickedTypeId] = useState<string | null>(null);
 
-	// Bottom sheet snap points - using better values for large lists
-	const snapPoints = useMemo(() => ["50%", "90%"], []);
+	const allExerciseTypes = exerciseTypesQuery.data ?? [];
+	const isLoadingTypes = exerciseTypesQuery.isLoading;
+	// Default to the most recently edited exercise type
+	const selectedExerciseType =
+		allExerciseTypes.find((type) => type.id === pickedTypeId) ??
+		allExerciseTypes[0] ??
+		null;
 
-	// Bottom sheet handlers
-	const handleSheetChanges = useCallback((index: number) => {
-		if (index === -1) {
-			setIsExercisePickerOpen(false);
-		}
-	}, []);
+	const historyQuery = useExerciseHistory(selectedExerciseType?.id ?? null);
+	const isLoading = isLoadingTypes || historyQuery.isLoading;
+	// One entry per recorded exercise, sets as arrays ordered by set_order
+	const exercise = (historyQuery.data ?? [])
+		.filter((item) => item.sessions)
+		.map((item) => ({
+			date: item.sessions?.date_session as string,
+			weight: setsToArrays(item.exercise_sets).weights,
+		}));
 
-	const openBottomSheet = useCallback(() => {
+	const openBottomSheet = () => {
 		bottomSheetRef.current?.snapToIndex(1); // Snap to 90% for maximum scrolling space
-		setIsExercisePickerOpen(true);
-	}, []);
+	};
 
-	const closeBottomSheet = useCallback(() => {
+	const closeBottomSheet = () => {
 		bottomSheetRef.current?.close();
-		setIsExercisePickerOpen(false);
-	}, []);
-
-	const fetchAllExerciseTypes = async () => {
-		try {
-			const response = await fetchApi(`/api/exercise-type?limit=1000`);
-			return response;
-		} catch (error: any) {
-			console.error("Fetch error: ", error);
-			return [];
-		} finally {
-			setIsLoadingTypes(false);
-		}
 	};
 
-	const onExerciseTypeChange = async (exerciseType: ExerciseType) => {
-		setSelectedExerciseType(exerciseType);
-		// Find the index of the selected exercise type
-		const index = allExerciseTypes.findIndex(
-			(type) => type._id === exerciseType._id,
-		);
-		setSelectedExerciseIndex(index >= 0 ? index : null);
-		setIsLoading(true);
-		try {
-			const response = await fetchApi(
-				`/api/exercise-user?limit=1000&sort=createdAt&type=${exerciseType._id}`,
-			);
-			setExercise(response);
-		} catch (error: any) {
-			console.error("Fetch error: ", error);
-		} finally {
-			setIsLoading(false);
-		}
+	const onExerciseTypeChange = (exerciseType: ExerciseType) => {
+		setPickedTypeId(exerciseType.id);
 	};
-
-	useEffect(() => {
-		const init = async () => {
-			setIsLoading(true);
-			const exerciseTypeData = await fetchAllExerciseTypes();
-			setAllExerciseTypes(exerciseTypeData);
-
-			if (exerciseTypeData.length > 0) {
-				const defaultExerciseType = exerciseTypeData[0];
-				setSelectedExerciseType(defaultExerciseType);
-				setSelectedExerciseIndex(0);
-				await onExerciseTypeChange(defaultExerciseType);
-			} else {
-				setSelectedExerciseType(null);
-				setSelectedExerciseIndex(null);
-				setExercise([]);
-			}
-
-			setIsLoading(false);
-		};
-
-		init();
-	}, []);
 
 	const formatXAxis = (tickFormat: string) => {
 		const formattedDate = format(new Date(tickFormat), "dd/MM/yyyy");
@@ -151,7 +72,7 @@ export default function Stats() {
 
 	// Prepare data for Victory charts
 	const chartData = exercise.map((exerciseItem) => ({
-		x: new Date(exerciseItem.session.date_session),
+		x: new Date(exerciseItem.date),
 		y1: exerciseItem.weight[0] || 0,
 		y2: exerciseItem.weight[1] || 0,
 		y3: exerciseItem.weight[2] || 0,
@@ -170,19 +91,16 @@ export default function Stats() {
 	];
 
 	return (
-		<SafeAreaView
-			className="flex-1 bg-background dark:bg-background-dark"
-			edges={["bottom"]}
-		>
+		<SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
 			<ScrollView className="flex-1 px-4 pt-4">
 				{/* Exercise Type Selection */}
 				<View className="mb-4">
 					{isLoadingTypes ? (
-						<View className="bg-muted/30 dark:bg-muted-dark/30 rounded-lg p-4">
+						<View className="bg-muted/30 rounded-lg p-4">
 							<ActivityIndicator size="small" />
 						</View>
 					) : allExerciseTypes.length === 0 ? (
-						<View className="bg-muted/30 dark:bg-muted-dark/30 rounded-lg p-4">
+						<View className="bg-muted/30 rounded-lg p-4">
 							<Text className="text-muted-foreground dark:text-gray-400 text-center">
 								Aucun exercice disponible.
 							</Text>
@@ -191,9 +109,9 @@ export default function Stats() {
 						<Button
 							onPress={openBottomSheet}
 							variant="ghost"
-							className="flex-row w-full flex-1 h-20 items-center dark:text-foreground-dark bg-gray-100 dark:bg-gray-700 rounded-md justify-between p-4"
+							className="flex-row w-full h-20 items-center bg-gray-100 dark:bg-gray-700 rounded-md justify-between p-4"
 						>
-							<Text className="text-foreground dark:text-foreground-dark">
+							<Text className="text-foreground">
 								{selectedExerciseType
 									? selectedExerciseType.name
 									: "Sélectionne un exercice"}
@@ -216,7 +134,7 @@ export default function Stats() {
 				{/* Chart */}
 				{!isLoading && exercise.length > 0 && (
 					<View className="bg-slate-50 dark:bg-slate-900/40 rounded-2xl p-4 mb-5">
-						<Text className="text-lg font-semibold text-center mb-4 text-foreground dark:text-foreground-dark">
+						<Text className="text-lg font-semibold text-center mb-4 text-foreground">
 							Évolution des charges (kg)
 						</Text>
 
@@ -280,7 +198,7 @@ export default function Stats() {
 										},
 									}}
 								/>
-								{selectedExerciseType?.repRange4 && (
+								{selectedExerciseType?.rep_range_4 && (
 									<VictoryArea
 										data={chartData}
 										x="x"
@@ -306,7 +224,7 @@ export default function Stats() {
 									{ name: "Série 1", symbol: { fill: "#AC38B2" } },
 									{ name: "Série 2", symbol: { fill: "#B2AC38" } },
 									{ name: "Série 3", symbol: { fill: "#38B2AC" } },
-									...(selectedExerciseType?.repRange4
+									...(selectedExerciseType?.rep_range_4
 										? [{ name: "Série 4", symbol: { fill: "#B238AC" } }]
 										: []),
 								]}
@@ -327,13 +245,13 @@ export default function Stats() {
 				{/* Stats Summary */}
 				{!isLoading && exercise.length > 0 && (
 					<View className="bg-slate-50 dark:bg-slate-900/40 rounded-2xl p-4 mb-20">
-						<Text className="text-lg font-semibold mb-4 text-foreground dark:text-foreground-dark">
+						<Text className="text-lg font-semibold mb-4 text-foreground">
 							Résumé
 						</Text>
 
 						<View className="flex-row justify-between">
 							<View className="items-center">
-								<Text className="text-2xl font-bold text-foreground dark:text-foreground-dark">
+								<Text className="text-2xl font-bold text-foreground">
 									{exercise.length}
 								</Text>
 								<Text className="text-sm text-muted-foreground dark:text-gray-400">
@@ -342,7 +260,7 @@ export default function Stats() {
 							</View>
 
 							<View className="items-center">
-								<Text className="text-2xl font-bold text-foreground dark:text-foreground-dark">
+								<Text className="text-2xl font-bold text-foreground">
 									{maxWeight}
 								</Text>
 								<Text className="text-sm text-muted-foreground dark:text-gray-400">
@@ -351,7 +269,7 @@ export default function Stats() {
 							</View>
 
 							<View className="items-center">
-								<Text className="text-2xl font-bold text-foreground dark:text-foreground-dark">
+								<Text className="text-2xl font-bold text-foreground">
 									{minWeight}
 								</Text>
 								<Text className="text-sm text-muted-foreground dark:text-gray-400">
@@ -367,9 +285,8 @@ export default function Stats() {
 			<BottomSheet
 				ref={bottomSheetRef}
 				index={-1}
-				snapPoints={snapPoints}
+				snapPoints={SNAP_POINTS}
 				enableDynamicSizing={false}
-				onChange={handleSheetChanges}
 				enablePanDownToClose
 				enableOverDrag={true}
 			>
@@ -387,13 +304,12 @@ export default function Stats() {
 						</View>
 					) : (
 						<View>
-							{allExerciseTypes.map((type: ExerciseType, index: number) => {
-								const isSelected = selectedExerciseType?._id === type._id;
+							{allExerciseTypes.map((type) => {
+								const isSelected = selectedExerciseType?.id === type.id;
 								return (
 									<Pressable
-										key={type._id}
+										key={type.id}
 										onPress={() => {
-											setSelectedExerciseIndex(index);
 											onExerciseTypeChange(type);
 											closeBottomSheet();
 										}}
@@ -426,7 +342,7 @@ export default function Stats() {
 													className={`text-base ${
 														isSelected
 															? "text-primary font-semibold"
-															: "text-foreground dark:text-foreground-dark"
+															: "text-foreground"
 													}`}
 												>
 													{type.name}

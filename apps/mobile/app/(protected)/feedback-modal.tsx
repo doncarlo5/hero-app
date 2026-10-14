@@ -11,8 +11,8 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { fetchApi } from "@/lib/api-handler";
-import { useProfile } from "@/lib/hooks/use-profile";
+import { useAuth } from "@/context/supabase-provider";
+import { useSendFeedback } from "@/lib/queries/feedback";
 import { useColorScheme } from "@/lib/useColorScheme";
 
 interface FeedbackModalProps {
@@ -24,45 +24,42 @@ export default function FeedbackModal({
 	visible,
 	onClose,
 }: FeedbackModalProps) {
-	const { user } = useProfile();
+	const { session } = useAuth();
+	const sendFeedback = useSendFeedback();
 	const { isDarkColorScheme } = useColorScheme();
 	const [formState, setFormState] = useState({ subject: "", message: "" });
-	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const loading = sendFeedback.isPending;
 
-	const handleFeedbackSubmit = async () => {
-		setLoading(true);
+	const handleFeedbackSubmit = () => {
 		setError(null);
-
-		try {
-			if (!formState.subject || !formState.message) {
-				throw new Error("Veuillez remplir tous les champs.");
-			}
-
-			await fetchApi("/api/feedbacks", {
-				method: "POST",
-				body: JSON.stringify({
-					userId: user?._id || null,
-					subject: formState.subject,
-					message: formState.message,
-				}),
-			});
-
-			Alert.alert("Feedback envoyé!", "Merci pour votre contribution.", [
-				{
-					text: "OK",
-					onPress: () => {
-						setFormState({ subject: "", message: "" });
-						onClose();
-					},
-				},
-			]);
-		} catch (error: any) {
-			setError(error.message);
-			console.error(error.message);
-		} finally {
-			setLoading(false);
+		if (!formState.subject || !formState.message) {
+			setError("Veuillez remplir tous les champs.");
+			return;
 		}
+		if (!session || loading) return;
+
+		sendFeedback.mutate(
+			{
+				ownerId: session.user.id,
+				subject: formState.subject,
+				message: formState.message,
+			},
+			{
+				onSuccess: () =>
+					Alert.alert("Feedback envoyé!", "Merci pour votre contribution.", [
+						{
+							text: "OK",
+							onPress: () => {
+								setFormState({ subject: "", message: "" });
+								onClose();
+							},
+						},
+					]),
+				// The draft is kept so the user can retry
+				onError: (mutationError) => setError(mutationError.message),
+			},
+		);
 	};
 
 	const addToMessage = (text: string) => {
@@ -81,11 +78,11 @@ export default function FeedbackModal({
 		>
 			<View className="flex-1 justify-center items-center bg-black/50">
 				<View
-					className="bg-background dark:bg-background-dark rounded-2xl p-4 w-11/12"
+					className="bg-background rounded-2xl p-4 w-11/12"
 					style={{ maxHeight: "80%" }}
 				>
 					<View className="flex-row justify-between items-center mb-4">
-						<Text className="text-lg font-semibold text-foreground dark:text-foreground-dark">
+						<Text className="text-lg font-semibold text-foreground">
 							Feedback
 						</Text>
 						<Pressable onPress={onClose}>
@@ -114,7 +111,7 @@ export default function FeedbackModal({
 										setFormState({ ...formState, subject: text })
 									}
 									placeholder="Entrez le sujet"
-									className="border border-border dark:border-border-dark rounded-md p-3 bg-background dark:bg-background-dark text-foreground dark:text-foreground-dark"
+									className="border border-border rounded-md p-3 bg-background text-foreground"
 									placeholderTextColor="#6B7280"
 								/>
 							</View>
@@ -129,7 +126,7 @@ export default function FeedbackModal({
 									placeholder="Décrivez votre feedback..."
 									multiline
 									numberOfLines={4}
-									className="border border-border dark:border-border-dark rounded-md p-3 bg-background dark:bg-background-dark text-foreground dark:text-foreground-dark"
+									className="border border-border rounded-md p-3 bg-background text-foreground"
 									placeholderTextColor="#6B7280"
 									textAlignVertical="top"
 								/>
@@ -138,35 +135,27 @@ export default function FeedbackModal({
 							<View className="flex-row flex-wrap gap-2 mb-4">
 								<Pressable
 									onPress={() => addToMessage("Bug")}
-									className="px-4 py-2 bg-muted dark:bg-muted-dark rounded-md border border-border dark:border-border-dark"
+									className="px-4 py-2 bg-muted rounded-md border border-border"
 								>
-									<Text className="text-primary dark:text-primary-dark">
-										+ Bug
-									</Text>
+									<Text className="text-primary">+ Bug</Text>
 								</Pressable>
 								<Pressable
 									onPress={() => addToMessage("Feature")}
-									className="px-4 py-2 bg-muted dark:bg-muted-dark rounded-md border border-border dark:border-border-dark"
+									className="px-4 py-2 bg-muted rounded-md border border-border"
 								>
-									<Text className="text-primary dark:text-primary-dark">
-										+ Feature
-									</Text>
+									<Text className="text-primary">+ Feature</Text>
 								</Pressable>
 								<Pressable
 									onPress={() => addToMessage("Séance")}
-									className="px-4 py-2 bg-muted dark:bg-muted-dark rounded-md border border-border dark:border-border-dark"
+									className="px-4 py-2 bg-muted rounded-md border border-border"
 								>
-									<Text className="text-primary dark:text-primary-dark">
-										+ Séance
-									</Text>
+									<Text className="text-primary">+ Séance</Text>
 								</Pressable>
 								<Pressable
 									onPress={() => addToMessage("Design")}
-									className="px-4 py-2 bg-muted dark:bg-muted-dark rounded-md border border-border dark:border-border-dark"
+									className="px-4 py-2 bg-muted rounded-md border border-border"
 								>
-									<Text className="text-primary dark:text-primary-dark">
-										+ Design
-									</Text>
+									<Text className="text-primary">+ Design</Text>
 								</Pressable>
 							</View>
 
@@ -180,7 +169,7 @@ export default function FeedbackModal({
 									size={16}
 									color={isDarkColorScheme ? "#000000" : "#ffffff"}
 								/>
-								<Text className="text-primary-foreground dark:text-primary-foreground-dark">
+								<Text className="text-primary-foreground">
 									{loading ? "Envoi en cours..." : "Envoyer"}
 								</Text>
 							</Button>

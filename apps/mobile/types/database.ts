@@ -312,14 +312,17 @@ export type Database = {
       program_exercise_alternatives: {
         Row: {
           exercise_type_id: string
+          position: number
           program_exercise_id: string
         }
         Insert: {
           exercise_type_id: string
+          position: number
           program_exercise_id: string
         }
         Update: {
           exercise_type_id?: string
+          position?: number
           program_exercise_id?: string
         }
         Relationships: [
@@ -612,6 +615,13 @@ export type Database = {
           p_type_id: string
         }
         Returns: Json
+      }
+      save_program: {
+        Args: {
+          p_exercises: Json
+          p_session_type: Database["public"]["Enums"]["session_type"]
+        }
+        Returns: string
       }
     }
     Enums: {

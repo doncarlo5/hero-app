@@ -8,7 +8,7 @@ import {
 	Noop,
 	useFormContext,
 } from "react-hook-form";
-import { View } from "react-native";
+import { View, type ViewProps } from "react-native";
 import Animated, { FadeInDown, FadeOut } from "react-native-reanimated";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -76,18 +76,17 @@ const FormItemContext = React.createContext<FormItemContextValue>(
 	{} as FormItemContextValue,
 );
 
-const FormItem = React.forwardRef<
-	React.ComponentRef<typeof View>,
-	React.ComponentPropsWithoutRef<typeof View>
->(({ className, ...props }, ref) => {
-	const nativeID = React.useId();
+const FormItem = React.forwardRef<View, ViewProps>(
+	({ className, ...props }, ref) => {
+		const nativeID = React.useId();
 
-	return (
-		<FormItemContext.Provider value={{ nativeID }}>
-			<View ref={ref} className={cn("space-y-2", className)} {...props} />
-		</FormItemContext.Provider>
-	);
-});
+		return (
+			<FormItemContext.Provider value={{ nativeID }}>
+				<View ref={ref} className={cn("space-y-2", className)} {...props} />
+			</FormItemContext.Provider>
+		);
+	},
+);
 FormItem.displayName = "FormItem";
 
 const FormLabel = React.forwardRef<
@@ -186,12 +185,7 @@ const FormInput = React.forwardRef<
 		formMessageNativeID,
 	} = useFormField();
 
-	React.useImperativeHandle(ref, () => {
-		if (!inputRef.current) {
-			return {} as React.ComponentRef<typeof Input>;
-		}
-		return inputRef.current;
-	}, [inputRef.current]);
+	React.useImperativeHandle(ref, () => inputRef.current!, []);
 
 	function handleOnLabelPress() {
 		if (!inputRef.current) {
@@ -244,12 +238,7 @@ const FormTextarea = React.forwardRef<
 		formMessageNativeID,
 	} = useFormField();
 
-	React.useImperativeHandle(ref, () => {
-		if (!textareaRef.current) {
-			return {} as React.ComponentRef<typeof Textarea>;
-		}
-		return textareaRef.current;
-	}, [textareaRef.current]);
+	React.useImperativeHandle(ref, () => textareaRef.current!, []);
 
 	function handleOnLabelPress() {
 		if (!textareaRef.current) {
@@ -342,12 +331,7 @@ const FormSwitch = React.forwardRef<
 		formMessageNativeID,
 	} = useFormField();
 
-	React.useImperativeHandle(ref, () => {
-		if (!switchRef.current) {
-			return {} as React.ComponentRef<typeof Switch>;
-		}
-		return switchRef.current;
-	}, [switchRef.current]);
+	React.useImperativeHandle(ref, () => switchRef.current!, []);
 
 	function handleOnLabelPress() {
 		onChange?.(!value);
