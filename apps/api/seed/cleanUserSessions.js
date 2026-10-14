@@ -1,11 +1,13 @@
+require("dotenv").config({ path: require("path").resolve(__dirname, "../../../.env") });
 // Command to run: node seed/cleanUserSessions.js
 
 const mongoose = require("mongoose");
+const MONGODB_URI = process.env.MONGODB_URI;
 const Session = require("../models/session.model");
 const User = require("../models/user.model");
 
 mongoose.connect(
-  "mongodb+srv://admin-test:yqbvFFLNMy9nG3Mo@hero-app.p7ekmkz.mongodb.net/?retryWrites=true&w=majority&appName=hero-app",
+  MONGODB_URI,
   {
     useNewUrlParser: true,
     useUnifiedTopology: true,

@@ -1,13 +1,12 @@
+require("dotenv").config({ path: require("path").resolve(__dirname, "../../../.env") });
 const mongoose = require("mongoose");
 const Program = require("../models/program.model");
 const ExerciseType = require("../models/exercise-type.model");
 const User = require("../models/user.model");
 const MONGODB_URI = process.env.MONGODB_URI;
 
-console.log("Connecting to MongoDB...", `${MONGODB_URI}`);
-
 mongoose.connect(
-  "mongodb+srv://admin-test:yqbvFFLNMy9nG3Mo@hero-app.p7ekmkz.mongodb.net/?retryWrites=true&w=majority&appName=hero-app",
+  MONGODB_URI,
   {
     useNewUrlParser: true,
     useUnifiedTopology: true,

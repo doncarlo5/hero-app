@@ -4,7 +4,7 @@ const helmet = require("helmet");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 
-require("dotenv").config();
+require("dotenv").config({ path: require("path").resolve(__dirname, "../../../.env") });
 
 require("./database");
 
