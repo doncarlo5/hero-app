@@ -18,7 +18,9 @@ export function useProgram(sessionType: SessionType | undefined) {
 				await supabase
 					.from("programs")
 					.select(
-						"id, session_type, program_exercises(id, order, exercise_types(id, name), program_exercise_alternatives(position, exercise_types(id, name)))",
+						// exercise_types is also reachable through the alternatives (many-to-many):
+						// name the direct foreign key so PostgREST knows which one to embed
+						"id, session_type, program_exercises(id, order, exercise_types!program_exercises_exercise_type_id_fkey(id, name), program_exercise_alternatives(position, exercise_types(id, name)))",
 					)
 					.eq("session_type", sessionType as SessionType)
 					.order("order", { referencedTable: "program_exercises" })

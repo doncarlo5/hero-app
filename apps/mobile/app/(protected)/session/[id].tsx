@@ -4,7 +4,7 @@ import { Picker } from "@react-native-picker/picker";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale/fr";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import {
 	ActivityIndicator,
 	Alert,
@@ -153,9 +153,10 @@ export default function SessionDetail() {
 		}
 	};
 
-	// Sync the form with the loaded session (also after each save)
-	useEffect(() => {
-		if (!session) return;
+	// Sync the form with the loaded session (also after each save that changed it)
+	const [syncedFrom, setSyncedFrom] = useState<typeof session>(null);
+	if (session && session !== syncedFrom) {
+		setSyncedFrom(session);
 		const newFormState = formFromSession(session);
 		setFormState(newFormState);
 		setOriginalFormState(newFormState);
@@ -166,7 +167,7 @@ export default function SessionDetail() {
 			(option) => option === `${parseFloat(weightValue).toFixed(1)} kg`,
 		);
 		setSelectedWeightIndex(weightIndex >= 0 ? weightIndex : 400); // Default to 70.0kg (index 400)
-	}, [session]);
+	}
 
 	const onRefresh = async () => {
 		setRefreshing(true);
@@ -317,7 +318,7 @@ export default function SessionDetail() {
 
 	if (isLoading) {
 		return (
-			<View className="flex-1 items-center justify-center bg-background dark:bg-background-dark">
+			<View className="flex-1 items-center justify-center bg-background">
 				<ActivityIndicator />
 			</View>
 		);
@@ -325,16 +326,14 @@ export default function SessionDetail() {
 
 	if (!session) {
 		return (
-			<View className="flex-1 items-center justify-center bg-background dark:bg-background-dark">
-				<Text className="text-foreground dark:text-foreground-dark">
-					Session not found
-				</Text>
+			<View className="flex-1 items-center justify-center bg-background">
+				<Text className="text-foreground">Session not found</Text>
 			</View>
 		);
 	}
 
 	return (
-		<View className="flex-1 bg-background dark:bg-background-dark">
+		<View className="flex-1 bg-background">
 			<View style={{ position: "relative", flex: 1 }}>
 				<ScrollView
 					className="flex-1"
@@ -352,14 +351,14 @@ export default function SessionDetail() {
 								hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
 								className="flex-row w-fit items-center gap-3 active:opacity-50"
 							>
-								<Text className="text-2xl font-bold text-foreground dark:text-foreground-dark mb-1">
+								<Text className="text-2xl font-bold text-foreground mb-1">
 									{session.type_session}
 								</Text>
-								<Text className="text-sm text-muted-foreground dark:text-muted-foreground-dark">
+								<Text className="text-sm text-muted-foreground">
 									What{"'"}s next?
 								</Text>
 							</Pressable>
-							<Text className="text-sm text-muted-foreground dark:text-muted-foreground-dark">
+							<Text className="text-sm text-muted-foreground">
 								{format(new Date(session.date_session), "EEEE d MMMM yyyy", {
 									locale: fr,
 								})}
@@ -392,9 +391,9 @@ export default function SessionDetail() {
 								<Button
 									onPress={() => setIsCalendarOpen(true)}
 									variant="ghost"
-									className="flex-row w-full items-center dark:text-foreground-dark bg-gray-100 dark:bg-gray-700 rounded-md justify-between"
+									className="flex-row w-full items-center bg-gray-100 dark:bg-gray-700 rounded-md justify-between"
 								>
-									<Text className="text-foreground dark:text-foreground-dark">
+									<Text className="text-foreground">
 										{selectedDate
 											? format(selectedDate, "d MMM yyyy", { locale: fr })
 											: "Select date"}
@@ -412,9 +411,9 @@ export default function SessionDetail() {
 								<Button
 									onPress={() => setIsWeightPickerOpen(true)}
 									variant="ghost"
-									className="flex-row w-full items-center dark:text-foreground-dark bg-gray-100 dark:bg-gray-700 rounded-md justify-between"
+									className="flex-row w-full items-center bg-gray-100 dark:bg-gray-700 rounded-md justify-between"
 								>
-									<Text className="text-foreground dark:text-foreground-dark">
+									<Text className="text-foreground">
 										{selectedWeight ? `${selectedWeight} kg` : "Select weight"}
 									</Text>
 									<Gauge
@@ -433,7 +432,7 @@ export default function SessionDetail() {
 							hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
 							className="bg-gray-100 dark:bg-gray-700 rounded-lg py-3 px-4 active:opacity-70"
 						>
-							<Text className="text-sm underline text-gray-500 font-semibold underline-gray-500 dark:text-muted-foreground-dark">
+							<Text className="text-sm underline text-gray-500 font-semibold underline-gray-500">
 								{formState.comment ||
 									(lastSession?.comment
 										? `Your last notes: ${lastSession.comment}`
@@ -446,10 +445,10 @@ export default function SessionDetail() {
 					<View>
 						<View className="flex-row items-center justify-between">
 							<View className="flex-1">
-								<Text className="text-2xl font-bold text-foreground dark:text-foreground-dark">
+								<Text className="text-2xl font-bold text-foreground">
 									Exercises
 								</Text>
-								<Text className="text-sm text-muted-foreground dark:text-muted-foreground-dark">
+								<Text className="text-sm text-muted-foreground">
 									{session.exercise_users.length} exercise
 									{session.exercise_users.length !== 1 ? "s" : ""} completed
 								</Text>
@@ -467,9 +466,7 @@ export default function SessionDetail() {
 								size={16}
 								color={isDarkColorScheme ? "#000000" : "#ffffff"}
 							/>
-							<Text className="text-primary-foreground dark:text-primary-foreground-dark">
-								Add an exercise
-							</Text>
+							<Text className="text-primary-foreground">Add an exercise</Text>
 						</Button>
 
 						<LegendList
@@ -478,12 +475,12 @@ export default function SessionDetail() {
 							renderItem={({ item }) => (
 								<Pressable
 									onPress={() => router.push(`/exercise/${item.id}`)}
-									className="mb-4 overflow-hidden rounded-xl bg-background dark:bg-background-dark shadow-sm border border-muted/20 dark:border-muted-dark/20"
+									className="mb-4 overflow-hidden rounded-xl bg-background shadow-sm border border-muted/20"
 								>
 									{/* Exercise Header */}
 									<View className="flex-row items-center justify-between mb-3 ">
 										<View className="flex-1">
-											<Text className="font-bold text-lg text-foreground dark:text-foreground-dark">
+											<Text className="font-bold text-lg text-foreground">
 												{item.exercise_types.name}
 											</Text>
 										</View>
@@ -504,15 +501,15 @@ export default function SessionDetail() {
 													return (
 														<View
 															key={index}
-															className="bg-primary/5 flex-1 dark:bg-primary-dark/5 rounded-lg px-3 py-2 border border-primary/10 dark:border-primary-dark/10"
+															className="bg-primary/5 flex-1 rounded-lg px-3 py-2 border border-primary/10"
 														>
-															<Text className="text-xs font-medium text-primary dark:text-primary-dark">
+															<Text className="text-xs font-medium text-primary">
 																Set {index + 1}
 															</Text>
-															<Text className="text-sm font-bold text-foreground dark:text-foreground-dark">
+															<Text className="text-sm font-bold text-foreground">
 																{set.reps} reps
 															</Text>
-															<Text className="text-xs text-muted-foreground dark:text-muted-foreground-dark">
+															<Text className="text-xs text-muted-foreground">
 																{set.weight} kg
 															</Text>
 														</View>
@@ -522,8 +519,8 @@ export default function SessionDetail() {
 									</View>
 
 									{item.comment && (
-										<View className="bg-muted/20 dark:bg-muted-dark/20 rounded-lg mb-4">
-											<Text className="text-sm text-foreground dark:text-foreground-dark">
+										<View className="bg-muted/20 rounded-lg mb-4">
+											<Text className="text-sm text-foreground">
 												{item.comment}
 											</Text>
 										</View>
@@ -536,7 +533,7 @@ export default function SessionDetail() {
 						{/* Next Exercise Suggestion */}
 						{program && getNextExercise() && (
 							<View className="mt-6">
-								<Text className="text-lg font-semibold text-foreground dark:text-foreground-dark mb-3">
+								<Text className="text-lg font-semibold text-foreground mb-3">
 									Next Exercise:
 								</Text>
 
@@ -554,7 +551,7 @@ export default function SessionDetail() {
 										variant="outline"
 										className="flex-1 flex-row items-center justify-center gap-2 border-2 border-dotted bg-slate-100/20 dark:bg-slate-900/20"
 									>
-										<Text className="text-foreground dark:text-foreground-dark">
+										<Text className="text-foreground">
 											{getNextExercise()?.exerciseType?.name}
 										</Text>
 									</Button>
@@ -607,7 +604,7 @@ export default function SessionDetail() {
 							variant="outline"
 							onPress={handleDeleteSession}
 							disabled={isDeleting}
-							className="flex-1 flex-row items-center justify-center dark:bg-background-dark dark:text-foreground-dark"
+							className="flex-1 flex-row items-center justify-center"
 						>
 							<TrashIcon size={16} color="#ef4444" />
 							<Text className="ml-2 text-red-500">
@@ -625,7 +622,7 @@ export default function SessionDetail() {
 									size={16}
 									color={isDarkColorScheme ? "#000000" : "#ffffff"}
 								/>
-								<Text className="ml-2 text-primary-foreground dark:text-primary-foreground-dark">
+								<Text className="ml-2 text-primary-foreground">
 									{isCompleting ? "Completing..." : "Complete"}
 								</Text>
 							</Button>
@@ -638,7 +635,7 @@ export default function SessionDetail() {
 									size={16}
 									color={isDarkColorScheme ? "#000000" : "#ffffff"}
 								/>
-								<Text className="ml-2 text-primary-foreground dark:text-primary-foreground-dark">
+								<Text className="ml-2 text-primary-foreground">
 									Go back to list
 								</Text>
 							</Button>
@@ -653,9 +650,7 @@ export default function SessionDetail() {
 							onPress={handleSave}
 							disabled={isSaving}
 							className={`w-14 h-14 rounded-full items-center justify-center shadow-lg ${
-								isSaving
-									? "bg-primary/50 dark:bg-primary-dark/50"
-									: "bg-primary dark:bg-primary-dark"
+								isSaving ? "bg-primary/50" : "bg-primary"
 							}`}
 						>
 							{isSaving ? (
@@ -729,9 +724,7 @@ export default function SessionDetail() {
 						/>
 						{Platform.OS === "ios" && (
 							<Button onPress={() => setIsCalendarOpen(false)} className="mt-4">
-								<Text className="text-primary-foreground dark:text-primary-foreground-dark">
-									Done
-								</Text>
+								<Text className="text-primary-foreground">Done</Text>
 							</Button>
 						)}
 					</Pressable>
@@ -810,9 +803,7 @@ export default function SessionDetail() {
 									color={isDarkColorScheme ? "#000000" : "#ffffff"}
 								/>
 							) : (
-								<Text className="text-primary-foreground dark:text-primary-foreground-dark">
-									Done
-								</Text>
+								<Text className="text-primary-foreground">Done</Text>
 							)}
 						</Button>
 					</Pressable>
@@ -848,7 +839,7 @@ export default function SessionDetail() {
 						onPress={(e) => e.stopPropagation()}
 					>
 						<View className="flex-row items-center justify-between mb-4">
-							<Text className="text-lg font-bold text-foreground dark:text-foreground-dark">
+							<Text className="text-lg font-bold text-foreground">
 								{session?.type_session} Exercises
 							</Text>
 							<Pressable
@@ -874,14 +865,12 @@ export default function SessionDetail() {
 											key={index}
 											className="flex-row items-center gap-3 mb-1"
 										>
-											<View className="w-6 h-6 rounded-full bg-primary/10 dark:bg-primary-dark/10 items-center justify-center">
-												<Text className="text-xs font-bold text-primary dark:text-primary-dark">
+											<View className="w-6 h-6 rounded-full bg-primary/10 items-center justify-center">
+												<Text className="text-xs font-bold text-primary">
 													{index + 1}
 												</Text>
 											</View>
-											<Text className="text-foreground dark:text-foreground-dark flex-1">
-												{exercise}
-											</Text>
+											<Text className="text-foreground flex-1">{exercise}</Text>
 										</View>
 									),
 								)}
@@ -926,7 +915,7 @@ export default function SessionDetail() {
 						onPress={(e) => e.stopPropagation()}
 					>
 						<View className="flex-row items-center justify-between mb-4">
-							<Text className="text-lg font-bold text-foreground dark:text-foreground-dark">
+							<Text className="text-lg font-bold text-foreground">
 								Add note
 							</Text>
 							<Pressable
@@ -987,8 +976,8 @@ export default function SessionDetail() {
 								<Text
 									className={
 										commentDraft.trim()
-											? "text-foreground dark:text-foreground-dark"
-											: "text-muted-foreground dark:text-muted-foreground-dark"
+											? "text-foreground"
+											: "text-muted-foreground"
 									}
 								>
 									Clear
@@ -1005,9 +994,7 @@ export default function SessionDetail() {
 										color={isDarkColorScheme ? "#000000" : "#ffffff"}
 									/>
 								) : (
-									<Text className="text-primary-foreground dark:text-primary-foreground-dark">
-										Done
-									</Text>
+									<Text className="text-primary-foreground">Done</Text>
 								)}
 							</Button>
 						</View>

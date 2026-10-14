@@ -118,7 +118,7 @@ export default function Home() {
 	const isLoadingSession = lastSessionQuery.isLoading;
 
 	return (
-		<SafeAreaView className="flex-1 bg-background dark:bg-background-dark">
+		<SafeAreaView className="flex-1 bg-background">
 			<ScrollView
 				contentContainerStyle={{ padding: 16 }}
 				showsVerticalScrollIndicator={false}

@@ -29,6 +29,7 @@ declare
   v_session uuid;
   v_exercise uuid;
   v_day int;
+  v_date timestamptz;
   v_pullups uuid;
   v_incline uuid;
 begin
@@ -36,18 +37,20 @@ begin
   select id into v_incline from public.exercise_types where owner_id = v_uid and definition_key = 'Développé incliné - Barre';
 
   for v_day in 1..3 loop
-    insert into public.sessions (owner_id, date_session, type_session, body_weight, is_done, comment)
-    values (v_uid, now() - make_interval(days => 21 - v_day * 7), 'Upper A', 80, true,
-            case when v_day = 3 then 'Bonne séance' end)
+    -- created_at follows the session date so "last exercise" lookups see a real history
+    v_date := now() - make_interval(days => 21 - v_day * 7);
+    insert into public.sessions (owner_id, date_session, type_session, body_weight, is_done, comment, created_at)
+    values (v_uid, v_date, 'Upper A', 80, true,
+            case when v_day = 3 then 'Bonne séance' end, v_date)
     returning id into v_session;
 
-    insert into public.exercise_users (owner_id, type_id, session_id)
-    values (v_uid, v_incline, v_session) returning id into v_exercise;
+    insert into public.exercise_users (owner_id, type_id, session_id, created_at)
+    values (v_uid, v_incline, v_session, v_date) returning id into v_exercise;
     insert into public.exercise_sets (exercise_user_id, set_order, weight, reps)
     values (v_exercise, 1, 50 + v_day * 5, 6), (v_exercise, 2, 50, 8), (v_exercise, 3, 45, 10);
 
-    insert into public.exercise_users (owner_id, type_id, session_id, comment)
-    values (v_uid, v_pullups, v_session, 'Prise large') returning id into v_exercise;
+    insert into public.exercise_users (owner_id, type_id, session_id, comment, created_at)
+    values (v_uid, v_pullups, v_session, 'Prise large', v_date) returning id into v_exercise;
     insert into public.exercise_sets (exercise_user_id, set_order, weight, reps)
     values (v_exercise, 1, v_day * 5, 6), (v_exercise, 2, 0, 8), (v_exercise, 3, 0, 8);
   end loop;

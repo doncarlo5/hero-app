@@ -1,6 +1,6 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Check, Trash2 } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
 	ActivityIndicator,
 	Alert,
@@ -64,22 +64,22 @@ export default function ExerciseTypeDetail() {
 		type_session: [],
 	});
 
-	// Fill the form from the loaded exercise type
-	useEffect(() => {
-		if (exerciseType) {
-			setFormState({
-				name: exerciseType.name,
-				advice: exerciseType.advice || "",
-				timer: exerciseType.timer_seconds.toString(),
-				repRange1: exerciseType.rep_range_1,
-				repRange2: exerciseType.rep_range_2,
-				repRange3: exerciseType.rep_range_3,
-				repRange4: exerciseType.rep_range_4 || "",
-				type_session: exerciseType.session_types,
-			});
-			setIsRepRange4(Boolean(exerciseType.rep_range_4));
-		}
-	}, [exerciseType]);
+	// Fill the form from the loaded exercise type (again only if it actually changed)
+	const [filledFrom, setFilledFrom] = useState<typeof exerciseType>(null);
+	if (exerciseType && exerciseType !== filledFrom) {
+		setFilledFrom(exerciseType);
+		setFormState({
+			name: exerciseType.name,
+			advice: exerciseType.advice || "",
+			timer: exerciseType.timer_seconds.toString(),
+			repRange1: exerciseType.rep_range_1,
+			repRange2: exerciseType.rep_range_2,
+			repRange3: exerciseType.rep_range_3,
+			repRange4: exerciseType.rep_range_4 || "",
+			type_session: exerciseType.session_types,
+		});
+		setIsRepRange4(Boolean(exerciseType.rep_range_4));
+	}
 
 	const handleInputChange = (field: string, value: string) => {
 		setFormState((prev) => ({ ...prev, [field]: value }));
@@ -187,7 +187,7 @@ export default function ExerciseTypeDetail() {
 
 	if (isLoading) {
 		return (
-			<View className="flex-1 bg-background dark:bg-background-dark items-center justify-center">
+			<View className="flex-1 bg-background items-center justify-center">
 				<ActivityIndicator size="large" />
 			</View>
 		);
@@ -195,14 +195,14 @@ export default function ExerciseTypeDetail() {
 
 	if (!isCreating && !exerciseType) {
 		return (
-			<View className="flex-1 bg-background dark:bg-background-dark items-center justify-center">
+			<View className="flex-1 bg-background items-center justify-center">
 				<Text>Exercise type not found</Text>
 			</View>
 		);
 	}
 
 	return (
-		<View className="flex-1 bg-background dark:bg-background-dark">
+		<View className="flex-1 bg-background">
 			<ScrollView className="flex-1 p-4">
 				{/* Header for create mode */}
 				{isCreating && (

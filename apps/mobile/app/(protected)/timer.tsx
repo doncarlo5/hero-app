@@ -33,7 +33,7 @@ export default function TimerPage() {
 					headerShadowVisible: true,
 				}}
 			/>
-			<View className="flex-1 bg-background dark:bg-background-dark">
+			<View className="flex-1 bg-background">
 				{/* Main Content */}
 				<View className="flex-1 flex-col items-center px-4 pt-4">
 					<CountDownTimer exerciseTypeTimer={customTimer} />

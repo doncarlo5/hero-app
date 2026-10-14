@@ -17,7 +17,7 @@ export default function ExerciseTypeCard({
 	return (
 		<Pressable
 			onPress={() => onPress(exerciseType)}
-			className="flex flex-col border-2 border-double active:translate-y-0.5 rounded-lg border-border dark:border-border-dark bg-background dark:bg-background-dark p-3"
+			className="flex flex-col border-2 border-double active:translate-y-0.5 rounded-lg border-border bg-background p-3"
 		>
 			<View className="flex justify-between flex-row">
 				<View className="flex flex-row items-center gap-1 flex-wrap">
@@ -25,7 +25,7 @@ export default function ExerciseTypeCard({
 						<TypeSessionBadge key={session} type_session={session} />
 					))}
 				</View>
-				<View className="flex flex-row items-center gap-1 rounded-sm rounded-tr-lg border px-2 border-border dark:border-border-dark">
+				<View className="flex flex-row items-center gap-1 rounded-sm rounded-tr-lg border px-2 border-border">
 					<Text>
 						<LucideClock4
 							size={13}

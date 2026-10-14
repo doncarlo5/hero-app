@@ -14,7 +14,7 @@ import {
 	StarIcon,
 	XIcon,
 } from "lucide-react-native";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import {
 	ActivityIndicator,
 	Alert,
@@ -45,6 +45,25 @@ function parseNumber(value: string) {
 	if (!value || value.trim() === "") return 0;
 	const parsed = parseFloat(value.replace(",", "."));
 	return Number.isNaN(parsed) ? 0 : parsed;
+}
+
+function CheckboxComponent(props: { isChecked: boolean; onPress: () => void }) {
+	return (
+		<TouchableOpacity
+			onPress={props.onPress}
+			className={`h-8 w-8 rounded border-2 border-dashed transition-all ${
+				props.isChecked
+					? "bg-teal-700 border-teal-700"
+					: "border-gray-400 bg-transparent"
+			}`}
+		>
+			{props.isChecked && (
+				<View className="flex-1 items-center justify-center">
+					<CheckIcon size={20} color="white" strokeWidth={4} />
+				</View>
+			)}
+		</TouchableOpacity>
+	);
 }
 
 export default function DoExercise() {
@@ -123,24 +142,24 @@ export default function DoExercise() {
 		set4: false,
 	});
 
-	// Prefill with the previous sets of this exercise type
-	useEffect(() => {
-		if (lastExerciseData) {
-			const { reps, weights } = setsToArrays(lastExerciseData.exercise_sets);
-			setFormState({
-				rep1: reps[0]?.toString() || "",
-				weight1: weights[0]?.toString() || "",
-				rep2: reps[1]?.toString() || "",
-				weight2: weights[1]?.toString() || "",
-				rep3: reps[2]?.toString() || "",
-				weight3: weights[2]?.toString() || "",
-				rep4: reps[3]?.toString() || "",
-				weight4: weights[3]?.toString() || "",
-				comment: "",
-			});
-			setAddRep4(Boolean(reps[3]));
-		}
-	}, [lastExerciseData]);
+	// Prefill with the previous sets of this exercise type, once per loaded exercise
+	const [prefilledFrom, setPrefilledFrom] = useState<string | null>(null);
+	if (lastExerciseData && lastExerciseData.id !== prefilledFrom) {
+		setPrefilledFrom(lastExerciseData.id);
+		const { reps, weights } = setsToArrays(lastExerciseData.exercise_sets);
+		setFormState({
+			rep1: reps[0]?.toString() || "",
+			weight1: weights[0]?.toString() || "",
+			rep2: reps[1]?.toString() || "",
+			weight2: weights[1]?.toString() || "",
+			rep3: reps[2]?.toString() || "",
+			weight3: weights[2]?.toString() || "",
+			rep4: reps[3]?.toString() || "",
+			weight4: weights[3]?.toString() || "",
+			comment: "",
+		});
+		setAddRep4(Boolean(reps[3]));
+	}
 
 	const onExerciseTypeChange = (exerciseType: ExerciseType) => {
 		setPickedTypeId(exerciseType.id);
@@ -225,34 +244,8 @@ export default function DoExercise() {
 		}));
 	};
 
-	const CheckboxComponent = ({
-		isChecked,
-		onPress,
-	}: {
-		isChecked: boolean;
-		onPress: () => void;
-	}) => (
-		<TouchableOpacity
-			onPress={onPress}
-			className={`h-8 w-8 rounded border-2 border-dashed transition-all ${
-				isChecked
-					? "bg-teal-700 border-teal-700"
-					: "border-gray-400 bg-transparent"
-			}`}
-		>
-			{isChecked && (
-				<View className="flex-1 items-center justify-center">
-					<CheckIcon size={20} color="white" strokeWidth={4} />
-				</View>
-			)}
-		</TouchableOpacity>
-	);
-
 	return (
-		<SafeAreaView
-			className="flex-1 bg-background dark:bg-background-dark"
-			edges={["bottom"]}
-		>
+		<SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
 			<KeyboardAvoidingView
 				behavior={Platform.OS === "ios" ? "padding" : "height"}
 				className="flex-1"
@@ -268,11 +261,11 @@ export default function DoExercise() {
 					{/* Exercise Type Selection */}
 					<View className="mb-4">
 						{isLoadingTypes ? (
-							<View className="bg-muted/30 dark:bg-muted-dark/30 rounded-lg p-4">
+							<View className="bg-muted/30 rounded-lg p-4">
 								<ActivityIndicator size="small" />
 							</View>
 						) : allExerciseTypes.length === 0 ? (
-							<View className="bg-muted/30 dark:bg-muted-dark/30 rounded-lg p-4">
+							<View className="bg-muted/30 rounded-lg p-4">
 								<Text className="text-muted-foreground dark:text-gray-400 text-center">
 									Please create an exercise for this session type.
 								</Text>
@@ -283,9 +276,9 @@ export default function DoExercise() {
 									bottomSheetRef.current?.snapToIndex(0);
 								}}
 								variant="ghost"
-								className="flex-row w-full items-center dark:text-foreground-dark bg-gray-100 dark:bg-gray-700 rounded-md justify-between p-4"
+								className="flex-row w-full items-center bg-gray-100 dark:bg-gray-700 rounded-md justify-between p-4"
 							>
-								<Text className="text-foreground dark:text-foreground-dark">
+								<Text className="text-foreground">
 									{oneExerciseType
 										? oneExerciseType.name
 										: "Select an exercise"}
@@ -300,7 +293,7 @@ export default function DoExercise() {
 					</View>
 
 					{/* Last Exercise Date */}
-					{lastExercise && (
+					{lastExercise?.date && (
 						<View className="flex-row items-center justify-end gap-1 px-2 py-1 mb-3">
 							<HistoryIcon
 								size={14}
@@ -309,10 +302,7 @@ export default function DoExercise() {
 							<Text className="text-sm text-muted-foreground dark:text-gray-400">
 								{isLoadingLastExercise
 									? "Loading..."
-									: format(
-											new Date(lastExercise.date ?? Date.now()),
-											"dd/MM/yyyy",
-										)}
+									: format(new Date(lastExercise.date), "dd/MM/yyyy")}
 							</Text>
 						</View>
 					)}
@@ -668,7 +658,7 @@ export default function DoExercise() {
 										className={`ml-2 ${
 											selectedExerciseIndex === index
 												? "text-primary font-semibold"
-												: "text-foreground dark:text-foreground-dark"
+												: "text-foreground"
 										}`}
 									>
 										{type.name}

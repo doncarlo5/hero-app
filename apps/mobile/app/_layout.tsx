@@ -83,7 +83,7 @@ function AuthLoadingOverlay() {
 	}
 
 	return (
-		<View className="absolute inset-0 items-center justify-center bg-background/80 dark:bg-background-dark/80">
+		<View className="absolute inset-0 items-center justify-center bg-background/80">
 			<ActivityIndicator size="large" />
 		</View>
 	);

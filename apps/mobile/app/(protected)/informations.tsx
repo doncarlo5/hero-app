@@ -35,16 +35,16 @@ export default function Informations() {
 	const [newPassword, setNewPassword] = useState("");
 	const isLoading = updateProfile.isPending;
 
-	// Fill the form once the profile is loaded
-	useEffect(() => {
-		if (profile.data) {
-			setFormState({
-				firstName: profile.data.first_name ?? "",
-				lastName: profile.data.last_name ?? "",
-				email: profile.data.email ?? session?.user.email ?? "",
-			});
-		}
-	}, [profile.data]);
+	// Fill the form once the profile is loaded (again only if it actually changed)
+	const [filledFrom, setFilledFrom] = useState<typeof profile.data>(undefined);
+	if (profile.data && profile.data !== filledFrom) {
+		setFilledFrom(profile.data);
+		setFormState({
+			firstName: profile.data.first_name ?? "",
+			lastName: profile.data.last_name ?? "",
+			email: profile.data.email ?? session?.user.email ?? "",
+		});
+	}
 	const [colorSchemePreference, setColorSchemePreference] =
 		useState<ColorSchemePreference>("system");
 
@@ -140,7 +140,7 @@ export default function Informations() {
 									className={`flex-1 flex-row items-center justify-center gap-2 p-4 rounded-lg border-2 ${
 										colorSchemePreference === "light"
 											? "border-primary bg-primary/10"
-											: "border-border dark:border-border-dark bg-muted/10 dark:bg-muted-dark/10"
+											: "border-border bg-muted/10"
 									}`}
 								>
 									<Sun
@@ -153,7 +153,7 @@ export default function Informations() {
 										className={
 											colorSchemePreference === "light"
 												? "font-semibold text-primary"
-												: "text-muted-foreground dark:text-muted-foreground-dark"
+												: "text-muted-foreground"
 										}
 									>
 										Clair
@@ -165,7 +165,7 @@ export default function Informations() {
 									className={`flex-1 flex-row items-center justify-center gap-2 p-4 rounded-lg border-2 ${
 										colorSchemePreference === "dark"
 											? "border-primary bg-primary/10"
-											: "border-border dark:border-border-dark bg-muted/10 dark:bg-muted-dark/10"
+											: "border-border bg-muted/10"
 									}`}
 								>
 									<Moon
@@ -178,7 +178,7 @@ export default function Informations() {
 										className={
 											colorSchemePreference === "dark"
 												? "font-semibold text-primary"
-												: "text-muted-foreground dark:text-muted-foreground-dark"
+												: "text-muted-foreground"
 										}
 									>
 										Sombre
@@ -190,7 +190,7 @@ export default function Informations() {
 									className={`flex-1 flex-row items-center justify-center gap-2 p-4 rounded-lg border-2 ${
 										colorSchemePreference === "system"
 											? "border-primary bg-primary/10"
-											: "border-border dark:border-border-dark bg-muted/10 dark:bg-muted-dark/10"
+											: "border-border bg-muted/10"
 									}`}
 								>
 									<Monitor
@@ -203,7 +203,7 @@ export default function Informations() {
 										className={
 											colorSchemePreference === "system"
 												? "font-semibold text-primary"
-												: "text-muted-foreground dark:text-muted-foreground-dark"
+												: "text-muted-foreground"
 										}
 									>
 										Auto
@@ -213,7 +213,7 @@ export default function Informations() {
 						</View>
 
 						{/* Divider */}
-						<View className="h-px bg-border dark:bg-border-dark" />
+						<View className="h-px bg-border" />
 
 						{/* First Name and Last Name */}
 						<View className="flex-row" style={{ gap: 16 }}>
@@ -268,7 +268,7 @@ export default function Informations() {
 						<Button
 							onPress={handleSubmit}
 							disabled={isLoading}
-							className="flex-1 dark:bg-transparent flex-row items-center justify-center dark:bg-background-dark dark:text-foreground-dark"
+							className="flex-1 dark:bg-transparent flex-row items-center justify-center"
 							style={{ marginTop: 24 }}
 						>
 							{isLoading ? (
