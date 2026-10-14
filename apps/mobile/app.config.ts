@@ -10,7 +10,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 	icon: "./assets/icon.png",
 	userInterfaceStyle: "automatic",
 	assetBundlePatterns: ["**/*"],
-	newArchEnabled: true,
 	extra: {
 		...(config as any)?.expo?.extra,
 		EXPO_ROUTER_APP_ROOT: "./app",
@@ -21,16 +20,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 		usesAppleSignIn: true,
 		config: {
 			usesNonExemptEncryption: false,
-		},
-		splash: {
-			image: "./assets/splash.png",
-			resizeMode: "cover",
-			backgroundColor: "#ffffff",
-			dark: {
-				backgroundColor: "#000000",
-				resizeMode: "cover",
-				image: "./assets/splash-dark.png",
-			},
 		},
 		icon: {
 			dark: "./assets/icon-dark.png",
@@ -43,19 +32,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 		buildNumber: "5",
 	},
 	android: {
-		edgeToEdgeEnabled: true,
 		adaptiveIcon: {
 			foregroundImage: "./assets/adaptive-icon.png",
-		},
-		splash: {
-			image: "./assets/splash.png",
-			resizeMode: "cover",
-			backgroundColor: "#ffffff",
-			dark: {
-				backgroundColor: "#000000",
-				resizeMode: "cover",
-				image: "./assets/splash-dark.png",
-			},
 		},
 		package: "com.doncarlos.heroapp",
 		versionCode: 5,
@@ -63,5 +41,21 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 	experiments: {
 		typedRoutes: true,
 	},
-	plugins: ["expo-router", "expo-secure-store", "expo-apple-authentication"],
+	plugins: [
+		"expo-router",
+		"expo-secure-store",
+		"expo-apple-authentication",
+		[
+			"expo-splash-screen",
+			{
+				image: "./assets/splash.png",
+				resizeMode: "cover",
+				backgroundColor: "#ffffff",
+				dark: {
+					image: "./assets/splash-dark.png",
+					backgroundColor: "#000000",
+				},
+			},
+		],
+	],
 });

@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
 	ActivityIndicator,
 	Alert,
@@ -92,12 +92,12 @@ export default function ExerciseDetail() {
 		setSelectedExerciseType(loaded.exercise_types);
 	};
 
-	// Fill the form when the exercise loads (not while the user is editing it)
-	useEffect(() => {
-		if (exercise && !isEditable) {
-			resetForm(exercise);
-		}
-	}, [exercise]);
+	// Fill the form when the exercise loads or changes (not while the user is editing it)
+	const [filledFrom, setFilledFrom] = useState<typeof exercise>(null);
+	if (exercise && exercise !== filledFrom && !isEditable) {
+		setFilledFrom(exercise);
+		resetForm(exercise);
+	}
 
 	const onRefresh = async () => {
 		setRefreshing(true);
@@ -162,13 +162,8 @@ export default function ExerciseDetail() {
 					style: "destructive",
 					onPress: () =>
 						deleteExercise.mutate(exercise.id, {
-							onSuccess: () => {
-								if (session) {
-									router.push(`/session/${session.id}`);
-								} else {
-									router.back();
-								}
-							},
+							// Back to the screen that opened it (the session), not a new copy of it
+							onSuccess: () => router.back(),
 							onError: () => Alert.alert("Error", "Failed to delete exercise"),
 						}),
 				},
@@ -178,7 +173,7 @@ export default function ExerciseDetail() {
 
 	if (isLoading) {
 		return (
-			<View className="flex-1 items-center justify-center bg-background dark:bg-background-dark">
+			<View className="flex-1 items-center justify-center bg-background">
 				<ActivityIndicator />
 			</View>
 		);
@@ -186,10 +181,8 @@ export default function ExerciseDetail() {
 
 	if (!exercise) {
 		return (
-			<View className="flex-1 items-center justify-center bg-background dark:bg-background-dark">
-				<Text className="text-foreground dark:text-foreground-dark">
-					Exercise not found
-				</Text>
+			<View className="flex-1 items-center justify-center bg-background">
+				<Text className="text-foreground">Exercise not found</Text>
 			</View>
 		);
 	}
@@ -201,7 +194,7 @@ export default function ExerciseDetail() {
 
 	return (
 		<ScrollView
-			className="flex-1 bg-background dark:bg-background-dark"
+			className="flex-1 bg-background"
 			refreshControl={
 				<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
 			}
@@ -210,11 +203,11 @@ export default function ExerciseDetail() {
 			{/* Header with back button */}
 			<View className="flex-row items-center mb-6">
 				<View className="flex-1">
-					<Text className="text-2xl font-bold text-foreground dark:text-foreground-dark">
+					<Text className="text-2xl font-bold text-foreground">
 						{exerciseType.name}
 					</Text>
 					{session && (
-						<Text className="text-sm text-muted-foreground dark:text-muted-foreground-dark">
+						<Text className="text-sm text-muted-foreground">
 							Session: {new Date(session.date_session).toLocaleDateString()}
 						</Text>
 					)}
@@ -224,7 +217,7 @@ export default function ExerciseDetail() {
 			{/* Exercise Type Selector (when editing) */}
 			{isEditable && (
 				<View className="mb-6">
-					<Text className="text-sm font-medium text-foreground dark:text-foreground-dark mb-2">
+					<Text className="text-sm font-medium text-foreground mb-2">
 						Exercise Type
 					</Text>
 					<ScrollView horizontal showsHorizontalScrollIndicator={false}>
@@ -236,14 +229,14 @@ export default function ExerciseDetail() {
 									className={`px-4 py-2 rounded-lg border ${
 										selectedExerciseType?.id === type.id
 											? "bg-primary border-primary"
-											: "bg-muted/30 border-muted dark:bg-muted-dark/30 dark:border-muted-dark"
+											: "bg-muted/30 border-muted"
 									}`}
 								>
 									<Text
 										className={`text-sm ${
 											selectedExerciseType?.id === type.id
 												? "text-primary-foreground"
-												: "text-foreground dark:text-foreground-dark"
+												: "text-foreground"
 										}`}
 									>
 										{type.name}
@@ -267,20 +260,20 @@ export default function ExerciseDetail() {
 
 			{/* Sets Form */}
 			<View className="mb-6">
-				<Text className="text-xl font-bold text-foreground dark:text-foreground-dark mb-4">
+				<Text className="text-xl font-bold text-foreground mb-4">
 					{isEditable ? "Edit Sets" : "Sets Detail"}
 				</Text>
 
 				{isEditable ? (
 					<View className="space-y-4">
 						{/* Set 1 */}
-						<View className="bg-primary/5 dark:bg-primary-dark/5 rounded-lg p-4 border border-primary/10 dark:border-primary-dark/10">
-							<Text className="text-sm font-medium text-primary dark:text-primary-dark mb-3">
+						<View className="bg-primary/5 rounded-lg p-4 border border-primary/10">
+							<Text className="text-sm font-medium text-primary mb-3">
 								Set 1
 							</Text>
 							<View className="flex-row space-x-3">
 								<View className="flex-1">
-									<Text className="text-xs text-muted-foreground dark:text-muted-foreground-dark mb-1">
+									<Text className="text-xs text-muted-foreground mb-1">
 										Reps
 									</Text>
 									<Input
@@ -292,7 +285,7 @@ export default function ExerciseDetail() {
 									/>
 								</View>
 								<View className="flex-1">
-									<Text className="text-xs text-muted-foreground dark:text-muted-foreground-dark mb-1">
+									<Text className="text-xs text-muted-foreground mb-1">
 										Weight (kg)
 									</Text>
 									<Input
@@ -309,13 +302,13 @@ export default function ExerciseDetail() {
 						</View>
 
 						{/* Set 2 */}
-						<View className="bg-primary/5 dark:bg-primary-dark/5 rounded-lg p-4 border border-primary/10 dark:border-primary-dark/10">
-							<Text className="text-sm font-medium text-primary dark:text-primary-dark mb-3">
+						<View className="bg-primary/5 rounded-lg p-4 border border-primary/10">
+							<Text className="text-sm font-medium text-primary mb-3">
 								Set 2
 							</Text>
 							<View className="flex-row space-x-3">
 								<View className="flex-1">
-									<Text className="text-xs text-muted-foreground dark:text-muted-foreground-dark mb-1">
+									<Text className="text-xs text-muted-foreground mb-1">
 										Reps
 									</Text>
 									<Input
@@ -327,7 +320,7 @@ export default function ExerciseDetail() {
 									/>
 								</View>
 								<View className="flex-1">
-									<Text className="text-xs text-muted-foreground dark:text-muted-foreground-dark mb-1">
+									<Text className="text-xs text-muted-foreground mb-1">
 										Weight (kg)
 									</Text>
 									<Input
@@ -344,13 +337,13 @@ export default function ExerciseDetail() {
 						</View>
 
 						{/* Set 3 */}
-						<View className="bg-primary/5 dark:bg-primary-dark/5 rounded-lg p-4 border border-primary/10 dark:border-primary-dark/10">
-							<Text className="text-sm font-medium text-primary dark:text-primary-dark mb-3">
+						<View className="bg-primary/5 rounded-lg p-4 border border-primary/10">
+							<Text className="text-sm font-medium text-primary mb-3">
 								Set 3
 							</Text>
 							<View className="flex-row space-x-3">
 								<View className="flex-1">
-									<Text className="text-xs text-muted-foreground dark:text-muted-foreground-dark mb-1">
+									<Text className="text-xs text-muted-foreground mb-1">
 										Reps
 									</Text>
 									<Input
@@ -362,7 +355,7 @@ export default function ExerciseDetail() {
 									/>
 								</View>
 								<View className="flex-1">
-									<Text className="text-xs text-muted-foreground dark:text-muted-foreground-dark mb-1">
+									<Text className="text-xs text-muted-foreground mb-1">
 										Weight (kg)
 									</Text>
 									<Input
@@ -380,13 +373,13 @@ export default function ExerciseDetail() {
 
 						{/* Set 4 (conditional) */}
 						{isRep4 && (
-							<View className="bg-primary/5 dark:bg-primary-dark/5 rounded-lg p-4 border border-primary/10 dark:border-primary-dark/10">
-								<Text className="text-sm font-medium text-primary dark:text-primary-dark mb-3">
+							<View className="bg-primary/5 rounded-lg p-4 border border-primary/10">
+								<Text className="text-sm font-medium text-primary mb-3">
 									Set 4
 								</Text>
 								<View className="flex-row space-x-3">
 									<View className="flex-1">
-										<Text className="text-xs text-muted-foreground dark:text-muted-foreground-dark mb-1">
+										<Text className="text-xs text-muted-foreground mb-1">
 											Reps
 										</Text>
 										<Input
@@ -398,7 +391,7 @@ export default function ExerciseDetail() {
 										/>
 									</View>
 									<View className="flex-1">
-										<Text className="text-xs text-muted-foreground dark:text-muted-foreground-dark mb-1">
+										<Text className="text-xs text-muted-foreground mb-1">
 											Weight (kg)
 										</Text>
 										<Input
@@ -419,9 +412,9 @@ export default function ExerciseDetail() {
 						{!isRep4 && (
 							<TouchableOpacity
 								onPress={() => setIsRep4(true)}
-								className="bg-muted/30 dark:bg-muted-dark/30 rounded-lg p-4 border border-dashed border-muted dark:border-muted-dark"
+								className="bg-muted/30 rounded-lg p-4 border border-dashed border-muted"
 							>
-								<Text className="text-center text-muted-foreground dark:text-muted-foreground-dark">
+								<Text className="text-center text-muted-foreground">
 									+ Add Set 4
 								</Text>
 							</TouchableOpacity>
@@ -436,15 +429,15 @@ export default function ExerciseDetail() {
 								return (
 									<View
 										key={index}
-										className="bg-primary/5 flex-1 dark:bg-primary-dark/5 rounded-lg px-3 py-2 border border-primary/10 dark:border-primary-dark/10"
+										className="bg-primary/5 flex-1 rounded-lg px-3 py-2 border border-primary/10"
 									>
-										<Text className="text-xs font-medium text-primary dark:text-primary-dark">
+										<Text className="text-xs font-medium text-primary">
 											Set {index + 1}
 										</Text>
-										<Text className="text-sm font-bold text-foreground dark:text-foreground-dark">
+										<Text className="text-sm font-bold text-foreground">
 											{rep} reps
 										</Text>
-										<Text className="text-xs text-muted-foreground dark:text-muted-foreground-dark">
+										<Text className="text-xs text-muted-foreground">
 											{exerciseWeights[index]} kg
 										</Text>
 									</View>
@@ -457,21 +450,19 @@ export default function ExerciseDetail() {
 
 			{/* Comment */}
 			<View className="mb-6">
-				<Text className="text-xl font-bold text-foreground dark:text-foreground-dark mb-4">
-					Notes
-				</Text>
+				<Text className="text-xl font-bold text-foreground mb-4">Notes</Text>
 				{isEditable ? (
 					<Textarea
 						value={formState.comment}
 						onChangeText={(value) => handleInputChange("comment", value)}
 						placeholder="Add notes about this exercise..."
-						className="bg-muted/20 dark:bg-muted-dark/20 rounded-lg p-4"
+						className="bg-muted/20 rounded-lg p-4"
 						multiline
 						numberOfLines={4}
 					/>
 				) : (
-					<View className="bg-muted/20 dark:bg-muted-dark/20 rounded-lg p-4">
-						<Text className="text-sm text-foreground dark:text-foreground-dark">
+					<View className="bg-muted/20 rounded-lg p-4">
+						<Text className="text-sm text-foreground">
 							{exercise.comment || "No notes added"}
 						</Text>
 					</View>
@@ -480,57 +471,49 @@ export default function ExerciseDetail() {
 
 			{/* Exercise Type Information */}
 			<View className="mb-6">
-				<Text className="text-xl font-bold text-foreground dark:text-foreground-dark mb-4">
+				<Text className="text-xl font-bold text-foreground mb-4">
 					Exercise Information
 				</Text>
-				<View className="bg-muted/20 dark:bg-muted-dark/20 rounded-lg p-4 space-y-3">
+				<View className="bg-muted/20 rounded-lg p-4 space-y-3">
 					<View className="flex-row justify-between">
-						<Text className="text-sm text-muted-foreground dark:text-muted-foreground-dark">
-							Timer:
-						</Text>
-						<Text className="text-sm font-medium text-foreground dark:text-foreground-dark">
+						<Text className="text-sm text-muted-foreground">Timer:</Text>
+						<Text className="text-sm font-medium text-foreground">
 							{exerciseType.timer_seconds} seconds
 						</Text>
 					</View>
 					<View className="flex-row justify-between">
-						<Text className="text-sm text-muted-foreground dark:text-muted-foreground-dark">
-							Rep Range 1:
-						</Text>
-						<Text className="text-sm font-medium text-foreground dark:text-foreground-dark">
+						<Text className="text-sm text-muted-foreground">Rep Range 1:</Text>
+						<Text className="text-sm font-medium text-foreground">
 							{exerciseType.rep_range_1}
 						</Text>
 					</View>
 					<View className="flex-row justify-between">
-						<Text className="text-sm text-muted-foreground dark:text-muted-foreground-dark">
-							Rep Range 2:
-						</Text>
-						<Text className="text-sm font-medium text-foreground dark:text-foreground-dark">
+						<Text className="text-sm text-muted-foreground">Rep Range 2:</Text>
+						<Text className="text-sm font-medium text-foreground">
 							{exerciseType.rep_range_2}
 						</Text>
 					</View>
 					<View className="flex-row justify-between">
-						<Text className="text-sm text-muted-foreground dark:text-muted-foreground-dark">
-							Rep Range 3:
-						</Text>
-						<Text className="text-sm font-medium text-foreground dark:text-foreground-dark">
+						<Text className="text-sm text-muted-foreground">Rep Range 3:</Text>
+						<Text className="text-sm font-medium text-foreground">
 							{exerciseType.rep_range_3}
 						</Text>
 					</View>
 					{exerciseType.rep_range_4 && (
 						<View className="flex-row justify-between">
-							<Text className="text-sm text-muted-foreground dark:text-muted-foreground-dark">
+							<Text className="text-sm text-muted-foreground">
 								Rep Range 4:
 							</Text>
-							<Text className="text-sm font-medium text-foreground dark:text-foreground-dark">
+							<Text className="text-sm font-medium text-foreground">
 								{exerciseType.rep_range_4}
 							</Text>
 						</View>
 					)}
 					<View className="flex-row justify-between">
-						<Text className="text-sm text-muted-foreground dark:text-muted-foreground-dark">
+						<Text className="text-sm text-muted-foreground">
 							Session Types:
 						</Text>
-						<Text className="text-sm font-medium text-foreground dark:text-foreground-dark">
+						<Text className="text-sm font-medium text-foreground">
 							{exerciseType.session_types.join(", ")}
 						</Text>
 					</View>
@@ -542,7 +525,7 @@ export default function ExerciseDetail() {
 				<Button
 					variant="outline"
 					onPress={handleDelete}
-					className="flex-1 flex-row items-center justify-center dark:bg-background-dark dark:text-foreground-dark"
+					className="flex-1 flex-row items-center justify-center"
 				>
 					<TrashIcon size={16} color="#ef4444" />
 					<Text className="ml-2 text-red-500">Delete</Text>
@@ -551,7 +534,7 @@ export default function ExerciseDetail() {
 				{!isEditable ? (
 					<Button
 						onPress={() => setIsEditable(true)}
-						className="flex-1 dark:bg-transparent flex-row items-center justify-center dark:bg-background-dark dark:text-foreground-dark"
+						className="flex-1 dark:bg-transparent flex-row items-center justify-center"
 					>
 						<EditIcon size={16} color="white" />
 						<Text className="ml-2">Edit</Text>
@@ -565,17 +548,15 @@ export default function ExerciseDetail() {
 								resetForm(exercise);
 							}}
 							disabled={isSaving}
-							className="flex-1 flex-row items-center justify-center dark:bg-background-dark dark:text-foreground-dark"
+							className="flex-1 flex-row items-center justify-center"
 						>
 							<XIcon size={16} color="#6b7280" />
-							<Text className="ml-2 text-muted-foreground dark:text-muted-foreground-dark">
-								Cancel
-							</Text>
+							<Text className="ml-2 text-muted-foreground">Cancel</Text>
 						</Button>
 						<Button
 							onPress={handleSave}
 							disabled={isSaving}
-							className="flex-1 dark:bg-transparent flex-row items-center justify-center dark:bg-background-dark dark:text-foreground-dark"
+							className="flex-1 dark:bg-transparent flex-row items-center justify-center"
 						>
 							{isSaving ? (
 								<ActivityIndicator size="small" color="white" />

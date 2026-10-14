@@ -25,7 +25,7 @@ export default function ExerciseTypes() {
 
 	if (exerciseTypesQuery.error && !exerciseTypesQuery.data) {
 		return (
-			<View className="flex-1 items-center justify-center bg-background dark:bg-background-dark p-4">
+			<View className="flex-1 items-center justify-center bg-background p-4">
 				<Text className="text-sm text-gray-500 dark:text-gray-400 mb-4">
 					Impossible de charger les exercices.
 				</Text>
@@ -36,7 +36,7 @@ export default function ExerciseTypes() {
 
 	if (!isLoading && exerciseTypes.length === 0) {
 		return (
-			<View className="flex-1 bg-background dark:bg-background-dark">
+			<View className="flex-1 bg-background">
 				<View className="flex-1 items-center justify-center p-4">
 					<View className="flex flex-col items-center gap-4">
 						<Text className="text-sm text-gray-500 dark:text-gray-400">
@@ -52,7 +52,7 @@ export default function ExerciseTypes() {
 	}
 
 	return (
-		<View className="flex-1 bg-background dark:bg-background-dark">
+		<View className="flex-1 bg-background">
 			<ScrollView className="flex-1 p-4">
 				<Pressable
 					onPress={handleCreateExercise}

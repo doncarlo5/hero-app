@@ -41,7 +41,7 @@ export default function List() {
 	};
 
 	return (
-		<View className="flex-1 items-center justify-center bg-background dark:bg-background-dark p-4 w-full gap-y-4">
+		<View className="flex-1 items-center justify-center bg-background p-4 w-full gap-y-4">
 			{isLoading && sessions.length === 0 ? (
 				<ActivityIndicator size="large" color={colors.light.primary} />
 			) : (
@@ -62,7 +62,7 @@ export default function List() {
 					}
 					renderItem={({ item }) => (
 						<TouchableOpacity
-							className="flex-row items-center px-2 py-2 border-b border-border dark:border-border-dark w-full"
+							className="flex-row items-center px-2 py-2 border-b border-border w-full"
 							onPress={() => handleSessionPress(item.id)}
 						>
 							<View
@@ -70,14 +70,14 @@ export default function List() {
 									item.is_done ? "bg-green-500" : "bg-orange-500"
 								}`}
 							/>
-							<Text className="mr-3 text-foreground dark:text-foreground-dark">
+							<Text className="mr-3 text-foreground">
 								<MessageSquareText opacity={!item.comment ? 0.3 : 1} />
 							</Text>
-							<Text className="mr-3 text-foreground dark:text-foreground-dark">
+							<Text className="mr-3 text-foreground">
 								{new Date(item.date_session).toLocaleDateString("fr-FR")}
 							</Text>
 							<TypeSessionBadge type_session={item.type_session} />
-							<Text className="text-center mr-3 text-foreground dark:text-foreground-dark">
+							<Text className="text-center mr-3 text-foreground">
 								{item.exercise_users[0]?.count ?? 0}
 							</Text>
 						</TouchableOpacity>
@@ -86,12 +86,12 @@ export default function List() {
 						sessionsPages.error ? (
 							<Text
 								onPress={() => sessionsPages.refetch()}
-								className="text-center text-foreground dark:text-foreground-dark py-6"
+								className="text-center text-foreground py-6"
 							>
 								Impossible de charger les séances. Toucher pour réessayer.
 							</Text>
 						) : !isLoading ? (
-							<Text className="text-center text-foreground dark:text-foreground-dark py-6">
+							<Text className="text-center text-foreground py-6">
 								Aucune séance pour le moment.
 							</Text>
 						) : null

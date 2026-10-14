@@ -126,7 +126,7 @@ export default function NewSessionButton() {
 						flexGrow: 1,
 					}}
 				>
-					<View className="bg-background dark:bg-background-dark">
+					<View className="bg-background">
 						{isLoading ? (
 							<View className="pt-14 items-center justify-center">
 								<ActivityIndicator size="large" />
@@ -135,12 +135,12 @@ export default function NewSessionButton() {
 							<View>
 								{/* Header */}
 								<View className="mb-4">
-									<Text className="text-xl font-bold text-foreground dark:text-foreground-dark">
+									<Text className="text-xl font-bold text-foreground">
 										Nouvelle séance
 									</Text>
 									{/* Minimalist training toggle - Coming soon */}
 									{/* <View className="flex-row items-center justify-between mt-2">
-										<Text className="text-sm text-muted-foreground dark:text-muted-foreground-dark flex-1 mr-2">
+										<Text className="text-sm text-muted-foreground flex-1 mr-2">
 											{showMinimaliste
 												? "Entrainement minimaliste (2x/semaine)"
 												: "Entrainement complet (3x/semaine)"}
@@ -159,9 +159,9 @@ export default function NewSessionButton() {
 										<>
 											<Pressable
 												onPress={() => handleCreateSession("Séance A")}
-												className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border dark:border-border-dark bg-card dark:bg-card-dark active:opacity-70"
+												className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border bg-card active:opacity-70"
 											>
-												<Text className="mt-2 text-lg font-medium text-foreground dark:text-foreground-dark">
+												<Text className="mt-2 text-lg font-medium text-foreground">
 													Séance A
 												</Text>
 												<Image
@@ -172,9 +172,9 @@ export default function NewSessionButton() {
 											</Pressable>
 											<Pressable
 												onPress={() => handleCreateSession("Séance B")}
-												className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border dark:border-border-dark bg-card dark:bg-card-dark active:opacity-70"
+												className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border bg-card active:opacity-70"
 											>
-												<Text className="mt-2 text-lg font-medium text-foreground dark:text-foreground-dark">
+												<Text className="mt-2 text-lg font-medium text-foreground">
 													Séance B
 												</Text>
 												<Image
@@ -188,9 +188,9 @@ export default function NewSessionButton() {
 									<>
 										<Pressable
 											onPress={() => handleCreateSession("Upper A")}
-											className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border dark:border-border-dark bg-card dark:bg-card-dark active:opacity-70"
+											className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border bg-card active:opacity-70"
 										>
-											<Text className="mb-1 mt-2 text-lg font-medium text-foreground dark:text-foreground-dark">
+											<Text className="mb-1 mt-2 text-lg font-medium text-foreground">
 												Upper A
 											</Text>
 											<Image
@@ -201,9 +201,9 @@ export default function NewSessionButton() {
 										</Pressable>
 										<Pressable
 											onPress={() => handleCreateSession("Lower")}
-											className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border dark:border-border-dark bg-card dark:bg-card-dark active:opacity-70"
+											className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border bg-card active:opacity-70"
 										>
-											<Text className="mb-1 mt-2 text-lg font-medium text-foreground dark:text-foreground-dark">
+											<Text className="mb-1 mt-2 text-lg font-medium text-foreground">
 												Lower
 											</Text>
 											<Image
@@ -214,9 +214,9 @@ export default function NewSessionButton() {
 										</Pressable>
 										<Pressable
 											onPress={() => handleCreateSession("Upper B")}
-											className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border dark:border-border-dark bg-card dark:bg-card-dark active:opacity-70"
+											className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border bg-card active:opacity-70"
 										>
-											<Text className="mb-1 mt-2 text-lg font-medium text-foreground dark:text-foreground-dark">
+											<Text className="mb-1 mt-2 text-lg font-medium text-foreground">
 												Upper B
 											</Text>
 											<Image

@@ -25,7 +25,6 @@ SplashScreen.preventAutoHideAsync();
 WebBrowser.maybeCompleteAuthSession();
 
 type AuthState = {
-	initialized: boolean;
 	session: Session | null;
 	authenticated: boolean;
 	isLoading: boolean;
@@ -43,7 +42,6 @@ type AuthState = {
 };
 
 export const AuthContext = createContext<AuthState>({
-	initialized: false,
 	session: null,
 	authenticated: false,
 	isLoading: true,
@@ -57,7 +55,6 @@ export const AuthContext = createContext<AuthState>({
 export const useAuth = () => useContext(AuthContext);
 
 export function AuthProvider({ children }: PropsWithChildren) {
-	const [initialized, setInitialized] = useState(false);
 	const [session, setSession] = useState<Session | null>(null);
 	const [authenticated, setAuthenticated] = useState(false);
 	const [isLoading, setIsLoading] = useState(true);
@@ -282,22 +279,20 @@ export function AuthProvider({ children }: PropsWithChildren) {
 			setIsLoading(false);
 		});
 
-		setInitialized(true);
-
 		return () => {
 			subscription?.unsubscribe();
 		};
 	}, []);
 
 	useEffect(() => {
-		if (initialized && !isLoading) {
+		// isLoading turns false once Supabase reported the initial session
+		if (!isLoading) {
 			SplashScreen.hideAsync();
 		}
-	}, [initialized, isLoading]);
+	}, [isLoading]);
 
 	const authContextValue = useMemo(
 		() => ({
-			initialized,
 			session,
 			authenticated,
 			isLoading,
@@ -307,7 +302,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 			signInWithApple,
 			signOut,
 		}),
-		[initialized, session, authenticated, isLoading],
+		[session, authenticated, isLoading],
 	);
 
 	return (

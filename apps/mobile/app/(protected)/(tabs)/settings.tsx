@@ -26,12 +26,12 @@ export default function Settings() {
 	const iconColor = isDarkColorScheme ? "#9ca3af" : "#52525b"; // gray-400 : zinc-600
 
 	return (
-		<View className="flex-1 bg-background dark:bg-background-dark p-4 flex flex-col gap-4 justify-center">
+		<View className="flex-1 bg-background p-4 flex flex-col gap-4 justify-center">
 			<View className="flex-row flex-wrap">
 				<View className="w-1/2 pr-1 pb-2">
 					<Pressable
 						onPress={() => router.push("/(protected)/exercise-types")}
-						className="h-32 rounded-md border flex items-center justify-center border-border dark:border-border-dark bg-background dark:bg-background-dark"
+						className="h-32 rounded-md border flex items-center justify-center border-border bg-background"
 					>
 						<View className="flex flex-col items-center gap-1">
 							<LucidePencilRuler
@@ -47,7 +47,7 @@ export default function Settings() {
 				<View className="w-1/2 pl-1 pb-2">
 					<Pressable
 						onPress={() => router.push("/(protected)/stats")}
-						className="h-32 rounded-md border flex items-center justify-center border-border dark:border-border-dark bg-background dark:bg-background-dark"
+						className="h-32 rounded-md border flex items-center justify-center border-border bg-background"
 					>
 						<View className="flex flex-col items-center gap-1">
 							<BarChart3 size={32} strokeWidth={1.1} color={iconColor} />
@@ -59,7 +59,7 @@ export default function Settings() {
 				<View className="w-1/2 pr-1 pb-2">
 					<Pressable
 						onPress={() => router.push("/(protected)/trophy")}
-						className="h-32 rounded-md border flex items-center justify-center border-border dark:border-border-dark bg-background dark:bg-background-dark"
+						className="h-32 rounded-md border flex items-center justify-center border-border bg-background"
 					>
 						<View className="flex flex-col items-center gap-1">
 							<Trophy size={32} strokeWidth={1.1} color={iconColor} />
@@ -71,7 +71,7 @@ export default function Settings() {
 				<View className="w-1/2 pl-1 pb-2">
 					<Pressable
 						onPress={() => router.push("/(protected)/timer")}
-						className="h-32 rounded-md border flex items-center justify-center border-border dark:border-border-dark bg-background dark:bg-background-dark"
+						className="h-32 rounded-md border flex items-center justify-center border-border bg-background"
 					>
 						<View className="flex flex-col items-center gap-1">
 							<Timer size={32} strokeWidth={1.1} color={iconColor} />
@@ -83,7 +83,7 @@ export default function Settings() {
 				<View className="w-1/2 pr-1 pb-2">
 					<Pressable
 						onPress={() => router.push("/(protected)/informations")}
-						className="h-32 rounded-md border flex items-center justify-center border-border dark:border-border-dark bg-background dark:bg-background-dark"
+						className="h-32 rounded-md border flex items-center justify-center border-border bg-background"
 					>
 						<View className="flex flex-col items-center gap-1">
 							<UserCog size={32} strokeWidth={1.1} color={iconColor} />
@@ -95,7 +95,7 @@ export default function Settings() {
 				<View className="w-1/2 pl-1 pb-2">
 					<Pressable
 						onPress={() => router.push("/(protected)/program")}
-						className="h-32 rounded-md border flex items-center justify-center border-border dark:border-border-dark bg-background dark:bg-background-dark"
+						className="h-32 rounded-md border flex items-center justify-center border-border bg-background"
 					>
 						<View className="flex flex-col items-center gap-1">
 							<Activity size={32} strokeWidth={1.1} color={iconColor} />
@@ -107,7 +107,7 @@ export default function Settings() {
 				<View className="w-1/2 pr-1 pb-2">
 					<Pressable
 						onPress={() => setFeedbackModalVisible(true)}
-						className="h-32 rounded-md border flex items-center justify-center border-border dark:border-border-dark bg-background dark:bg-background-dark"
+						className="h-32 rounded-md border flex items-center justify-center border-border bg-background"
 					>
 						<View className="flex flex-col items-center gap-1">
 							<Star size={32} strokeWidth={1.1} color={iconColor} />
@@ -118,7 +118,7 @@ export default function Settings() {
 
 				<View className="w-1/2 pl-1 pb-2">
 					<Pressable
-						className="h-32 rounded-md border flex items-center justify-center border-border dark:border-border-dark bg-background dark:bg-background-dark"
+						className="h-32 rounded-md border flex items-center justify-center border-border bg-background"
 						onPress={async () => {
 							await signOut();
 						}}

@@ -91,19 +91,16 @@ export default function Stats() {
 	];
 
 	return (
-		<SafeAreaView
-			className="flex-1 bg-background dark:bg-background-dark"
-			edges={["bottom"]}
-		>
+		<SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
 			<ScrollView className="flex-1 px-4 pt-4">
 				{/* Exercise Type Selection */}
 				<View className="mb-4">
 					{isLoadingTypes ? (
-						<View className="bg-muted/30 dark:bg-muted-dark/30 rounded-lg p-4">
+						<View className="bg-muted/30 rounded-lg p-4">
 							<ActivityIndicator size="small" />
 						</View>
 					) : allExerciseTypes.length === 0 ? (
-						<View className="bg-muted/30 dark:bg-muted-dark/30 rounded-lg p-4">
+						<View className="bg-muted/30 rounded-lg p-4">
 							<Text className="text-muted-foreground dark:text-gray-400 text-center">
 								Aucun exercice disponible.
 							</Text>
@@ -112,9 +109,9 @@ export default function Stats() {
 						<Button
 							onPress={openBottomSheet}
 							variant="ghost"
-							className="flex-row w-full flex-1 h-20 items-center dark:text-foreground-dark bg-gray-100 dark:bg-gray-700 rounded-md justify-between p-4"
+							className="flex-row w-full h-20 items-center bg-gray-100 dark:bg-gray-700 rounded-md justify-between p-4"
 						>
-							<Text className="text-foreground dark:text-foreground-dark">
+							<Text className="text-foreground">
 								{selectedExerciseType
 									? selectedExerciseType.name
 									: "Sélectionne un exercice"}
@@ -137,7 +134,7 @@ export default function Stats() {
 				{/* Chart */}
 				{!isLoading && exercise.length > 0 && (
 					<View className="bg-slate-50 dark:bg-slate-900/40 rounded-2xl p-4 mb-5">
-						<Text className="text-lg font-semibold text-center mb-4 text-foreground dark:text-foreground-dark">
+						<Text className="text-lg font-semibold text-center mb-4 text-foreground">
 							Évolution des charges (kg)
 						</Text>
 
@@ -248,13 +245,13 @@ export default function Stats() {
 				{/* Stats Summary */}
 				{!isLoading && exercise.length > 0 && (
 					<View className="bg-slate-50 dark:bg-slate-900/40 rounded-2xl p-4 mb-20">
-						<Text className="text-lg font-semibold mb-4 text-foreground dark:text-foreground-dark">
+						<Text className="text-lg font-semibold mb-4 text-foreground">
 							Résumé
 						</Text>
 
 						<View className="flex-row justify-between">
 							<View className="items-center">
-								<Text className="text-2xl font-bold text-foreground dark:text-foreground-dark">
+								<Text className="text-2xl font-bold text-foreground">
 									{exercise.length}
 								</Text>
 								<Text className="text-sm text-muted-foreground dark:text-gray-400">
@@ -263,7 +260,7 @@ export default function Stats() {
 							</View>
 
 							<View className="items-center">
-								<Text className="text-2xl font-bold text-foreground dark:text-foreground-dark">
+								<Text className="text-2xl font-bold text-foreground">
 									{maxWeight}
 								</Text>
 								<Text className="text-sm text-muted-foreground dark:text-gray-400">
@@ -272,7 +269,7 @@ export default function Stats() {
 							</View>
 
 							<View className="items-center">
-								<Text className="text-2xl font-bold text-foreground dark:text-foreground-dark">
+								<Text className="text-2xl font-bold text-foreground">
 									{minWeight}
 								</Text>
 								<Text className="text-sm text-muted-foreground dark:text-gray-400">
@@ -345,7 +342,7 @@ export default function Stats() {
 													className={`text-base ${
 														isSelected
 															? "text-primary font-semibold"
-															: "text-foreground dark:text-foreground-dark"
+															: "text-foreground"
 													}`}
 												>
 													{type.name}
