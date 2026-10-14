@@ -24,6 +24,7 @@ import { Text } from "@/components/ui/text";
 import { useExerciseHistory } from "@/lib/queries/exercises";
 import { useExerciseTypes } from "@/lib/queries/exercise-types";
 import { setsToArrays, type ExerciseType } from "@/lib/queries/types";
+import { useThemeColors } from "@/lib/theme";
 
 const { width } = Dimensions.get("window");
 
@@ -31,6 +32,7 @@ const { width } = Dimensions.get("window");
 const SNAP_POINTS = ["50%", "90%"];
 
 export default function Stats() {
+	const themeColors = useThemeColors();
 	const bottomSheetRef = useRef<BottomSheet>(null);
 	const exerciseTypesQuery = useExerciseTypes();
 	const [pickedTypeId, setPickedTypeId] = useState<string | null>(null);
@@ -101,7 +103,7 @@ export default function Stats() {
 						</View>
 					) : allExerciseTypes.length === 0 ? (
 						<View className="bg-muted/30 rounded-lg p-4">
-							<Text className="text-muted-foreground dark:text-gray-400 text-center">
+							<Text className="text-muted-foreground text-center">
 								Aucun exercice disponible.
 							</Text>
 						</View>
@@ -109,14 +111,18 @@ export default function Stats() {
 						<Button
 							onPress={openBottomSheet}
 							variant="ghost"
-							className="flex-row w-full h-20 items-center bg-gray-100 dark:bg-gray-700 rounded-md justify-between p-4"
+							className="flex-row w-full h-20 items-center bg-muted rounded-md justify-between p-4"
 						>
 							<Text className="text-foreground">
 								{selectedExerciseType
 									? selectedExerciseType.name
 									: "Sélectionne un exercice"}
 							</Text>
-							<AlignJustifyIcon size={20} color="#252525" strokeWidth={1.5} />
+							<AlignJustifyIcon
+								size={20}
+								color={themeColors.foreground}
+								strokeWidth={1.5}
+							/>
 						</Button>
 					)}
 				</View>
@@ -124,8 +130,12 @@ export default function Stats() {
 				{/* Loading State */}
 				{isLoading && (
 					<View className="flex-1 items-center justify-center py-20">
-						<LucideLoader2 className="animate-spin" size={32} />
-						<Text className="mt-4 text-sm text-muted-foreground dark:text-gray-400">
+						<LucideLoader2
+							className="animate-spin"
+							size={32}
+							color={themeColors.mutedForeground}
+						/>
+						<Text className="mt-4 text-sm text-muted-foreground">
 							Chargement...
 						</Text>
 					</View>
@@ -148,7 +158,14 @@ export default function Stats() {
 							<VictoryAxis
 								tickFormat={(t) => formatXAxis(t)}
 								style={{
-									tickLabels: { fontSize: 10, angle: -45 },
+									axis: { stroke: themeColors.border },
+									grid: { stroke: themeColors.border },
+									ticks: { stroke: themeColors.border },
+									tickLabels: {
+										fontSize: 10,
+										angle: -45,
+										fill: themeColors.mutedForeground,
+									},
 								}}
 							/>
 							<VictoryAxis
@@ -156,8 +173,18 @@ export default function Stats() {
 								domain={yDomain}
 								label="Charge (kg)"
 								style={{
-									axisLabel: { padding: 35, fontSize: 12 },
-									tickLabels: { fontSize: 10 },
+									axis: { stroke: themeColors.border },
+									grid: { stroke: themeColors.border },
+									ticks: { stroke: themeColors.border },
+									axisLabel: {
+										padding: 35,
+										fontSize: 12,
+										fill: themeColors.mutedForeground,
+									},
+									tickLabels: {
+										fontSize: 10,
+										fill: themeColors.mutedForeground,
+									},
 								}}
 							/>
 
@@ -219,7 +246,11 @@ export default function Stats() {
 								y={50}
 								orientation="vertical"
 								gutter={20}
-								style={{ border: { stroke: "black" }, title: { fontSize: 20 } }}
+								style={{
+									border: { stroke: themeColors.border },
+									title: { fontSize: 20 },
+									labels: { fill: themeColors.foreground },
+								}}
 								data={[
 									{ name: "Série 1", symbol: { fill: "#AC38B2" } },
 									{ name: "Série 2", symbol: { fill: "#B2AC38" } },
@@ -236,7 +267,7 @@ export default function Stats() {
 				{/* No Data State */}
 				{exercise.length === 0 && !isLoading && (
 					<View className=" text-center">
-						<Text className="text-gray-500 dark:text-gray-400">
+						<Text className="text-muted-foreground">
 							Aucun historique disponible sur cet exercice.
 						</Text>
 					</View>
@@ -254,27 +285,21 @@ export default function Stats() {
 								<Text className="text-2xl font-bold text-foreground">
 									{exercise.length}
 								</Text>
-								<Text className="text-sm text-muted-foreground dark:text-gray-400">
-									Séances
-								</Text>
+								<Text className="text-sm text-muted-foreground">Séances</Text>
 							</View>
 
 							<View className="items-center">
 								<Text className="text-2xl font-bold text-foreground">
 									{maxWeight}
 								</Text>
-								<Text className="text-sm text-muted-foreground dark:text-gray-400">
-									Max (kg)
-								</Text>
+								<Text className="text-sm text-muted-foreground">Max (kg)</Text>
 							</View>
 
 							<View className="items-center">
 								<Text className="text-2xl font-bold text-foreground">
 									{minWeight}
 								</Text>
-								<Text className="text-sm text-muted-foreground dark:text-gray-400">
-									Min (kg)
-								</Text>
+								<Text className="text-sm text-muted-foreground">Min (kg)</Text>
 							</View>
 						</View>
 					</View>
@@ -289,6 +314,8 @@ export default function Stats() {
 				enableDynamicSizing={false}
 				enablePanDownToClose
 				enableOverDrag={true}
+				backgroundStyle={{ backgroundColor: themeColors.popover }}
+				handleIndicatorStyle={{ backgroundColor: themeColors.mutedForeground }}
 			>
 				{/* Scrollable list as a sibling, no flex:1 */}
 				<BottomSheetScrollView
@@ -298,7 +325,7 @@ export default function Stats() {
 				>
 					{allExerciseTypes.length === 0 ? (
 						<View className="py-8 items-center">
-							<Text className="text-muted-foreground dark:text-gray-400 text-center">
+							<Text className="text-muted-foreground text-center">
 								Aucun exercice disponible
 							</Text>
 						</View>
@@ -323,18 +350,18 @@ export default function Stats() {
 											className={`flex-row items-center p-4 rounded-lg mb-2 ${
 												isSelected
 													? "bg-primary/10 border border-primary/20"
-													: "bg-gray-50 dark:bg-gray-800"
+													: "bg-muted"
 											}`}
 										>
 											<View
 												className={`w-5 h-5 rounded-full border-2 ${
 													isSelected
 														? "bg-primary border-primary"
-														: "border-gray-300 dark:border-gray-600"
+														: "border-muted-foreground"
 												}`}
 											>
 												{isSelected && (
-													<View className="w-2 h-2 bg-white rounded-full m-auto" />
+													<View className="w-2 h-2 bg-primary-foreground rounded-full m-auto" />
 												)}
 											</View>
 											<View className="ml-3 flex-1">

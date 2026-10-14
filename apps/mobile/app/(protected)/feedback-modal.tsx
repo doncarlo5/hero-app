@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { useAuth } from "@/context/supabase-provider";
 import { useSendFeedback } from "@/lib/queries/feedback";
+import { useThemeColors } from "@/lib/theme";
 import { useColorScheme } from "@/lib/useColorScheme";
 
 interface FeedbackModalProps {
@@ -27,6 +28,7 @@ export default function FeedbackModal({
 	const { session } = useAuth();
 	const sendFeedback = useSendFeedback();
 	const { isDarkColorScheme } = useColorScheme();
+	const themeColors = useThemeColors();
 	const [formState, setFormState] = useState({ subject: "", message: "" });
 	const [error, setError] = useState<string | null>(null);
 	const loading = sendFeedback.isPending;
@@ -78,7 +80,7 @@ export default function FeedbackModal({
 		>
 			<View className="flex-1 justify-center items-center bg-black/50">
 				<View
-					className="bg-background rounded-2xl p-4 w-11/12"
+					className="bg-popover rounded-2xl p-4 w-11/12"
 					style={{ maxHeight: "80%" }}
 				>
 					<View className="flex-row justify-between items-center mb-4">
@@ -86,11 +88,11 @@ export default function FeedbackModal({
 							Feedback
 						</Text>
 						<Pressable onPress={onClose}>
-							<X size={24} color={isDarkColorScheme ? "#ffffff" : "#000000"} />
+							<X size={24} color={themeColors.foreground} />
 						</Pressable>
 					</View>
 
-					<Text className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+					<Text className="text-sm text-muted-foreground mb-4">
 						Décrivez votre expérience de l&apos;application.
 					</Text>
 
@@ -112,7 +114,7 @@ export default function FeedbackModal({
 									}
 									placeholder="Entrez le sujet"
 									className="border border-border rounded-md p-3 bg-background text-foreground"
-									placeholderTextColor="#6B7280"
+									placeholderTextColor={themeColors.mutedForeground}
 								/>
 							</View>
 
@@ -127,7 +129,7 @@ export default function FeedbackModal({
 									multiline
 									numberOfLines={4}
 									className="border border-border rounded-md p-3 bg-background text-foreground"
-									placeholderTextColor="#6B7280"
+									placeholderTextColor={themeColors.mutedForeground}
 									textAlignVertical="top"
 								/>
 							</View>
@@ -165,10 +167,7 @@ export default function FeedbackModal({
 								disabled={loading}
 								className="flex-row items-center gap-2"
 							>
-								<Send
-									size={16}
-									color={isDarkColorScheme ? "#000000" : "#ffffff"}
-								/>
+								<Send size={16} color={themeColors.primaryForeground} />
 								<Text className="text-primary-foreground">
 									{loading ? "Envoi en cours..." : "Envoyer"}
 								</Text>

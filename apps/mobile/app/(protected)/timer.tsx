@@ -6,11 +6,10 @@ import { View } from "react-native";
 import { CountDownTimer } from "@/components/countdown-timer";
 import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors";
-import { useColorScheme } from "@/lib/useColorScheme";
+import { useThemeColors } from "@/lib/theme";
 
 export default function TimerPage() {
-	const { colorScheme } = useColorScheme();
+	const themeColors = useThemeColors();
 
 	const [customTimer, setCustomTimer] = useState(120);
 
@@ -20,16 +19,6 @@ export default function TimerPage() {
 				options={{
 					headerShown: true,
 					title: "Timer",
-					headerStyle: {
-						backgroundColor:
-							colorScheme === "dark"
-								? colors.dark.background
-								: colors.light.background,
-					},
-					headerTintColor:
-						colorScheme === "dark"
-							? colors.dark.foreground
-							: colors.light.foreground,
 					headerShadowVisible: true,
 				}}
 			/>
@@ -41,10 +30,7 @@ export default function TimerPage() {
 					<View className="w-full max-w-xs ">
 						<View className="relative">
 							<View className="absolute top-1/2 left-0 flex items-center pl-3 z-10 -translate-y-1/2">
-								<LucideClock4
-									size={20}
-									color={colorScheme === "dark" ? "#6B7280" : "#9CA3AF"}
-								/>
+								<LucideClock4 size={20} color={themeColors.mutedForeground} />
 							</View>
 							<Input
 								value={customTimer.toString()}
@@ -58,7 +44,7 @@ export default function TimerPage() {
 								style={{ fontSize: 20 }}
 							/>
 						</View>
-						<Text className="mb-6 text-gray-500 dark:text-gray-400 text-lg">
+						<Text className="mb-6 text-muted-foreground text-lg">
 							En secondes
 						</Text>
 					</View>

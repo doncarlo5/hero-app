@@ -1,8 +1,6 @@
 import { Redirect, Stack } from "expo-router";
 
-import { colors } from "@/constants/colors";
 import { useAuth } from "@/context/supabase-provider";
-import { useColorScheme } from "@/lib/useColorScheme";
 
 export const unstable_settings = {
 	initialRouteName: "(tabs)",
@@ -10,7 +8,6 @@ export const unstable_settings = {
 
 export default function ProtectedLayout() {
 	const { session } = useAuth();
-	const { colorScheme } = useColorScheme();
 
 	if (!session) {
 		return <Redirect href="/welcome" />;
@@ -29,16 +26,6 @@ export default function ProtectedLayout() {
 				options={({ route }) => {
 					const params = route.params as { fromExercise?: string };
 					return {
-						headerStyle: {
-							backgroundColor:
-								colorScheme === "dark"
-									? colors.dark.background
-									: colors.light.background,
-						},
-						headerTintColor:
-							colorScheme === "dark"
-								? colors.dark.foreground
-								: colors.light.foreground,
 						presentation: "card",
 						headerShown: true,
 						headerTitle: "Session",
@@ -51,16 +38,6 @@ export default function ProtectedLayout() {
 			<Stack.Screen
 				name="exercise/[id]"
 				options={{
-					headerStyle: {
-						backgroundColor:
-							colorScheme === "dark"
-								? colors.dark.background
-								: colors.light.background,
-					},
-					headerTintColor:
-						colorScheme === "dark"
-							? colors.dark.foreground
-							: colors.light.foreground,
 					presentation: "card",
 					headerShown: true,
 					headerTitle: "Exercise",
@@ -70,16 +47,6 @@ export default function ProtectedLayout() {
 			<Stack.Screen
 				name="exercise-type/[id]"
 				options={{
-					headerStyle: {
-						backgroundColor:
-							colorScheme === "dark"
-								? colors.dark.background
-								: colors.light.background,
-					},
-					headerTintColor:
-						colorScheme === "dark"
-							? colors.dark.foreground
-							: colors.light.foreground,
 					presentation: "card",
 					headerShown: true,
 					headerTitle: "Exercise Type",
@@ -90,16 +57,6 @@ export default function ProtectedLayout() {
 			<Stack.Screen
 				name="do-exercise"
 				options={{
-					headerStyle: {
-						backgroundColor:
-							colorScheme === "dark"
-								? colors.dark.background
-								: colors.light.background,
-					},
-					headerTintColor:
-						colorScheme === "dark"
-							? colors.dark.foreground
-							: colors.light.foreground,
 					presentation: "card",
 					headerShown: true,
 					headerTitle: "New Exercise",
@@ -110,16 +67,6 @@ export default function ProtectedLayout() {
 			<Stack.Screen
 				name="exercise-types"
 				options={{
-					headerStyle: {
-						backgroundColor:
-							colorScheme === "dark"
-								? colors.dark.background
-								: colors.light.background,
-					},
-					headerTintColor:
-						colorScheme === "dark"
-							? colors.dark.foreground
-							: colors.light.foreground,
 					presentation: "card",
 					headerShown: true,
 					headerTitle: "Mes exercices type",
@@ -130,16 +77,6 @@ export default function ProtectedLayout() {
 			<Stack.Screen
 				name="stats"
 				options={{
-					headerStyle: {
-						backgroundColor:
-							colorScheme === "dark"
-								? colors.dark.background
-								: colors.light.background,
-					},
-					headerTintColor:
-						colorScheme === "dark"
-							? colors.dark.foreground
-							: colors.light.foreground,
 					presentation: "card",
 					headerShown: true,
 					headerTitle: "Statistiques",
@@ -150,16 +87,6 @@ export default function ProtectedLayout() {
 			<Stack.Screen
 				name="trophy"
 				options={{
-					headerStyle: {
-						backgroundColor:
-							colorScheme === "dark"
-								? colors.dark.background
-								: colors.light.background,
-					},
-					headerTintColor:
-						colorScheme === "dark"
-							? colors.dark.foreground
-							: colors.light.foreground,
 					presentation: "card",
 					headerShown: true,
 					headerTitle: "Trophées",

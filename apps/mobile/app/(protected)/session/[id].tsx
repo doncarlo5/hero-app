@@ -19,7 +19,6 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors";
 import { useProgram } from "@/lib/queries/programs";
 import {
 	useDeleteSession,
@@ -28,6 +27,7 @@ import {
 	useUpdateSession,
 } from "@/lib/queries/sessions";
 import type { Session } from "@/lib/queries/types";
+import { useThemeColors } from "@/lib/theme";
 import { useColorScheme } from "@/lib/useColorScheme";
 import {
 	ArrowLeftIcon,
@@ -68,7 +68,8 @@ export default function SessionDetail() {
 		fromExercise?: string;
 	}>();
 	const router = useRouter();
-	const { isDarkColorScheme, colorScheme } = useColorScheme();
+	const { isDarkColorScheme } = useColorScheme();
+	const themeColors = useThemeColors();
 
 	const commentTextareaRef = useRef<TextInput>(null);
 
@@ -391,7 +392,7 @@ export default function SessionDetail() {
 								<Button
 									onPress={() => setIsCalendarOpen(true)}
 									variant="ghost"
-									className="flex-row w-full items-center bg-gray-100 dark:bg-gray-700 rounded-md justify-between"
+									className="flex-row w-full items-center bg-muted rounded-md justify-between"
 								>
 									<Text className="text-foreground">
 										{selectedDate
@@ -400,7 +401,7 @@ export default function SessionDetail() {
 									</Text>
 									<CalendarIcon
 										size={20}
-										color={isDarkColorScheme ? "#9CA3AF" : "#252525"}
+										color={themeColors.foreground}
 										strokeWidth={1.5}
 									/>
 								</Button>
@@ -411,14 +412,14 @@ export default function SessionDetail() {
 								<Button
 									onPress={() => setIsWeightPickerOpen(true)}
 									variant="ghost"
-									className="flex-row w-full items-center bg-gray-100 dark:bg-gray-700 rounded-md justify-between"
+									className="flex-row w-full items-center bg-muted rounded-md justify-between"
 								>
 									<Text className="text-foreground">
 										{selectedWeight ? `${selectedWeight} kg` : "Select weight"}
 									</Text>
 									<Gauge
 										size={20}
-										color={isDarkColorScheme ? "#9CA3AF" : "#252525"}
+										color={themeColors.foreground}
 										strokeWidth={1.5}
 									/>
 								</Button>
@@ -430,9 +431,9 @@ export default function SessionDetail() {
 							onPress={handleOpenCommentSheet}
 							android_ripple={{ color: "rgba(0,0,0,0.1)" }}
 							hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
-							className="bg-gray-100 dark:bg-gray-700 rounded-lg py-3 px-4 active:opacity-70"
+							className="bg-muted rounded-lg py-3 px-4 active:opacity-70"
 						>
-							<Text className="text-sm underline text-gray-500 font-semibold underline-gray-500">
+							<Text className="text-sm underline text-muted-foreground font-semibold">
 								{formState.comment ||
 									(lastSession?.comment
 										? `Your last notes: ${lastSession.comment}`
@@ -462,10 +463,7 @@ export default function SessionDetail() {
 							variant="default"
 							className="flex-row items-center justify-center gap-2 my-4"
 						>
-							<PlusIcon
-								size={16}
-								color={isDarkColorScheme ? "#000000" : "#ffffff"}
-							/>
+							<PlusIcon size={16} color={themeColors.primaryForeground} />
 							<Text className="text-primary-foreground">Add an exercise</Text>
 						</Button>
 
@@ -486,7 +484,7 @@ export default function SessionDetail() {
 										</View>
 										<ChevronRightIcon
 											size={20}
-											color={isDarkColorScheme ? "#9CA3AF" : "#6b7280"}
+											color={themeColors.mutedForeground}
 										/>
 									</View>
 
@@ -562,12 +560,12 @@ export default function SessionDetail() {
 										variant="outline"
 										className="w-20 flex-row items-center justify-center gap-1 border-none bg-slate-100/60 dark:bg-slate-900/60"
 									>
-										<Text className="text-sm italic text-gray-400 dark:text-gray-500">
+										<Text className="text-sm italic text-muted-foreground">
 											Skip
 										</Text>
 										<ChevronsRight
 											size={16}
-											color={isDarkColorScheme ? "#6B7280" : "#9ca3af"}
+											color={themeColors.mutedForeground}
 										/>
 									</Button>
 								</View>
@@ -575,7 +573,7 @@ export default function SessionDetail() {
 								{/* Alternative exercises */}
 								{(getNextExercise()?.alternatives?.length ?? 0) > 0 && (
 									<View className="mb-3">
-										<Text className="text-sm font-medium text-gray-500 mb-2">
+										<Text className="text-sm font-medium text-muted-foreground mb-2">
 											Alternatives:
 										</Text>
 										{getNextExercise()?.alternatives?.map((alt) => (
@@ -589,7 +587,9 @@ export default function SessionDetail() {
 												variant="outline"
 												className="mb-2 flex-row items-center justify-center gap-2 border-2 border-dotted bg-slate-100/20 dark:bg-slate-900/20"
 											>
-												<Text className="text-gray-500">{alt.name}</Text>
+												<Text className="text-muted-foreground">
+													{alt.name}
+												</Text>
 											</Button>
 										))}
 									</View>
@@ -620,7 +620,7 @@ export default function SessionDetail() {
 							>
 								<CheckCircleIcon
 									size={16}
-									color={isDarkColorScheme ? "#000000" : "#ffffff"}
+									color={themeColors.primaryForeground}
 								/>
 								<Text className="ml-2 text-primary-foreground">
 									{isCompleting ? "Completing..." : "Complete"}
@@ -633,7 +633,7 @@ export default function SessionDetail() {
 							>
 								<ArrowLeftIcon
 									size={16}
-									color={isDarkColorScheme ? "#000000" : "#ffffff"}
+									color={themeColors.primaryForeground}
 								/>
 								<Text className="ml-2 text-primary-foreground">
 									Go back to list
@@ -656,13 +656,10 @@ export default function SessionDetail() {
 							{isSaving ? (
 								<ActivityIndicator
 									size="small"
-									color={isDarkColorScheme ? "#000000" : "#ffffff"}
+									color={themeColors.primaryForeground}
 								/>
 							) : (
-								<SaveIcon
-									size={24}
-									color={isDarkColorScheme ? "#000000" : "#ffffff"}
-								/>
+								<SaveIcon size={24} color={themeColors.primaryForeground} />
 							)}
 						</Pressable>
 					</View>
@@ -687,8 +684,7 @@ export default function SessionDetail() {
 				>
 					<Pressable
 						style={{
-							backgroundColor:
-								colorScheme === "dark" ? colors.dark.card : colors.light.card,
+							backgroundColor: themeColors.popover,
 							borderRadius: 24,
 							padding: 24,
 							width: "90%",
@@ -704,7 +700,7 @@ export default function SessionDetail() {
 							>
 								<XIcon
 									size={20}
-									color={isDarkColorScheme ? "#9CA3AF" : "#252525"}
+									color={themeColors.foreground}
 									strokeWidth={2}
 								/>
 							</Pressable>
@@ -749,8 +745,7 @@ export default function SessionDetail() {
 				>
 					<Pressable
 						style={{
-							backgroundColor:
-								colorScheme === "dark" ? colors.dark.card : colors.light.card,
+							backgroundColor: themeColors.popover,
 							borderRadius: 24,
 							padding: 24,
 							width: "90%",
@@ -767,7 +762,7 @@ export default function SessionDetail() {
 							>
 								<XIcon
 									size={20}
-									color={isDarkColorScheme ? "#9CA3AF" : "#252525"}
+									color={themeColors.foreground}
 									strokeWidth={2}
 								/>
 							</Pressable>
@@ -800,7 +795,7 @@ export default function SessionDetail() {
 							{isSaving ? (
 								<ActivityIndicator
 									size="small"
-									color={isDarkColorScheme ? "#000000" : "#ffffff"}
+									color={themeColors.primaryForeground}
 								/>
 							) : (
 								<Text className="text-primary-foreground">Done</Text>
@@ -828,8 +823,7 @@ export default function SessionDetail() {
 				>
 					<Pressable
 						style={{
-							backgroundColor:
-								colorScheme === "dark" ? colors.dark.card : colors.light.card,
+							backgroundColor: themeColors.popover,
 							borderRadius: 24,
 							padding: 24,
 							width: "90%",
@@ -848,7 +842,7 @@ export default function SessionDetail() {
 							>
 								<XIcon
 									size={20}
-									color={isDarkColorScheme ? "#9CA3AF" : "#252525"}
+									color={themeColors.foreground}
 									strokeWidth={2}
 								/>
 							</Pressable>
@@ -904,8 +898,7 @@ export default function SessionDetail() {
 				>
 					<Pressable
 						style={{
-							backgroundColor:
-								colorScheme === "dark" ? colors.dark.card : colors.light.card,
+							backgroundColor: themeColors.popover,
 							borderRadius: 24,
 							padding: 24,
 							width: "90%",
@@ -927,7 +920,7 @@ export default function SessionDetail() {
 							>
 								<XIcon
 									size={20}
-									color={isDarkColorScheme ? "#9CA3AF" : "#252525"}
+									color={themeColors.foreground}
 									strokeWidth={2}
 								/>
 							</Pressable>
@@ -945,21 +938,13 @@ export default function SessionDetail() {
 									padding: 12,
 									borderRadius: 8,
 									borderWidth: 1,
-									borderColor: colorScheme === "dark" ? "#374151" : "#D1D5DB",
-									backgroundColor:
-										colorScheme === "dark"
-											? colors.dark.background
-											: colors.light.background,
-									color:
-										colorScheme === "dark"
-											? colors.dark.foreground
-											: colors.light.foreground,
+									borderColor: themeColors.input,
+									backgroundColor: themeColors.background,
+									color: themeColors.foreground,
 									fontSize: 16,
 									textAlignVertical: "top",
 								}}
-								placeholderTextColor={
-									colorScheme === "dark" ? "#9CA3AF" : "#6B7280"
-								}
+								placeholderTextColor={themeColors.mutedForeground}
 								multiline={true}
 								numberOfLines={2}
 								blurOnSubmit={false}
@@ -991,7 +976,7 @@ export default function SessionDetail() {
 								{isSaving ? (
 									<ActivityIndicator
 										size="small"
-										color={isDarkColorScheme ? "#000000" : "#ffffff"}
+										color={themeColors.primaryForeground}
 									/>
 								) : (
 									<Text className="text-primary-foreground">Done</Text>

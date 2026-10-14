@@ -11,11 +11,12 @@ import {
 import NewSessionButton from "@/components/new-session-button";
 import { Text } from "@/components/ui/text";
 import { TypeSessionBadge } from "@/components/ui/type-session-badge";
-import { colors } from "@/constants/colors";
 import { useSessionsPages } from "@/lib/queries/sessions";
+import { useThemeColors } from "@/lib/theme";
 import { MessageSquareText } from "lucide-react-native";
 
 export default function List() {
+	const themeColors = useThemeColors();
 	const router = useRouter();
 	const sessionsPages = useSessionsPages();
 	const [refreshing, setRefreshing] = useState(false);
@@ -43,7 +44,7 @@ export default function List() {
 	return (
 		<View className="flex-1 items-center justify-center bg-background p-4 w-full gap-y-4">
 			{isLoading && sessions.length === 0 ? (
-				<ActivityIndicator size="large" color={colors.light.primary} />
+				<ActivityIndicator size="large" color={themeColors.primary} />
 			) : (
 				<LegendList
 					className="w-full"
@@ -56,8 +57,8 @@ export default function List() {
 						<RefreshControl
 							refreshing={refreshing}
 							onRefresh={onRefresh}
-							tintColor="rgb(71 85 105)"
-							colors={["rgb(71 85 105)"]}
+							tintColor={themeColors.mutedForeground}
+							colors={[themeColors.mutedForeground]}
 						/>
 					}
 					renderItem={({ item }) => (
@@ -71,7 +72,10 @@ export default function List() {
 								}`}
 							/>
 							<Text className="mr-3 text-foreground">
-								<MessageSquareText opacity={!item.comment ? 0.3 : 1} />
+								<MessageSquareText
+									color={themeColors.foreground}
+									opacity={!item.comment ? 0.3 : 1}
+								/>
 							</Text>
 							<Text className="mr-3 text-foreground">
 								{new Date(item.date_session).toLocaleDateString("fr-FR")}
@@ -99,7 +103,7 @@ export default function List() {
 					ListFooterComponent={
 						isLoadingMore ? (
 							<View className="py-4">
-								<ActivityIndicator size="small" color={colors.light.primary} />
+								<ActivityIndicator size="small" color={themeColors.primary} />
 							</View>
 						) : null
 					}

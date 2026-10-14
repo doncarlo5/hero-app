@@ -24,6 +24,8 @@ import {
 	type ExerciseType,
 	type ExerciseWithSession,
 } from "@/lib/queries/types";
+import { useThemeColors } from "@/lib/theme";
+import { useColorScheme } from "@/lib/useColorScheme";
 import {
 	CheckIcon,
 	EditIcon,
@@ -54,6 +56,8 @@ function parseNumber(value: string) {
 }
 
 export default function ExerciseDetail() {
+	const themeColors = useThemeColors();
+	const { isDarkColorScheme } = useColorScheme();
 	const { id } = useLocalSearchParams<{ id: string }>();
 	const router = useRouter();
 
@@ -251,7 +255,10 @@ export default function ExerciseDetail() {
 			{/* Advice */}
 			{exerciseType.advice && (
 				<View className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mb-6 flex-row items-center gap-2">
-					<InfoIcon size={15} color="#1e40af" />
+					<InfoIcon
+						size={15}
+						color={isDarkColorScheme ? "#60a5fa" : "#1e40af"}
+					/>
 					<Text className="text-sm text-blue-700 dark:text-blue-200">
 						{exerciseType.advice}
 					</Text>
@@ -534,9 +541,9 @@ export default function ExerciseDetail() {
 				{!isEditable ? (
 					<Button
 						onPress={() => setIsEditable(true)}
-						className="flex-1 dark:bg-transparent flex-row items-center justify-center"
+						className="flex-1 flex-row items-center justify-center"
 					>
-						<EditIcon size={16} color="white" />
+						<EditIcon size={16} color={themeColors.primaryForeground} />
 						<Text className="ml-2">Edit</Text>
 					</Button>
 				) : (
@@ -550,18 +557,21 @@ export default function ExerciseDetail() {
 							disabled={isSaving}
 							className="flex-1 flex-row items-center justify-center"
 						>
-							<XIcon size={16} color="#6b7280" />
+							<XIcon size={16} color={themeColors.mutedForeground} />
 							<Text className="ml-2 text-muted-foreground">Cancel</Text>
 						</Button>
 						<Button
 							onPress={handleSave}
 							disabled={isSaving}
-							className="flex-1 dark:bg-transparent flex-row items-center justify-center"
+							className="flex-1 flex-row items-center justify-center"
 						>
 							{isSaving ? (
-								<ActivityIndicator size="small" color="white" />
+								<ActivityIndicator
+									size="small"
+									color={themeColors.primaryForeground}
+								/>
 							) : (
-								<CheckIcon size={16} color="white" />
+								<CheckIcon size={16} color={themeColors.primaryForeground} />
 							)}
 							<Text className="ml-2">{isSaving ? "Saving..." : "Save"}</Text>
 						</Button>

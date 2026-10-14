@@ -1,4 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Stack } from "expo-router";
 import {
 	LucideLoader2,
@@ -14,18 +13,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors";
 import { useAuth } from "@/context/supabase-provider";
 import { useProfile, useUpdateProfile } from "@/lib/queries/profile";
-import { useColorScheme } from "@/lib/useColorScheme";
-
-type ColorSchemePreference = "light" | "dark" | "system";
+import {
+	type ColorSchemePreference,
+	getColorSchemePreference,
+	setColorSchemePreference,
+} from "@/lib/color-scheme-preference";
+import { useThemeColors } from "@/lib/theme";
 
 export default function Informations() {
 	const { session } = useAuth();
 	const profile = useProfile();
 	const updateProfile = useUpdateProfile();
-	const { colorScheme, setColorScheme } = useColorScheme();
+	const themeColors = useThemeColors();
 
 	const [formState, setFormState] = useState({
 		firstName: "",
@@ -45,39 +46,20 @@ export default function Informations() {
 			email: profile.data.email ?? session?.user.email ?? "",
 		});
 	}
-	const [colorSchemePreference, setColorSchemePreference] =
+	const [colorSchemePreference, setPreference] =
 		useState<ColorSchemePreference>("system");
 
-	// Load the user's preference on mount
 	useEffect(() => {
-		const loadPreference = async () => {
-			try {
-				const savedPreference = await AsyncStorage.getItem(
-					"colorSchemePreference",
-				);
-				if (savedPreference) {
-					setColorSchemePreference(savedPreference as ColorSchemePreference);
-				}
-			} catch (error) {
-				console.error("Failed to load color scheme preference:", error);
-			}
-		};
-		loadPreference();
+		getColorSchemePreference().then(setPreference);
 	}, []);
 
 	const handleChange = (field: string, value: string) => {
 		setFormState({ ...formState, [field]: value });
 	};
 
-	const handleColorSchemeChange = async (preference: ColorSchemePreference) => {
+	const handleColorSchemeChange = (preference: ColorSchemePreference) => {
+		setPreference(preference);
 		setColorSchemePreference(preference);
-		setColorScheme(preference);
-
-		try {
-			await AsyncStorage.setItem("colorSchemePreference", preference);
-		} catch (error) {
-			console.error("Failed to save color scheme preference:", error);
-		}
 	};
 
 	const handleSubmit = () => {
@@ -114,16 +96,6 @@ export default function Informations() {
 					headerShown: true,
 					title: "Modifier mon profil",
 					headerBackTitle: "Retour",
-					headerStyle: {
-						backgroundColor:
-							colorScheme === "dark"
-								? colors.dark.background
-								: colors.light.background,
-					},
-					headerTintColor:
-						colorScheme === "dark"
-							? colors.dark.foreground
-							: colors.light.foreground,
 					headerShadowVisible: true,
 				}}
 			/>
@@ -146,7 +118,9 @@ export default function Informations() {
 									<Sun
 										size={20}
 										color={
-											colorSchemePreference === "light" ? "#0891b2" : "#6b7280"
+											colorSchemePreference === "light"
+												? themeColors.primary
+												: themeColors.mutedForeground
 										}
 									/>
 									<Text
@@ -171,7 +145,9 @@ export default function Informations() {
 									<Moon
 										size={20}
 										color={
-											colorSchemePreference === "dark" ? "#0891b2" : "#6b7280"
+											colorSchemePreference === "dark"
+												? themeColors.primary
+												: themeColors.mutedForeground
 										}
 									/>
 									<Text
@@ -196,7 +172,9 @@ export default function Informations() {
 									<Monitor
 										size={20}
 										color={
-											colorSchemePreference === "system" ? "#0891b2" : "#6b7280"
+											colorSchemePreference === "system"
+												? themeColors.primary
+												: themeColors.mutedForeground
 										}
 									/>
 									<Text
@@ -268,19 +246,22 @@ export default function Informations() {
 						<Button
 							onPress={handleSubmit}
 							disabled={isLoading}
-							className="flex-1 dark:bg-transparent flex-row items-center justify-center"
+							className="flex-1 flex-row items-center justify-center"
 							style={{ marginTop: 24 }}
 						>
 							{isLoading ? (
 								<>
-									<LucideLoader2 size={16} color="white" />
+									<LucideLoader2
+										size={16}
+										color={themeColors.primaryForeground}
+									/>
 									<Text className="ml-2">
 										{isLoading ? "Mise à jour..." : "Mettre à jour"}
 									</Text>
 								</>
 							) : (
 								<>
-									<SaveIcon size={16} color="white" />
+									<SaveIcon size={16} color={themeColors.primaryForeground} />
 									<Text className="ml-2">Mettre à jour</Text>
 								</>
 							)}
