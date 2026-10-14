@@ -14,26 +14,18 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { Textarea } from "@/components/ui/textarea";
-import { fetchApi } from "@/lib/api-handler";
+import { useAuth } from "@/context/supabase-provider";
+import {
+	useCreateExerciseType,
+	useDeleteExerciseType,
+	useExerciseType,
+	useUpdateExerciseType,
+} from "@/lib/queries/exercise-types";
+import type { SessionType } from "@/lib/queries/types";
 import { useColorScheme } from "@/lib/useColorScheme";
 import { cn } from "@/lib/utils";
 
-interface ExerciseType {
-	_id: string;
-	name: string;
-	advice?: string;
-	timer: number;
-	repRange1: string;
-	repRange2: string;
-	repRange3: string;
-	repRange4?: string;
-	type_session: string[];
-	trophyLocked?: boolean;
-	owner?: string;
-}
-
 interface FormState {
-	id: string;
 	name: string;
 	advice: string;
 	timer: string;
@@ -41,23 +33,27 @@ interface FormState {
 	repRange2: string;
 	repRange3: string;
 	repRange4: string;
-	type_session: string[];
+	type_session: SessionType[];
 }
 
 export default function ExerciseTypeDetail() {
 	const { id } = useLocalSearchParams<{ id: string }>();
 	const router = useRouter();
+	const { session } = useAuth();
 	const { isDarkColorScheme } = useColorScheme();
 
 	const isCreating = id === "new";
-	const [isLoading, setIsLoading] = useState(!isCreating);
-	const [isSaving, setIsSaving] = useState(false);
-	const [exerciseType, setExerciseType] = useState<ExerciseType | null>(null);
+	const exerciseTypeQuery = useExerciseType(id, { enabled: !isCreating });
+	const createExerciseType = useCreateExerciseType();
+	const updateExerciseType = useUpdateExerciseType();
+	const deleteExerciseType = useDeleteExerciseType();
+	const exerciseType = exerciseTypeQuery.data ?? null;
+	const isLoading = !isCreating && exerciseTypeQuery.isLoading;
+	const isSaving = createExerciseType.isPending || updateExerciseType.isPending;
 	const [addRepRange4, setAddRepRange4] = useState(false);
 	const [isRepRange4, setIsRepRange4] = useState(false);
 
 	const [formState, setFormState] = useState<FormState>({
-		id: "",
 		name: "",
 		advice: "",
 		timer: "",
@@ -68,44 +64,28 @@ export default function ExerciseTypeDetail() {
 		type_session: [],
 	});
 
-	const fetchExerciseType = async () => {
-		if (!id || isCreating) return;
-		try {
-			const response: ExerciseType = await fetchApi(`/api/exercise-type/${id}`);
-			setExerciseType(response);
-			setFormState({
-				id: response._id,
-				name: response.name,
-				advice: response.advice || "",
-				timer: response.timer.toString(),
-				repRange1: response.repRange1,
-				repRange2: response.repRange2,
-				repRange3: response.repRange3,
-				repRange4: response.repRange4 || "",
-				type_session: response.type_session,
-			});
-			if (response.repRange4) {
-				setIsRepRange4(true);
-			}
-		} catch (error) {
-			console.error("Fetch exercise type error:", error);
-			Alert.alert("Error", "Failed to load exercise type");
-		} finally {
-			setIsLoading(false);
-		}
-	};
-
+	// Fill the form from the loaded exercise type
 	useEffect(() => {
-		if (!isCreating) {
-			fetchExerciseType();
+		if (exerciseType) {
+			setFormState({
+				name: exerciseType.name,
+				advice: exerciseType.advice || "",
+				timer: exerciseType.timer_seconds.toString(),
+				repRange1: exerciseType.rep_range_1,
+				repRange2: exerciseType.rep_range_2,
+				repRange3: exerciseType.rep_range_3,
+				repRange4: exerciseType.rep_range_4 || "",
+				type_session: exerciseType.session_types,
+			});
+			setIsRepRange4(Boolean(exerciseType.rep_range_4));
 		}
-	}, [id, isCreating]);
+	}, [exerciseType]);
 
 	const handleInputChange = (field: string, value: string) => {
 		setFormState((prev) => ({ ...prev, [field]: value }));
 	};
 
-	const handleCheckboxChange = (checked: boolean, sessionType: string) => {
+	const handleCheckboxChange = (checked: boolean, sessionType: SessionType) => {
 		setFormState((prevState) => {
 			const updatedTypeSession = checked
 				? [...prevState.type_session, sessionType]
@@ -139,66 +119,48 @@ export default function ExerciseTypeDetail() {
 			return;
 		}
 
-		setIsSaving(true);
-		try {
-			const timerValue = parseInt(formState.timer);
-
-			if (isCreating) {
-				// Create new exercise type
-				await fetchApi(`/api/exercise-type`, {
-					method: "POST",
-					body: JSON.stringify({
-						name: formState.name,
-						advice: formState.advice,
-						timer: timerValue,
-						repRange1: formState.repRange1,
-						repRange2: formState.repRange2,
-						repRange3: formState.repRange3,
-						repRange4: formState.repRange4,
-						type_session: formState.type_session,
-					}),
-				});
-				Alert.alert("Success", "Exercise type created successfully!", [
-					{
-						text: "OK",
-						onPress: () => router.back(),
-					},
-				]);
-			} else {
-				// Update existing exercise type
-				if (!exerciseType) return;
-				await fetchApi(`/api/exercise-type/${exerciseType._id}`, {
-					method: "PUT",
-					body: JSON.stringify({
-						name: formState.name,
-						advice: formState.advice,
-						timer: timerValue,
-						repRange1: formState.repRange1,
-						repRange2: formState.repRange2,
-						repRange3: formState.repRange3,
-						repRange4: formState.repRange4,
-						type_session: formState.type_session,
-					}),
-				});
-				await fetchExerciseType();
-				Alert.alert("Success", "Exercise type updated successfully!");
-			}
-		} catch (error) {
-			console.error(
-				isCreating
-					? "Create exercise type error:"
-					: "Update exercise type error:",
-				error,
-			);
-			Alert.alert(
-				"Error",
-				isCreating
-					? "Failed to create exercise type"
-					: "Failed to update exercise type",
-			);
-		} finally {
-			setIsSaving(false);
+		const timerValue = parseInt(formState.timer, 10);
+		if (Number.isNaN(timerValue)) {
+			Alert.alert("Error", "Rest time must be a number.");
+			return;
 		}
+		if (isSaving) return;
+
+		const changes = {
+			name: formState.name.trim(),
+			advice: formState.advice || null,
+			timer_seconds: timerValue,
+			rep_range_1: formState.repRange1,
+			rep_range_2: formState.repRange2,
+			rep_range_3: formState.repRange3,
+			rep_range_4: formState.repRange4 || null,
+			session_types: formState.type_session,
+		};
+
+		if (isCreating) {
+			if (!session) return;
+			createExerciseType.mutate(
+				{ ...changes, owner_id: session.user.id },
+				{
+					onSuccess: () =>
+						Alert.alert("Success", "Exercise type created successfully!", [
+							{ text: "OK", onPress: () => router.back() },
+						]),
+					onError: () => Alert.alert("Error", "Failed to create exercise type"),
+				},
+			);
+			return;
+		}
+
+		if (!exerciseType) return;
+		updateExerciseType.mutate(
+			{ id: exerciseType.id, changes },
+			{
+				onSuccess: () =>
+					Alert.alert("Success", "Exercise type updated successfully!"),
+				onError: () => Alert.alert("Error", "Failed to update exercise type"),
+			},
+		);
 	};
 
 	const handleDelete = () => {
@@ -206,23 +168,18 @@ export default function ExerciseTypeDetail() {
 
 		Alert.alert(
 			"Delete Exercise Type",
-			"Are you sure you want to delete this exercise type? This action cannot be undone.",
+			"Are you sure you want to delete this exercise type? Its history and trophies will be deleted too. This action cannot be undone.",
 			[
 				{ text: "Cancel", style: "cancel" },
 				{
 					text: "Delete",
 					style: "destructive",
-					onPress: async () => {
-						try {
-							await fetchApi(`/api/exercise-type/${exerciseType._id}`, {
-								method: "DELETE",
-							});
-							router.back();
-						} catch (error) {
-							console.error("Delete exercise type error:", error);
-							Alert.alert("Error", "Failed to delete exercise type");
-						}
-					},
+					onPress: () =>
+						deleteExerciseType.mutate(exerciseType.id, {
+							onSuccess: () => router.back(),
+							onError: () =>
+								Alert.alert("Error", "Failed to delete exercise type"),
+						}),
 				},
 			],
 		);

@@ -1,5 +1,6 @@
 import BottomSheet, {
 	BottomSheetBackdrop,
+	type BottomSheetBackdropProps,
 	BottomSheetScrollView,
 } from "@gorhom/bottom-sheet";
 import { format } from "date-fns";
@@ -13,7 +14,7 @@ import {
 	StarIcon,
 	XIcon,
 } from "lucide-react-native";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
 	ActivityIndicator,
 	Alert,
@@ -32,44 +33,19 @@ import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { Textarea } from "@/components/ui/textarea";
 import { colors } from "@/constants/colors";
-import { fetchApi } from "@/lib/api-handler";
+import { useLastExercise, useSaveExercise } from "@/lib/queries/exercises";
+import { useExerciseTypes } from "@/lib/queries/exercise-types";
+import { useSession } from "@/lib/queries/sessions";
+import { setsToArrays, type ExerciseType } from "@/lib/queries/types";
 import { useColorScheme } from "@/lib/useColorScheme";
 import { Pressable } from "react-native-gesture-handler";
 
-type ExerciseType = {
-	_id: string;
-	name: string;
-	advice?: string;
-	timer: number;
-	repRange1: string;
-	repRange2: string;
-	repRange3: string;
-	repRange4?: string;
-	type_session: string[];
-};
-
-type LastExercise = {
-	_id: string;
-	rep: number[];
-	weight: number[];
-	comment?: string;
-	session: {
-		_id: string;
-		date_session: string;
-	};
-};
-
-type ExerciseUserSummary = {
-	_id?: string;
-	id?: string;
-};
-
-type Session = {
-	_id: string;
-	name?: string;
-	type_session: string;
-	exercise_user_list: (string | ExerciseUserSummary)[];
-};
+// "12,5" and "12.5" are both accepted; empty or invalid input counts as 0
+function parseNumber(value: string) {
+	if (!value || value.trim() === "") return 0;
+	const parsed = parseFloat(value.replace(",", "."));
+	return Number.isNaN(parsed) ? 0 : parsed;
+}
 
 export default function DoExercise() {
 	const router = useRouter();
@@ -84,38 +60,48 @@ export default function DoExercise() {
 	// ScrollView ref for keyboard handling
 	const scrollViewRef = useRef<ScrollView>(null);
 
-	const [oneExerciseType, setOneExerciseType] = useState<ExerciseType | null>(
-		null,
+	const sessionQuery = useSession(sessionId);
+	const exerciseTypesQuery = useExerciseTypes(sessionQuery.data?.type_session);
+	const saveExercise = useSaveExercise();
+	const [pickedTypeId, setPickedTypeId] = useState<string | null>(
+		exerciseTypeId ?? null,
 	);
-	const [lastExercise, setLastExercise] = useState<LastExercise | null>(null);
-	const [allExerciseTypes, setAllExerciseTypes] = useState<ExerciseType[]>([]);
-	const [session, setSession] = useState<Session | null>(null);
+
+	const allExerciseTypes = sessionQuery.data
+		? (exerciseTypesQuery.data ?? [])
+		: [];
+	const isLoadingTypes = sessionQuery.isLoading || exerciseTypesQuery.isLoading;
+	const oneExerciseType: ExerciseType | null =
+		allExerciseTypes.find((type) => type.id === pickedTypeId) ?? null;
+	const selectedExerciseIndex = oneExerciseType
+		? allExerciseTypes.indexOf(oneExerciseType)
+		: null;
+
+	const lastExerciseQuery = useLastExercise(oneExerciseType?.id ?? null);
+	const isLoadingLastExercise = lastExerciseQuery.isLoading;
+	const lastExerciseData = lastExerciseQuery.data ?? null;
+	// Previous sets as arrays, plus the date of the session they were done in
+	const lastExercise = lastExerciseData
+		? {
+				rep: setsToArrays(lastExerciseData.exercise_sets).reps,
+				weight: setsToArrays(lastExerciseData.exercise_sets).weights,
+				comment: lastExerciseData.comment,
+				date: lastExerciseData.sessions?.date_session ?? null,
+			}
+		: null;
+	const isLoading = saveExercise.isPending;
+
 	const [showPrefillButton, setShowPrefillButton] = useState(false);
 	const [addRep4, setAddRep4] = useState(false);
-	const [isLoading, setIsLoading] = useState(false);
-	const [isLoadingTypes, setIsLoadingTypes] = useState(true);
-	const [isLoadingLastExercise, setIsLoadingLastExercise] = useState(true);
-	const [selectedExerciseIndex, setSelectedExerciseIndex] = useState<
-		number | null
-	>(null);
-	const [isExercisePickerOpen, setIsExercisePickerOpen] = useState(false);
-
-	// Handle sheet changes
-	const handleSheetChange = useCallback((index: number) => {
-		setIsExercisePickerOpen(index >= 0);
-	}, []);
 
 	// Handle backdrop press to close sheet
-	const renderBackdrop = useCallback(
-		(props: any) => (
-			<BottomSheetBackdrop
-				{...props}
-				disappearsOnIndex={-1}
-				appearsOnIndex={0}
-				opacity={0.5}
-			/>
-		),
-		[],
+	const renderBackdrop = (props: BottomSheetBackdropProps) => (
+		<BottomSheetBackdrop
+			{...props}
+			disappearsOnIndex={-1}
+			appearsOnIndex={0}
+			opacity={0.5}
+		/>
 	);
 
 	const [formState, setFormState] = useState({
@@ -137,93 +123,28 @@ export default function DoExercise() {
 		set4: false,
 	});
 
+	// Prefill with the previous sets of this exercise type
 	useEffect(() => {
-		if (lastExercise) {
+		if (lastExerciseData) {
+			const { reps, weights } = setsToArrays(lastExerciseData.exercise_sets);
 			setFormState({
-				rep1: lastExercise.rep[0]?.toString() || "",
-				weight1: lastExercise.weight[0]?.toString() || "",
-				rep2: lastExercise.rep[1]?.toString() || "",
-				weight2: lastExercise.weight[1]?.toString() || "",
-				rep3: lastExercise.rep[2]?.toString() || "",
-				weight3: lastExercise.weight[2]?.toString() || "",
-				rep4: lastExercise.rep[3]?.toString() || "",
-				weight4: lastExercise.weight[3]?.toString() || "",
+				rep1: reps[0]?.toString() || "",
+				weight1: weights[0]?.toString() || "",
+				rep2: reps[1]?.toString() || "",
+				weight2: weights[1]?.toString() || "",
+				rep3: reps[2]?.toString() || "",
+				weight3: weights[2]?.toString() || "",
+				rep4: reps[3]?.toString() || "",
+				weight4: weights[3]?.toString() || "",
 				comment: "",
 			});
-			if (lastExercise.rep[3]) {
-				setAddRep4(true);
-			} else {
-				setAddRep4(false);
-			}
+			setAddRep4(Boolean(reps[3]));
 		}
-	}, [lastExercise]);
+	}, [lastExerciseData]);
 
-	const onExerciseTypeChange = async (exerciseType: ExerciseType) => {
-		setOneExerciseType(exerciseType);
-		setIsLoadingLastExercise(true);
-		try {
-			const response = await fetchApi(
-				`/api/exercise-user?limit=1&sort=-createdAt&type=${exerciseType._id}`,
-			);
-			setLastExercise(response[0] || null);
-		} catch (error: any) {
-			console.error("Fetch error: ", error);
-		} finally {
-			setIsLoadingLastExercise(false);
-		}
+	const onExerciseTypeChange = (exerciseType: ExerciseType) => {
+		setPickedTypeId(exerciseType.id);
 	};
-
-	const fetchAllExerciseTypes = async (sessionData: Session) => {
-		try {
-			const response = await fetchApi(
-				`/api/exercise-type?type_session=${sessionData.type_session}&limit=1000`,
-			);
-			return response;
-		} catch (error: any) {
-			console.error("Fetch error: ", error);
-			return [];
-		} finally {
-			setIsLoadingTypes(false);
-		}
-	};
-
-	useEffect(() => {
-		const fetchOneSession = async () => {
-			if (!sessionId) return null;
-			try {
-				const response = await fetchApi(`/api/sessions/${sessionId}`);
-				return response;
-			} catch (error: any) {
-				console.error("Fetch error: ", error);
-				return null;
-			}
-		};
-
-		const fetchInitialData = async () => {
-			const sessionData = await fetchOneSession();
-			if (sessionData) {
-				setSession(sessionData);
-				const exerciseTypes = await fetchAllExerciseTypes(sessionData);
-				setAllExerciseTypes(exerciseTypes);
-
-				// Check if exerciseTypeId exists in URL, and auto-select the exercise type
-				if (exerciseTypeId) {
-					const selectedExerciseType = exerciseTypes.find(
-						(type: ExerciseType) => type._id === exerciseTypeId,
-					);
-					if (selectedExerciseType) {
-						const selectedIndex = exerciseTypes.findIndex(
-							(type: ExerciseType) => type._id === exerciseTypeId,
-						);
-						setSelectedExerciseIndex(selectedIndex);
-						await onExerciseTypeChange(selectedExerciseType);
-					}
-				}
-			}
-		};
-
-		fetchInitialData();
-	}, [exerciseTypeId, sessionId]);
 
 	const handleInputChange = (field: string, value: string) => {
 		setFormState({ ...formState, [field]: value });
@@ -240,7 +161,7 @@ export default function DoExercise() {
 			weight3: formState.weight1,
 		};
 
-		if (oneExerciseType?.repRange4 || addRep4) {
+		if (oneExerciseType?.rep_range_4 || addRep4) {
 			newFormState.weight4 = formState.weight1;
 		}
 
@@ -248,78 +169,53 @@ export default function DoExercise() {
 		setShowPrefillButton(false);
 	};
 
-	const handleSubmit = async () => {
-		if (!oneExerciseType || !sessionId) return;
+	const handleSubmit = () => {
+		if (!oneExerciseType || !sessionId || isLoading) return;
 
-		try {
-			setIsLoading(true);
+		// Same shape as before: three or four sets, in order, empty ones as 0
+		const showsSet4 = Boolean(addRep4 || oneExerciseType.rep_range_4);
+		const sets = [
+			{ reps: formState.rep1, weight: formState.weight1 },
+			{ reps: formState.rep2, weight: formState.weight2 },
+			{ reps: formState.rep3, weight: formState.weight3 },
+			...(showsSet4
+				? [{ reps: formState.rep4, weight: formState.weight4 }]
+				: []),
+		].map((set) => ({
+			reps: Math.round(parseNumber(set.reps)),
+			weight: parseNumber(set.weight),
+		}));
 
-			// Helper function to convert string to number, handling commas and empty strings
-			const parseNumber = (value: string): number => {
-				if (!value || value.trim() === "") return 0;
-				// Replace comma with dot for decimal numbers
-				const normalizedValue = value.replace(",", ".");
-				const parsed = parseFloat(normalizedValue);
-				return isNaN(parsed) ? 0 : parsed;
-			};
-
-			// Convert rep and weight strings to numbers
-			const repArray = [
-				parseNumber(formState.rep1),
-				parseNumber(formState.rep2),
-				parseNumber(formState.rep3),
-				parseNumber(formState.rep4),
-			];
-
-			const weightArray = [
-				parseNumber(formState.weight1),
-				parseNumber(formState.weight2),
-				parseNumber(formState.weight3),
-				parseNumber(formState.weight4),
-			];
-
-			const response = await fetchApi("/api/exercise-user", {
-				method: "POST",
-				body: JSON.stringify({
-					type: oneExerciseType._id,
-					rep: repArray,
-					weight: weightArray,
-					comment: formState.comment,
-					session: sessionId,
-				}),
-			});
-
-			if (session) {
-				const existingExerciseIds = (session.exercise_user_list || []).map(
-					(exercise) =>
-						typeof exercise === "string"
-							? exercise
-							: exercise?._id || exercise?.id,
-				);
-
-				const updatedSession = {
-					exercise_user_list: [
-						...existingExerciseIds.filter(Boolean),
-						response._id,
-					],
-				};
-
-				await fetchApi(`/api/sessions/${sessionId}`, {
-					method: "PUT",
-					body: JSON.stringify(updatedSession),
-				});
-			}
-
-			router.replace({
-				pathname: "/(protected)/session/[id]",
-				params: { id: sessionId, fromExercise: "true" },
-			});
-		} catch (error: any) {
-			console.error(error);
-			Alert.alert("Error", "Failed to save exercise");
-		} finally {
-			setIsLoading(false);
-		}
+		saveExercise.mutate(
+			{
+				typeId: oneExerciseType.id,
+				sessionId,
+				comment: formState.comment,
+				sets,
+			},
+			{
+				onSuccess: (result) => {
+					const goToSession = () =>
+						router.replace({
+							pathname: "/(protected)/session/[id]",
+							params: { id: sessionId, fromExercise: "true" },
+						});
+					if (result.new_trophies.length > 0) {
+						const names = result.new_trophies
+							.map((trophy) => `${trophy.trophy_type} (${trophy.description})`)
+							.join("\n");
+						Alert.alert("Nouveau trophée ! 🏆", names, [
+							{ text: "OK", onPress: goToSession },
+						]);
+					} else {
+						goToSession();
+					}
+				},
+				// The form keeps its values so the user can retry
+				onError: (error) =>
+					Alert.alert("Error", error.message || "Failed to save exercise"),
+			},
+		);
 	};
 
 	const toggleSet = (setNumber: 1 | 2 | 3 | 4) => {
@@ -385,7 +281,6 @@ export default function DoExercise() {
 							<Button
 								onPress={() => {
 									bottomSheetRef.current?.snapToIndex(0);
-									setIsExercisePickerOpen(true);
 								}}
 								variant="ghost"
 								className="flex-row w-full items-center dark:text-foreground-dark bg-gray-100 dark:bg-gray-700 rounded-md justify-between p-4"
@@ -415,7 +310,7 @@ export default function DoExercise() {
 								{isLoadingLastExercise
 									? "Loading..."
 									: format(
-											new Date(lastExercise.session.date_session),
+											new Date(lastExercise.date ?? Date.now()),
 											"dd/MM/yyyy",
 										)}
 							</Text>
@@ -436,7 +331,7 @@ export default function DoExercise() {
 					)}
 
 					{oneExerciseType && (
-						<CountDownTimer exerciseTypeTimer={oneExerciseType.timer} />
+						<CountDownTimer exerciseTypeTimer={oneExerciseType.timer_seconds} />
 					)}
 
 					{/* Exercise Form */}
@@ -513,7 +408,7 @@ export default function DoExercise() {
 												onSubmitEditing={Keyboard.dismiss}
 												className="h-12 text-center text-3xl font-black"
 											/>
-											{(addRep4 || oneExerciseType.repRange4) && (
+											{(addRep4 || oneExerciseType.rep_range_4) && (
 												<Input
 													value={formState.rep4}
 													onChangeText={(value) =>
@@ -572,7 +467,7 @@ export default function DoExercise() {
 												onSubmitEditing={Keyboard.dismiss}
 												className="h-12 text-center text-3xl font-black"
 											/>
-											{(addRep4 || oneExerciseType.repRange4) && (
+											{(addRep4 || oneExerciseType.rep_range_4) && (
 												<Input
 													value={formState.weight4}
 													onChangeText={(value) =>
@@ -599,23 +494,23 @@ export default function DoExercise() {
 										<View className="gap-1">
 											<View className="h-12 items-center justify-center">
 												<Text className="text-gray-700 dark:text-gray-300 font-light">
-													{oneExerciseType.repRange1}
+													{oneExerciseType.rep_range_1}
 												</Text>
 											</View>
 											<View className="h-12 items-center justify-center">
 												<Text className="text-gray-700 dark:text-gray-300 font-light">
-													{oneExerciseType.repRange2}
+													{oneExerciseType.rep_range_2}
 												</Text>
 											</View>
 											<View className="h-12 items-center justify-center">
 												<Text className="text-gray-700 dark:text-gray-300 font-light">
-													{oneExerciseType.repRange3}
+													{oneExerciseType.rep_range_3}
 												</Text>
 											</View>
-											{(addRep4 || oneExerciseType.repRange4) && (
+											{(addRep4 || oneExerciseType.rep_range_4) && (
 												<View className="h-12 items-center justify-center">
 													<Text className="text-gray-700 dark:text-gray-300 font-light">
-														{oneExerciseType.repRange4}
+														{oneExerciseType.rep_range_4}
 													</Text>
 												</View>
 											)}
@@ -646,7 +541,7 @@ export default function DoExercise() {
 													onPress={() => toggleSet(3)}
 												/>
 											</View>
-											{(addRep4 || oneExerciseType.repRange4) && (
+											{(addRep4 || oneExerciseType.rep_range_4) && (
 												<View className="h-12 items-center justify-center">
 													<CheckboxComponent
 														isChecked={completedSets.set4}
@@ -659,7 +554,7 @@ export default function DoExercise() {
 								</View>
 
 								{/* Add/Remove Set 4 Button */}
-								{!oneExerciseType.repRange4 && (
+								{!oneExerciseType.rep_range_4 && (
 									<TouchableOpacity
 										onPress={() => setAddRep4(!addRep4)}
 										className="mt-4 items-center"
@@ -733,8 +628,6 @@ export default function DoExercise() {
 				enableDynamicSizing={true}
 				enablePanDownToClose={true}
 				maxDynamicContentSize={600}
-				onChange={handleSheetChange}
-				onClose={() => setIsExercisePickerOpen(false)}
 				backdropComponent={renderBackdrop}
 				backgroundStyle={{
 					backgroundColor:
@@ -757,9 +650,8 @@ export default function DoExercise() {
 					<View>
 						{allExerciseTypes.map((type, index) => (
 							<Pressable
-								key={type._id}
+								key={type.id}
 								onPress={() => {
-									setSelectedExerciseIndex(index);
 									onExerciseTypeChange(type);
 									bottomSheetRef.current?.close();
 								}}

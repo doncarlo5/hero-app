@@ -1,7 +1,7 @@
 import { format } from "date-fns";
 import { fr } from "date-fns/locale/fr";
 import { Flame, Gauge, Plus, Trophy } from "lucide-react-native";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import {
 	RefreshControl,
 	SafeAreaView,
@@ -14,20 +14,13 @@ import Svg, { Circle, Defs, LinearGradient, Stop } from "react-native-svg";
 
 import { TypeSessionBadge } from "@/components/ui/type-session-badge";
 import WeekActivityCarousel from "@/components/week-activity-carousel";
-import { fetchApi } from "@/lib/api-handler";
-import { useProfile } from "@/lib/hooks/use-profile";
+import { useQueryClient } from "@tanstack/react-query";
+
+import { useProfile } from "@/lib/queries/profile";
+import { useLastSession, useSessionsCount } from "@/lib/queries/sessions";
+import { useTrophies } from "@/lib/queries/trophies";
 import { useColorScheme } from "@/lib/useColorScheme";
 import { router } from "expo-router";
-
-type Session = {
-	_id: string;
-	date_session: string;
-	type_session: string;
-	body_weight: string;
-	is_done: boolean;
-	comment?: string;
-	exercise_user_list: string[];
-};
 
 const CircularProgress = ({
 	progress,
@@ -103,67 +96,26 @@ const CircularProgress = ({
 
 export default function Home() {
 	const { isDarkColorScheme } = useColorScheme();
-	const [lastSession, setLastSession] = useState<Session | null>(null);
-	const [allSessions, setAllSessions] = useState<Session[]>([]);
-	const [trophies, setTrophies] = useState<
-		{
-			_id: string;
-			name: string;
-			achieved: boolean;
-			level: number;
-			description: string;
-		}[]
-	>([]);
-	const [isLoading, setIsLoading] = useState(true);
+	const queryClient = useQueryClient();
+	const profile = useProfile();
+	const lastSessionQuery = useLastSession();
+	const sessionsCount = useSessionsCount();
+	const trophiesQuery = useTrophies();
 	const [refreshing, setRefreshing] = useState(false);
-	const { user } = useProfile();
 
-	const inFlightRef = useRef(false);
-
-	const fetchData = useCallback(async () => {
-		if (inFlightRef.current) return; // prevent overlap
-		inFlightRef.current = true;
-		try {
-			setIsLoading(true);
-
-			const lastSessionResponse = await fetchApi(
-				"/api/sessions?limit=1&sortBy=date_session:desc",
-				{ noStore: true },
-			);
-			setLastSession(lastSessionResponse?.[0] ?? null);
-
-			// ⚠️ This is heavy. Either delay it or move it to the History screen.
-			const allSessionsResponse = await fetchApi(
-				"/api/sessions?limit=1000&sortBy=date_session:desc",
-				{ noStore: true },
-			);
-			setAllSessions(allSessionsResponse ?? []);
-
-			const trophiesResponse = await fetchApi("/api/trophies", {
-				noStore: true,
-			});
-			setTrophies(trophiesResponse ?? []);
-		} catch (e) {
-			console.error(e);
-		} finally {
-			setIsLoading(false);
-			inFlightRef.current = false;
-		}
-	}, []);
-
-	useEffect(() => {
-		fetchData(); // run once on mount
-	}, [fetchData]);
-
-	const onRefresh = useCallback(async () => {
+	const onRefresh = async () => {
 		setRefreshing(true);
-		await fetchData();
+		await queryClient.invalidateQueries();
 		setRefreshing(false);
-	}, [fetchData]);
+	};
 
+	const lastSession = lastSessionQuery.data ?? null;
+	const trophies = trophiesQuery.data ?? [];
 	const achievedTrophies = trophies.filter((t) => t.achieved).length;
-	const isLoadingTrophies = isLoading && trophies.length === 0;
-	const isLoadingSession = isLoading && !lastSession;
+	// One trophy per tier of each exercise that has trophies (27 with the defaults)
+	const totalTrophies = trophies.length || 27;
+	const isLoadingTrophies = trophiesQuery.isLoading;
+	const isLoadingSession = lastSessionQuery.isLoading;
 
 	return (
 		<SafeAreaView className="flex-1 bg-background dark:bg-background-dark">
@@ -181,7 +133,7 @@ export default function Home() {
 			>
 				<View className="">
 					<Text className="text-4xl font-bold tracking-tighter mb-4 dark:text-gray-300">
-						Bienvenue {user?.firstName || ""}
+						Bienvenue {profile.data?.first_name || ""}
 					</Text>
 
 					{isLoadingSession ? (
@@ -260,7 +212,7 @@ export default function Home() {
 									</Text>
 								</View>
 								<Text className="text-3xl font-extrabold tracking-tighter dark:text-gray-300">
-									{allSessions.length}
+									{sessionsCount.data ?? "–"}
 								</Text>
 							</View>
 
@@ -296,12 +248,12 @@ export default function Home() {
 
 									<View className="items-center">
 										<CircularProgress
-											progress={(achievedTrophies / 27) * 100}
+											progress={(achievedTrophies / totalTrophies) * 100}
 											size={70}
 											strokeWidth={6}
 										/>
 										<Text className="text-xl font-extrabold text-center mt-2 dark:text-gray-300">
-											{achievedTrophies}/27
+											{achievedTrophies}/{totalTrophies}
 										</Text>
 									</View>
 								</TouchableOpacity>

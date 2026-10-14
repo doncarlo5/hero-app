@@ -12,6 +12,7 @@ import {
 import { Session } from "@supabase/supabase-js";
 
 import { supabase } from "@/config/supabase";
+import { queryClient } from "@/lib/queries/client";
 
 import * as AppleAuthentication from "expo-apple-authentication";
 import { makeRedirectUri } from "expo-auth-session";
@@ -185,7 +186,7 @@ export function AuthProvider({ children }: PropsWithChildren) {
 	const signInWithApple = async () => {
 		setIsLoading(true);
 		try {
-			const nonce = Math.random().toString(36).substring(2, 10);
+			const nonce = Crypto.randomUUID();
 			const hashedNonce = await Crypto.digestStringAsync(
 				Crypto.CryptoDigestAlgorithm.SHA256,
 				nonce,
@@ -272,7 +273,8 @@ export function AuthProvider({ children }: PropsWithChildren) {
 				setSession(session);
 				setAuthenticated(true);
 			} else {
-				// not logged in
+				// not logged in: drop the previous user's cached data
+				queryClient.clear();
 				setSession(null);
 				setAuthenticated(false);
 			}

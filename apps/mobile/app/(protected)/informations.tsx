@@ -16,22 +16,35 @@ import { Label } from "@/components/ui/label";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors";
 import { useAuth } from "@/context/supabase-provider";
-import { fetchApi } from "@/lib/api-handler";
+import { useProfile, useUpdateProfile } from "@/lib/queries/profile";
 import { useColorScheme } from "@/lib/useColorScheme";
 
 type ColorSchemePreference = "light" | "dark" | "system";
 
 export default function Informations() {
-	const { user, session } = useAuth();
+	const { session } = useAuth();
+	const profile = useProfile();
+	const updateProfile = useUpdateProfile();
 	const { colorScheme, setColorScheme } = useColorScheme();
 
 	const [formState, setFormState] = useState({
-		firstName: user?.firstName || "",
-		lastName: user?.lastName || "",
-		email: user?.email || "",
+		firstName: "",
+		lastName: "",
+		email: "",
 	});
 	const [newPassword, setNewPassword] = useState("");
-	const [isLoading, setIsLoading] = useState(false);
+	const isLoading = updateProfile.isPending;
+
+	// Fill the form once the profile is loaded
+	useEffect(() => {
+		if (profile.data) {
+			setFormState({
+				firstName: profile.data.first_name ?? "",
+				lastName: profile.data.last_name ?? "",
+				email: profile.data.email ?? session?.user.email ?? "",
+			});
+		}
+	}, [profile.data]);
 	const [colorSchemePreference, setColorSchemePreference] =
 		useState<ColorSchemePreference>("system");
 
@@ -67,27 +80,31 @@ export default function Informations() {
 		}
 	};
 
-	const handleSubmit = async () => {
-		setIsLoading(true);
-		try {
-			const updateData: any = { ...formState };
-			if (newPassword) {
-				updateData.password = newPassword;
-			}
-
-			await fetchApi("/api/auth/settings", {
-				method: "PATCH",
-				body: JSON.stringify(updateData),
-			});
-
-			Alert.alert("Succès", "Profil mis à jour!");
-			setNewPassword(""); // Clear password field after successful update
-		} catch (error: any) {
-			const errorMessage = error.message || "Une erreur est survenue!";
-			Alert.alert("Erreur", errorMessage);
-		} finally {
-			setIsLoading(false);
-		}
+	const handleSubmit = () => {
+		if (!profile.data || isLoading) return;
+		updateProfile.mutate(
+			{
+				id: profile.data.id,
+				firstName: formState.firstName,
+				lastName: formState.lastName,
+				email: formState.email,
+				currentEmail: session?.user.email ?? null,
+				password: newPassword,
+			},
+			{
+				onSuccess: (result) => {
+					Alert.alert(
+						"Succès",
+						result.emailChangePending
+							? "Profil mis à jour ! Confirme ta nouvelle adresse depuis l'email reçu."
+							: "Profil mis à jour !",
+					);
+					setNewPassword("");
+				},
+				onError: (error) =>
+					Alert.alert("Erreur", error.message || "Une erreur est survenue!"),
+			},
+		);
 	};
 
 	return (

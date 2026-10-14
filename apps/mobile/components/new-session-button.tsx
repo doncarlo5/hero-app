@@ -2,11 +2,20 @@ import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { useRouter } from "expo-router";
 import { Zap } from "lucide-react-native";
 import React, { useCallback, useRef, useState } from "react";
-import { ActivityIndicator, Image, Pressable, Text, View } from "react-native";
+import {
+	ActivityIndicator,
+	Alert,
+	Image,
+	Pressable,
+	Text,
+	View,
+} from "react-native";
 
 // import { Switch } from "@/components/ui/switch"; // For minimalist feature - coming later
 import { colors } from "@/constants/colors";
-import { fetchApi } from "@/lib/api-handler";
+import { useAuth } from "@/context/supabase-provider";
+import { useCreateSession, useLastSession } from "@/lib/queries/sessions";
+import type { SessionType } from "@/lib/queries/types";
 import { useColorScheme } from "@/lib/useColorScheme";
 
 // Import body images (we'll add these assets)
@@ -18,8 +27,10 @@ const lower = require("../assets/lower.png");
 
 export default function NewSessionButton() {
 	// const [showMinimaliste, setShowMinimaliste] = useState(false); // Feature coming later
-	const [isLoading, setIsLoading] = useState(false);
-	const [bodyWeight, setBodyWeight] = useState(0);
+	const { session } = useAuth();
+	const createSession = useCreateSession();
+	const lastSession = useLastSession();
+	const isLoading = createSession.isPending;
 	const [open, setOpen] = useState(false);
 	const { isDarkColorScheme } = useColorScheme();
 
@@ -38,10 +49,6 @@ export default function NewSessionButton() {
 		: "rgba(243, 244, 246, 0.5)"; // slate-600/50 : gray-100/50
 
 	// Bottom sheet callbacks
-	const handleSheetChange = useCallback((index: number) => {
-		console.log("handleSheetChange", index);
-	}, []);
-
 	const handleSnapPress = useCallback((index: number) => {
 		sheetRef.current?.snapToIndex(index);
 	}, []);
@@ -50,28 +57,24 @@ export default function NewSessionButton() {
 		sheetRef.current?.close();
 	}, []);
 
-	const handleCreateSession = async (userChoice: string) => {
-		setIsLoading(true);
-		try {
-			const response = await fetchApi("/api/sessions", {
-				method: "POST",
-				body: JSON.stringify({
-					date_session: new Date(),
-					type_session: userChoice,
-					body_weight: bodyWeight,
-					exercise_user_list: [],
-					is_done: false,
-					comment: "",
-				}),
-			});
-			if (response.session) {
-				router.push(`/session/${response.session._id}`);
-			}
-		} catch (error: any) {
-			console.error(error);
-		} finally {
-			setIsLoading(false);
-		}
+	const handleCreateSession = (userChoice: SessionType) => {
+		if (!session || createSession.isPending) return;
+		createSession.mutate(
+			{
+				ownerId: session.user.id,
+				typeSession: userChoice,
+				// Start from the last known body weight; editable on the session screen
+				bodyWeight: lastSession.data?.body_weight ?? 0,
+			},
+			{
+				onSuccess: (created) => router.push(`/session/${created.id}`),
+				onError: (error) =>
+					Alert.alert(
+						"Erreur",
+						error.message || "Impossible de créer la séance.",
+					),
+			},
+		);
 	};
 
 	return (
@@ -104,7 +107,6 @@ export default function NewSessionButton() {
 				enableDynamicSizing={true}
 				enablePanDownToClose={true}
 				maxDynamicContentSize={600}
-				onChange={handleSheetChange}
 				onClose={() => setOpen(false)}
 				backgroundStyle={{
 					backgroundColor: isDarkColorScheme

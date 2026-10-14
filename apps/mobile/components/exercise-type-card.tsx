@@ -3,14 +3,7 @@ import { Pressable, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
 import { TypeSessionBadge } from "@/components/ui/type-session-badge";
-
-interface ExerciseType {
-	_id: string;
-	name: string;
-	type_session: string[];
-	timer: number;
-	advice?: string;
-}
+import type { ExerciseType } from "@/lib/queries/types";
 
 interface ExerciseTypeCardProps {
 	exerciseType: ExerciseType;
@@ -28,7 +21,7 @@ export default function ExerciseTypeCard({
 		>
 			<View className="flex justify-between flex-row">
 				<View className="flex flex-row items-center gap-1 flex-wrap">
-					{exerciseType.type_session.map((session: string) => (
+					{exerciseType.session_types.map((session) => (
 						<TypeSessionBadge key={session} type_session={session} />
 					))}
 				</View>
@@ -39,7 +32,9 @@ export default function ExerciseTypeCard({
 							className="text-gray-500 dark:text-gray-400"
 						/>
 					</Text>
-					<Text className="text-sm font-medium">{exerciseType.timer}</Text>
+					<Text className="text-sm font-medium">
+						{exerciseType.timer_seconds}
+					</Text>
 				</View>
 			</View>
 			<View className="flex flex-col justify-center px-3 py-2">

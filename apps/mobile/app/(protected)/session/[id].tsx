@@ -20,7 +20,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors";
-import { fetchApi } from "@/lib/api-handler";
+import { useProgram } from "@/lib/queries/programs";
+import {
+	useDeleteSession,
+	usePreviousSession,
+	useSession,
+	useUpdateSession,
+} from "@/lib/queries/sessions";
+import type { Session } from "@/lib/queries/types";
 import { useColorScheme } from "@/lib/useColorScheme";
 import {
 	ArrowLeftIcon,
@@ -35,56 +42,25 @@ import {
 	XIcon,
 } from "lucide-react-native";
 
-type ExerciseUser = {
-	_id: string;
-	type: {
-		_id: string;
-		name: string;
-		advice?: string;
-		timer: number;
-		repRange1: string;
-		repRange2: string;
-		repRange3: string;
-		repRange4?: string;
-		type_session: string[];
-		trophyLocked?: boolean;
-		owner?: string;
-	};
-	rep: number[];
-	weight: number[];
-	comment?: string;
-};
-
-type Session = {
-	_id: string;
-	date_session: string;
-	type_session: string;
-	body_weight: string;
-	is_done: boolean;
-	comment?: string;
-	exercise_user_list: ExerciseUser[];
-};
-
 type FormState = {
 	body_weight: string;
 	comment: string;
 	date_session: string;
 };
 
-type ProgramExercise = {
-	exerciseType: {
-		_id: string;
-		name: string;
-	};
-	alternatives?: {
-		_id: string;
-		name: string;
-	}[];
-};
+// Weight options for picker (30kg to 200kg with 0.1kg increments)
+const weightOptions = Array.from(
+	{ length: 1701 },
+	(_, i) => `${(i / 10 + 30).toFixed(1)} kg`,
+);
 
-type Program = {
-	exercises: ProgramExercise[];
-};
+function formFromSession(session: Session): FormState {
+	return {
+		body_weight: String(session.body_weight || ""),
+		comment: session.comment ?? "",
+		date_session: session.date_session,
+	};
+}
 
 export default function SessionDetail() {
 	const { id } = useLocalSearchParams<{
@@ -96,14 +72,20 @@ export default function SessionDetail() {
 
 	const commentTextareaRef = useRef<TextInput>(null);
 
-	const [session, setSession] = useState<Session | null>(null);
-	const [lastSession, setLastSession] = useState<Session | null>(null);
-	const [program, setProgram] = useState<Program | null>(null);
+	const sessionQuery = useSession(id);
+	const previousSessionQuery = usePreviousSession(id);
+	const programQuery = useProgram(sessionQuery.data?.type_session);
+	const updateSession = useUpdateSession();
+	const deleteSession = useDeleteSession();
+
+	const session = sessionQuery.data ?? null;
+	const lastSession = previousSessionQuery.data ?? null;
+	const program = programQuery.data ?? null;
+	const isLoading = sessionQuery.isLoading;
+	const isSaving = updateSession.isPending;
+	const isDeleting = deleteSession.isPending;
 	const [skippedExercises, setSkippedExercises] = useState<string[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [isSaving, setIsSaving] = useState(false);
 	const [isCompleting, setIsCompleting] = useState(false);
-	const [isDeleting, setIsDeleting] = useState(false);
 	const [refreshing, setRefreshing] = useState(false);
 	const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 	const [isWeightPickerOpen, setIsWeightPickerOpen] = useState(false);
@@ -130,12 +112,6 @@ export default function SessionDetail() {
 	const [selectedWeight, setSelectedWeight] = useState<string>("");
 	const [selectedWeightIndex, setSelectedWeightIndex] = useState<number>(0);
 
-	// Weight options for picker (30kg to 200kg with 0.1kg increments)
-	const weightOptions = Array.from(
-		{ length: 1701 },
-		(_, i) => `${(i / 10 + 30).toFixed(1)} kg`,
-	);
-
 	const [formState, setFormState] = useState<FormState>({
 		body_weight: "",
 		comment: "",
@@ -147,89 +123,81 @@ export default function SessionDetail() {
 		date_session: "",
 	});
 
-	const fetchLastSession = async () => {
-		try {
-			const response = await fetchApi(
-				`/api/sessions?limit=2&sortBy=date_session:desc`,
-			);
-			if (response && response.length > 1) {
-				setLastSession(response[1]); // Get the second most recent session
-			}
-		} catch (error) {
-			console.error("Error fetching last session:", error);
-		}
-	};
-
-	const fetchProgram = async (typeSession: string) => {
-		try {
-			const response = await fetchApi(`/api/program/${typeSession}`);
-			setProgram(response);
-		} catch (error) {
-			console.error("Error fetching program:", error);
-		}
-	};
-
+	// Program exercises not done yet in this session, in program order
 	const getNextExercise = () => {
 		if (!program || !session) return null;
 
-		const completedExerciseIds = session.exercise_user_list.map(
-			(exercise) => exercise.type._id,
+		const completedExerciseIds = session.exercise_users.map(
+			(exercise) => exercise.type_id,
 		);
 
-		// Find the next exercise that hasn't been completed or skipped
-		const nextExercise = program.exercises.find(
+		const nextExercise = program.program_exercises.find(
 			(exercise) =>
-				!completedExerciseIds.includes(exercise.exerciseType._id) &&
-				!skippedExercises.includes(exercise.exerciseType._id),
+				!completedExerciseIds.includes(exercise.exercise_types.id) &&
+				!skippedExercises.includes(exercise.exercise_types.id),
 		);
+		if (!nextExercise) return null;
 
-		return nextExercise;
+		return {
+			exerciseType: nextExercise.exercise_types,
+			alternatives: nextExercise.program_exercise_alternatives.map(
+				(alternative) => alternative.exercise_types,
+			),
+		};
 	};
 
 	const handleSkipExercise = () => {
 		const nextExercise = getNextExercise();
-		if (nextExercise && nextExercise.exerciseType) {
-			setSkippedExercises([...skippedExercises, nextExercise.exerciseType._id]);
+		if (nextExercise) {
+			setSkippedExercises([...skippedExercises, nextExercise.exerciseType.id]);
 		}
 	};
 
-	const fetchSession = async () => {
-		if (!id) return;
-		try {
-			const response: Session = await fetchApi(`/api/sessions/${id}`);
-			setSession(response);
-
-			const newFormState = {
-				body_weight: String(response.body_weight || ""),
-				comment: response.comment ?? "",
-				date_session: response.date_session,
-			};
-
-			setFormState(newFormState);
-			setOriginalFormState(newFormState);
-			setSelectedDate(new Date(response.date_session));
-			setSelectedWeight(String(response.body_weight || ""));
-			// Find the index of the current weight in the options array
-			const weightValue = String(response.body_weight || "70.0");
-			const weightIndex = weightOptions.findIndex(
-				(option) => option === `${parseFloat(weightValue).toFixed(1)} kg`,
-			);
-			setSelectedWeightIndex(weightIndex >= 0 ? weightIndex : 400); // Default to 70.0kg (index 400)
-
-			// Fetch program for this session type
-			await fetchProgram(response.type_session);
-		} catch (error) {
-			console.error("Fetch session error:", error);
-		} finally {
-			setIsLoading(false);
-			setRefreshing(false);
-		}
-	};
-
+	// Sync the form with the loaded session (also after each save)
 	useEffect(() => {
-		fetchSession();
-		fetchLastSession();
-	}, [id]);
+		if (!session) return;
+		const newFormState = formFromSession(session);
+		setFormState(newFormState);
+		setOriginalFormState(newFormState);
+		setSelectedDate(new Date(session.date_session));
+		setSelectedWeight(String(session.body_weight || ""));
+		const weightValue = String(session.body_weight || "70.0");
+		const weightIndex = weightOptions.findIndex(
+			(option) => option === `${parseFloat(weightValue).toFixed(1)} kg`,
+		);
+		setSelectedWeightIndex(weightIndex >= 0 ? weightIndex : 400); // Default to 70.0kg (index 400)
+	}, [session]);
+
+	const onRefresh = async () => {
+		setRefreshing(true);
+		await sessionQuery.refetch();
+		setRefreshing(false);
+	};
+
+	// Persists the form fields; resolves false (and alerts) on failure
+	const saveFields = async (fields: FormState & { is_done?: boolean }) => {
+		if (!session) return false;
+		try {
+			await updateSession.mutateAsync({
+				id: session.id,
+				changes: {
+					body_weight: parseFloat(fields.body_weight) || 0,
+					comment: fields.comment,
+					date_session: fields.date_session,
+					...(fields.is_done !== undefined ? { is_done: fields.is_done } : {}),
+				},
+			});
+			setOriginalFormState({
+				body_weight: fields.body_weight,
+				comment: fields.comment,
+				date_session: fields.date_session,
+			});
+			return true;
+		} catch (error) {
+			Alert.alert("Error", "Failed to save changes. Please try again.");
+			return false;
+		}
+	};
 
 	// Enhanced form state management - track dirty state
 	const hasChanges = () => {
@@ -243,58 +211,14 @@ export default function SessionDetail() {
 	// Auto-save functionality
 	const handleSave = async () => {
 		if (!session || !hasChanges()) return;
-
-		try {
-			setIsSaving(true);
-			await fetchApi(`/api/sessions/${session._id}`, {
-				method: "PUT",
-				body: JSON.stringify({
-					body_weight: formState.body_weight,
-					comment: formState.comment,
-					date_session: formState.date_session,
-				}),
-			});
-
-			// Update original state after successful save
-			setOriginalFormState(formState);
-			console.log("formState", formState);
-			await fetchSession(); // Refresh data
-		} catch (error) {
-			console.error("Save session error:", error);
-			Alert.alert("Error", "Failed to save changes. Please try again.");
-		} finally {
-			setIsSaving(false);
-		}
+		await saveFields(formState);
 	};
 
 	// Handle comment save
 	const handleCommentSave = async () => {
 		setFormState((prev) => ({ ...prev, comment: commentDraft }));
 		setIsCommentSheetOpen(false);
-
-		// Always save the session
-		if (session) {
-			try {
-				setIsSaving(true);
-				await fetchApi(`/api/sessions/${session._id}`, {
-					method: "PUT",
-					body: JSON.stringify({
-						body_weight: formState.body_weight,
-						comment: commentDraft,
-						date_session: formState.date_session,
-					}),
-				});
-
-				// Update original state after successful save
-				setOriginalFormState((prev) => ({ ...prev, comment: commentDraft }));
-				await fetchSession(); // Refresh data
-			} catch (error) {
-				console.error("Save session error:", error);
-				Alert.alert("Error", "Failed to save changes. Please try again.");
-			} finally {
-				setIsSaving(false);
-			}
-		}
+		await saveFields({ ...formState, comment: commentDraft });
 	};
 
 	// Handle comment clear
@@ -315,25 +239,11 @@ export default function SessionDetail() {
 					text: "Complete",
 					style: "default",
 					onPress: async () => {
-						try {
-							setIsCompleting(true);
-							await fetchApi(`/api/sessions/${session._id}`, {
-								method: "PUT",
-								body: JSON.stringify({
-									...formState,
-									is_done: true,
-								}),
-							});
-							await fetchSession();
+						setIsCompleting(true);
+						const saved = await saveFields({ ...formState, is_done: true });
+						setIsCompleting(false);
+						if (saved) {
 							router.replace("/(protected)/(tabs)");
-						} catch (error) {
-							console.error("Complete session error:", error);
-							Alert.alert(
-								"Error",
-								"Failed to complete session. Please try again.",
-							);
-						} finally {
-							setIsCompleting(false);
 						}
 					},
 				},
@@ -352,23 +262,15 @@ export default function SessionDetail() {
 				{
 					text: "Delete",
 					style: "destructive",
-					onPress: async () => {
-						try {
-							setIsDeleting(true);
-							await fetchApi(`/api/sessions/${session._id}`, {
-								method: "DELETE",
-							});
-							router.back();
-						} catch (error) {
-							console.error("Delete session error:", error);
-							Alert.alert(
-								"Error",
-								"Failed to delete session. Please try again.",
-							);
-						} finally {
-							setIsDeleting(false);
-						}
-					},
+					onPress: () =>
+						deleteSession.mutate(session.id, {
+							onSuccess: () => router.back(),
+							onError: () =>
+								Alert.alert(
+									"Error",
+									"Failed to delete session. Please try again.",
+								),
+						}),
 				},
 			],
 		);
@@ -409,26 +311,7 @@ export default function SessionDetail() {
 
 		// Save the session if there are changes
 		if (session && currentWeightValue !== originalFormState.body_weight) {
-			try {
-				setIsSaving(true);
-				await fetchApi(`/api/sessions/${session._id}`, {
-					method: "PUT",
-					body: JSON.stringify({
-						body_weight: currentWeightValue,
-						comment: updatedFormState.comment,
-						date_session: updatedFormState.date_session,
-					}),
-				});
-
-				// Update original state after successful save
-				setOriginalFormState(updatedFormState);
-				await fetchSession(); // Refresh data
-			} catch (error) {
-				console.error("Save session error:", error);
-				Alert.alert("Error", "Failed to save changes. Please try again.");
-			} finally {
-				setIsSaving(false);
-			}
+			await saveFields(updatedFormState);
 		}
 	};
 
@@ -456,13 +339,7 @@ export default function SessionDetail() {
 				<ScrollView
 					className="flex-1"
 					refreshControl={
-						<RefreshControl
-							refreshing={refreshing}
-							onRefresh={() => {
-								setRefreshing(true);
-								fetchSession();
-							}}
-						/>
+						<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
 					}
 					contentContainerStyle={{ padding: 16, paddingBottom: 120 }}
 				>
@@ -573,15 +450,15 @@ export default function SessionDetail() {
 									Exercises
 								</Text>
 								<Text className="text-sm text-muted-foreground dark:text-muted-foreground-dark">
-									{session.exercise_user_list.length} exercise
-									{session.exercise_user_list.length !== 1 ? "s" : ""} completed
+									{session.exercise_users.length} exercise
+									{session.exercise_users.length !== 1 ? "s" : ""} completed
 								</Text>
 							</View>
 						</View>
 
 						<Button
 							onPress={() =>
-								router.push(`/(protected)/do-exercise?sessionId=${session._id}`)
+								router.push(`/(protected)/do-exercise?sessionId=${session.id}`)
 							}
 							variant="default"
 							className="flex-row items-center justify-center gap-2 my-4"
@@ -596,18 +473,18 @@ export default function SessionDetail() {
 						</Button>
 
 						<LegendList
-							data={session.exercise_user_list}
-							keyExtractor={(item) => item._id}
+							data={session.exercise_users}
+							keyExtractor={(item) => item.id}
 							renderItem={({ item }) => (
 								<Pressable
-									onPress={() => router.push(`/exercise/${item._id}`)}
+									onPress={() => router.push(`/exercise/${item.id}`)}
 									className="mb-4 overflow-hidden rounded-xl bg-background dark:bg-background-dark shadow-sm border border-muted/20 dark:border-muted-dark/20"
 								>
 									{/* Exercise Header */}
 									<View className="flex-row items-center justify-between mb-3 ">
 										<View className="flex-1">
 											<Text className="font-bold text-lg text-foreground dark:text-foreground-dark">
-												{item.type.name}
+												{item.exercise_types.name}
 											</Text>
 										</View>
 										<ChevronRightIcon
@@ -618,27 +495,29 @@ export default function SessionDetail() {
 
 									<View className="mb-3">
 										<View className="flex-row gap-2 w-full">
-											{item.rep.map((rep, index) => {
-												// Only show sets with actual data
-												if (rep <= 0 || item.weight[index] <= 0) return null;
+											{[...item.exercise_sets]
+												.sort((a, b) => a.set_order - b.set_order)
+												.map((set, index) => {
+													// Only show sets with actual data
+													if (set.reps <= 0 || set.weight <= 0) return null;
 
-												return (
-													<View
-														key={index}
-														className="bg-primary/5 flex-1 dark:bg-primary-dark/5 rounded-lg px-3 py-2 border border-primary/10 dark:border-primary-dark/10"
-													>
-														<Text className="text-xs font-medium text-primary dark:text-primary-dark">
-															Set {index + 1}
-														</Text>
-														<Text className="text-sm font-bold text-foreground dark:text-foreground-dark">
-															{rep} reps
-														</Text>
-														<Text className="text-xs text-muted-foreground dark:text-muted-foreground-dark">
-															{item.weight[index]} kg
-														</Text>
-													</View>
-												);
-											})}
+													return (
+														<View
+															key={index}
+															className="bg-primary/5 flex-1 dark:bg-primary-dark/5 rounded-lg px-3 py-2 border border-primary/10 dark:border-primary-dark/10"
+														>
+															<Text className="text-xs font-medium text-primary dark:text-primary-dark">
+																Set {index + 1}
+															</Text>
+															<Text className="text-sm font-bold text-foreground dark:text-foreground-dark">
+																{set.reps} reps
+															</Text>
+															<Text className="text-xs text-muted-foreground dark:text-muted-foreground-dark">
+																{set.weight} kg
+															</Text>
+														</View>
+													);
+												})}
 										</View>
 									</View>
 
@@ -668,7 +547,7 @@ export default function SessionDetail() {
 											const nextExercise = getNextExercise();
 											if (nextExercise && nextExercise.exerciseType) {
 												router.push(
-													`/(protected)/do-exercise?sessionId=${session._id}&exerciseTypeId=${nextExercise.exerciseType._id}`,
+													`/(protected)/do-exercise?sessionId=${session.id}&exerciseTypeId=${nextExercise.exerciseType.id}`,
 												);
 											}
 										}}
@@ -704,10 +583,10 @@ export default function SessionDetail() {
 										</Text>
 										{getNextExercise()?.alternatives?.map((alt) => (
 											<Button
-												key={alt._id}
+												key={alt.id}
 												onPress={() =>
 													router.push(
-														`/(protected)/do-exercise?sessionId=${session._id}&exerciseTypeId=${alt._id}`,
+														`/(protected)/do-exercise?sessionId=${session.id}&exerciseTypeId=${alt.id}`,
 													)
 												}
 												variant="outline"

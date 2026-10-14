@@ -1,66 +1,38 @@
 import { useRouter } from "expo-router";
 import { PlusIcon } from "lucide-react-native";
-import { useEffect, useState } from "react";
 import { Pressable, ScrollView, View } from "react-native";
 
 import ExerciseTypeCard from "@/components/exercise-type-card";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { fetchApi } from "@/lib/api-handler";
-
-interface ExerciseType {
-	_id: string;
-	name: string;
-	type_session: string[];
-	timer: number;
-	advice?: string;
-}
+import { useExerciseTypes } from "@/lib/queries/exercise-types";
+import type { ExerciseType } from "@/lib/queries/types";
 
 export default function ExerciseTypes() {
-	const [exerciseTypes, setExerciseTypes] = useState<ExerciseType[]>([]);
-	const [filteredExerciseTypes, setFilteredExerciseTypes] = useState<
-		ExerciseType[]
-	>([]);
-	const [currentFilter, setCurrentFilter] = useState<string | null>(null);
-	const [isLoading, setIsLoading] = useState(true);
+	const exerciseTypesQuery = useExerciseTypes();
 	const router = useRouter();
 
-	const fetchTypes = async () => {
-		try {
-			const response = await fetchApi(
-				"/api/exercise-type?limit=1000&sort=-updatedAt",
-			);
-			setExerciseTypes(response);
-			setFilteredExerciseTypes(response);
-		} catch (error: any) {
-			console.error("Fetch error: ", error);
-		} finally {
-			setIsLoading(false);
-		}
-	};
-
-	useEffect(() => {
-		fetchTypes();
-	}, []);
-
-	const handleFilter = (typeSession: string | null) => {
-		setCurrentFilter(typeSession);
-		setFilteredExerciseTypes(
-			typeSession
-				? exerciseTypes.filter((type) =>
-						type.type_session.includes(typeSession),
-					)
-				: exerciseTypes,
-		);
-	};
+	const exerciseTypes = exerciseTypesQuery.data ?? [];
+	const isLoading = exerciseTypesQuery.isLoading;
 
 	const handleExerciseTypePress = (exerciseType: ExerciseType) => {
-		router.push(`/exercise-type/${exerciseType._id}`);
+		router.push(`/exercise-type/${exerciseType.id}`);
 	};
 
 	const handleCreateExercise = () => {
 		router.push("/exercise-type/new");
 	};
+
+	if (exerciseTypesQuery.error && !exerciseTypesQuery.data) {
+		return (
+			<View className="flex-1 items-center justify-center bg-background dark:bg-background-dark p-4">
+				<Text className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+					Impossible de charger les exercices.
+				</Text>
+				<Button onPress={() => exerciseTypesQuery.refetch()}>Réessayer</Button>
+			</View>
+		);
+	}
 
 	if (!isLoading && exerciseTypes.length === 0) {
 		return (
@@ -104,10 +76,10 @@ export default function ExerciseTypes() {
 					</View>
 				) : (
 					<View className="flex flex-col gap-4">
-						{filteredExerciseTypes.map((exerciseType: ExerciseType) => (
+						{exerciseTypes.map((exerciseType) => (
 							<ExerciseTypeCard
 								exerciseType={exerciseType}
-								key={exerciseType._id}
+								key={exerciseType.id}
 								onPress={handleExerciseTypePress}
 							/>
 						))}

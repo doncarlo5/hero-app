@@ -11,8 +11,8 @@ import {
 
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { fetchApi } from "@/lib/api-handler";
-import { useProfile } from "@/lib/hooks/use-profile";
+import { useAuth } from "@/context/supabase-provider";
+import { useSendFeedback } from "@/lib/queries/feedback";
 import { useColorScheme } from "@/lib/useColorScheme";
 
 interface FeedbackModalProps {
@@ -24,45 +24,42 @@ export default function FeedbackModal({
 	visible,
 	onClose,
 }: FeedbackModalProps) {
-	const { user } = useProfile();
+	const { session } = useAuth();
+	const sendFeedback = useSendFeedback();
 	const { isDarkColorScheme } = useColorScheme();
 	const [formState, setFormState] = useState({ subject: "", message: "" });
-	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
+	const loading = sendFeedback.isPending;
 
-	const handleFeedbackSubmit = async () => {
-		setLoading(true);
+	const handleFeedbackSubmit = () => {
 		setError(null);
-
-		try {
-			if (!formState.subject || !formState.message) {
-				throw new Error("Veuillez remplir tous les champs.");
-			}
-
-			await fetchApi("/api/feedbacks", {
-				method: "POST",
-				body: JSON.stringify({
-					userId: user?._id || null,
-					subject: formState.subject,
-					message: formState.message,
-				}),
-			});
-
-			Alert.alert("Feedback envoyé!", "Merci pour votre contribution.", [
-				{
-					text: "OK",
-					onPress: () => {
-						setFormState({ subject: "", message: "" });
-						onClose();
-					},
-				},
-			]);
-		} catch (error: any) {
-			setError(error.message);
-			console.error(error.message);
-		} finally {
-			setLoading(false);
+		if (!formState.subject || !formState.message) {
+			setError("Veuillez remplir tous les champs.");
+			return;
 		}
+		if (!session || loading) return;
+
+		sendFeedback.mutate(
+			{
+				ownerId: session.user.id,
+				subject: formState.subject,
+				message: formState.message,
+			},
+			{
+				onSuccess: () =>
+					Alert.alert("Feedback envoyé!", "Merci pour votre contribution.", [
+						{
+							text: "OK",
+							onPress: () => {
+								setFormState({ subject: "", message: "" });
+								onClose();
+							},
+						},
+					]),
+				// The draft is kept so the user can retry
+				onError: (mutationError) => setError(mutationError.message),
+			},
+		);
 	};
 
 	const addToMessage = (text: string) => {

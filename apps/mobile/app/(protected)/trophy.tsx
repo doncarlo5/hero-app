@@ -1,56 +1,31 @@
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import { Lock } from "lucide-react-native";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Pressable, ScrollView, View } from "react-native";
+import { useRef, useState } from "react";
+import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
 
 import TrophyIcon from "@/components/trophy-icon";
 import { Text } from "@/components/ui/text";
 import { colors } from "@/constants/colors";
-import { fetchApi } from "@/lib/api-handler";
+import { useTrophies } from "@/lib/queries/trophies";
+import type { Trophy } from "@/lib/queries/types";
 import { useColorScheme } from "@/lib/useColorScheme";
 
-type TrophyType = {
-	_id: string;
-	name: string;
-	exerciseType: { name: string };
-	repsGoal: number;
-	awardedAt: string | null;
-	achieved: boolean;
-	description: string;
-	repsUser: number;
-	trophyType: string;
-	level: number;
-	rewardText: string;
-};
-
 export default function TrophyScreen() {
-	const [trophies, setTrophies] = useState<TrophyType[]>([]);
-	const [selected, setSelected] = useState<TrophyType | null>(null);
+	const trophiesQuery = useTrophies();
+	const [selected, setSelected] = useState<Trophy | null>(null);
 	const { colorScheme } = useColorScheme();
 
 	// Bottom sheet ref
 	const bottomSheetRef = useRef<BottomSheet>(null);
 
-	useEffect(() => {
-		const run = async () => {
-			try {
-				const data: TrophyType[] = await fetchApi("/api/trophies");
-				setTrophies(data);
-			} catch (e) {
-				console.error(e);
-			}
-		};
-		run();
-	}, []);
-
-	// Handle trophy selection
-	const handleTrophyPress = useCallback((trophy: TrophyType) => {
+	const handleTrophyPress = (trophy: Trophy) => {
 		setSelected(trophy);
 		bottomSheetRef.current?.snapToIndex(0);
-	}, []);
+	};
 
-	const grouped = trophies.reduce((acc: Record<string, TrophyType[]>, t) => {
-		const key = t.exerciseType?.name ?? "Autres";
+	const trophies = trophiesQuery.data ?? [];
+	const grouped = trophies.reduce((acc: Record<string, Trophy[]>, t) => {
+		const key = t.exercise_types?.name ?? "Autres";
 		if (!acc[key]) acc[key] = [];
 		acc[key].push(t);
 		return acc;
@@ -68,6 +43,16 @@ export default function TrophyScreen() {
 				}}
 				contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
 			>
+				{trophiesQuery.data === undefined &&
+					(trophiesQuery.error ? (
+						<Pressable onPress={() => trophiesQuery.refetch()} className="py-8">
+							<Text className="text-center text-gray-500">
+								Impossible de charger les trophées. Toucher pour réessayer.
+							</Text>
+						</Pressable>
+					) : (
+						<ActivityIndicator className="py-8" />
+					))}
 				{Object.keys(grouped).map((groupName) => {
 					const list = grouped[groupName];
 					const achievedCount = list.filter((t) => t.achieved).length;
@@ -83,7 +68,7 @@ export default function TrophyScreen() {
 							<View className="flex-row flex-wrap">
 								{list.map((trophy) => (
 									<Pressable
-										key={trophy._id}
+										key={trophy.id}
 										onPress={() => handleTrophyPress(trophy)}
 										className="w-1/2 p-2"
 									>
@@ -127,21 +112,21 @@ export default function TrophyScreen() {
 											</View>
 											<Text className="mt-2 text-center text-base font-semibold capitalize">
 												{trophy.achieved
-													? `Trophée ${trophy.trophyType}`
+													? `Trophée ${trophy.trophy_type}`
 													: "???"}
 											</Text>
 											{trophy.achieved ? (
 												<Text className="text-xs text-gray-500">
 													Obtenu le{" "}
-													{trophy.awardedAt
-														? new Date(trophy.awardedAt).toLocaleDateString()
+													{trophy.awarded_at
+														? new Date(trophy.awarded_at).toLocaleDateString()
 														: ""}
 												</Text>
 											) : (
 												<View className="mt-1 flex-row items-center gap-1">
 													<Lock size={14} />
 													<Text className="text-xs text-gray-500">
-														{trophy.repsGoal} reps min
+														{trophy.reps_goal} reps min
 													</Text>
 												</View>
 											)}
@@ -189,12 +174,12 @@ export default function TrophyScreen() {
 										achieved={selected.achieved}
 									/>
 									<Text className="mt-3 text-center text-2xl font-semibold">
-										{selected.rewardText}
+										{selected.reward_text}
 									</Text>
 									<Text className="mt-2 text-center text-gray-600 dark:text-gray-400">
-										Tu as obtenu le trophée {selected.trophyType} pour
-										l&apos;exercice {selected.exerciseType.name} avec{" "}
-										{selected.repsUser} reps.
+										Tu as obtenu le trophée {selected.trophy_type} pour
+										l&apos;exercice {selected.exercise_types?.name} avec{" "}
+										{selected.reps_user} reps.
 									</Text>
 									<View
 										className="mt-4 flex-row items-center gap-2 rounded-lg border px-3 py-2"
@@ -216,7 +201,7 @@ export default function TrophyScreen() {
 												{selected.description}
 											</Text>
 											<Text className="text-xs text-gray-500 dark:text-gray-500">
-												{selected.repsGoal} reps min requises
+												{selected.reps_goal} reps min requises
 											</Text>
 										</View>
 									</View>
@@ -254,10 +239,10 @@ export default function TrophyScreen() {
 											Objectif requis
 										</Text>
 										<Text className="mt-1 text-center text-lg font-bold text-primary">
-											{selected.repsGoal} reps
+											{selected.reps_goal} reps
 										</Text>
 										<Text className="mt-1 text-center text-xs text-gray-500">
-											pour l&apos;exercice {selected.exerciseType.name}
+											pour l&apos;exercice {selected.exercise_types?.name}
 										</Text>
 									</View>
 								</View>
