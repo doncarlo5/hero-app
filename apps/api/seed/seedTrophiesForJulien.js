@@ -1,3 +1,4 @@
+require("../config/load-env");
 const mongoose = require("mongoose");
 const Trophy = require("../models/trophy.model");
 const User = require("../models/user.model");
@@ -6,14 +7,13 @@ const ExerciseUser = require("../models/exercise-user.model");
 const Session = require("../models/session.model");
 const TrophiesConstants = require("../constants/TrophiesConstant");
 
+const MONGODB_URI = process.env.MONGODB_URI;
+
 // MongoDB connection
-mongoose.connect(
-  "mongodb+srv://admin-test:yqbvFFLNMy9nG3Mo@hero-app.p7ekmkz.mongodb.net/?retryWrites=true&w=majority&appName=hero-app",
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  }
-);
+mongoose.connect(MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 // Main function to award trophies to a specific user by email
 const awardTrophiesToSpecificUser = async () => {

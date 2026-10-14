@@ -1,14 +1,14 @@
+require("../config/load-env");
 const mongoose = require("mongoose");
 const ExerciseType = require("../models/exercise-type.model"); // Assuming you have an ExerciseType model
 const User = require("../models/user.model"); // Assuming you have a User model
 
-mongoose.connect(
-  "mongodb+srv://admin-test:yqbvFFLNMy9nG3Mo@hero-app.p7ekmkz.mongodb.net/?retryWrites=true&w=majority&appName=hero-app",
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  }
-);
+const MONGODB_URI = process.env.MONGODB_URI;
+
+mongoose.connect(MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 // List of default exercise types (Séance A and Séance B only)
 const defaultExerciseTypes = [

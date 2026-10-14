@@ -1,18 +1,15 @@
+require("../config/load-env");
 const mongoose = require("mongoose");
 const Program = require("../models/program.model");
 const ExerciseType = require("../models/exercise-type.model");
 const User = require("../models/user.model");
+
 const MONGODB_URI = process.env.MONGODB_URI;
 
-console.log("Connecting to MongoDB...", `${MONGODB_URI}`);
-
-mongoose.connect(
-  "mongodb+srv://admin-test:yqbvFFLNMy9nG3Mo@hero-app.p7ekmkz.mongodb.net/?retryWrites=true&w=majority&appName=hero-app",
-  {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  }
-);
+mongoose.connect(MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 const programsData = {
   "Upper A": [
