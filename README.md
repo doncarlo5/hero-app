@@ -44,3 +44,26 @@ supabase db reset   # re-apply migrations + seed
 ```
 
 To point the mobile app at it, create `apps/mobile/.env.local` (gitignored) with `EXPO_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321` and the local anon key from `supabase status`.
+
+### Final Mongo → Supabase sync (before the Supabase build ships)
+
+Until the Supabase build of the mobile app is live in the stores, the store app keeps writing to MongoDB Atlas. `scripts/sync-mongo-delta.js` copies what was written there since the original copy (2026-04-06): profiles of users who signed up since, exercise types, sessions, exercise users and their sets, programs and feedbacks. Trophies are not copied: the database triggers evaluate them from the copied sets.
+
+- Mongo documents are matched to existing rows by owner + `created_at` (the first copy kept Mongo's timestamps), exercise types also by name, programs by session type. A matched row is only updated when its content differs and Mongo has the newer version, so the script can be re-run safely.
+- Users without a profile go through `private.setup_user`, like a sign-up. Mongo users without a Supabase auth user, and documents whose owner no longer exists, are skipped and listed.
+- Everything runs in one transaction; `--dry-run` uses a read-only transaction and prints the same per-table counts.
+- `MONGODB_URI` comes from the root `.env`. The Supabase connection string (Dashboard → Connect → session pooler, `postgres` user) is passed in the environment only, never stored. Writing to a non-local database requires `--yes`.
+
+```bash
+SUPABASE_DB_URL='postgresql://...' node scripts/sync-mongo-delta.js --dry-run
+SUPABASE_DB_URL='postgresql://...' node scripts/sync-mongo-delta.js --yes
+```
+
+`--since=YYYY-MM-DD` changes the window (default 2026-03-01, before the copy: overlap is harmless). Run it once more after the last store app writes, i.e. once the old build is retired or the API is switched off.
+
+Test against local databases only (needs `supabase start` and a throwaway Mongo):
+
+```bash
+docker run -d --rm --name hero-delta-mongo -p 127.0.0.1:27099:27017 mongo:7
+node --test scripts/sync-mongo-delta.test.js
+```
