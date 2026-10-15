@@ -4,115 +4,77 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Structure
 
-This is a Hero App fitness tracking application built as a monorepo with three main applications:
+Hero App is a workout tracking app. Monorepo (npm workspaces + Turborepo):
 
-- **apps/web**: React/TypeScript frontend with Vite, Tailwind CSS, and Radix UI components
-- **apps/mobile**: React Native/Expo app with TypeScript, NativeWind, and React Native Elements
-- **apps/api**: Express.js REST API with MongoDB/Mongoose, Supabase integration, and JWT authentication
+- **apps/mobile**: the product. Expo SDK 57 / React Native app (TypeScript, Expo Router, NativeWind, TanStack Query) that talks to Supabase directly: Auth, Postgres through PostgREST with RLS, and RPCs.
+- **apps/web**: marketing site only (Vite + React + Tailwind): landing page, support page, static privacy policy (`public/privacy-policy/`). Deployed on Vercel (`hero-app-web`). The old PWA is unregistered by `vite-plugin-pwa` with `selfDestroying`.
+- **apps/api**: legacy Express + MongoDB API used by the store build released before the Supabase migration. Do not add features; it is removed once the Supabase build has been adopted.
+- **supabase/**: the database. Migrations, local config and seed.
+- **scripts/**: one-off maintenance scripts (Mongo → Supabase delta sync, Atlas password rotation).
+
+## Environment
+
+A single gitignored `.env` at the repo root (see `.env.example`). `apps/mobile/.env` is a symlink to it. `apps/mobile/.env.local` (gitignored) can point the app at the local Supabase. EAS builds read `EXPO_PUBLIC_SUPABASE_URL` / `EXPO_PUBLIC_SUPABASE_ANON_KEY` from the EAS environment named in `eas.json`. See README.md for details.
+
+Local shell quirks: run npm with `NODE_ENV=development` (otherwise dev dependencies are skipped), and CocoaPods needs `LANG=en_US.UTF-8`.
 
 ## Development Commands
 
-### Root Level (Turborepo)
+### Mobile (apps/mobile)
+
 ```bash
-npm run dev     # Start all apps in development mode
-npm run build   # Build all apps
-npm run lint    # Lint all apps
-npm run test    # Run tests for all apps
-npm run clean   # Clean build artifacts
+npm run start      # Expo dev server for the dev client
+npm run ios        # Build and run on the iOS simulator
+npm run lint       # ESLint with auto-fix
+npx tsc --noEmit   # Type check
 ```
 
-### Web App (apps/web)
+Native folders (`ios/`, `android/`) are generated (CNG) and gitignored: native config lives in `app.config.ts`.
+
+### Web (apps/web)
+
 ```bash
-npm run dev            # Start Vite dev server
-npm run build          # Build for production (TypeScript + Vite)
-npm run lint           # ESLint with TypeScript
-npm run format         # Format with Prettier
-npm run format:check   # Check formatting
-npm run preview        # Preview production build
+npm run dev     # Vite dev server
+npm run build   # tsc + vite build
+npm run lint
 ```
 
-### Mobile App (apps/mobile)
+### Database (repo root, needs Docker)
+
 ```bash
-npm run start     # Start Expo dev client
-npm run web       # Start Expo web version
-npm run android   # Run on Android
-npm run ios       # Run on iOS
-npm run lint      # ESLint with auto-fix
-npm run format    # Format with Prettier
+supabase start      # local stack, applies migrations + supabase/seed.sql
+supabase db reset   # re-apply migrations + seed
 ```
 
-### API (apps/api)
-```bash
-npm start         # Start production server
-npm run dev       # Start with nodemon
-npm run lint      # ESLint with auto-fix
-npm run test      # Run Jest tests
-npm run format    # Format with Prettier
-```
+Local test account: `test@hero.local` / `hero-local-test`.
 
-## Architecture Overview
+## Database (Supabase Postgres)
 
-### Data Flow
-- **Authentication**: Supabase Auth with JWT tokens
-- **Database**: MongoDB with Mongoose ODM for the API, Supabase for auth
-- **State Management**: React Context API (no Redux)
-- **Styling**: Tailwind CSS with component libraries (Radix UI for web, React Native Elements for mobile)
+- Every schema change is a new file in `supabase/migrations/`; never edit an applied migration. `20261014180000_baseline.sql` is the pre-migration snapshot and is never replayed on prod.
+- After a migration, regenerate `apps/mobile/types/database.ts`.
+- Tables: `profiles`, `exercise_types` (per-user copies of `default_exercise_types`), `sessions`, `exercise_users` + `exercise_sets`, `programs` + `program_exercises` + `program_exercise_alternatives` (defaults in `default_program_exercises`), `trophies` (+ `trophy_definitions`), `feedbacks`.
+- RLS on every table: a user only sees and writes rows they own.
+- Sign-up: the `on_auth_user_created` trigger calls `private.setup_user` (profile, default exercise types, programs, trophies). `ensure_profile()` repairs accounts created without it.
+- Writes that span several tables go through RPCs: `save_exercise` (returns new trophies) and `save_program`.
+- Trophies are evaluated in SQL by triggers on exercise sets; the app never computes them.
+- Security definer helpers live in the `private` schema.
 
-### Key Features
-- Exercise tracking with multiple types (upper body, lower body, cardio)
-- Session management with workout programs
-- Trophy/achievement system
-- User profiles and progress tracking
-- PWA capabilities for web app
+## Mobile Architecture
 
-### Database Models
-- User (authentication and profile)
-- Exercise Types (predefined workout categories)
-- Exercise User (user's exercise instances)
-- Sessions (workout sessions)
-- Programs (structured workout plans)
-- Trophies (achievements)
-- Feedback (user feedback system)
-
-### API Structure
-- RESTful endpoints in `apps/api/api/`
-- Authentication middleware with JWT
-- Supabase integration for auth
-- MongoDB for data persistence
-- Seeding scripts for initial data
-
-### Mobile App Architecture
-- Expo Router for navigation
-- TypeScript with strict typing
-- NativeWind for styling (Tailwind CSS for React Native)
-- React Hook Form for form management
-- Expo modules for device capabilities
-
-### Web App Architecture
-- React Router for client-side routing
-- Radix UI components with custom theming
-- Recharts for data visualization
-- PWA with offline capabilities
-- Responsive design with Tailwind CSS
+- `app/`: Expo Router screens; `(protected)/` requires a session.
+- `config/supabase.ts`: typed client. The session is stored encrypted: an AES key in SecureStore, the ciphertext in AsyncStorage.
+- `context/supabase-provider.tsx`: auth state, Apple/Google/email sign-in.
+- `lib/queries/`: every data access, as TanStack Query hooks (`queryKeys`, `unwrap` in `client.ts`).
+- `lib/color-scheme-preference.ts`, `lib/theme.ts`: light/dark/auto preference and navigation themes.
+- `components/ui/`: shared primitives (rn-primitives + NativeWind).
 
 ## Testing
 
-- **API**: Jest tests in `apps/api/test/`
-- **Web/Mobile**: No specific test setup currently configured
-- Run tests from root: `npm run test`
+- Mongo → Supabase sync: `node --test scripts/sync-mongo-delta.test.js` (local Supabase + throwaway Mongo, see README).
+- Legacy API: Jest in `apps/api/test/`.
+- Mobile: no automated tests. Verify on the iOS simulator against the local Supabase.
 
-## Key Directories
+## Release
 
-- `apps/api/models/`: Mongoose schemas
-- `apps/api/api/`: API route handlers
-- `apps/web/src/pages/`: React page components
-- `apps/web/src/components/`: Reusable React components
-- `apps/mobile/app/`: Expo Router pages
-- `apps/mobile/components/`: React Native components
-
-## Authentication Flow
-
-1. User signs up/in through Supabase Auth
-2. JWT tokens stored in secure storage (mobile) or localStorage (web)
-3. API middleware validates JWT on protected routes
-4. User data synced between Supabase and MongoDB
+- `eas build --profile production` builds against the EAS `production` environment. The build number is managed remotely (`appVersionSource: remote`, `autoIncrement`). `eas submit` targets App Store Connect app `6751747764`.
+- Bump `version` in `app.config.ts` for each store release.
