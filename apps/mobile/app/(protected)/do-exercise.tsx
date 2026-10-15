@@ -29,6 +29,7 @@ import {
 } from "react-native";
 
 import { CountDownTimer } from "@/components/countdown-timer";
+import { MovementPicker } from "@/components/movement-picker";
 import { SafeAreaView } from "@/components/safe-area-view";
 import { Text } from "@/components/ui/text";
 import { useLastPerformance, useSaveExercise } from "@/lib/queries/exercises";
@@ -48,6 +49,9 @@ import {
 } from "@/lib/progression/engine";
 import { useThemeColors } from "@/lib/theme";
 import { useColorScheme } from "@/lib/useColorScheme";
+
+// Fixed height: the picker can list more movements than fit on screen
+const PICKER_SNAP_POINTS = ["90%"];
 
 const DEFAULT_SET_COUNT = 3;
 const DEFAULT_REST_SECONDS = 90;
@@ -154,7 +158,7 @@ export default function DoExercise() {
 		) ??
 		null;
 
-	// Movements of the day first (slot movements and their alternatives), then the others
+	// Movements of the day are pinned first in the picker (slot movements and their alternatives)
 	const dayMovementIds = new Set(
 		(day?.slots ?? []).flatMap((s) => [
 			s.movement_id,
@@ -162,7 +166,6 @@ export default function DoExercise() {
 		]),
 	);
 	const dayMovements = allMovements.filter((m) => dayMovementIds.has(m.id));
-	const otherMovements = allMovements.filter((m) => !dayMovementIds.has(m.id));
 
 	const lastPerformanceQuery = useLastPerformance(movement?.id ?? null);
 	const lastPerformance = lastPerformanceQuery.data ?? null;
@@ -257,35 +260,6 @@ export default function DoExercise() {
 
 	const notes = [movement?.notes, slot?.note].filter(Boolean).join("\n");
 	const hasCalibration = targets.some((t) => t.reason === "calibration");
-
-	const renderPickerRow = (m: Movement) => (
-		<Pressable
-			key={m.id}
-			onPress={() => {
-				setPickedMovementId(m.id);
-				bottomSheetRef.current?.close();
-			}}
-		>
-			<View className="flex-row items-center p-3">
-				<View
-					className={`rounded-full border border-gray-300 dark:border-gray-600 p-2 ${
-						m.id === pickedMovementId
-							? "bg-gray-700 dark:bg-gray-500"
-							: "bg-transparent"
-					}`}
-				/>
-				<Text
-					className={`ml-2 ${
-						m.id === pickedMovementId
-							? "text-foreground font-semibold"
-							: "text-foreground"
-					}`}
-				>
-					{m.name}
-				</Text>
-			</View>
-		</Pressable>
-	);
 
 	return (
 		<SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
@@ -544,7 +518,8 @@ export default function DoExercise() {
 			<BottomSheet
 				ref={bottomSheetRef}
 				index={-1}
-				enableDynamicSizing={true}
+				snapPoints={PICKER_SNAP_POINTS}
+				enableDynamicSizing={false}
 				enablePanDownToClose={true}
 				backgroundStyle={{
 					backgroundColor: themeColors.popover,
@@ -554,6 +529,7 @@ export default function DoExercise() {
 				}}
 			>
 				<BottomSheetScrollView
+					keyboardShouldPersistTaps="handled"
 					contentContainerStyle={{
 						padding: 24,
 						paddingBottom: 24,
@@ -561,18 +537,17 @@ export default function DoExercise() {
 						flexGrow: 1,
 					}}
 				>
-					{dayMovements.length > 0 && (
-						<>
-							<Text className="text-xl font-bold mb-2">{day?.name}</Text>
-							<View className="mb-4">{dayMovements.map(renderPickerRow)}</View>
-						</>
-					)}
-					<Text className="text-xl font-bold mb-2">
-						{dayMovements.length > 0
-							? "Autres exercices"
-							: "Choisir un exercice"}
-					</Text>
-					<View>{otherMovements.map(renderPickerRow)}</View>
+					<MovementPicker
+						movements={allMovements}
+						selectedId={pickedMovementId}
+						onPick={(m) => {
+							setPickedMovementId(m.id);
+							bottomSheetRef.current?.close();
+						}}
+						pinned={
+							day ? { title: day.name, movements: dayMovements } : undefined
+						}
+					/>
 				</BottomSheetScrollView>
 			</BottomSheet>
 		</SafeAreaView>

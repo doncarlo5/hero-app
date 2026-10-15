@@ -1,10 +1,15 @@
 import { useRouter } from "expo-router";
+import { Button, Input } from "heroui-native";
 import { PlusIcon } from "lucide-react-native";
-import { Pressable, ScrollView, View } from "react-native";
+import { useState } from "react";
+import { Pressable, SectionList, View } from "react-native";
 
 import MovementCard from "@/components/exercise-type-card";
-import { Button } from "heroui-native";
 import { Text } from "@/components/ui/text";
+import {
+	isLibraryMovement,
+	matchesMovementSearch,
+} from "@/lib/movement-library";
 import { useMovements } from "@/lib/queries/movements";
 import type { Movement } from "@/lib/queries/types";
 import { useThemeColors } from "@/lib/theme";
@@ -13,9 +18,18 @@ export default function ExerciseTypes() {
 	const exerciseTypesQuery = useMovements();
 	const router = useRouter();
 	const themeColors = useThemeColors();
+	const [query, setQuery] = useState("");
 
 	const exerciseTypes = exerciseTypesQuery.data ?? [];
 	const isLoading = exerciseTypesQuery.isLoading;
+	const matches = exerciseTypes.filter((m) => matchesMovementSearch(m, query));
+	const sections = [
+		{
+			title: "Mes exercices",
+			data: matches.filter((m) => !isLibraryMovement(m)),
+		},
+		{ title: "Bibliothèque", data: matches.filter(isLibraryMovement) },
+	].filter((section) => section.data.length > 0);
 
 	const handleExerciseTypePress = (exerciseType: Movement) => {
 		router.push(`/exercise-type/${exerciseType.id}`);
@@ -53,39 +67,60 @@ export default function ExerciseTypes() {
 
 	return (
 		<View className="flex-1 bg-background">
-			<ScrollView className="flex-1 p-4">
-				<Pressable
-					onPress={handleCreateExercise}
-					className="flex h-14 w-full flex-row items-center justify-center gap-1 rounded-lg border-2 border-border border-dotted bg-default mb-4"
-				>
-					<PlusIcon size={20} color={themeColors.foreground} />
-					<Text>Créer un exercice</Text>
-				</Pressable>
-
-				{/* Exercise Types List */}
-				{isLoading ? (
-					<View className="flex flex-col items-center gap-2">
-						{Array(5)
-							.fill(0)
-							.map((_, index) => (
-								<View
-									key={index}
-									className="h-32 w-full rounded-lg bg-default"
-								/>
-							))}
+			<SectionList
+				sections={isLoading ? [] : sections}
+				keyExtractor={(item) => item.id}
+				keyboardShouldPersistTaps="handled"
+				keyboardDismissMode="on-drag"
+				stickySectionHeadersEnabled={false}
+				contentContainerStyle={{ padding: 16 }}
+				ListHeaderComponent={
+					<View className="gap-4 mb-2">
+						<Pressable
+							onPress={handleCreateExercise}
+							className="flex h-14 w-full flex-row items-center justify-center gap-1 rounded-lg border-2 border-border border-dotted bg-default"
+						>
+							<PlusIcon size={20} color={themeColors.foreground} />
+							<Text>Créer un exercice</Text>
+						</Pressable>
+						<Input
+							value={query}
+							onChangeText={setQuery}
+							placeholder="Rechercher (nom, muscle, matériel)"
+							autoCorrect={false}
+							autoCapitalize="none"
+							clearButtonMode="while-editing"
+						/>
+						{isLoading &&
+							Array(5)
+								.fill(0)
+								.map((_, index) => (
+									<View
+										key={index}
+										className="h-24 w-full rounded-lg bg-default"
+									/>
+								))}
 					</View>
-				) : (
-					<View className="flex flex-col gap-4">
-						{exerciseTypes.map((exerciseType) => (
-							<MovementCard
-								movement={exerciseType}
-								key={exerciseType.id}
-								onPress={handleExerciseTypePress}
-							/>
-						))}
+				}
+				renderSectionHeader={(info) => (
+					<Text className="text-xl font-bold mt-4 mb-2">
+						{info.section.title} ({info.section.data.length})
+					</Text>
+				)}
+				renderItem={(info) => (
+					<View className="mb-3">
+						<MovementCard
+							movement={info.item}
+							onPress={handleExerciseTypePress}
+						/>
 					</View>
 				)}
-			</ScrollView>
+				ListEmptyComponent={
+					isLoading ? null : (
+						<Text className="text-sm text-muted mt-4">Aucun résultat.</Text>
+					)
+				}
+			/>
 		</View>
 	);
 }

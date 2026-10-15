@@ -11,9 +11,12 @@ import {
 	View,
 } from "react-native";
 
+import { Image } from "@/components/image";
 import { Text } from "@/components/ui/text";
 import { useAuth } from "@/context/supabase-provider";
+import { muscleLabel } from "@/lib/movement-library";
 import {
+	movementImageUrl,
 	useCreateMovement,
 	useDeleteMovement,
 	useMovement,
@@ -173,10 +176,33 @@ export default function MovementDetail() {
 						</Text>
 					</View>
 				)}
-				{isReadOnly && (
-					<Text className="text-sm text-muted mb-4">
-						Exercice de la bibliothèque : lecture seule.
-					</Text>
+				{isReadOnly && movement && (
+					<View className="mb-4 gap-3">
+						{movement.image_paths.length > 0 && (
+							<View className="flex-row gap-2">
+								{movement.image_paths.map((path) => (
+									<Image
+										key={path}
+										source={{ uri: movementImageUrl(path) }}
+										contentFit="cover"
+										transition={150}
+										className="aspect-square flex-1 rounded-lg bg-default"
+									/>
+								))}
+							</View>
+						)}
+						{movement.primary_muscles.length > 0 && (
+							<Text className="text-sm">
+								Muscles :{" "}
+								{[...movement.primary_muscles, ...movement.secondary_muscles]
+									.map(muscleLabel)
+									.join(", ")}
+							</Text>
+						)}
+						<Text className="text-sm text-muted">
+							Exercice de la bibliothèque (free-exercise-db) : lecture seule.
+						</Text>
+					</View>
 				)}
 
 				<View className="mb-4">

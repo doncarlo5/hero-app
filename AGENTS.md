@@ -21,7 +21,7 @@ Monorepo (npm workspaces + Turborepo):
 - **apps/web**: marketing site only (Vite + React + Tailwind): landing page, support page, static privacy policy (`public/privacy-policy/`). Deployed on Vercel (`hero-app-web`). The old PWA is unregistered by `vite-plugin-pwa` with `selfDestroying`.
 - **apps/api**: legacy Express + MongoDB API used by the store build released before the Supabase migration. Do not add features; it is removed once the Supabase build has been adopted.
 - **supabase/**: the database. Migrations, local config and seed.
-- **scripts/**: one-off maintenance scripts (Mongo → Supabase delta sync, Atlas password rotation).
+- **scripts/**: maintenance scripts (Mongo → Supabase delta sync, movement library import, Atlas password rotation).
 
 ## Environment
 
@@ -57,13 +57,13 @@ supabase start      # local stack, applies migrations + supabase/seed.sql
 supabase db reset   # re-apply migrations + seed
 ```
 
-Local test account: `test@hero.local` / `hero-local-test`.
+Local test account: `test@hero.local` / `hero-local-test`. The movement library is not in the seed: after a reset, import it with `SUPABASE_SERVICE_ROLE_KEY=$(supabase status -o json | jq -r .SERVICE_ROLE_KEY) node scripts/import-movement-library.js` (local by default, see README).
 
 ## Database (Supabase Postgres)
 
 - Every schema change is a new file in `supabase/migrations/`; never edit an applied migration. `20261014180000_baseline.sql` is the pre-migration snapshot and is never replayed on prod.
 - After a migration, regenerate `apps/mobile/types/database.ts`.
-- Model ([ADR-0001](docs/adr/0001-programs-as-data.md)): `movements` (owner null = shared library), `programs` → `program_days` → `slots` → `set_prescriptions` / `slot_alternatives`, `profiles.active_program_id`, `sessions` (→ program day, `label` kept) → `logged_exercises` (→ movement, slot) → `logged_sets` (kind, side), `trophies` (by movement, + `trophy_definitions`), `feedbacks`. `default_exercise_types` is the movement list new users get.
+- Model ([ADR-0001](docs/adr/0001-programs-as-data.md)): `movements` (owner null = shared library, from free-exercise-db: `library_key`, muscles, `image_paths` in the public `movement-images` bucket), `programs` → `program_days` → `slots` → `set_prescriptions` / `slot_alternatives`, `profiles.active_program_id`, `sessions` (→ program day, `label` kept) → `logged_exercises` (→ movement, slot) → `logged_sets` (kind, side), `trophies` (by movement, + `trophy_definitions`), `feedbacks`. `default_exercise_types` is the movement list new users get.
 - RLS on every table: a user only sees and writes rows they own; library movements are readable by everyone.
 - Sign-up: the `on_auth_user_created` trigger calls `private.setup_user` (profile, default movements, an empty program). `ensure_profile()` repairs accounts created without it.
 - Writes that span several tables go through RPCs: `save_exercise` (returns new trophies) and `save_program_day`.

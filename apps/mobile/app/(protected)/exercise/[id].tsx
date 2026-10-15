@@ -16,6 +16,7 @@ import {
 	useLoggedExercise,
 	useSaveExercise,
 } from "@/lib/queries/exercises";
+import { isLibraryMovement } from "@/lib/movement-library";
 import { useMovements } from "@/lib/queries/movements";
 import {
 	setsToArrays,
@@ -66,7 +67,10 @@ export default function ExerciseDetail() {
 
 	const exercise = exerciseQuery.data ?? null;
 	const session = exercise?.sessions ?? null;
-	const exerciseTypes = exerciseTypesQuery.data ?? [];
+	// The user's movements and the one logged: the library is picked from when doing an exercise
+	const exerciseTypes = (exerciseTypesQuery.data ?? []).filter(
+		(type) => !isLibraryMovement(type) || type.id === exercise?.movement_id,
+	);
 	const isLoading = exerciseQuery.isLoading;
 	const isSaving = saveExercise.isPending;
 	const [refreshing, setRefreshing] = useState(false);

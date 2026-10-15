@@ -47,6 +47,18 @@ supabase db reset   # re-apply migrations + seed
 
 To point the mobile app at it, create `apps/mobile/.env.local` (gitignored) with `EXPO_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321` and the local anon key from `supabase status`.
 
+### Movement library
+
+The shared, read-only movement library (`movements` with `owner_id` null) comes from [free-exercise-db](https://github.com/yuhonas/free-exercise-db) (Unlicense), pinned to one commit in `scripts/import-movement-library.js`. The seed does not include it: run the import after `supabase db reset`.
+
+```bash
+SUPABASE_SERVICE_ROLE_KEY=$(supabase status -o json | jq -r .SERVICE_ROLE_KEY) node scripts/import-movement-library.js
+```
+
+- Stretching and cardio entries are skipped (739 of 876 movements are kept). Names stay in English; the source id is `library_key`, the key the import upserts on, so the script can be re-run safely. Movements removed upstream are not deleted, since programs and logs may point to them.
+- Images are copied to the public `movement-images` Storage bucket (about 1,500 JPEGs, 84 MB) rather than hot-linked from GitHub; `image_paths` holds their object paths and the app shows the first one as a thumbnail. A movement's images are only uploaded when its `image_paths` change (`--refresh-images` forces it).
+- `--dry-run` prints the counts without writing. The target is the local stack unless `--url=https://…` is given, which also needs `--yes`; the root `.env` and `SUPABASE_URL` are never read.
+
 ### Final Mongo → Supabase sync (before the Supabase build ships)
 
 Until the Supabase build of the mobile app is live in the stores, the store app keeps writing to MongoDB Atlas. `scripts/sync-mongo-delta.js` copies what was written there since the original copy (2026-04-06): profiles of users who signed up since, exercise types, sessions, exercise users and their sets, programs and feedbacks. They land in the `legacy` schema (the Mongo-era tables), then `private.migrate_legacy()` converts them into the current model ([ADR-0001](docs/adr/0001-programs-as-data.md)); a converted row is only refreshed when its legacy source is newer, so edits made in the new app survive a re-sync. Trophies are not copied: the database evaluates them from the converted sets.

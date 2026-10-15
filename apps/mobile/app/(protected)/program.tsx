@@ -21,6 +21,7 @@ import {
 	View,
 } from "react-native";
 
+import { MovementPicker } from "@/components/movement-picker";
 import { SafeAreaView } from "@/components/safe-area-view";
 import { Button } from "heroui-native";
 import { Text } from "@/components/ui/text";
@@ -37,7 +38,9 @@ import {
 } from "@/lib/queries/types";
 import { useThemeColors } from "@/lib/theme";
 import { useColorScheme } from "@/lib/useColorScheme";
-import { Pressable } from "react-native-gesture-handler";
+
+// Fixed height: the picker can list more movements than fit on screen
+const PICKER_SNAP_POINTS = ["90%"];
 
 type MovementRef = Pick<Movement, "id" | "name">;
 
@@ -458,7 +461,8 @@ export default function ProgramPage() {
 				<BottomSheet
 					ref={bottomSheetRef}
 					index={-1}
-					enableDynamicSizing={true}
+					snapPoints={PICKER_SNAP_POINTS}
+					enableDynamicSizing={false}
 					enablePanDownToClose={true}
 					backgroundStyle={{
 						backgroundColor: themeColors.popover,
@@ -468,6 +472,7 @@ export default function ProgramPage() {
 					}}
 				>
 					<BottomSheetScrollView
+						keyboardShouldPersistTaps="handled"
 						contentContainerStyle={{
 							padding: 24,
 							paddingBottom: 24,
@@ -492,15 +497,11 @@ export default function ProgramPage() {
 								</Text>
 							</View>
 						) : (
-							<View>
-								{availableExercises.map((ex) => (
-									<Pressable key={ex.id} onPress={() => handleSelect(ex)}>
-										<View className="flex-row items-center p-3 border-b border-border">
-											<Text className="text-foreground flex-1">{ex.name}</Text>
-										</View>
-									</Pressable>
-								))}
-							</View>
+							<MovementPicker
+								movements={availableExercises}
+								selectedId={null}
+								onPick={handleSelect}
+							/>
 						)}
 						<Button
 							onPress={() => bottomSheetRef.current?.close()}
