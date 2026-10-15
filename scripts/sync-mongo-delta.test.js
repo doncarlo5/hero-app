@@ -446,3 +446,86 @@ test("delta sync copies Mongo changes to Supabase and is idempotent", async () =
     await mongo.close();
   }
 });
+
+test("rows created in bulk with the same created_at are matched by content, not swapped", async () => {
+  const pg = new Client({ connectionString: supabaseDbUrl });
+  await pg.connect();
+  const mongo = await MongoClient.connect(mongoUri);
+  const db = mongo.db();
+  await db.dropDatabase();
+
+  // The sign-up trigger creates every default type and program in one transaction: one shared created_at
+  const D = crypto.randomUUID();
+  const mD = new ObjectId();
+  try {
+    await createAuthUser(pg, D, `d-${crypto.randomUUID().slice(0, 8)}@hero.local`, "Dana Bulk");
+    const types = (
+      await pg.query(
+        `select id, name, advice, timer_seconds, rep_range_1, rep_range_2, rep_range_3, rep_range_4,
+                session_types::text[] as session_types, trophy_locked, created_at
+         from public.exercise_types where owner_id = $1`,
+        [D],
+      )
+    ).rows;
+    assert.ok(types.length > 10);
+    assert.equal(new Set(types.map((t) => t.created_at.getTime())).size, 1, "expected one shared created_at");
+
+    // Mongo holds the same data (the first copy kept Mongo's timestamps), in another order (rotated by one)
+    const mongoIds = new Map(types.map((t) => [t.id, new ObjectId()]));
+    await db.collection("users").insertOne({ _id: mD, supabaseId: D, createdAt: types[0].created_at, updatedAt: types[0].created_at });
+    await db.collection("exercisetypes").insertMany(
+      [...types.slice(1), types[0]].map((t) => ({
+        _id: mongoIds.get(t.id),
+        owner: mD,
+        name: t.name,
+        advice: t.advice,
+        timer: t.timer_seconds,
+        repRange1: t.rep_range_1,
+        repRange2: t.rep_range_2,
+        repRange3: t.rep_range_3,
+        repRange4: t.rep_range_4,
+        type_session: t.session_types,
+        trophyLocked: t.trophy_locked,
+        createdAt: t.created_at,
+        updatedAt: t.created_at,
+      })),
+    );
+    const programs = (
+      await pg.query(
+        `select p.session_type::text as session_type, p.created_at,
+                coalesce(json_agg(json_build_object('type', pe.exercise_type_id, 'order', pe."order",
+                  'alts', (select coalesce(json_agg(a.exercise_type_id order by a.position), '[]')
+                           from public.program_exercise_alternatives a where a.program_exercise_id = pe.id)))
+                  filter (where pe.id is not null), '[]') as exercises
+         from public.programs p left join public.program_exercises pe on pe.program_id = p.id
+         where p.owner_id = $1 group by p.id`,
+        [D],
+      )
+    ).rows;
+    await db.collection("programs").insertMany(
+      programs.map((p) => ({
+        owner: mD,
+        sessionType: p.session_type,
+        createdAt: p.created_at,
+        updatedAt: p.created_at,
+        exercises: p.exercises.map((e) => ({
+          exerciseType: mongoIds.get(e.type),
+          order: e.order,
+          alternatives: e.alts.map((a) => mongoIds.get(a)),
+        })),
+      })),
+    );
+
+    const before = await counts(pg, [D]);
+    const result = await run({ mongoUri, supabaseDbUrl, since: SINCE, log: quiet });
+    for (const [table, s] of Object.entries(result.stats)) {
+      assert.equal(s.inserted + s.updated, 0, `${table}: ${JSON.stringify(s)}`);
+    }
+    assert.equal(result.stats.exercise_types.unchanged, types.length);
+    assert.deepEqual(await counts(pg, [D]), before);
+  } finally {
+    await pg.query("delete from auth.users where id = $1", [D]);
+    await pg.end();
+    await mongo.close();
+  }
+});
