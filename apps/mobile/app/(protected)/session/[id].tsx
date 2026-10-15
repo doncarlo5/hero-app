@@ -1,4 +1,3 @@
-import { LegendList } from "@legendapp/list";
 import { DateTimePicker } from "@expo/ui/community/datetime-picker";
 import { Picker } from "@expo/ui/community/picker";
 import { format } from "date-fns";
@@ -19,7 +18,8 @@ import {
 
 import { Button } from "heroui-native";
 import { Text } from "@/components/ui/text";
-import { useProgram } from "@/lib/queries/programs";
+import { useActiveProgram } from "@/lib/queries/programs";
+import { prescriptionLabels } from "@/lib/queries/types";
 import {
 	useDeleteSession,
 	usePreviousSession,
@@ -75,13 +75,17 @@ export default function SessionDetail() {
 
 	const sessionQuery = useSession(id);
 	const previousSessionQuery = usePreviousSession(id);
-	const programQuery = useProgram(sessionQuery.data?.type_session);
+	const programQuery = useActiveProgram();
 	const updateSession = useUpdateSession();
 	const deleteSession = useDeleteSession();
 
 	const session = sessionQuery.data ?? null;
 	const lastSession = previousSessionQuery.data ?? null;
-	const program = programQuery.data ?? null;
+	// The session's day in the active program (null for a free session or another program's day)
+	const day =
+		programQuery.data?.program_days.find(
+			(d) => d.id === sessionQuery.data?.program_day_id,
+		) ?? null;
 	const isLoading = sessionQuery.isLoading;
 	const isSaving = updateSession.isPending;
 	const isDeleting = deleteSession.isPending;
@@ -124,25 +128,30 @@ export default function SessionDetail() {
 		date_session: "",
 	});
 
-	// Program exercises not done yet in this session, in program order
+	// First slot of the day not logged yet in this session (nor skipped), in program order
 	const getNextExercise = () => {
-		if (!program || !session) return null;
+		if (!day || !session) return null;
 
-		const completedExerciseIds = session.exercise_users.map(
-			(exercise) => exercise.type_id,
+		const loggedMovementIds = session.logged_exercises.map(
+			(exercise) => exercise.movement_id,
+		);
+		const loggedSlotIds = session.logged_exercises.map(
+			(exercise) => exercise.slot_id,
 		);
 
-		const nextExercise = program.program_exercises.find(
-			(exercise) =>
-				!completedExerciseIds.includes(exercise.exercise_types.id) &&
-				!skippedExercises.includes(exercise.exercise_types.id),
+		const nextSlot = day.slots.find(
+			(slot) =>
+				!loggedSlotIds.includes(slot.id) &&
+				!loggedMovementIds.includes(slot.movement_id) &&
+				!skippedExercises.includes(slot.id),
 		);
-		if (!nextExercise) return null;
+		if (!nextSlot) return null;
 
 		return {
-			exerciseType: nextExercise.exercise_types,
-			alternatives: nextExercise.program_exercise_alternatives.map(
-				(alternative) => alternative.exercise_types,
+			slotId: nextSlot.id,
+			exerciseType: nextSlot.movement,
+			alternatives: nextSlot.alternatives.map(
+				(alternative) => alternative.movement,
 			),
 		};
 	};
@@ -150,7 +159,7 @@ export default function SessionDetail() {
 	const handleSkipExercise = () => {
 		const nextExercise = getNextExercise();
 		if (nextExercise) {
-			setSkippedExercises([...skippedExercises, nextExercise.exerciseType.id]);
+			setSkippedExercises([...skippedExercises, nextExercise.slotId]);
 		}
 	};
 
@@ -353,7 +362,7 @@ export default function SessionDetail() {
 								className="flex-row w-fit items-center gap-3 active:opacity-50"
 							>
 								<Text className="text-2xl font-bold text-foreground mb-1">
-									{session.type_session}
+									{session.program_day?.name ?? session.label ?? "Séance libre"}
 								</Text>
 								<Text className="text-sm text-muted">What{"'"}s next?</Text>
 							</Pressable>
@@ -470,8 +479,8 @@ export default function SessionDetail() {
 									Exercises
 								</Text>
 								<Text className="text-sm text-muted">
-									{session.exercise_users.length} exercise
-									{session.exercise_users.length !== 1 ? "s" : ""} completed
+									{session.logged_exercises.length} exercise
+									{session.logged_exercises.length !== 1 ? "s" : ""} completed
 								</Text>
 							</View>
 						</View>
@@ -486,69 +495,67 @@ export default function SessionDetail() {
 							<Button.Label>Add an exercise</Button.Label>
 						</Button>
 
-						<LegendList
-							data={session.exercise_users}
-							keyExtractor={(item) => item.id}
-							renderItem={({ item }) => (
-								<Pressable
-									onPress={() => router.push(`/exercise/${item.id}`)}
-									className="mb-4 overflow-hidden rounded-xl bg-background shadow-sm border border-default/20"
-								>
-									{/* Exercise Header */}
-									<View className="flex-row items-center justify-between mb-3 ">
-										<View className="flex-1">
-											<Text className="font-bold text-lg text-foreground">
-												{item.exercise_types.name}
-											</Text>
-										</View>
-										<ChevronRightIcon
-											size={20}
-											color={themeColors.mutedForeground}
-										/>
+						{/* A session holds a handful of exercises: a plain list inside the scroll view */}
+						{session.logged_exercises.map((item) => (
+							<Pressable
+								key={item.id}
+								onPress={() => router.push(`/exercise/${item.id}`)}
+								className="mb-4 overflow-hidden rounded-xl bg-background shadow-sm border border-default/20"
+							>
+								{/* Exercise Header */}
+								<View className="flex-row items-center justify-between mb-3 ">
+									<View className="flex-1">
+										<Text className="font-bold text-lg text-foreground">
+											{item.movement.name}
+										</Text>
 									</View>
+									<ChevronRightIcon
+										size={20}
+										color={themeColors.mutedForeground}
+									/>
+								</View>
 
-									<View className="mb-3">
-										<View className="flex-row gap-2 w-full">
-											{[...item.exercise_sets]
-												.sort((a, b) => a.set_order - b.set_order)
-												.map((set, index) => {
-													// Only show sets with actual data
-													if (set.reps <= 0 || set.weight <= 0) return null;
+								<View className="mb-3">
+									<View className="flex-row gap-2 w-full">
+										{item.logged_sets
+											.filter((set) => set.kind === "working")
+											.sort((a, b) => a.set_order - b.set_order)
+											.map((set, index) => {
+												// Only show sets with actual data
+												if (set.reps <= 0 || set.weight <= 0) return null;
 
-													return (
-														<View
-															key={index}
-															className="bg-foreground/5 flex-1 rounded-lg px-3 py-2 border border-foreground/10"
-														>
-															<Text className="text-xs font-medium text-foreground">
-																Set {index + 1}
-															</Text>
-															<Text className="text-sm font-bold text-foreground">
-																{set.reps} reps
-															</Text>
-															<Text className="text-xs text-muted">
-																{set.weight} kg
-															</Text>
-														</View>
-													);
-												})}
-										</View>
+												return (
+													<View
+														key={index}
+														className="bg-foreground/5 flex-1 rounded-lg px-3 py-2 border border-foreground/10"
+													>
+														<Text className="text-xs font-medium text-foreground">
+															Set {index + 1}
+														</Text>
+														<Text className="text-sm font-bold text-foreground">
+															{set.reps} reps
+														</Text>
+														<Text className="text-xs text-muted">
+															{set.weight} kg
+														</Text>
+													</View>
+												);
+											})}
 									</View>
+								</View>
 
-									{item.comment && (
-										<View className="bg-default/20 rounded-lg mb-4">
-											<Text className="text-sm text-foreground">
-												{item.comment}
-											</Text>
-										</View>
-									)}
-								</Pressable>
-							)}
-							scrollEnabled={false}
-						/>
+								{item.comment && (
+									<View className="bg-default/20 rounded-lg mb-4">
+										<Text className="text-sm text-foreground">
+											{item.comment}
+										</Text>
+									</View>
+								)}
+							</Pressable>
+						))}
 
 						{/* Next Exercise Suggestion */}
-						{program && getNextExercise() && (
+						{day && getNextExercise() && (
 							<View className="mt-6">
 								<Text className="text-lg font-semibold text-foreground mb-3">
 									Next Exercise:
@@ -561,7 +568,7 @@ export default function SessionDetail() {
 											const nextExercise = getNextExercise();
 											if (nextExercise && nextExercise.exerciseType) {
 												router.push(
-													`/(protected)/do-exercise?sessionId=${session.id}&exerciseTypeId=${nextExercise.exerciseType.id}`,
+													`/(protected)/do-exercise?sessionId=${session.id}&movementId=${nextExercise.exerciseType.id}&slotId=${nextExercise.slotId}`,
 												);
 											}
 										}}
@@ -598,7 +605,7 @@ export default function SessionDetail() {
 												key={alt.id}
 												onPress={() =>
 													router.push(
-														`/(protected)/do-exercise?sessionId=${session.id}&exerciseTypeId=${alt.id}`,
+														`/(protected)/do-exercise?sessionId=${session.id}&movementId=${alt.id}&slotId=${getNextExercise()?.slotId ?? ""}`,
 													)
 												}
 												variant="outline"
@@ -783,7 +790,7 @@ export default function SessionDetail() {
 					>
 						<View className="flex-row items-center justify-between mb-4">
 							<Text className="text-lg font-bold text-foreground">
-								{session?.type_session} Exercises
+								{day?.name ?? session?.label ?? "Séance libre"}
 							</Text>
 							<Pressable
 								onPress={() => setIsExerciseInfoOpen(false)}
@@ -802,21 +809,31 @@ export default function SessionDetail() {
 							}}
 						>
 							<View>
-								{getSessionExercises(session?.type_session || "").map(
-									(exercise, index) => (
-										<View
-											key={index}
-											className="flex-row items-center gap-3 mb-1"
-										>
-											<View className="w-6 h-6 rounded-full bg-foreground/10 items-center justify-center">
-												<Text className="text-xs font-bold text-foreground">
-													{index + 1}
-												</Text>
-											</View>
-											<Text className="text-foreground flex-1">{exercise}</Text>
-										</View>
-									),
+								{(day?.slots ?? []).length === 0 && (
+									<Text className="text-muted">
+										Pas de programme pour cette séance.
+									</Text>
 								)}
+								{(day?.slots ?? []).map((slot, index) => (
+									<View
+										key={slot.id}
+										className="flex-row items-center gap-3 mb-2"
+									>
+										<View className="w-6 h-6 rounded-full bg-foreground/10 items-center justify-center">
+											<Text className="text-xs font-bold text-foreground">
+												{index + 1}
+											</Text>
+										</View>
+										<View className="flex-1">
+											<Text className="text-foreground">
+												{slot.movement.name}
+											</Text>
+											<Text className="text-xs text-muted">
+												{prescriptionLabels(slot).join(" / ")}
+											</Text>
+										</View>
+									</View>
+								))}
 							</View>
 						</ScrollView>
 					</Pressable>
@@ -930,50 +947,3 @@ export default function SessionDetail() {
 		</View>
 	);
 }
-
-const getSessionExercises = (sessionType: string) => {
-	switch (sessionType) {
-		case "Upper A":
-			return [
-				"Développé Incliné",
-				"Tractions Lestées",
-				"Élévations Frontales",
-				"Curl Incliné",
-				"Élévations Latérales",
-			];
-		case "Lower":
-			return [
-				"Squat",
-				"Fentes ou Presse",
-				"Leg Curl/Leg Extension",
-				"Extensions Mollets",
-				"Upright Row Penché",
-			];
-		case "Upper B":
-			return [
-				"Overhead Press",
-				"Développé Couché",
-				"Tractions Neutres",
-				"Oiseau Assis Prise Neutre",
-				"Upright Row",
-			];
-		case "Séance A":
-			return [
-				"Développé incliné",
-				"Traction prise neutre",
-				"ATG Split Squat",
-				"Upright Row",
-				"Curl incliné",
-			];
-		case "Séance B":
-			return [
-				"Dips lestés",
-				"Rowing bucheron",
-				"Romanian deadlift",
-				"Upright Row",
-				"Extension Triceps Nuque",
-			];
-		default:
-			return [];
-	}
-};

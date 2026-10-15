@@ -5,31 +5,17 @@ import {
 import { useRouter } from "expo-router";
 import { Zap } from "lucide-react-native";
 import React, { useCallback, useRef, useState } from "react";
-import {
-	ActivityIndicator,
-	Alert,
-	Image,
-	Pressable,
-	Text,
-	View,
-} from "react-native";
+import { ActivityIndicator, Alert, Pressable, Text, View } from "react-native";
 
 import { useAuth } from "@/context/supabase-provider";
+import { useActiveProgram } from "@/lib/queries/programs";
 import { useCreateSession, useLastSession } from "@/lib/queries/sessions";
-import type { SessionType } from "@/lib/queries/types";
 import { useThemeColors } from "@/lib/theme";
 import { useColorScheme } from "@/lib/useColorScheme";
 
-// Import body images (we'll add these assets)
-// const bodyFront = require("../assets/body-front.png"); // For minimalist feature - coming later
-// const bodyBack = require("../assets/body-back.png"); // For minimalist feature - coming later
-const upperFront = require("../assets/upper-front.png");
-const upperBack = require("../assets/upper-back.png");
-const lower = require("../assets/lower.png");
-
 export default function NewSessionButton() {
-	// const [showMinimaliste, setShowMinimaliste] = useState(false); // Feature coming later
 	const { session } = useAuth();
+	const program = useActiveProgram();
 	const createSession = useCreateSession();
 	const lastSession = useLastSession();
 	const isLoading = createSession.isPending;
@@ -60,12 +46,14 @@ export default function NewSessionButton() {
 		sheetRef.current?.close();
 	}, []);
 
-	const handleCreateSession = (userChoice: SessionType) => {
+	// day null: a free session outside the program
+	const handleCreateSession = (day: { id: string; name: string } | null) => {
 		if (!session || createSession.isPending) return;
 		createSession.mutate(
 			{
 				ownerId: session.user.id,
-				typeSession: userChoice,
+				dayId: day?.id ?? null,
+				label: day?.name ?? "Séance libre",
 				// Start from the last known body weight; editable on the session screen
 				bodyWeight: lastSession.data?.body_weight ?? 0,
 			},
@@ -135,100 +123,38 @@ export default function NewSessionButton() {
 							</View>
 						) : (
 							<View>
-								{/* Header */}
-								<View className="mb-4">
-									<Text className="text-xl font-bold text-foreground">
-										Nouvelle séance
+								<Text className="text-xl font-bold text-foreground mb-1">
+									Nouvelle séance
+								</Text>
+								{program.data && (
+									<Text className="text-sm text-muted mb-4">
+										{program.data.name}
 									</Text>
-									{/* Minimalist training toggle - Coming soon */}
-									{/* <View className="flex-row items-center justify-between mt-2">
-										<Text className="text-sm text-muted flex-1 mr-2">
-											{showMinimaliste
-												? "Entrainement minimaliste (2x/semaine)"
-												: "Entrainement complet (3x/semaine)"}
+								)}
+								<View className="gap-2">
+									{program.data?.program_days.map((day) => (
+										<Pressable
+											key={day.id}
+											onPress={() => handleCreateSession(day)}
+											className="flex-row items-center justify-between rounded-md border border-border bg-surface px-4 py-3 active:opacity-70"
+										>
+											<Text className="text-lg font-medium text-foreground">
+												{day.name}
+											</Text>
+											<Text className="text-sm text-muted">
+												{day.slots.length} exercice
+												{day.slots.length > 1 ? "s" : ""}
+											</Text>
+										</Pressable>
+									))}
+									<Pressable
+										onPress={() => handleCreateSession(null)}
+										className="rounded-md border border-dashed border-border px-4 py-3 active:opacity-70"
+									>
+										<Text className="text-base text-muted">
+											Séance libre, hors programme
 										</Text>
-										<Switch
-											checked={showMinimaliste}
-											onCheckedChange={setShowMinimaliste}
-										/>
-									</View> */}
-								</View>
-
-								{/* Session Type Buttons */}
-								<View className="flex-row justify-evenly">
-									{/* Minimalist sessions - Coming soon */}
-									{/* {showMinimaliste ? (
-										<>
-											<Pressable
-												onPress={() => handleCreateSession("Séance A")}
-												className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border bg-surface active:opacity-70"
-											>
-												<Text className="mt-2 text-lg font-medium text-foreground">
-													Séance A
-												</Text>
-												<Image
-													source={bodyFront}
-													className="h-14 w-9"
-													resizeMode="contain"
-												/>
-											</Pressable>
-											<Pressable
-												onPress={() => handleCreateSession("Séance B")}
-												className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border bg-surface active:opacity-70"
-											>
-												<Text className="mt-2 text-lg font-medium text-foreground">
-													Séance B
-												</Text>
-												<Image
-													source={bodyBack}
-													className="h-14 w-9"
-													resizeMode="contain"
-												/>
-											</Pressable>
-										</>
-									) : ( */}
-									<>
-										<Pressable
-											onPress={() => handleCreateSession("Upper A")}
-											className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border bg-surface active:opacity-70"
-										>
-											<Text className="mb-1 mt-2 text-lg font-medium text-foreground">
-												Upper A
-											</Text>
-											<Image
-												source={upperFront}
-												className="mb-1 h-14 w-14"
-												resizeMode="contain"
-											/>
-										</Pressable>
-										<Pressable
-											onPress={() => handleCreateSession("Lower")}
-											className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border bg-surface active:opacity-70"
-										>
-											<Text className="mb-1 mt-2 text-lg font-medium text-foreground">
-												Lower
-											</Text>
-											<Image
-												source={lower}
-												className="mb-1 h-14 w-12"
-												resizeMode="contain"
-											/>
-										</Pressable>
-										<Pressable
-											onPress={() => handleCreateSession("Upper B")}
-											className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border bg-surface active:opacity-70"
-										>
-											<Text className="mb-1 mt-2 text-lg font-medium text-foreground">
-												Upper B
-											</Text>
-											<Image
-												source={upperBack}
-												className="mb-1 h-14 w-14"
-												resizeMode="contain"
-											/>
-										</Pressable>
-									</>
-									{/* )} */}
+									</Pressable>
 								</View>
 							</View>
 						)}

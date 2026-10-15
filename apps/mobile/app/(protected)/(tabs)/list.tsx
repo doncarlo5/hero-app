@@ -80,9 +80,9 @@ export default function List() {
 							<Text className="mr-3 text-foreground">
 								{new Date(item.date_session).toLocaleDateString("fr-FR")}
 							</Text>
-							<TypeSessionBadge type_session={item.type_session} />
+							<TypeSessionBadge label={item.label} />
 							<Text className="text-center mr-3 text-foreground">
-								{item.exercise_users[0]?.count ?? 0}
+								{item.logged_exercises[0]?.count ?? 0}
 							</Text>
 						</TouchableOpacity>
 					)}

@@ -13,14 +13,14 @@ import { Button, Input, TextArea } from "heroui-native";
 import { Text } from "@/components/ui/text";
 import {
 	useDeleteExercise,
-	useExercise,
+	useLoggedExercise,
 	useSaveExercise,
 } from "@/lib/queries/exercises";
-import { useExerciseTypes } from "@/lib/queries/exercise-types";
+import { useMovements } from "@/lib/queries/movements";
 import {
 	setsToArrays,
-	type ExerciseType,
-	type ExerciseWithSession,
+	type LoggedExerciseWithSession,
+	type Movement,
 } from "@/lib/queries/types";
 import { useThemeColors } from "@/lib/theme";
 import { useColorScheme } from "@/lib/useColorScheme";
@@ -32,8 +32,8 @@ import {
 	XIcon,
 } from "lucide-react-native";
 
-function formFromExercise(exercise: ExerciseWithSession) {
-	const { reps, weights } = setsToArrays(exercise.exercise_sets);
+function formFromExercise(exercise: LoggedExerciseWithSession) {
+	const { reps, weights } = setsToArrays(exercise.logged_sets);
 	return {
 		rep1: reps[0]?.toString() || "",
 		rep2: reps[1]?.toString() || "",
@@ -59,8 +59,8 @@ export default function ExerciseDetail() {
 	const { id } = useLocalSearchParams<{ id: string }>();
 	const router = useRouter();
 
-	const exerciseQuery = useExercise(id);
-	const exerciseTypesQuery = useExerciseTypes();
+	const exerciseQuery = useLoggedExercise(id);
+	const exerciseTypesQuery = useMovements();
 	const saveExercise = useSaveExercise();
 	const deleteExercise = useDeleteExercise();
 
@@ -72,7 +72,7 @@ export default function ExerciseDetail() {
 	const [refreshing, setRefreshing] = useState(false);
 	const [isEditable, setIsEditable] = useState(false);
 	const [selectedExerciseType, setSelectedExerciseType] =
-		useState<ExerciseType | null>(null);
+		useState<Movement | null>(null);
 	const [isRep4, setIsRep4] = useState(false);
 
 	const [formState, setFormState] = useState({
@@ -87,11 +87,11 @@ export default function ExerciseDetail() {
 		comment: "",
 	});
 
-	const resetForm = (loaded: ExerciseWithSession) => {
+	const resetForm = (loaded: LoggedExerciseWithSession) => {
 		setFormState(formFromExercise(loaded));
-		const reps = setsToArrays(loaded.exercise_sets).reps;
+		const reps = setsToArrays(loaded.logged_sets).reps;
 		setIsRep4(Boolean(reps[3] && reps[3] > 0));
-		setSelectedExerciseType(loaded.exercise_types);
+		setSelectedExerciseType(loaded.movement);
 	};
 
 	// Fill the form when the exercise loads or changes (not while the user is editing it)
@@ -138,7 +138,7 @@ export default function ExerciseDetail() {
 		saveExercise.mutate(
 			{
 				id: exercise.id,
-				typeId: selectedExerciseType.id,
+				movementId: selectedExerciseType.id,
 				comment: formState.comment,
 				sets: sets.map((set) => ({ ...set, reps: Math.round(set.reps) })),
 			},
@@ -190,9 +190,9 @@ export default function ExerciseDetail() {
 	}
 
 	const { reps: exerciseReps, weights: exerciseWeights } = setsToArrays(
-		exercise.exercise_sets,
+		exercise.logged_sets,
 	);
-	const exerciseType = exercise.exercise_types;
+	const exerciseType = exercise.movement;
 
 	return (
 		<ScrollView
@@ -251,14 +251,14 @@ export default function ExerciseDetail() {
 			)}
 
 			{/* Advice */}
-			{exerciseType.advice && (
+			{exerciseType.notes && (
 				<View className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mb-6 flex-row items-center gap-2">
 					<InfoIcon
 						size={15}
 						color={isDarkColorScheme ? "#60a5fa" : "#1e40af"}
 					/>
 					<Text className="text-sm text-blue-700 dark:text-blue-200">
-						{exerciseType.advice}
+						{exerciseType.notes}
 					</Text>
 				</View>
 			)}
@@ -454,53 +454,6 @@ export default function ExerciseDetail() {
 						</Text>
 					</View>
 				)}
-			</View>
-
-			{/* Exercise Type Information */}
-			<View className="mb-6">
-				<Text className="text-xl font-bold text-foreground mb-4">
-					Exercise Information
-				</Text>
-				<View className="bg-default/20 rounded-lg p-4 space-y-3">
-					<View className="flex-row justify-between">
-						<Text className="text-sm text-muted">Timer:</Text>
-						<Text className="text-sm font-medium text-foreground">
-							{exerciseType.timer_seconds} seconds
-						</Text>
-					</View>
-					<View className="flex-row justify-between">
-						<Text className="text-sm text-muted">Rep Range 1:</Text>
-						<Text className="text-sm font-medium text-foreground">
-							{exerciseType.rep_range_1}
-						</Text>
-					</View>
-					<View className="flex-row justify-between">
-						<Text className="text-sm text-muted">Rep Range 2:</Text>
-						<Text className="text-sm font-medium text-foreground">
-							{exerciseType.rep_range_2}
-						</Text>
-					</View>
-					<View className="flex-row justify-between">
-						<Text className="text-sm text-muted">Rep Range 3:</Text>
-						<Text className="text-sm font-medium text-foreground">
-							{exerciseType.rep_range_3}
-						</Text>
-					</View>
-					{exerciseType.rep_range_4 && (
-						<View className="flex-row justify-between">
-							<Text className="text-sm text-muted">Rep Range 4:</Text>
-							<Text className="text-sm font-medium text-foreground">
-								{exerciseType.rep_range_4}
-							</Text>
-						</View>
-					)}
-					<View className="flex-row justify-between">
-						<Text className="text-sm text-muted">Session Types:</Text>
-						<Text className="text-sm font-medium text-foreground">
-							{exerciseType.session_types.join(", ")}
-						</Text>
-					</View>
-				</View>
 			</View>
 
 			{/* Action Buttons */}

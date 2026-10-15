@@ -13,7 +13,7 @@ export function useTrophies() {
 			unwrap(
 				await supabase
 					.from("trophies")
-					.select("*, exercise_types(name)")
+					.select("*, movement:movements(name)")
 					.order("level", { ascending: true }),
 			),
 	});

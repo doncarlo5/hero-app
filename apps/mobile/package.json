@@ -11,7 +11,8 @@
     "lint": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "postinstall": "cd ../.. && npm run build"
+    "postinstall": "cd ../.. && npm run build",
+    "test": "node --test \"lib/**/*.test.ts\""
   },
   "dependencies": {
     "@expo/ui": "~57.0.24",

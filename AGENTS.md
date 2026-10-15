@@ -9,7 +9,7 @@ Hero App is a strength training logbook that runs a user's program: it proposes 
 - [docs/PRODUCT.md](docs/PRODUCT.md): who it is for, principles, scope.
 - [docs/FLOWS.md](docs/FLOWS.md): user flows, today and v1 target.
 - [GLOSSARY.md](GLOSSARY.md): canonical terms. Use them in code, UI copy and docs; update the glossary when a term is decided.
-- [docs/adr/](docs/adr/): architecture decisions. [ADR-0001](docs/adr/0001-programs-as-data.md) (proposed) is the target data model.
+- [docs/adr/](docs/adr/): architecture decisions. [ADR-0001](docs/adr/0001-programs-as-data.md) is the data model.
 
 The app is generic: never commit a third-party program, its texts, technique names, videos or transcripts (seeds, fixtures, docs or tests). A user's program is their private data.
 
@@ -63,11 +63,12 @@ Local test account: `test@hero.local` / `hero-local-test`.
 
 - Every schema change is a new file in `supabase/migrations/`; never edit an applied migration. `20261014180000_baseline.sql` is the pre-migration snapshot and is never replayed on prod.
 - After a migration, regenerate `apps/mobile/types/database.ts`.
-- Tables: `profiles`, `exercise_types` (per-user copies of `default_exercise_types`), `sessions`, `exercise_users` + `exercise_sets`, `programs` + `program_exercises` + `program_exercise_alternatives` (defaults in `default_program_exercises`), `trophies` (+ `trophy_definitions`), `feedbacks`.
-- RLS on every table: a user only sees and writes rows they own.
-- Sign-up: the `on_auth_user_created` trigger calls `private.setup_user` (profile, default exercise types, programs, trophies). `ensure_profile()` repairs accounts created without it.
-- Writes that span several tables go through RPCs: `save_exercise` (returns new trophies) and `save_program`.
-- Trophies are evaluated in SQL by triggers on exercise sets; the app never computes them.
+- Model ([ADR-0001](docs/adr/0001-programs-as-data.md)): `movements` (owner null = shared library), `programs` → `program_days` → `slots` → `set_prescriptions` / `slot_alternatives`, `profiles.active_program_id`, `sessions` (→ program day, `label` kept) → `logged_exercises` (→ movement, slot) → `logged_sets` (kind, side), `trophies` (by movement, + `trophy_definitions`), `feedbacks`. `default_exercise_types` is the movement list new users get.
+- RLS on every table: a user only sees and writes rows they own; library movements are readable by everyone.
+- Sign-up: the `on_auth_user_created` trigger calls `private.setup_user` (profile, default movements, an empty program). `ensure_profile()` repairs accounts created without it.
+- Writes that span several tables go through RPCs: `save_exercise` (returns new trophies) and `save_program_day`.
+- Trophies are evaluated in SQL by triggers on logged sets (working sets only); the app never computes them. Set targets are computed in the app by `apps/mobile/lib/progression/engine.ts`.
+- `legacy` schema: the Mongo-era tables, not exposed to clients. `scripts/sync-mongo-delta.js` writes there, then `private.migrate_legacy()` converts them (idempotent, newest version wins). Dropped once the Supabase build ships and the final sync ran.
 - Security definer helpers live in the `private` schema.
 
 ## Mobile Architecture
@@ -93,7 +94,7 @@ Local test account: `test@hero.local` / `hero-local-test`.
 
 - Mongo → Supabase sync: `node --test scripts/sync-mongo-delta.test.js` (local Supabase + throwaway Mongo, see README).
 - Legacy API: Jest in `apps/api/test/`.
-- Mobile: no automated tests. Verify on the iOS simulator against the local Supabase.
+- Mobile: `npm test` in `apps/mobile` runs the progression engine's unit tests (Node test runner). Screens: verify on the iOS simulator against the local Supabase.
 
 ## Release
 

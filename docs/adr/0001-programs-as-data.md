@@ -1,5 +1,5 @@
 ---
-status: proposed
+status: accepted
 ---
 
 # Programs, set schemes and progression rules are data, and movements are separate from prescriptions
@@ -29,3 +29,11 @@ We decide to model programs as data, with the movement on one side and the presc
 - Existing accounts are migrated in place: each exercise type becomes a library movement (matched by name) or a custom movement; the programs of one account become one program with one program day per former session type; `rep_range_1..4` and `timer_seconds` become set prescriptions; `advice` becomes the slot note; sessions and logged exercises are repointed. The owner's current program, including the coach's wording, survives as that user's private data only.
 - `scripts/sync-mongo-delta.js` writes into today's tables and runs once more before the Supabase build ships. The schema change lands after that final sync, or the script is updated in the same change.
 - `save_exercise` and `save_program` are rewritten for the new tables; `apps/mobile/types/database.ts` is regenerated.
+
+## Implementation (migration `20261015120000_programs_as_data`)
+
+- **No templates yet.** A user owns `programs` directly; `program_templates` comes with the first shared template. New users get the default movement list and an empty program with one day.
+- **Legacy schema.** The Mongo-era tables moved to `legacy`, unchanged, and keep receiving the sync. `private.migrate_legacy()` converts them with the same ids, idempotently, and refreshes a converted row only when its legacy source is newer. The 3-day and 2-day session types become two programs, one day per session type; `rep_range_*` become set prescriptions (top set and back-off sets recognised from the old advice text), `timer_seconds` the slot's rest, `advice` the movement's notes.
+- **Choices and finishers** are not modelled yet beyond the slot's `finisher_*` columns: the guided session that uses them is the next step.
+- **Progression engine**: `apps/mobile/lib/progression/engine.ts`, unit-tested with `npm test`. The logging screen prefills each set with its target.
+
