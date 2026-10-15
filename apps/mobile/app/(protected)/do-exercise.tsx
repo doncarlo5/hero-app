@@ -32,11 +32,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { Textarea } from "@/components/ui/textarea";
-import { colors } from "@/constants/colors";
 import { useLastExercise, useSaveExercise } from "@/lib/queries/exercises";
 import { useExerciseTypes } from "@/lib/queries/exercise-types";
 import { useSession } from "@/lib/queries/sessions";
 import { setsToArrays, type ExerciseType } from "@/lib/queries/types";
+import { useThemeColors } from "@/lib/theme";
 import { useColorScheme } from "@/lib/useColorScheme";
 import { Pressable } from "react-native-gesture-handler";
 
@@ -68,7 +68,8 @@ function CheckboxComponent(props: { isChecked: boolean; onPress: () => void }) {
 
 export default function DoExercise() {
 	const router = useRouter();
-	const { isDarkColorScheme, colorScheme } = useColorScheme();
+	const { isDarkColorScheme } = useColorScheme();
+	const themeColors = useThemeColors();
 	const { sessionId, exerciseTypeId } = useLocalSearchParams<{
 		sessionId: string;
 		exerciseTypeId?: string;
@@ -266,7 +267,7 @@ export default function DoExercise() {
 							</View>
 						) : allExerciseTypes.length === 0 ? (
 							<View className="bg-muted/30 rounded-lg p-4">
-								<Text className="text-muted-foreground dark:text-gray-400 text-center">
+								<Text className="text-muted-foreground text-center">
 									Please create an exercise for this session type.
 								</Text>
 							</View>
@@ -276,7 +277,7 @@ export default function DoExercise() {
 									bottomSheetRef.current?.snapToIndex(0);
 								}}
 								variant="ghost"
-								className="flex-row w-full items-center bg-gray-100 dark:bg-gray-700 rounded-md justify-between p-4"
+								className="flex-row w-full items-center bg-muted rounded-md justify-between p-4"
 							>
 								<Text className="text-foreground">
 									{oneExerciseType
@@ -285,7 +286,7 @@ export default function DoExercise() {
 								</Text>
 								<AlignJustifyIcon
 									size={20}
-									color={isDarkColorScheme ? "#9CA3AF" : "#252525"}
+									color={themeColors.foreground}
 									strokeWidth={1.5}
 								/>
 							</Button>
@@ -295,11 +296,8 @@ export default function DoExercise() {
 					{/* Last Exercise Date */}
 					{lastExercise?.date && (
 						<View className="flex-row items-center justify-end gap-1 px-2 py-1 mb-3">
-							<HistoryIcon
-								size={14}
-								color={isDarkColorScheme ? "#9CA3AF" : "#6b7280"}
-							/>
-							<Text className="text-sm text-muted-foreground dark:text-gray-400">
+							<HistoryIcon size={14} color={themeColors.mutedForeground} />
+							<Text className="text-sm text-muted-foreground">
 								{isLoadingLastExercise
 									? "Loading..."
 									: format(new Date(lastExercise.date), "dd/MM/yyyy")}
@@ -335,10 +333,7 @@ export default function DoExercise() {
 										onPress={handlePrefillWeights}
 										className="flex-1 flex-row items-center justify-center"
 									>
-										<StarIcon
-											size={16}
-											color={isDarkColorScheme ? "#9CA3AF" : "#6b7280"}
-										/>
+										<StarIcon size={16} color={themeColors.mutedForeground} />
 										<Text className="ml-1">
 											All sets to {formState.weight1} KG
 										</Text>
@@ -348,7 +343,7 @@ export default function DoExercise() {
 										size="icon"
 										onPress={() => setShowPrefillButton(false)}
 									>
-										<XIcon size={16} color="#6b7280" />
+										<XIcon size={16} color={themeColors.mutedForeground} />
 									</Button>
 								</View>
 							)}
@@ -358,7 +353,7 @@ export default function DoExercise() {
 								<View className="flex-row justify-between gap-1 px-2">
 									{/* Reps Column */}
 									<View className="flex-1 max-w-[25%]">
-										<Text className="text-sm text-muted-foreground dark:text-gray-400 text-center mb-2">
+										<Text className="text-sm text-muted-foreground text-center mb-2">
 											Reps
 										</Text>
 										<View className="gap-1">
@@ -417,7 +412,7 @@ export default function DoExercise() {
 
 									{/* Weight Column */}
 									<View className="flex-1 max-w-[35%]">
-										<Text className="text-sm text-muted-foreground dark:text-gray-400 text-center mb-2">
+										<Text className="text-sm text-muted-foreground text-center mb-2">
 											KG
 										</Text>
 										<View className="gap-1">
@@ -478,7 +473,7 @@ export default function DoExercise() {
 
 									{/* Range Column */}
 									<View className="flex-1 max-w-[20%]">
-										<Text className="text-sm text-muted-foreground dark:text-gray-400 text-center mb-2">
+										<Text className="text-sm text-muted-foreground text-center mb-2">
 											Range
 										</Text>
 										<View className="gap-1">
@@ -509,7 +504,7 @@ export default function DoExercise() {
 
 									{/* Checkbox Column */}
 									<View className="flex-1 max-w-[20%]">
-										<Text className="text-sm text-muted-foreground dark:text-gray-400 text-center mb-2">
+										<Text className="text-sm text-muted-foreground text-center mb-2">
 											Set
 										</Text>
 										<View className="gap-1">
@@ -559,13 +554,8 @@ export default function DoExercise() {
 							{/* Notes Section */}
 							<View className="bg-slate-50 dark:bg-slate-900/40 rounded-2xl p-4 mb-20">
 								<View className="flex-row items-center gap-2 mb-3">
-									<EditIcon
-										size={16}
-										color={isDarkColorScheme ? "#9CA3AF" : "#6b7280"}
-									/>
-									<Text className="text-muted-foreground dark:text-gray-400">
-										Notes
-									</Text>
+									<EditIcon size={16} color={themeColors.mutedForeground} />
+									<Text className="text-muted-foreground">Notes</Text>
 									{lastExercise?.comment && (
 										<View className="w-2 h-2 bg-teal-500 rounded-full" />
 									)}
@@ -599,13 +589,10 @@ export default function DoExercise() {
 						{isLoading ? (
 							<ActivityIndicator
 								size="small"
-								color={isDarkColorScheme ? "#000000" : "#ffffff"}
+								color={themeColors.primaryForeground}
 							/>
 						) : (
-							<CheckIcon
-								size={28}
-								color={isDarkColorScheme ? "#000000" : "#ffffff"}
-							/>
+							<CheckIcon size={28} color={themeColors.primaryForeground} />
 						)}
 					</Button>
 				</View>
@@ -620,19 +607,17 @@ export default function DoExercise() {
 				maxDynamicContentSize={600}
 				backdropComponent={renderBackdrop}
 				backgroundStyle={{
-					backgroundColor:
-						colorScheme === "dark" ? colors.dark.card : colors.light.card,
+					backgroundColor: themeColors.popover,
 				}}
 				handleIndicatorStyle={{
-					backgroundColor: colorScheme === "dark" ? "#6B7280" : "#9CA3AF",
+					backgroundColor: themeColors.mutedForeground,
 				}}
 			>
 				<BottomSheetScrollView
 					contentContainerStyle={{
 						padding: 24,
 						paddingBottom: 24,
-						backgroundColor:
-							colorScheme === "dark" ? colors.dark.card : colors.light.card,
+						backgroundColor: themeColors.popover,
 						flexGrow: 1,
 					}}
 				>

@@ -12,10 +12,10 @@ import {
 } from "react-native";
 
 // import { Switch } from "@/components/ui/switch"; // For minimalist feature - coming later
-import { colors } from "@/constants/colors";
 import { useAuth } from "@/context/supabase-provider";
 import { useCreateSession, useLastSession } from "@/lib/queries/sessions";
 import type { SessionType } from "@/lib/queries/types";
+import { useThemeColors } from "@/lib/theme";
 import { useColorScheme } from "@/lib/useColorScheme";
 
 // Import body images (we'll add these assets)
@@ -33,6 +33,7 @@ export default function NewSessionButton() {
 	const isLoading = createSession.isPending;
 	const [open, setOpen] = useState(false);
 	const { isDarkColorScheme } = useColorScheme();
+	const themeColors = useThemeColors();
 
 	// Bottom sheet ref and snap points
 	const sheetRef = useRef<BottomSheet>(null);
@@ -40,7 +41,7 @@ export default function NewSessionButton() {
 	const router = useRouter();
 
 	// Dynamic colors based on theme
-	const iconColor = isDarkColorScheme ? "#9ca3af" : "#6b7280"; // gray-400 : gray-500
+	const iconColor = themeColors.mutedForeground;
 	const fabBgColor = isDarkColorScheme
 		? "rgba(51, 65, 85, 0.5)"
 		: "rgba(243, 244, 246, 0.5)"; // slate-700/50 : gray-100/50
@@ -109,24 +110,20 @@ export default function NewSessionButton() {
 				maxDynamicContentSize={600}
 				onClose={() => setOpen(false)}
 				backgroundStyle={{
-					backgroundColor: isDarkColorScheme
-						? colors.dark.background
-						: colors.light.background,
+					backgroundColor: themeColors.popover,
 				}}
 				handleIndicatorStyle={{
-					backgroundColor: isDarkColorScheme ? "#6B7280" : "#9CA3AF",
+					backgroundColor: themeColors.mutedForeground,
 				}}
 			>
 				<BottomSheetScrollView
 					contentContainerStyle={{
 						padding: 16,
-						backgroundColor: isDarkColorScheme
-							? colors.dark.background
-							: colors.light.background,
+						backgroundColor: themeColors.popover,
 						flexGrow: 1,
 					}}
 				>
-					<View className="bg-background">
+					<View className="bg-popover">
 						{isLoading ? (
 							<View className="pt-14 items-center justify-center">
 								<ActivityIndicator size="large" />

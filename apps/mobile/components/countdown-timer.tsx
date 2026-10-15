@@ -11,6 +11,8 @@ import { TouchableOpacity, View } from "react-native";
 import { CountdownCircleTimer } from "react-native-countdown-circle-timer";
 
 import { Text } from "@/components/ui/text";
+import { useThemeColors } from "@/lib/theme";
+import { useColorScheme } from "@/lib/useColorScheme";
 
 const audioSource = require("../assets/ding.mp3");
 
@@ -19,6 +21,8 @@ interface CountDownTimerProps {
 }
 
 export function CountDownTimer({ exerciseTypeTimer }: CountDownTimerProps) {
+	const themeColors = useThemeColors();
+	const { isDarkColorScheme } = useColorScheme();
 	const [isTimerPlaying, setIsTimerPlaying] = useState(false);
 	const [key, setKey] = useState(0);
 	const [hasCompleted, setHasCompleted] = useState(false);
@@ -78,7 +82,7 @@ export function CountDownTimer({ exerciseTypeTimer }: CountDownTimerProps) {
 		if (Number.isNaN(remainingTime)) {
 			return (
 				<View className="flex items-center justify-center">
-					<Text className="text-2xl text-gray-500">--:--</Text>
+					<Text className="text-2xl text-muted-foreground">--:--</Text>
 				</View>
 			);
 		}
@@ -119,10 +123,10 @@ export function CountDownTimer({ exerciseTypeTimer }: CountDownTimerProps) {
 		<View className="mb-4 w-full flex items-center justify-center relative rounded-2xl bg-slate-50 dark:bg-slate-900/40 px-4 py-6">
 			<TouchableOpacity
 				onPress={toggleSound}
-				className="absolute top-2 left-2 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-gray-50 shadow-sm"
+				className="absolute top-2 left-2 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-background shadow-sm"
 			>
 				{isMuted ? (
-					<VolumeXIcon size={20} color="#6B7280" />
+					<VolumeXIcon size={20} color={themeColors.mutedForeground} />
 				) : (
 					<Volume2Icon size={20} color="#0F766E" />
 				)}
@@ -138,7 +142,7 @@ export function CountDownTimer({ exerciseTypeTimer }: CountDownTimerProps) {
 					strokeWidth={8}
 					rotation="counterclockwise"
 					isGrowing={true}
-					trailColor="#d9d9d9"
+					trailColor={isDarkColorScheme ? "#27272a" : "#d9d9d9"} // zinc-800 : the original light trail
 					key={key}
 					onComplete={() => {
 						setHasCompleted(true);

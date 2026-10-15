@@ -5,15 +5,16 @@ import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
 
 import TrophyIcon from "@/components/trophy-icon";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors";
 import { useTrophies } from "@/lib/queries/trophies";
 import type { Trophy } from "@/lib/queries/types";
+import { useThemeColors } from "@/lib/theme";
 import { useColorScheme } from "@/lib/useColorScheme";
 
 export default function TrophyScreen() {
 	const trophiesQuery = useTrophies();
 	const [selected, setSelected] = useState<Trophy | null>(null);
 	const { colorScheme } = useColorScheme();
+	const themeColors = useThemeColors();
 
 	// Bottom sheet ref
 	const bottomSheetRef = useRef<BottomSheet>(null);
@@ -36,17 +37,14 @@ export default function TrophyScreen() {
 			<ScrollView
 				className="flex-1"
 				style={{
-					backgroundColor:
-						colorScheme === "dark"
-							? colors.dark.background
-							: colors.light.background,
+					backgroundColor: themeColors.background,
 				}}
 				contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
 			>
 				{trophiesQuery.data === undefined &&
 					(trophiesQuery.error ? (
 						<Pressable onPress={() => trophiesQuery.refetch()} className="py-8">
-							<Text className="text-center text-gray-500">
+							<Text className="text-center text-muted-foreground">
 								Impossible de charger les trophées. Toucher pour réessayer.
 							</Text>
 						</Pressable>
@@ -61,7 +59,7 @@ export default function TrophyScreen() {
 						<View key={groupName} className="mb-6">
 							<Text className="mb-2 text-lg font-medium">
 								{groupName}{" "}
-								<Text className="text-gray-500">
+								<Text className="text-muted-foreground">
 									({achievedCount}/{totalCount})
 								</Text>
 							</Text>
@@ -75,14 +73,8 @@ export default function TrophyScreen() {
 										<View
 											className="items-center rounded-xl border p-3"
 											style={{
-												borderColor:
-													colorScheme === "dark"
-														? colors.dark.border
-														: colors.light.border,
-												backgroundColor:
-													colorScheme === "dark"
-														? colors.dark.background
-														: colors.light.background,
+												borderColor: themeColors.border,
+												backgroundColor: themeColors.background,
 												opacity: trophy.achieved ? 1 : 0.5,
 											}}
 										>
@@ -102,12 +94,7 @@ export default function TrophyScreen() {
 												{trophy.achieved ? (
 													<Text className="text-2xl">🏆</Text>
 												) : (
-													<Lock
-														size={24}
-														color={
-															colorScheme === "dark" ? "#9CA3AF" : "#6B7280"
-														}
-													/>
+													<Lock size={24} color={themeColors.mutedForeground} />
 												)}
 											</View>
 											<Text className="mt-2 text-center text-base font-semibold capitalize">
@@ -116,7 +103,7 @@ export default function TrophyScreen() {
 													: "???"}
 											</Text>
 											{trophy.achieved ? (
-												<Text className="text-xs text-gray-500">
+												<Text className="text-xs text-muted-foreground">
 													Obtenu le{" "}
 													{trophy.awarded_at
 														? new Date(trophy.awarded_at).toLocaleDateString()
@@ -124,8 +111,8 @@ export default function TrophyScreen() {
 												</Text>
 											) : (
 												<View className="mt-1 flex-row items-center gap-1">
-													<Lock size={14} />
-													<Text className="text-xs text-gray-500">
+													<Lock size={14} color={themeColors.mutedForeground} />
+													<Text className="text-xs text-muted-foreground">
 														{trophy.reps_goal} reps min
 													</Text>
 												</View>
@@ -148,19 +135,17 @@ export default function TrophyScreen() {
 				maxDynamicContentSize={600}
 				onClose={() => setSelected(null)}
 				backgroundStyle={{
-					backgroundColor:
-						colorScheme === "dark" ? colors.dark.card : colors.light.card,
+					backgroundColor: themeColors.popover,
 				}}
 				handleIndicatorStyle={{
-					backgroundColor: colorScheme === "dark" ? "#6B7280" : "#9CA3AF",
+					backgroundColor: themeColors.mutedForeground,
 				}}
 			>
 				<BottomSheetScrollView
 					contentContainerStyle={{
 						padding: 24,
 						paddingBottom: 24,
-						backgroundColor:
-							colorScheme === "dark" ? colors.dark.card : colors.light.card,
+						backgroundColor: themeColors.popover,
 						flexGrow: 1,
 					}}
 				>
@@ -176,7 +161,7 @@ export default function TrophyScreen() {
 									<Text className="mt-3 text-center text-2xl font-semibold">
 										{selected.reward_text}
 									</Text>
-									<Text className="mt-2 text-center text-gray-600 dark:text-gray-400">
+									<Text className="mt-2 text-center text-muted-foreground">
 										Tu as obtenu le trophée {selected.trophy_type} pour
 										l&apos;exercice {selected.exercise_types?.name} avec{" "}
 										{selected.reps_user} reps.
@@ -192,15 +177,12 @@ export default function TrophyScreen() {
 													: "rgba(107, 114, 128, 0.1)",
 										}}
 									>
-										<Lock
-											size={16}
-											color={colorScheme === "dark" ? "#9CA3AF" : "#6B7280"}
-										/>
+										<Lock size={16} color={themeColors.mutedForeground} />
 										<View className="flex-1">
-											<Text className="text-xs text-gray-600 dark:text-gray-400">
+											<Text className="text-xs text-muted-foreground">
 												{selected.description}
 											</Text>
-											<Text className="text-xs text-gray-500 dark:text-gray-500">
+											<Text className="text-xs text-muted-foreground">
 												{selected.reps_goal} reps min requises
 											</Text>
 										</View>
@@ -215,15 +197,12 @@ export default function TrophyScreen() {
 												colorScheme === "dark" ? "#374151" : "#F3F4F6",
 										}}
 									>
-										<Lock
-											size={48}
-											color={colorScheme === "dark" ? "#6B7280" : "#9CA3AF"}
-										/>
+										<Lock size={48} color={themeColors.mutedForeground} />
 									</View>
 									<Text className="mb-2 text-center text-xl font-semibold text-gray-700 dark:text-gray-300">
 										Trophée verrouillé
 									</Text>
-									<Text className="mb-4 text-center text-base text-gray-600 dark:text-gray-400">
+									<Text className="mb-4 text-center text-base text-muted-foreground">
 										{selected.description}
 									</Text>
 									<View
@@ -241,7 +220,7 @@ export default function TrophyScreen() {
 										<Text className="mt-1 text-center text-lg font-bold text-primary">
 											{selected.reps_goal} reps
 										</Text>
-										<Text className="mt-1 text-center text-xs text-gray-500">
+										<Text className="mt-1 text-center text-xs text-muted-foreground">
 											pour l&apos;exercice {selected.exercise_types?.name}
 										</Text>
 									</View>

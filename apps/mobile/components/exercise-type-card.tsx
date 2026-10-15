@@ -4,6 +4,7 @@ import { Pressable, View } from "react-native";
 import { Text } from "@/components/ui/text";
 import { TypeSessionBadge } from "@/components/ui/type-session-badge";
 import type { ExerciseType } from "@/lib/queries/types";
+import { useThemeColors } from "@/lib/theme";
 
 interface ExerciseTypeCardProps {
 	exerciseType: ExerciseType;
@@ -14,6 +15,8 @@ export default function ExerciseTypeCard({
 	exerciseType,
 	onPress,
 }: ExerciseTypeCardProps) {
+	const themeColors = useThemeColors();
+
 	return (
 		<Pressable
 			onPress={() => onPress(exerciseType)}
@@ -27,10 +30,7 @@ export default function ExerciseTypeCard({
 				</View>
 				<View className="flex flex-row items-center gap-1 rounded-sm rounded-tr-lg border px-2 border-border">
 					<Text>
-						<LucideClock4
-							size={13}
-							className="text-gray-500 dark:text-gray-400"
-						/>
+						<LucideClock4 size={13} color={themeColors.mutedForeground} />
 					</Text>
 					<Text className="text-sm font-medium">
 						{exerciseType.timer_seconds}
@@ -41,12 +41,12 @@ export default function ExerciseTypeCard({
 				<Text className="text-lg font-bold">{exerciseType.name}</Text>
 				{exerciseType?.advice && (
 					<>
-						<View className="my-1 flex w-full rounded-full border border-gray-200 dark:border-gray-800" />
+						<View className="my-1 flex w-full rounded-full border border-border" />
 						<View className="flex w-full flex-row items-center gap-1">
 							<Text>
-								<LucideInfo className="flex-none" size={12} />
+								<LucideInfo size={12} color={themeColors.mutedForeground} />
 							</Text>
-							<Text className="truncate text-left text-xs text-gray-500 dark:text-gray-400">
+							<Text className="truncate text-left text-xs text-muted-foreground">
 								{exerciseType.advice}
 							</Text>
 						</View>

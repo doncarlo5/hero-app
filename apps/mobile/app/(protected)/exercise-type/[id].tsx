@@ -22,6 +22,7 @@ import {
 	useUpdateExerciseType,
 } from "@/lib/queries/exercise-types";
 import type { SessionType } from "@/lib/queries/types";
+import { useThemeColors } from "@/lib/theme";
 import { useColorScheme } from "@/lib/useColorScheme";
 import { cn } from "@/lib/utils";
 
@@ -41,6 +42,7 @@ export default function ExerciseTypeDetail() {
 	const router = useRouter();
 	const { session } = useAuth();
 	const { isDarkColorScheme } = useColorScheme();
+	const themeColors = useThemeColors();
 
 	const isCreating = id === "new";
 	const exerciseTypeQuery = useExerciseType(id, { enabled: !isCreating });
@@ -208,7 +210,7 @@ export default function ExerciseTypeDetail() {
 				{isCreating && (
 					<View className="mb-6">
 						<Text className="text-2xl font-bold mb-2">New Exercise Type</Text>
-						<Text className="text-sm text-gray-500 dark:text-gray-400">
+						<Text className="text-sm text-muted-foreground">
 							Create a new exercise type for your workouts
 						</Text>
 					</View>
@@ -233,7 +235,7 @@ export default function ExerciseTypeDetail() {
 						Session Types{" "}
 						{isCreating && <Text className="text-red-500">*</Text>}
 					</Text>
-					<View className="bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+					<View className="bg-muted p-4 rounded-lg">
 						<View className="flex-row justify-between">
 							<View className="flex-1">
 								<View className="flex-row items-center mb-2">
@@ -303,7 +305,7 @@ export default function ExerciseTypeDetail() {
 				</View>
 
 				{/* Rep Ranges */}
-				<View className="mb-4 bg-gray-50 dark:bg-gray-900 p-4 rounded-lg">
+				<View className="mb-4 bg-muted p-4 rounded-lg">
 					<View className="flex-row items-center justify-between mb-4">
 						<Text className="text-lg font-medium">Repetition Ranges</Text>
 						<Pressable
@@ -399,11 +401,11 @@ export default function ExerciseTypeDetail() {
 						{isSaving ? (
 							<ActivityIndicator
 								size="small"
-								color={isDarkColorScheme ? "#1F2937" : "white"}
+								color={themeColors.primaryForeground}
 							/>
 						) : (
 							<Check
-								color={isDarkColorScheme ? "#1F2937" : "#fff"}
+								color={themeColors.primaryForeground}
 								strokeWidth={1.7}
 								size={20}
 							/>

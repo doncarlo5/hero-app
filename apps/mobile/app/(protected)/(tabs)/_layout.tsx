@@ -2,12 +2,11 @@ import * as Haptics from "expo-haptics";
 import { Tabs } from "expo-router";
 import React from "react";
 
-import { colors } from "@/constants/colors";
-import { useColorScheme } from "@/lib/useColorScheme";
+import { useThemeColors } from "@/lib/theme";
 import { AlignJustifyIcon, HomeIcon, SettingsIcon } from "lucide-react-native";
 
 export default function TabsLayout() {
-	const { colorScheme } = useColorScheme();
+	const themeColors = useThemeColors();
 
 	const handleTabPress = () => {
 		Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -17,27 +16,8 @@ export default function TabsLayout() {
 		<Tabs
 			screenOptions={{
 				headerShown: true,
-				headerStyle: {
-					backgroundColor:
-						colorScheme === "dark"
-							? colors.dark.background
-							: colors.light.background,
-				},
-				headerTintColor:
-					colorScheme === "dark"
-						? colors.dark.foreground
-						: colors.light.foreground,
-				tabBarStyle: {
-					backgroundColor:
-						colorScheme === "dark"
-							? colors.dark.background
-							: colors.light.background,
-					borderTopColor:
-						colorScheme === "dark" ? colors.dark.border : colors.light.border,
-					borderTopWidth: 1,
-				},
-				tabBarActiveTintColor: "#14b8a6",
-				tabBarInactiveTintColor: "#9ca3af",
+				tabBarActiveTintColor: themeColors.brand,
+				tabBarInactiveTintColor: themeColors.mutedForeground,
 				tabBarShowLabel: true,
 				tabBarIconStyle: {
 					marginBottom: 3,

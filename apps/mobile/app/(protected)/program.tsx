@@ -20,7 +20,6 @@ import {
 import { SafeAreaView } from "@/components/safe-area-view";
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { colors } from "@/constants/colors";
 import { useExerciseTypes } from "@/lib/queries/exercise-types";
 import { useProgram, useSaveProgram } from "@/lib/queries/programs";
 import {
@@ -28,6 +27,7 @@ import {
 	type ExerciseTypeRef,
 	type SessionType,
 } from "@/lib/queries/types";
+import { useThemeColors } from "@/lib/theme";
 import { useColorScheme } from "@/lib/useColorScheme";
 import { Pressable } from "react-native-gesture-handler";
 
@@ -39,6 +39,7 @@ interface ExerciseProgram {
 
 export default function ProgramPage() {
 	const { colorScheme } = useColorScheme();
+	const themeColors = useThemeColors();
 
 	// Bottom sheet ref
 	const bottomSheetRef = useRef<BottomSheet>(null);
@@ -186,16 +187,6 @@ export default function ProgramPage() {
 					title: "Programme",
 					headerShown: true,
 					headerBackTitle: "Back",
-					headerStyle: {
-						backgroundColor:
-							colorScheme === "dark"
-								? colors.dark.background
-								: colors.light.background,
-					},
-					headerTintColor:
-						colorScheme === "dark"
-							? colors.dark.foreground
-							: colors.light.foreground,
 					headerShadowVisible: true,
 				}}
 			/>
@@ -242,10 +233,7 @@ export default function ProgramPage() {
 						onPress={openAddExercise}
 						className="mb-4 flex-row items-center justify-center"
 					>
-						<PlusCircle
-							size={18}
-							color={colorScheme === "dark" ? "#000000" : "#ffffff"}
-						/>
+						<PlusCircle size={18} color={themeColors.primaryForeground} />
 						<Text className="ml-2 text-primary-foreground font-medium">
 							Add Exercise
 						</Text>
@@ -255,13 +243,13 @@ export default function ProgramPage() {
 					{isLoading ? (
 						<View className="flex-1 items-center justify-center py-8">
 							<ActivityIndicator size="large" />
-							<Text className="text-muted-foreground dark:text-gray-400 mt-2">
+							<Text className="text-muted-foreground mt-2">
 								Loading program...
 							</Text>
 						</View>
 					) : exercises.length === 0 ? (
 						<View className="bg-muted/30 rounded-lg p-6 items-center">
-							<Text className="text-muted-foreground dark:text-gray-400 text-center">
+							<Text className="text-muted-foreground text-center">
 								No exercises in this program yet. Add your first exercise!
 							</Text>
 						</View>
@@ -283,10 +271,7 @@ export default function ProgramPage() {
 												onPress={() => openAddAlternative(index)}
 												className="p-2 rounded-lg bg-primary/10"
 											>
-												<PlusCircle
-													size={16}
-													color={colorScheme === "dark" ? "#0891b2" : "#0891b2"}
-												/>
+												<PlusCircle size={16} color="#0891b2" />
 											</TouchableOpacity>
 											<TouchableOpacity
 												disabled={index === 0}
@@ -297,7 +282,11 @@ export default function ProgramPage() {
 											>
 												<ChevronUp
 													size={16}
-													color={index === 0 ? "#9ca3af" : "#374151"}
+													color={
+														index === 0
+															? themeColors.mutedForeground
+															: themeColors.foreground
+													}
 												/>
 											</TouchableOpacity>
 											<TouchableOpacity
@@ -313,8 +302,8 @@ export default function ProgramPage() {
 													size={16}
 													color={
 														index === exercises.length - 1
-															? "#9ca3af"
-															: "#374151"
+															? themeColors.mutedForeground
+															: themeColors.foreground
 													}
 												/>
 											</TouchableOpacity>
@@ -350,7 +339,11 @@ export default function ProgramPage() {
 														>
 															<ChevronUp
 																size={14}
-																color={altIndex === 0 ? "#9ca3af" : "#374151"}
+																color={
+																	altIndex === 0
+																		? themeColors.mutedForeground
+																		: themeColors.foreground
+																}
 															/>
 														</TouchableOpacity>
 														<TouchableOpacity
@@ -370,8 +363,8 @@ export default function ProgramPage() {
 																size={14}
 																color={
 																	altIndex === exercise.alternatives.length - 1
-																		? "#9ca3af"
-																		: "#374151"
+																		? themeColors.mutedForeground
+																		: themeColors.foreground
 																}
 															/>
 														</TouchableOpacity>
@@ -408,13 +401,10 @@ export default function ProgramPage() {
 						{isSaving ? (
 							<ActivityIndicator
 								size="small"
-								color={colorScheme === "dark" ? "#000000" : "#ffffff"}
+								color={themeColors.primaryForeground}
 							/>
 						) : (
-							<SaveIcon
-								size={28}
-								color={colorScheme === "dark" ? "#000000" : "#ffffff"}
-							/>
+							<SaveIcon size={28} color={themeColors.primaryForeground} />
 						)}
 					</Button>
 				</View>
@@ -427,19 +417,17 @@ export default function ProgramPage() {
 					enablePanDownToClose={true}
 					maxDynamicContentSize={600}
 					backgroundStyle={{
-						backgroundColor:
-							colorScheme === "dark" ? colors.dark.card : colors.light.card,
+						backgroundColor: themeColors.popover,
 					}}
 					handleIndicatorStyle={{
-						backgroundColor: colorScheme === "dark" ? "#6B7280" : "#9CA3AF",
+						backgroundColor: themeColors.mutedForeground,
 					}}
 				>
 					<BottomSheetScrollView
 						contentContainerStyle={{
 							padding: 24,
 							paddingBottom: 24,
-							backgroundColor:
-								colorScheme === "dark" ? colors.dark.card : colors.light.card,
+							backgroundColor: themeColors.popover,
 							flexGrow: 1,
 						}}
 					>
@@ -451,13 +439,13 @@ export default function ProgramPage() {
 						{isLoadingTypes ? (
 							<View className="items-center py-8">
 								<ActivityIndicator size="large" />
-								<Text className="text-muted-foreground dark:text-gray-400 mt-2">
+								<Text className="text-muted-foreground mt-2">
 									Loading exercises...
 								</Text>
 							</View>
 						) : availableExercises.length === 0 ? (
 							<View className="bg-muted/30 rounded-lg p-6 items-center">
-								<Text className="text-muted-foreground dark:text-gray-400 text-center">
+								<Text className="text-muted-foreground text-center">
 									No exercises available for this session type.
 								</Text>
 							</View>
@@ -477,7 +465,7 @@ export default function ProgramPage() {
 							variant="outline"
 							className="mt-4"
 						>
-							<XIcon size={16} color="#6b7280" />
+							<XIcon size={16} color={themeColors.mutedForeground} />
 							<Text className="ml-2">Close</Text>
 						</Button>
 					</BottomSheetScrollView>

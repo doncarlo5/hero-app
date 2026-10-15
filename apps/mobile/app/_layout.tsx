@@ -2,75 +2,71 @@ import "react-native-reanimated";
 import "../global.css";
 
 import { QueryClientProvider } from "@tanstack/react-query";
-import { Stack, useRouter, useSegments } from "expo-router";
+import { Stack, ThemeProvider, useRouter, useSegments } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-import { colors } from "@/constants/colors";
 import { AuthProvider, useAuth } from "@/context/supabase-provider";
+import { useApplyColorSchemePreference } from "@/lib/color-scheme-preference";
 import { queryClient } from "@/lib/queries/client";
+import { navigationThemes } from "@/lib/theme";
 import { useColorScheme } from "@/lib/useColorScheme";
 
 export default function AppLayout() {
-	const { colorScheme } = useColorScheme();
+	const { isDarkColorScheme } = useColorScheme();
+	const preferenceApplied = useApplyColorSchemePreference();
+
+	// The splash screen stays up until AuthProvider hides it, so rendering
+	// nothing here avoids a frame in the wrong color scheme.
+	if (!preferenceApplied) {
+		return null;
+	}
 
 	return (
 		<GestureHandlerRootView style={{ flex: 1 }}>
-			<QueryClientProvider client={queryClient}>
-				<AuthProvider>
-					<View className="flex-1">
-						<Stack
-							screenOptions={{ headerShown: false, gestureEnabled: false }}
-						>
-							<Stack.Screen name="(protected)" />
-							<Stack.Screen name="welcome" />
-							<Stack.Screen
-								name="sign-up"
-								options={{
-									presentation: "modal",
-									headerShown: true,
-									headerTitle: "Sign Up",
-									headerStyle: {
-										backgroundColor:
-											colorScheme === "dark"
-												? colors.dark.background
-												: colors.light.background,
-									},
-									headerTintColor:
-										colorScheme === "dark"
-											? colors.dark.foreground
-											: colors.light.foreground,
-									headerShadowVisible: true,
-									gestureEnabled: true,
-								}}
-							/>
-							<Stack.Screen
-								name="sign-in"
-								options={{
-									presentation: "modal",
-									headerShown: true,
-									headerTitle: "Sign In",
-									headerStyle: {
-										backgroundColor:
-											colorScheme === "dark"
-												? colors.dark.background
-												: colors.light.background,
-									},
-									headerTintColor:
-										colorScheme === "dark"
-											? colors.dark.foreground
-											: colors.light.foreground,
-									headerShadowVisible: true,
-									gestureEnabled: true,
-								}}
-							/>
-						</Stack>
-						<AuthRedirector />
-						<AuthLoadingOverlay />
-					</View>
-				</AuthProvider>
-			</QueryClientProvider>
+			<ThemeProvider
+				value={
+					isDarkColorScheme ? navigationThemes.dark : navigationThemes.light
+				}
+			>
+				<StatusBar style="auto" />
+				<QueryClientProvider client={queryClient}>
+					<AuthProvider>
+						<View className="flex-1 bg-background">
+							<Stack
+								screenOptions={{ headerShown: false, gestureEnabled: false }}
+							>
+								<Stack.Screen name="(protected)" />
+								<Stack.Screen name="welcome" />
+								<Stack.Screen
+									name="sign-up"
+									options={{
+										presentation: "modal",
+										headerShown: true,
+										headerTitle: "Sign Up",
+										headerShadowVisible: true,
+										gestureEnabled: true,
+									}}
+								/>
+								<Stack.Screen
+									name="sign-in"
+									options={{
+										presentation: "modal",
+										headerShown: true,
+										headerTitle: "Sign In",
+										headerShadowVisible: true,
+										gestureEnabled: true,
+									}}
+								/>
+							</Stack>
+							<AuthRedirector />
+							<AuthLoadingOverlay />
+						</View>
+					</AuthProvider>
+				</QueryClientProvider>
+			</ThemeProvider>
 		</GestureHandlerRootView>
 	);
 }
