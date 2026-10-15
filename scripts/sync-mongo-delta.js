@@ -51,6 +51,22 @@ function groupBy(rows, keyFn) {
   return map;
 }
 
+// Index of Supabase rows by created_at. Rows created in bulk (default exercise types, sign-up data)
+// share the same millisecond, so a timestamp alone does not identify a row: take() only returns a row
+// that `prefer` accepts, or the only unclaimed row at that timestamp. A row is never returned twice.
+function createdAtIndex(rows, claimed = new Set()) {
+  const byCreated = groupBy(rows, (r) => ms(r.created_at));
+  return {
+    claimed,
+    take(createdMs, prefer, { allowSingle = true } = {}) {
+      const candidates = (byCreated.get(createdMs) || []).filter((r) => !claimed.has(r.id));
+      const match = candidates.find(prefer) ?? (allowSingle && candidates.length === 1 ? candidates[0] : null);
+      if (match) claimed.add(match.id);
+      return match ?? null;
+    },
+  };
+}
+
 // Mongo arrays weight[] / rep[] → one row per set, set_order from 1
 function mongoSets(doc) {
   const weights = doc.weight || [];
@@ -305,28 +321,25 @@ async function run({ mongoUri, supabaseDbUrl, dryRun = false, since = DEFAULT_SI
         session_types: r.session_types,
         trophy_locked: r.trophy_locked,
       });
-      // Exact timestamp matches first, so a name match never steals a copied row
-      const typeByCreated = new Map(state.types.map((r) => [ms(r.created_at), r]));
-      const pendingTypes = [];
-      for (const t of uTypes) {
-        const match = typeByCreated.get(ms(t.createdAt));
-        if (match && !claimed.has(match.id)) {
-          claimed.add(match.id);
-          typeMap.set(String(t._id), match.id);
-          pendingTypes.push([t, match]);
-        } else pendingTypes.push([t, null]);
-      }
+      // Default types are created in bulk and share timestamps, so matching goes in three passes:
+      // timestamp + name, then name alone, then a timestamp held by a single row (type renamed in Mongo)
+      const sameName = (t) => (r) => r.name === t.name || (r.definition_key && r.definition_key === t.name);
+      const typesByCreated = createdAtIndex(state.types, claimed);
+      const pendingTypes = uTypes.map((t) => [
+        t,
+        typesByCreated.take(ms(t.createdAt), sameName(t), { allowSingle: false }),
+      ]);
       for (const entry of pendingTypes) {
         if (entry[1]) continue;
-        const t = entry[0];
-        const match = state.types.find(
-          (r) => !claimed.has(r.id) && (r.name === t.name || (r.definition_key && r.definition_key === t.name)),
-        );
+        const match = state.types.find((r) => !claimed.has(r.id) && sameName(entry[0])(r));
         if (match) {
           claimed.add(match.id);
-          typeMap.set(String(t._id), match.id);
           entry[1] = match;
         }
+      }
+      for (const entry of pendingTypes) {
+        if (!entry[1]) entry[1] = typesByCreated.take(ms(entry[0].createdAt), () => false);
+        if (entry[1]) typeMap.set(String(entry[0]._id), entry[1].id);
       }
       for (const [t, match] of pendingTypes) {
         const row = typeRow(t);
@@ -364,7 +377,7 @@ async function run({ mongoUri, supabaseDbUrl, dryRun = false, since = DEFAULT_SI
 
       // Sessions --------------------------------------------------------------
       const sessionMap = new Map();
-      const sessionByCreated = new Map(state.sessions.map((r) => [ms(r.created_at), r]));
+      const sessionsByCreated = createdAtIndex(state.sessions);
       for (const s of uSessions) {
         const row = {
           date_session: ms(s.date_session),
@@ -373,7 +386,10 @@ async function run({ mongoUri, supabaseDbUrl, dryRun = false, since = DEFAULT_SI
           is_done: !!s.is_done,
           comment: text(s.comment),
         };
-        const match = sessionByCreated.get(ms(s.createdAt));
+        const match = sessionsByCreated.take(
+          ms(s.createdAt),
+          (r) => r.type_session === row.type_session && ms(r.date_session) === row.date_session,
+        );
         if (match) {
           sessionMap.set(String(s._id), match.id);
           if (!touched(s)) continue;
@@ -430,7 +446,7 @@ async function run({ mongoUri, supabaseDbUrl, dryRun = false, since = DEFAULT_SI
           [exerciseUserId, sets.map((s) => s.weight), sets.map((s) => s.reps)],
         );
       };
-      const euByCreated = new Map(state.exerciseUsers.map((r) => [ms(r.created_at), r]));
+      const exerciseUsersByCreated = createdAtIndex(state.exerciseUsers);
       for (const eu of exerciseUsersToSync) {
         const typeId = typeMap.get(String(eu.type));
         if (!typeId) {
@@ -448,7 +464,7 @@ async function run({ mongoUri, supabaseDbUrl, dryRun = false, since = DEFAULT_SI
         }
         const row = { type_id: typeId, session_id: sessionId, comment: text(eu.comment) };
         const sets = mongoSets(eu);
-        const match = euByCreated.get(ms(eu.createdAt));
+        const match = exerciseUsersByCreated.take(ms(eu.createdAt), (r) => r.type_id === row.type_id);
         if (!match) {
           stats.exercise_users.inserted++;
           let id = crypto.randomUUID();
@@ -545,10 +561,10 @@ async function run({ mongoUri, supabaseDbUrl, dryRun = false, since = DEFAULT_SI
       }
 
       // Feedbacks -------------------------------------------------------------
-      const feedbackByCreated = new Map(state.feedbacks.map((r) => [ms(r.created_at), r]));
+      const feedbacksByCreated = createdAtIndex(state.feedbacks);
       for (const f of uFeedbacks.filter(touched)) {
         const row = { subject: f.subject, message: text(f.message) };
-        const match = feedbackByCreated.get(ms(f.createdAt));
+        const match = feedbacksByCreated.take(ms(f.createdAt), (r) => r.subject === row.subject);
         if (!match) {
           stats.feedbacks.inserted++;
           if (!dryRun) {
