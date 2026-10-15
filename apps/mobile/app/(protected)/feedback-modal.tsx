@@ -9,7 +9,7 @@ import {
 	View,
 } from "react-native";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "heroui-native";
 import { Text } from "@/components/ui/text";
 import { useAuth } from "@/context/supabase-provider";
 import { useSendFeedback } from "@/lib/queries/feedback";
@@ -80,7 +80,7 @@ export default function FeedbackModal({
 		>
 			<View className="flex-1 justify-center items-center bg-black/50">
 				<View
-					className="bg-popover rounded-2xl p-4 w-11/12"
+					className="bg-overlay rounded-2xl p-4 w-11/12"
 					style={{ maxHeight: "80%" }}
 				>
 					<View className="flex-row justify-between items-center mb-4">
@@ -92,7 +92,7 @@ export default function FeedbackModal({
 						</Pressable>
 					</View>
 
-					<Text className="text-sm text-muted-foreground mb-4">
+					<Text className="text-sm text-muted mb-4">
 						Décrivez votre expérience de l&apos;application.
 					</Text>
 
@@ -137,40 +137,35 @@ export default function FeedbackModal({
 							<View className="flex-row flex-wrap gap-2 mb-4">
 								<Pressable
 									onPress={() => addToMessage("Bug")}
-									className="px-4 py-2 bg-muted rounded-md border border-border"
+									className="px-4 py-2 bg-default rounded-md border border-border"
 								>
-									<Text className="text-primary">+ Bug</Text>
+									<Text className="text-foreground">+ Bug</Text>
 								</Pressable>
 								<Pressable
 									onPress={() => addToMessage("Feature")}
-									className="px-4 py-2 bg-muted rounded-md border border-border"
+									className="px-4 py-2 bg-default rounded-md border border-border"
 								>
-									<Text className="text-primary">+ Feature</Text>
+									<Text className="text-foreground">+ Feature</Text>
 								</Pressable>
 								<Pressable
 									onPress={() => addToMessage("Séance")}
-									className="px-4 py-2 bg-muted rounded-md border border-border"
+									className="px-4 py-2 bg-default rounded-md border border-border"
 								>
-									<Text className="text-primary">+ Séance</Text>
+									<Text className="text-foreground">+ Séance</Text>
 								</Pressable>
 								<Pressable
 									onPress={() => addToMessage("Design")}
-									className="px-4 py-2 bg-muted rounded-md border border-border"
+									className="px-4 py-2 bg-default rounded-md border border-border"
 								>
-									<Text className="text-primary">+ Design</Text>
+									<Text className="text-foreground">+ Design</Text>
 								</Pressable>
 							</View>
 
-							<Button
-								variant="default"
-								onPress={handleFeedbackSubmit}
-								disabled={loading}
-								className="flex-row items-center gap-2"
-							>
-								<Send size={16} color={themeColors.primaryForeground} />
-								<Text className="text-primary-foreground">
+							<Button onPress={handleFeedbackSubmit} isDisabled={loading}>
+								<Send size={16} color={themeColors.accentForeground} />
+								<Button.Label>
 									{loading ? "Envoi en cours..." : "Envoyer"}
-								</Text>
+								</Button.Label>
 							</Button>
 						</ScrollView>
 					</View>

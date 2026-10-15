@@ -3,7 +3,7 @@ import { PlusIcon } from "lucide-react-native";
 import { Pressable, ScrollView, View } from "react-native";
 
 import ExerciseTypeCard from "@/components/exercise-type-card";
-import { Button } from "@/components/ui/button";
+import { Button } from "heroui-native";
 import { Text } from "@/components/ui/text";
 import { useExerciseTypes } from "@/lib/queries/exercise-types";
 import type { ExerciseType } from "@/lib/queries/types";
@@ -28,7 +28,7 @@ export default function ExerciseTypes() {
 	if (exerciseTypesQuery.error && !exerciseTypesQuery.data) {
 		return (
 			<View className="flex-1 items-center justify-center bg-background p-4">
-				<Text className="text-sm text-muted-foreground mb-4">
+				<Text className="text-sm text-muted mb-4">
 					Impossible de charger les exercices.
 				</Text>
 				<Button onPress={() => exerciseTypesQuery.refetch()}>Réessayer</Button>
@@ -41,9 +41,7 @@ export default function ExerciseTypes() {
 			<View className="flex-1 bg-background">
 				<View className="flex-1 items-center justify-center p-4">
 					<View className="flex flex-col items-center gap-4">
-						<Text className="text-sm text-muted-foreground">
-							Aucun exercice.
-						</Text>
+						<Text className="text-sm text-muted">Aucun exercice.</Text>
 						<Button onPress={handleCreateExercise} className="w-full">
 							Créer un exercice
 						</Button>
@@ -58,7 +56,7 @@ export default function ExerciseTypes() {
 			<ScrollView className="flex-1 p-4">
 				<Pressable
 					onPress={handleCreateExercise}
-					className="flex h-14 w-full flex-row items-center justify-center gap-1 rounded-lg border-2 border-border border-dotted bg-muted mb-4"
+					className="flex h-14 w-full flex-row items-center justify-center gap-1 rounded-lg border-2 border-border border-dotted bg-default mb-4"
 				>
 					<PlusIcon size={20} color={themeColors.foreground} />
 					<Text>Créer un exercice</Text>
@@ -70,7 +68,10 @@ export default function ExerciseTypes() {
 						{Array(5)
 							.fill(0)
 							.map((_, index) => (
-								<View key={index} className="h-32 w-full rounded-lg bg-muted" />
+								<View
+									key={index}
+									className="h-32 w-full rounded-lg bg-default"
+								/>
 							))}
 					</View>
 				) : (

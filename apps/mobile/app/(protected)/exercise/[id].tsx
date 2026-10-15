@@ -9,10 +9,8 @@ import {
 	View,
 } from "react-native";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button, Input, TextArea } from "heroui-native";
 import { Text } from "@/components/ui/text";
-import { Textarea } from "@/components/ui/textarea";
 import {
 	useDeleteExercise,
 	useExercise,
@@ -211,7 +209,7 @@ export default function ExerciseDetail() {
 						{exerciseType.name}
 					</Text>
 					{session && (
-						<Text className="text-sm text-muted-foreground">
+						<Text className="text-sm text-muted">
 							Session: {new Date(session.date_session).toLocaleDateString()}
 						</Text>
 					)}
@@ -232,14 +230,14 @@ export default function ExerciseDetail() {
 									onPress={() => setSelectedExerciseType(type)}
 									className={`px-4 py-2 rounded-lg border ${
 										selectedExerciseType?.id === type.id
-											? "bg-primary border-primary"
-											: "bg-muted/30 border-muted"
+											? "bg-foreground border-foreground"
+											: "bg-default/30 border-default"
 									}`}
 								>
 									<Text
 										className={`text-sm ${
 											selectedExerciseType?.id === type.id
-												? "text-primary-foreground"
+												? "text-background"
 												: "text-foreground"
 										}`}
 									>
@@ -274,15 +272,13 @@ export default function ExerciseDetail() {
 				{isEditable ? (
 					<View className="space-y-4">
 						{/* Set 1 */}
-						<View className="bg-primary/5 rounded-lg p-4 border border-primary/10">
-							<Text className="text-sm font-medium text-primary mb-3">
+						<View className="bg-foreground/5 rounded-lg p-4 border border-foreground/10">
+							<Text className="text-sm font-medium text-foreground mb-3">
 								Set 1
 							</Text>
 							<View className="flex-row space-x-3">
 								<View className="flex-1">
-									<Text className="text-xs text-muted-foreground mb-1">
-										Reps
-									</Text>
+									<Text className="text-xs text-muted mb-1">Reps</Text>
 									<Input
 										value={formState.rep1}
 										onChangeText={(value) => handleInputChange("rep1", value)}
@@ -292,9 +288,7 @@ export default function ExerciseDetail() {
 									/>
 								</View>
 								<View className="flex-1">
-									<Text className="text-xs text-muted-foreground mb-1">
-										Weight (kg)
-									</Text>
+									<Text className="text-xs text-muted mb-1">Weight (kg)</Text>
 									<Input
 										value={formState.weight1}
 										onChangeText={(value) =>
@@ -309,15 +303,13 @@ export default function ExerciseDetail() {
 						</View>
 
 						{/* Set 2 */}
-						<View className="bg-primary/5 rounded-lg p-4 border border-primary/10">
-							<Text className="text-sm font-medium text-primary mb-3">
+						<View className="bg-foreground/5 rounded-lg p-4 border border-foreground/10">
+							<Text className="text-sm font-medium text-foreground mb-3">
 								Set 2
 							</Text>
 							<View className="flex-row space-x-3">
 								<View className="flex-1">
-									<Text className="text-xs text-muted-foreground mb-1">
-										Reps
-									</Text>
+									<Text className="text-xs text-muted mb-1">Reps</Text>
 									<Input
 										value={formState.rep2}
 										onChangeText={(value) => handleInputChange("rep2", value)}
@@ -327,9 +319,7 @@ export default function ExerciseDetail() {
 									/>
 								</View>
 								<View className="flex-1">
-									<Text className="text-xs text-muted-foreground mb-1">
-										Weight (kg)
-									</Text>
+									<Text className="text-xs text-muted mb-1">Weight (kg)</Text>
 									<Input
 										value={formState.weight2}
 										onChangeText={(value) =>
@@ -344,15 +334,13 @@ export default function ExerciseDetail() {
 						</View>
 
 						{/* Set 3 */}
-						<View className="bg-primary/5 rounded-lg p-4 border border-primary/10">
-							<Text className="text-sm font-medium text-primary mb-3">
+						<View className="bg-foreground/5 rounded-lg p-4 border border-foreground/10">
+							<Text className="text-sm font-medium text-foreground mb-3">
 								Set 3
 							</Text>
 							<View className="flex-row space-x-3">
 								<View className="flex-1">
-									<Text className="text-xs text-muted-foreground mb-1">
-										Reps
-									</Text>
+									<Text className="text-xs text-muted mb-1">Reps</Text>
 									<Input
 										value={formState.rep3}
 										onChangeText={(value) => handleInputChange("rep3", value)}
@@ -362,9 +350,7 @@ export default function ExerciseDetail() {
 									/>
 								</View>
 								<View className="flex-1">
-									<Text className="text-xs text-muted-foreground mb-1">
-										Weight (kg)
-									</Text>
+									<Text className="text-xs text-muted mb-1">Weight (kg)</Text>
 									<Input
 										value={formState.weight3}
 										onChangeText={(value) =>
@@ -380,15 +366,13 @@ export default function ExerciseDetail() {
 
 						{/* Set 4 (conditional) */}
 						{isRep4 && (
-							<View className="bg-primary/5 rounded-lg p-4 border border-primary/10">
-								<Text className="text-sm font-medium text-primary mb-3">
+							<View className="bg-foreground/5 rounded-lg p-4 border border-foreground/10">
+								<Text className="text-sm font-medium text-foreground mb-3">
 									Set 4
 								</Text>
 								<View className="flex-row space-x-3">
 									<View className="flex-1">
-										<Text className="text-xs text-muted-foreground mb-1">
-											Reps
-										</Text>
+										<Text className="text-xs text-muted mb-1">Reps</Text>
 										<Input
 											value={formState.rep4}
 											onChangeText={(value) => handleInputChange("rep4", value)}
@@ -398,9 +382,7 @@ export default function ExerciseDetail() {
 										/>
 									</View>
 									<View className="flex-1">
-										<Text className="text-xs text-muted-foreground mb-1">
-											Weight (kg)
-										</Text>
+										<Text className="text-xs text-muted mb-1">Weight (kg)</Text>
 										<Input
 											value={formState.weight4}
 											onChangeText={(value) =>
@@ -419,11 +401,9 @@ export default function ExerciseDetail() {
 						{!isRep4 && (
 							<TouchableOpacity
 								onPress={() => setIsRep4(true)}
-								className="bg-muted/30 rounded-lg p-4 border border-dashed border-muted"
+								className="bg-default/30 rounded-lg p-4 border border-dashed border-default"
 							>
-								<Text className="text-center text-muted-foreground">
-									+ Add Set 4
-								</Text>
+								<Text className="text-center text-muted">+ Add Set 4</Text>
 							</TouchableOpacity>
 						)}
 					</View>
@@ -436,15 +416,15 @@ export default function ExerciseDetail() {
 								return (
 									<View
 										key={index}
-										className="bg-primary/5 flex-1 rounded-lg px-3 py-2 border border-primary/10"
+										className="bg-foreground/5 flex-1 rounded-lg px-3 py-2 border border-foreground/10"
 									>
-										<Text className="text-xs font-medium text-primary">
+										<Text className="text-xs font-medium text-foreground">
 											Set {index + 1}
 										</Text>
 										<Text className="text-sm font-bold text-foreground">
 											{rep} reps
 										</Text>
-										<Text className="text-xs text-muted-foreground">
+										<Text className="text-xs text-muted">
 											{exerciseWeights[index]} kg
 										</Text>
 									</View>
@@ -459,16 +439,16 @@ export default function ExerciseDetail() {
 			<View className="mb-6">
 				<Text className="text-xl font-bold text-foreground mb-4">Notes</Text>
 				{isEditable ? (
-					<Textarea
+					<TextArea
 						value={formState.comment}
 						onChangeText={(value) => handleInputChange("comment", value)}
 						placeholder="Add notes about this exercise..."
-						className="bg-muted/20 rounded-lg p-4"
+						className="bg-default/20 rounded-lg p-4"
 						multiline
 						numberOfLines={4}
 					/>
 				) : (
-					<View className="bg-muted/20 rounded-lg p-4">
+					<View className="bg-default/20 rounded-lg p-4">
 						<Text className="text-sm text-foreground">
 							{exercise.comment || "No notes added"}
 						</Text>
@@ -481,45 +461,41 @@ export default function ExerciseDetail() {
 				<Text className="text-xl font-bold text-foreground mb-4">
 					Exercise Information
 				</Text>
-				<View className="bg-muted/20 rounded-lg p-4 space-y-3">
+				<View className="bg-default/20 rounded-lg p-4 space-y-3">
 					<View className="flex-row justify-between">
-						<Text className="text-sm text-muted-foreground">Timer:</Text>
+						<Text className="text-sm text-muted">Timer:</Text>
 						<Text className="text-sm font-medium text-foreground">
 							{exerciseType.timer_seconds} seconds
 						</Text>
 					</View>
 					<View className="flex-row justify-between">
-						<Text className="text-sm text-muted-foreground">Rep Range 1:</Text>
+						<Text className="text-sm text-muted">Rep Range 1:</Text>
 						<Text className="text-sm font-medium text-foreground">
 							{exerciseType.rep_range_1}
 						</Text>
 					</View>
 					<View className="flex-row justify-between">
-						<Text className="text-sm text-muted-foreground">Rep Range 2:</Text>
+						<Text className="text-sm text-muted">Rep Range 2:</Text>
 						<Text className="text-sm font-medium text-foreground">
 							{exerciseType.rep_range_2}
 						</Text>
 					</View>
 					<View className="flex-row justify-between">
-						<Text className="text-sm text-muted-foreground">Rep Range 3:</Text>
+						<Text className="text-sm text-muted">Rep Range 3:</Text>
 						<Text className="text-sm font-medium text-foreground">
 							{exerciseType.rep_range_3}
 						</Text>
 					</View>
 					{exerciseType.rep_range_4 && (
 						<View className="flex-row justify-between">
-							<Text className="text-sm text-muted-foreground">
-								Rep Range 4:
-							</Text>
+							<Text className="text-sm text-muted">Rep Range 4:</Text>
 							<Text className="text-sm font-medium text-foreground">
 								{exerciseType.rep_range_4}
 							</Text>
 						</View>
 					)}
 					<View className="flex-row justify-between">
-						<Text className="text-sm text-muted-foreground">
-							Session Types:
-						</Text>
+						<Text className="text-sm text-muted">Session Types:</Text>
 						<Text className="text-sm font-medium text-foreground">
 							{exerciseType.session_types.join(", ")}
 						</Text>
@@ -529,22 +505,15 @@ export default function ExerciseDetail() {
 
 			{/* Action Buttons */}
 			<View className="flex-row gap-2 mb-6">
-				<Button
-					variant="outline"
-					onPress={handleDelete}
-					className="flex-1 flex-row items-center justify-center"
-				>
+				<Button variant="outline" onPress={handleDelete} className="flex-1">
 					<TrashIcon size={16} color="#ef4444" />
-					<Text className="ml-2 text-red-500">Delete</Text>
+					<Button.Label>Delete</Button.Label>
 				</Button>
 
 				{!isEditable ? (
-					<Button
-						onPress={() => setIsEditable(true)}
-						className="flex-1 flex-row items-center justify-center"
-					>
-						<EditIcon size={16} color={themeColors.primaryForeground} />
-						<Text className="ml-2">Edit</Text>
+					<Button onPress={() => setIsEditable(true)} className="flex-1">
+						<EditIcon size={16} color={themeColors.accentForeground} />
+						<Button.Label>Edit</Button.Label>
 					</Button>
 				) : (
 					<View className="flex-1 flex-row gap-2">
@@ -554,26 +523,26 @@ export default function ExerciseDetail() {
 								setIsEditable(false);
 								resetForm(exercise);
 							}}
-							disabled={isSaving}
-							className="flex-1 flex-row items-center justify-center"
+							isDisabled={isSaving}
+							className="flex-1"
 						>
 							<XIcon size={16} color={themeColors.mutedForeground} />
-							<Text className="ml-2 text-muted-foreground">Cancel</Text>
+							<Button.Label>Cancel</Button.Label>
 						</Button>
 						<Button
 							onPress={handleSave}
-							disabled={isSaving}
-							className="flex-1 flex-row items-center justify-center"
+							isDisabled={isSaving}
+							className="flex-1"
 						>
 							{isSaving ? (
 								<ActivityIndicator
 									size="small"
-									color={themeColors.primaryForeground}
+									color={themeColors.accentForeground}
 								/>
 							) : (
-								<CheckIcon size={16} color={themeColors.primaryForeground} />
+								<CheckIcon size={16} color={themeColors.accentForeground} />
 							)}
-							<Text className="ml-2">{isSaving ? "Saving..." : "Save"}</Text>
+							<Button.Label>{isSaving ? "Saving..." : "Save"}</Button.Label>
 						</Button>
 					</View>
 				)}

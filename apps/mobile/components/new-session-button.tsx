@@ -1,4 +1,7 @@
-import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import {
+	BottomSheet,
+	BottomSheetScrollView,
+} from "@expo/ui/community/bottom-sheet";
 import { useRouter } from "expo-router";
 import { Zap } from "lucide-react-native";
 import React, { useCallback, useRef, useState } from "react";
@@ -11,7 +14,6 @@ import {
 	View,
 } from "react-native";
 
-// import { Switch } from "@/components/ui/switch"; // For minimalist feature - coming later
 import { useAuth } from "@/context/supabase-provider";
 import { useCreateSession, useLastSession } from "@/lib/queries/sessions";
 import type { SessionType } from "@/lib/queries/types";
@@ -68,7 +70,11 @@ export default function NewSessionButton() {
 				bodyWeight: lastSession.data?.body_weight ?? 0,
 			},
 			{
-				onSuccess: (created) => router.push(`/session/${created.id}`),
+				onSuccess: (created) => {
+					// The native sheet stays presented over the next screen otherwise
+					handleClosePress();
+					router.push(`/session/${created.id}`);
+				},
 				onError: (error) =>
 					Alert.alert(
 						"Erreur",
@@ -107,7 +113,6 @@ export default function NewSessionButton() {
 				index={-1}
 				enableDynamicSizing={true}
 				enablePanDownToClose={true}
-				maxDynamicContentSize={600}
 				onClose={() => setOpen(false)}
 				backgroundStyle={{
 					backgroundColor: themeColors.popover,
@@ -123,7 +128,7 @@ export default function NewSessionButton() {
 						flexGrow: 1,
 					}}
 				>
-					<View className="bg-popover">
+					<View className="bg-overlay">
 						{isLoading ? (
 							<View className="pt-14 items-center justify-center">
 								<ActivityIndicator size="large" />
@@ -137,7 +142,7 @@ export default function NewSessionButton() {
 									</Text>
 									{/* Minimalist training toggle - Coming soon */}
 									{/* <View className="flex-row items-center justify-between mt-2">
-										<Text className="text-sm text-muted-foreground flex-1 mr-2">
+										<Text className="text-sm text-muted flex-1 mr-2">
 											{showMinimaliste
 												? "Entrainement minimaliste (2x/semaine)"
 												: "Entrainement complet (3x/semaine)"}
@@ -156,7 +161,7 @@ export default function NewSessionButton() {
 										<>
 											<Pressable
 												onPress={() => handleCreateSession("Séance A")}
-												className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border bg-card active:opacity-70"
+												className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border bg-surface active:opacity-70"
 											>
 												<Text className="mt-2 text-lg font-medium text-foreground">
 													Séance A
@@ -169,7 +174,7 @@ export default function NewSessionButton() {
 											</Pressable>
 											<Pressable
 												onPress={() => handleCreateSession("Séance B")}
-												className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border bg-card active:opacity-70"
+												className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border bg-surface active:opacity-70"
 											>
 												<Text className="mt-2 text-lg font-medium text-foreground">
 													Séance B
@@ -185,7 +190,7 @@ export default function NewSessionButton() {
 									<>
 										<Pressable
 											onPress={() => handleCreateSession("Upper A")}
-											className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border bg-card active:opacity-70"
+											className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border bg-surface active:opacity-70"
 										>
 											<Text className="mb-1 mt-2 text-lg font-medium text-foreground">
 												Upper A
@@ -198,7 +203,7 @@ export default function NewSessionButton() {
 										</Pressable>
 										<Pressable
 											onPress={() => handleCreateSession("Lower")}
-											className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border bg-card active:opacity-70"
+											className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border bg-surface active:opacity-70"
 										>
 											<Text className="mb-1 mt-2 text-lg font-medium text-foreground">
 												Lower
@@ -211,7 +216,7 @@ export default function NewSessionButton() {
 										</Pressable>
 										<Pressable
 											onPress={() => handleCreateSession("Upper B")}
-											className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border bg-card active:opacity-70"
+											className="flex h-24 w-24 flex-col items-center justify-center rounded-md border border-border bg-surface active:opacity-70"
 										>
 											<Text className="mb-1 mt-2 text-lg font-medium text-foreground">
 												Upper B

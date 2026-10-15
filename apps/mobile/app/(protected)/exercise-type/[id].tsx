@@ -6,14 +6,12 @@ import {
 	Alert,
 	Pressable,
 	ScrollView,
-	Switch,
 	View,
 } from "react-native";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Host, Switch } from "@expo/ui";
+import { Button, Input, TextArea } from "heroui-native";
 import { Text } from "@/components/ui/text";
-import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/context/supabase-provider";
 import {
 	useCreateExerciseType,
@@ -210,7 +208,7 @@ export default function ExerciseTypeDetail() {
 				{isCreating && (
 					<View className="mb-6">
 						<Text className="text-2xl font-bold mb-2">New Exercise Type</Text>
-						<Text className="text-sm text-muted-foreground">
+						<Text className="text-sm text-muted">
 							Create a new exercise type for your workouts
 						</Text>
 					</View>
@@ -235,54 +233,64 @@ export default function ExerciseTypeDetail() {
 						Session Types{" "}
 						{isCreating && <Text className="text-red-500">*</Text>}
 					</Text>
-					<View className="bg-muted p-4 rounded-lg">
+					<View className="bg-default p-4 rounded-lg">
 						<View className="flex-row justify-between">
 							<View className="flex-1">
 								<View className="flex-row items-center mb-2">
-									<Switch
-										value={formState.type_session.includes("Upper A")}
-										onValueChange={(checked: boolean) =>
-											handleCheckboxChange(checked, "Upper A")
-										}
-									/>
+									<Host matchContents>
+										<Switch
+											value={formState.type_session.includes("Upper A")}
+											onValueChange={(checked: boolean) =>
+												handleCheckboxChange(checked, "Upper A")
+											}
+										/>
+									</Host>
 									<Text className="ml-2">Upper A</Text>
 								</View>
 								<View className="flex-row items-center mb-2">
-									<Switch
-										value={formState.type_session.includes("Lower")}
-										onValueChange={(checked: boolean) =>
-											handleCheckboxChange(checked, "Lower")
-										}
-									/>
+									<Host matchContents>
+										<Switch
+											value={formState.type_session.includes("Lower")}
+											onValueChange={(checked: boolean) =>
+												handleCheckboxChange(checked, "Lower")
+											}
+										/>
+									</Host>
 									<Text className="ml-2">Lower</Text>
 								</View>
 								<View className="flex-row items-center mb-2">
-									<Switch
-										value={formState.type_session.includes("Upper B")}
-										onValueChange={(checked: boolean) =>
-											handleCheckboxChange(checked, "Upper B")
-										}
-									/>
+									<Host matchContents>
+										<Switch
+											value={formState.type_session.includes("Upper B")}
+											onValueChange={(checked: boolean) =>
+												handleCheckboxChange(checked, "Upper B")
+											}
+										/>
+									</Host>
 									<Text className="ml-2">Upper B</Text>
 								</View>
 							</View>
 							<View className="flex-1">
 								<View className="flex-row items-center mb-2">
-									<Switch
-										value={formState.type_session.includes("Séance A")}
-										onValueChange={(checked: boolean) =>
-											handleCheckboxChange(checked, "Séance A")
-										}
-									/>
+									<Host matchContents>
+										<Switch
+											value={formState.type_session.includes("Séance A")}
+											onValueChange={(checked: boolean) =>
+												handleCheckboxChange(checked, "Séance A")
+											}
+										/>
+									</Host>
 									<Text className="ml-2">Séance A</Text>
 								</View>
 								<View className="flex-row items-center mb-2">
-									<Switch
-										value={formState.type_session.includes("Séance B")}
-										onValueChange={(checked: boolean) =>
-											handleCheckboxChange(checked, "Séance B")
-										}
-									/>
+									<Host matchContents>
+										<Switch
+											value={formState.type_session.includes("Séance B")}
+											onValueChange={(checked: boolean) =>
+												handleCheckboxChange(checked, "Séance B")
+											}
+										/>
+									</Host>
 									<Text className="ml-2">Séance B</Text>
 								</View>
 							</View>
@@ -305,7 +313,7 @@ export default function ExerciseTypeDetail() {
 				</View>
 
 				{/* Rep Ranges */}
-				<View className="mb-4 bg-muted p-4 rounded-lg">
+				<View className="mb-4 bg-default p-4 rounded-lg">
 					<View className="flex-row items-center justify-between mb-4">
 						<Text className="text-lg font-medium">Repetition Ranges</Text>
 						<Pressable
@@ -368,7 +376,7 @@ export default function ExerciseTypeDetail() {
 				{/* Advice */}
 				<View className="mb-6">
 					<Text className="text-sm font-medium mb-2">Advice / Notes</Text>
-					<Textarea
+					<TextArea
 						value={formState.advice}
 						onChangeText={(value) => handleInputChange("advice", value)}
 						placeholder="No advice."
@@ -381,18 +389,21 @@ export default function ExerciseTypeDetail() {
 				<View className="flex-row gap-2 mb-20">
 					{!isCreating && (
 						<Button
-							variant="outline"
+							variant="danger-soft"
 							onPress={handleDelete}
-							className="flex-row w-1/2 gap-2 items-center justify-center"
+							className="w-1/2"
 						>
-							<Trash2 size={20} color="#EF4444" strokeWidth={1.7} />
-							<Text className="text-red-600 dark:text-red-500">Delete</Text>
+							<Trash2
+								size={20}
+								color={themeColors.destructive}
+								strokeWidth={1.7}
+							/>
+							<Button.Label>Delete</Button.Label>
 						</Button>
 					)}
 					<Button
-						variant="default"
 						onPress={handleSave}
-						disabled={isSaving}
+						isDisabled={isSaving}
 						className={cn(
 							"flex-row items-center justify-center gap-2",
 							isCreating ? "w-full" : "w-1/2",
@@ -401,16 +412,16 @@ export default function ExerciseTypeDetail() {
 						{isSaving ? (
 							<ActivityIndicator
 								size="small"
-								color={themeColors.primaryForeground}
+								color={themeColors.accentForeground}
 							/>
 						) : (
 							<Check
-								color={themeColors.primaryForeground}
+								color={themeColors.accentForeground}
 								strokeWidth={1.7}
 								size={20}
 							/>
 						)}
-						<Text className="text-primary-foreground">
+						<Button.Label>
 							{isSaving
 								? isCreating
 									? "Creating..."
@@ -418,7 +429,7 @@ export default function ExerciseTypeDetail() {
 								: isCreating
 									? "Create Exercise Type"
 									: "Save"}
-						</Text>
+						</Button.Label>
 					</Button>
 				</View>
 			</ScrollView>

@@ -47,7 +47,7 @@ export default function List() {
 				<ActivityIndicator size="large" color={themeColors.primary} />
 			) : (
 				<LegendList
-					className="w-full"
+					style={{ width: "100%" }}
 					data={sessions}
 					keyExtractor={(item) => item.id}
 					estimatedItemSize={60}

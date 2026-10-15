@@ -2,7 +2,7 @@ import { addDays, isSameDay, startOfWeek, subDays } from "date-fns";
 import { Circle, CircleDashed } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
 import { Text, View } from "react-native";
-import PagerView from "react-native-pager-view";
+import PagerView, { type PagerViewRef } from "@expo/ui/community/pager-view";
 import Animated, {
 	interpolate,
 	useAnimatedStyle,
@@ -17,7 +17,7 @@ const WeekActivityCarousel = () => {
 	const { isDarkColorScheme } = useColorScheme();
 	const recentSessions = useRecentSessions(31);
 	const [currentPage, setCurrentPage] = useState(2);
-	const pagerRef = React.useRef<PagerView>(null);
+	const pagerRef = React.useRef<PagerViewRef>(null);
 	const sessions = recentSessions.data ?? [];
 	const isLoading = recentSessions.isLoading;
 
@@ -124,7 +124,7 @@ const WeekActivityCarousel = () => {
 		<View>
 			<PagerView
 				ref={pagerRef}
-				style={{ height: 40 }}
+				style={{ height: 56 }}
 				initialPage={2}
 				onPageSelected={(e) => setCurrentPage(e.nativeEvent.position)}
 			>
@@ -142,14 +142,14 @@ const WeekActivityCarousel = () => {
 												fill={activeFillColor}
 												color={activeStrokeColor}
 												strokeWidth={2}
-												className="mb-1"
+												style={{ marginBottom: 4 }}
 											/>
 										) : (
 											<CircleDashed
 												size={24}
 												color={inactiveStrokeColor}
 												strokeWidth={1}
-												className="mb-1"
+												style={{ marginBottom: 4 }}
 											/>
 										)}
 										<Text className="text-sm text-gray-700 dark:text-gray-300">

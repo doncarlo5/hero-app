@@ -1,4 +1,7 @@
-import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import {
+	BottomSheet,
+	BottomSheetScrollView,
+} from "@expo/ui/community/bottom-sheet";
 import { Stack, useRouter } from "expo-router";
 import {
 	ChevronDown,
@@ -18,7 +21,7 @@ import {
 } from "react-native";
 
 import { SafeAreaView } from "@/components/safe-area-view";
-import { Button } from "@/components/ui/button";
+import { Button } from "heroui-native";
 import { Text } from "@/components/ui/text";
 import { useExerciseTypes } from "@/lib/queries/exercise-types";
 import { useProgram, useSaveProgram } from "@/lib/queries/programs";
@@ -209,14 +212,14 @@ export default function ProgramPage() {
 										onPress={() => setSessionType(type)}
 										className={`px-4 py-2 rounded-lg border ${
 											sessionType === type
-												? "bg-primary border-primary"
-												: "border-border bg-muted/30"
+												? "bg-foreground border-foreground"
+												: "border-border bg-default/30"
 										}`}
 									>
 										<Text
 											className={
 												sessionType === type
-													? "text-primary-foreground font-medium"
+													? "text-background font-medium"
 													: "text-foreground"
 											}
 										>
@@ -229,27 +232,20 @@ export default function ProgramPage() {
 					</View>
 
 					{/* Add Exercise Button */}
-					<Button
-						onPress={openAddExercise}
-						className="mb-4 flex-row items-center justify-center"
-					>
-						<PlusCircle size={18} color={themeColors.primaryForeground} />
-						<Text className="ml-2 text-primary-foreground font-medium">
-							Add Exercise
-						</Text>
+					<Button onPress={openAddExercise} className="mb-4">
+						<PlusCircle size={18} color={themeColors.accentForeground} />
+						<Button.Label>Add Exercise</Button.Label>
 					</Button>
 
 					{/* Exercises List */}
 					{isLoading ? (
 						<View className="flex-1 items-center justify-center py-8">
 							<ActivityIndicator size="large" />
-							<Text className="text-muted-foreground mt-2">
-								Loading program...
-							</Text>
+							<Text className="text-muted mt-2">Loading program...</Text>
 						</View>
 					) : exercises.length === 0 ? (
-						<View className="bg-muted/30 rounded-lg p-6 items-center">
-							<Text className="text-muted-foreground text-center">
+						<View className="bg-default/30 rounded-lg p-6 items-center">
+							<Text className="text-muted text-center">
 								No exercises in this program yet. Add your first exercise!
 							</Text>
 						</View>
@@ -258,7 +254,7 @@ export default function ProgramPage() {
 							{exercises.map((exercise, index) => (
 								<View
 									key={index}
-									className="mb-3 rounded-xl border border-border bg-card p-4"
+									className="mb-3 rounded-xl border border-border bg-surface p-4"
 								>
 									<View className="flex-row items-center justify-between">
 										<View className="flex-1">
@@ -269,7 +265,7 @@ export default function ProgramPage() {
 										<View className="flex-row items-center gap-1">
 											<TouchableOpacity
 												onPress={() => openAddAlternative(index)}
-												className="p-2 rounded-lg bg-primary/10"
+												className="p-2 rounded-lg bg-foreground/10"
 											>
 												<PlusCircle size={16} color="#0891b2" />
 											</TouchableOpacity>
@@ -277,7 +273,7 @@ export default function ProgramPage() {
 												disabled={index === 0}
 												onPress={() => moveExerciseUp(index)}
 												className={`p-2 rounded-lg ${
-													index === 0 ? "bg-muted/30" : "bg-muted/50"
+													index === 0 ? "bg-default/30" : "bg-default/50"
 												}`}
 											>
 												<ChevronUp
@@ -294,8 +290,8 @@ export default function ProgramPage() {
 												onPress={() => moveExerciseDown(index)}
 												className={`p-2 rounded-lg ${
 													index === exercises.length - 1
-														? "bg-muted/30"
-														: "bg-muted/50"
+														? "bg-default/30"
+														: "bg-default/50"
 												}`}
 											>
 												<ChevronDown
@@ -324,7 +320,7 @@ export default function ProgramPage() {
 											{exercise.alternatives.map((alt, altIndex) => (
 												<View
 													key={alt.id}
-													className="flex-row items-center justify-between border-l-2 border-border py-2 px-3 bg-muted/20 rounded-r-lg"
+													className="flex-row items-center justify-between border-l-2 border-border py-2 px-3 bg-default/20 rounded-r-lg"
 												>
 													<Text className="text-foreground flex-1">
 														{exercise.order}.{altIndex + 1}. {alt.name}
@@ -334,7 +330,9 @@ export default function ProgramPage() {
 															disabled={altIndex === 0}
 															onPress={() => moveAlternativeUp(index, altIndex)}
 															className={`p-1 rounded ${
-																altIndex === 0 ? "bg-muted/30" : "bg-muted/50"
+																altIndex === 0
+																	? "bg-default/30"
+																	: "bg-default/50"
 															}`}
 														>
 															<ChevronUp
@@ -355,8 +353,8 @@ export default function ProgramPage() {
 															}
 															className={`p-1 rounded ${
 																altIndex === exercise.alternatives.length - 1
-																	? "bg-muted/30"
-																	: "bg-muted/50"
+																	? "bg-default/30"
+																	: "bg-default/50"
 															}`}
 														>
 															<ChevronDown
@@ -394,17 +392,17 @@ export default function ProgramPage() {
 				<View className="absolute bottom-20 right-10">
 					<Button
 						onPress={saveProgram}
-						disabled={isSaving || exercises.length === 0}
-						size="icon"
-						className="h-16 w-16 rounded-full items-center justify-center p-0"
+						isDisabled={isSaving || exercises.length === 0}
+						isIconOnly
+						className="h-16 w-16 rounded-full"
 					>
 						{isSaving ? (
 							<ActivityIndicator
 								size="small"
-								color={themeColors.primaryForeground}
+								color={themeColors.accentForeground}
 							/>
 						) : (
-							<SaveIcon size={28} color={themeColors.primaryForeground} />
+							<SaveIcon size={28} color={themeColors.accentForeground} />
 						)}
 					</Button>
 				</View>
@@ -415,7 +413,6 @@ export default function ProgramPage() {
 					index={-1}
 					enableDynamicSizing={true}
 					enablePanDownToClose={true}
-					maxDynamicContentSize={600}
 					backgroundStyle={{
 						backgroundColor: themeColors.popover,
 					}}
@@ -439,13 +436,11 @@ export default function ProgramPage() {
 						{isLoadingTypes ? (
 							<View className="items-center py-8">
 								<ActivityIndicator size="large" />
-								<Text className="text-muted-foreground mt-2">
-									Loading exercises...
-								</Text>
+								<Text className="text-muted mt-2">Loading exercises...</Text>
 							</View>
 						) : availableExercises.length === 0 ? (
-							<View className="bg-muted/30 rounded-lg p-6 items-center">
-								<Text className="text-muted-foreground text-center">
+							<View className="bg-default/30 rounded-lg p-6 items-center">
+								<Text className="text-muted text-center">
 									No exercises available for this session type.
 								</Text>
 							</View>
@@ -466,7 +461,7 @@ export default function ProgramPage() {
 							className="mt-4"
 						>
 							<XIcon size={16} color={themeColors.mutedForeground} />
-							<Text className="ml-2">Close</Text>
+							<Button.Label>Close</Button.Label>
 						</Button>
 					</BottomSheetScrollView>
 				</BottomSheet>

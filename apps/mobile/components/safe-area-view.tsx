@@ -1,8 +1,6 @@
-import { cssInterop } from "nativewind";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { withUniwind } from "uniwind";
 
-const StyledSafeAreaView = cssInterop(SafeAreaView, {
-	className: "style",
-});
+const StyledSafeAreaView = withUniwind(SafeAreaView);
 
 export { StyledSafeAreaView as SafeAreaView };

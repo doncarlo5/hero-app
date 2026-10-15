@@ -6,7 +6,7 @@ This file provides guidance to coding agents when working with code in this repo
 
 Hero App is a workout tracking app. Monorepo (npm workspaces + Turborepo):
 
-- **apps/mobile**: the product. Expo SDK 57 / React Native app (TypeScript, Expo Router, NativeWind, TanStack Query) that talks to Supabase directly: Auth, Postgres through PostgREST with RLS, and RPCs.
+- **apps/mobile**: the product. Expo SDK 57 / React Native app (TypeScript, Expo Router, Uniwind + HeroUI Native, Expo UI, TanStack Query) that talks to Supabase directly: Auth, Postgres through PostgREST with RLS, and RPCs.
 - **apps/web**: marketing site only (Vite + React + Tailwind): landing page, support page, static privacy policy (`public/privacy-policy/`). Deployed on Vercel (`hero-app-web`). The old PWA is unregistered by `vite-plugin-pwa` with `selfDestroying`.
 - **apps/api**: legacy Express + MongoDB API used by the store build released before the Supabase migration. Do not add features; it is removed once the Supabase build has been adopted.
 - **supabase/**: the database. Migrations, local config and seed.
@@ -65,8 +65,9 @@ Local test account: `test@hero.local` / `hero-local-test`.
 - `config/supabase.ts`: typed client. The session is stored encrypted: an AES key in SecureStore, the ciphertext in AsyncStorage.
 - `context/supabase-provider.tsx`: auth state, Apple/Google/email sign-in.
 - `lib/queries/`: every data access, as TanStack Query hooks (`queryKeys`, `unwrap` in `client.ts`).
-- `lib/color-scheme-preference.ts`, `lib/theme.ts`: light/dark/auto preference and navigation themes.
-- `components/ui/`: shared primitives (rn-primitives + NativeWind).
+- `lib/color-scheme-preference.ts`, `lib/theme.ts`: light/dark/auto preference (`Uniwind.setTheme`), theme colors for non-className props (`useThemeColors`) and the navigation theme.
+- Styling: Uniwind (Tailwind v4) with HeroUI Native's semantic tokens (`background`, `foreground`, `surface`, `default`, `muted`, `accent` = brand teal, `danger`, `border`…), set in `global.css`. Never hardcode a color a token covers.
+- Components: HeroUI Native (`heroui-native`) for buttons, fields and labels; Expo UI (`@expo/ui`) for native controls: bottom sheets, pickers, date pickers, switches, pager (drop-ins from `@expo/ui/community/*`). `components/ui/` only keeps the react-hook-form bridge (`form.tsx`), `Text` and typography.
 
 ## Testing
 

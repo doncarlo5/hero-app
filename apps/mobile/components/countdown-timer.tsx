@@ -82,7 +82,7 @@ export function CountDownTimer({ exerciseTypeTimer }: CountDownTimerProps) {
 		if (Number.isNaN(remainingTime)) {
 			return (
 				<View className="flex items-center justify-center">
-					<Text className="text-2xl text-muted-foreground">--:--</Text>
+					<Text className="text-2xl text-muted">--:--</Text>
 				</View>
 			);
 		}

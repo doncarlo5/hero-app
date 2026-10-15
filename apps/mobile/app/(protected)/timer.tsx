@@ -4,7 +4,7 @@ import { useState } from "react";
 import { View } from "react-native";
 
 import { CountDownTimer } from "@/components/countdown-timer";
-import { Input } from "@/components/ui/input";
+import { Input } from "heroui-native";
 import { Text } from "@/components/ui/text";
 import { useThemeColors } from "@/lib/theme";
 
@@ -44,9 +44,7 @@ export default function TimerPage() {
 								style={{ fontSize: 20 }}
 							/>
 						</View>
-						<Text className="mb-6 text-muted-foreground text-lg">
-							En secondes
-						</Text>
+						<Text className="mb-6 text-muted text-lg">En secondes</Text>
 					</View>
 				</View>
 			</View>

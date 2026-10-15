@@ -1,8 +1,7 @@
-import BottomSheet, {
-	BottomSheetBackdrop,
-	type BottomSheetBackdropProps,
+import {
+	BottomSheet,
 	BottomSheetScrollView,
-} from "@gorhom/bottom-sheet";
+} from "@expo/ui/community/bottom-sheet";
 import { format } from "date-fns";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
@@ -21,6 +20,7 @@ import {
 	Keyboard,
 	KeyboardAvoidingView,
 	Platform,
+	Pressable,
 	ScrollView,
 	TouchableOpacity,
 	View,
@@ -28,17 +28,14 @@ import {
 
 import { CountDownTimer } from "@/components/countdown-timer";
 import { SafeAreaView } from "@/components/safe-area-view";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Button, Input, TextArea } from "heroui-native";
 import { Text } from "@/components/ui/text";
-import { Textarea } from "@/components/ui/textarea";
 import { useLastExercise, useSaveExercise } from "@/lib/queries/exercises";
 import { useExerciseTypes } from "@/lib/queries/exercise-types";
 import { useSession } from "@/lib/queries/sessions";
 import { setsToArrays, type ExerciseType } from "@/lib/queries/types";
 import { useThemeColors } from "@/lib/theme";
 import { useColorScheme } from "@/lib/useColorScheme";
-import { Pressable } from "react-native-gesture-handler";
 
 // "12,5" and "12.5" are both accepted; empty or invalid input counts as 0
 function parseNumber(value: string) {
@@ -113,16 +110,6 @@ export default function DoExercise() {
 
 	const [showPrefillButton, setShowPrefillButton] = useState(false);
 	const [addRep4, setAddRep4] = useState(false);
-
-	// Handle backdrop press to close sheet
-	const renderBackdrop = (props: BottomSheetBackdropProps) => (
-		<BottomSheetBackdrop
-			{...props}
-			disappearsOnIndex={-1}
-			appearsOnIndex={0}
-			opacity={0.5}
-		/>
-	);
 
 	const [formState, setFormState] = useState({
 		rep1: "",
@@ -262,22 +249,21 @@ export default function DoExercise() {
 					{/* Exercise Type Selection */}
 					<View className="mb-4">
 						{isLoadingTypes ? (
-							<View className="bg-muted/30 rounded-lg p-4">
+							<View className="bg-default/30 rounded-lg p-4">
 								<ActivityIndicator size="small" />
 							</View>
 						) : allExerciseTypes.length === 0 ? (
-							<View className="bg-muted/30 rounded-lg p-4">
-								<Text className="text-muted-foreground text-center">
+							<View className="bg-default/30 rounded-lg p-4">
+								<Text className="text-muted text-center">
 									Please create an exercise for this session type.
 								</Text>
 							</View>
 						) : (
-							<Button
+							<Pressable
 								onPress={() => {
 									bottomSheetRef.current?.snapToIndex(0);
 								}}
-								variant="ghost"
-								className="flex-row w-full items-center bg-muted rounded-md justify-between p-4"
+								className="flex-row items-center w-full bg-default rounded-md justify-between p-4"
 							>
 								<Text className="text-foreground">
 									{oneExerciseType
@@ -289,7 +275,7 @@ export default function DoExercise() {
 									color={themeColors.foreground}
 									strokeWidth={1.5}
 								/>
-							</Button>
+							</Pressable>
 						)}
 					</View>
 
@@ -297,7 +283,7 @@ export default function DoExercise() {
 					{lastExercise?.date && (
 						<View className="flex-row items-center justify-end gap-1 px-2 py-1 mb-3">
 							<HistoryIcon size={14} color={themeColors.mutedForeground} />
-							<Text className="text-sm text-muted-foreground">
+							<Text className="text-sm text-muted">
 								{isLoadingLastExercise
 									? "Loading..."
 									: format(new Date(lastExercise.date), "dd/MM/yyyy")}
@@ -331,16 +317,16 @@ export default function DoExercise() {
 									<Button
 										variant="outline"
 										onPress={handlePrefillWeights}
-										className="flex-1 flex-row items-center justify-center"
+										className="flex-1"
 									>
 										<StarIcon size={16} color={themeColors.mutedForeground} />
-										<Text className="ml-1">
+										<Button.Label>
 											All sets to {formState.weight1} KG
-										</Text>
+										</Button.Label>
 									</Button>
 									<Button
 										variant="outline"
-										size="icon"
+										isIconOnly
 										onPress={() => setShowPrefillButton(false)}
 									>
 										<XIcon size={16} color={themeColors.mutedForeground} />
@@ -353,7 +339,7 @@ export default function DoExercise() {
 								<View className="flex-row justify-between gap-1 px-2">
 									{/* Reps Column */}
 									<View className="flex-1 max-w-[25%]">
-										<Text className="text-sm text-muted-foreground text-center mb-2">
+										<Text className="text-sm text-muted text-center mb-2">
 											Reps
 										</Text>
 										<View className="gap-1">
@@ -412,7 +398,7 @@ export default function DoExercise() {
 
 									{/* Weight Column */}
 									<View className="flex-1 max-w-[35%]">
-										<Text className="text-sm text-muted-foreground text-center mb-2">
+										<Text className="text-sm text-muted text-center mb-2">
 											KG
 										</Text>
 										<View className="gap-1">
@@ -473,7 +459,7 @@ export default function DoExercise() {
 
 									{/* Range Column */}
 									<View className="flex-1 max-w-[20%]">
-										<Text className="text-sm text-muted-foreground text-center mb-2">
+										<Text className="text-sm text-muted text-center mb-2">
 											Range
 										</Text>
 										<View className="gap-1">
@@ -504,7 +490,7 @@ export default function DoExercise() {
 
 									{/* Checkbox Column */}
 									<View className="flex-1 max-w-[20%]">
-										<Text className="text-sm text-muted-foreground text-center mb-2">
+										<Text className="text-sm text-muted text-center mb-2">
 											Set
 										</Text>
 										<View className="gap-1">
@@ -555,12 +541,12 @@ export default function DoExercise() {
 							<View className="bg-slate-50 dark:bg-slate-900/40 rounded-2xl p-4 mb-20">
 								<View className="flex-row items-center gap-2 mb-3">
 									<EditIcon size={16} color={themeColors.mutedForeground} />
-									<Text className="text-muted-foreground">Notes</Text>
+									<Text className="text-muted">Notes</Text>
 									{lastExercise?.comment && (
 										<View className="w-2 h-2 bg-teal-500 rounded-full" />
 									)}
 								</View>
-								<Textarea
+								<TextArea
 									value={formState.comment}
 									onChangeText={(value) => handleInputChange("comment", value)}
 									placeholder={
@@ -582,17 +568,17 @@ export default function DoExercise() {
 				<View className="absolute bottom-20 right-10">
 					<Button
 						onPress={handleSubmit}
-						disabled={isLoading}
-						size="icon"
-						className="h-16 w-16 rounded-full items-center justify-center p-0"
+						isDisabled={isLoading}
+						isIconOnly
+						className="h-16 w-16 rounded-full"
 					>
 						{isLoading ? (
 							<ActivityIndicator
 								size="small"
-								color={themeColors.primaryForeground}
+								color={themeColors.accentForeground}
 							/>
 						) : (
-							<CheckIcon size={28} color={themeColors.primaryForeground} />
+							<CheckIcon size={28} color={themeColors.accentForeground} />
 						)}
 					</Button>
 				</View>
@@ -604,8 +590,6 @@ export default function DoExercise() {
 				index={-1}
 				enableDynamicSizing={true}
 				enablePanDownToClose={true}
-				maxDynamicContentSize={600}
-				backdropComponent={renderBackdrop}
 				backgroundStyle={{
 					backgroundColor: themeColors.popover,
 				}}
@@ -642,7 +626,7 @@ export default function DoExercise() {
 									<Text
 										className={`ml-2 ${
 											selectedExerciseIndex === index
-												? "text-primary font-semibold"
+												? "text-foreground font-semibold"
 												: "text-foreground"
 										}`}
 									>

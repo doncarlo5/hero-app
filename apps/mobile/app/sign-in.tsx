@@ -9,7 +9,7 @@ import { ActivityIndicator, Platform, View } from "react-native";
 import * as z from "zod";
 
 import { SafeAreaView } from "@/components/safe-area-view";
-import { Button } from "@/components/ui/button";
+import { Button } from "heroui-native";
 import { Form, FormField, FormInput } from "@/components/ui/form";
 import { Text } from "@/components/ui/text";
 import { H1 } from "@/components/ui/typography";
@@ -128,20 +128,18 @@ export default function SignIn() {
 
 				{/* Google Sign In Button */}
 				<Button
-					size="default"
 					variant="outline"
 					onPress={handleGoogleSignIn}
-					disabled={
+					isDisabled={
 						isGoogleLoading || isAppleLoading || form.formState.isSubmitting
 					}
-					className="flex-row items-center justify-center gap-2 rounded-lg"
 				>
 					{isGoogleLoading ? (
 						<ActivityIndicator size="small" />
 					) : (
 						<>
 							<GoogleIcon size={16} />
-							<Text>Continue with Google</Text>
+							<Button.Label>Continue with Google</Button.Label>
 						</>
 					)}
 				</Button>
@@ -181,16 +179,13 @@ export default function SignIn() {
 				</Form>
 			</View>
 			<Button
-				size="default"
-				variant="default"
 				onPress={form.handleSubmit(onSubmit)}
-				disabled={form.formState.isSubmitting || isGoogleLoading}
-				className="web:m-4"
+				isDisabled={form.formState.isSubmitting || isGoogleLoading}
 			>
 				{form.formState.isSubmitting ? (
 					<ActivityIndicator size="small" />
 				) : (
-					<Text>Sign In</Text>
+					<Button.Label>Sign In</Button.Label>
 				)}
 			</Button>
 		</SafeAreaView>

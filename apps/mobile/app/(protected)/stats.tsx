@@ -1,4 +1,7 @@
-import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import {
+	BottomSheet,
+	BottomSheetScrollView,
+} from "@expo/ui/community/bottom-sheet";
 import { format } from "date-fns";
 import { AlignJustifyIcon, LucideLoader2 } from "lucide-react-native";
 import React, { useRef, useState } from "react";
@@ -19,7 +22,7 @@ import {
 } from "victory-native";
 
 import { SafeAreaView } from "@/components/safe-area-view";
-import { Button } from "@/components/ui/button";
+import { Button } from "heroui-native";
 import { Text } from "@/components/ui/text";
 import { useExerciseHistory } from "@/lib/queries/exercises";
 import { useExerciseTypes } from "@/lib/queries/exercise-types";
@@ -98,20 +101,19 @@ export default function Stats() {
 				{/* Exercise Type Selection */}
 				<View className="mb-4">
 					{isLoadingTypes ? (
-						<View className="bg-muted/30 rounded-lg p-4">
+						<View className="bg-default/30 rounded-lg p-4">
 							<ActivityIndicator size="small" />
 						</View>
 					) : allExerciseTypes.length === 0 ? (
-						<View className="bg-muted/30 rounded-lg p-4">
-							<Text className="text-muted-foreground text-center">
+						<View className="bg-default/30 rounded-lg p-4">
+							<Text className="text-muted text-center">
 								Aucun exercice disponible.
 							</Text>
 						</View>
 					) : (
-						<Button
+						<Pressable
 							onPress={openBottomSheet}
-							variant="ghost"
-							className="flex-row w-full h-20 items-center bg-muted rounded-md justify-between p-4"
+							className="flex-row items-center w-full h-20 bg-default rounded-md justify-between p-4"
 						>
 							<Text className="text-foreground">
 								{selectedExerciseType
@@ -123,21 +125,15 @@ export default function Stats() {
 								color={themeColors.foreground}
 								strokeWidth={1.5}
 							/>
-						</Button>
+						</Pressable>
 					)}
 				</View>
 
 				{/* Loading State */}
 				{isLoading && (
 					<View className="flex-1 items-center justify-center py-20">
-						<LucideLoader2
-							className="animate-spin"
-							size={32}
-							color={themeColors.mutedForeground}
-						/>
-						<Text className="mt-4 text-sm text-muted-foreground">
-							Chargement...
-						</Text>
+						<LucideLoader2 size={32} color={themeColors.mutedForeground} />
+						<Text className="mt-4 text-sm text-muted">Chargement...</Text>
 					</View>
 				)}
 
@@ -267,7 +263,7 @@ export default function Stats() {
 				{/* No Data State */}
 				{exercise.length === 0 && !isLoading && (
 					<View className=" text-center">
-						<Text className="text-muted-foreground">
+						<Text className="text-muted">
 							Aucun historique disponible sur cet exercice.
 						</Text>
 					</View>
@@ -285,21 +281,21 @@ export default function Stats() {
 								<Text className="text-2xl font-bold text-foreground">
 									{exercise.length}
 								</Text>
-								<Text className="text-sm text-muted-foreground">Séances</Text>
+								<Text className="text-sm text-muted">Séances</Text>
 							</View>
 
 							<View className="items-center">
 								<Text className="text-2xl font-bold text-foreground">
 									{maxWeight}
 								</Text>
-								<Text className="text-sm text-muted-foreground">Max (kg)</Text>
+								<Text className="text-sm text-muted">Max (kg)</Text>
 							</View>
 
 							<View className="items-center">
 								<Text className="text-2xl font-bold text-foreground">
 									{minWeight}
 								</Text>
-								<Text className="text-sm text-muted-foreground">Min (kg)</Text>
+								<Text className="text-sm text-muted">Min (kg)</Text>
 							</View>
 						</View>
 					</View>
@@ -325,7 +321,7 @@ export default function Stats() {
 				>
 					{allExerciseTypes.length === 0 ? (
 						<View className="py-8 items-center">
-							<Text className="text-muted-foreground text-center">
+							<Text className="text-muted text-center">
 								Aucun exercice disponible
 							</Text>
 						</View>
@@ -349,26 +345,26 @@ export default function Stats() {
 										<View
 											className={`flex-row items-center p-4 rounded-lg mb-2 ${
 												isSelected
-													? "bg-primary/10 border border-primary/20"
-													: "bg-muted"
+													? "bg-foreground/10 border border-foreground/20"
+													: "bg-default"
 											}`}
 										>
 											<View
 												className={`w-5 h-5 rounded-full border-2 ${
 													isSelected
-														? "bg-primary border-primary"
-														: "border-muted-foreground"
+														? "bg-foreground border-foreground"
+														: "border-default"
 												}`}
 											>
 												{isSelected && (
-													<View className="w-2 h-2 bg-primary-foreground rounded-full m-auto" />
+													<View className="w-2 h-2 bg-background rounded-full m-auto" />
 												)}
 											</View>
 											<View className="ml-3 flex-1">
 												<Text
 													className={`text-base ${
 														isSelected
-															? "text-primary font-semibold"
+															? "text-foreground font-semibold"
 															: "text-foreground"
 													}`}
 												>
