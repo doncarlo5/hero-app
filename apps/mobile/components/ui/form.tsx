@@ -41,7 +41,7 @@ function useFieldError() {
 	return getFieldState(fieldContext.name, formState).error;
 }
 
-type FormInputProps = Omit<InputProps, "onChange" | "value"> & {
+type FormInputProps = Omit<InputProps, "onChange" | "value" | "ref"> & {
 	name: string;
 	value: string;
 	onChange: (value: string) => void;
@@ -49,7 +49,8 @@ type FormInputProps = Omit<InputProps, "onChange" | "value"> & {
 	disabled?: boolean;
 	label?: string;
 	description?: string;
-	ref?: React.Ref<React.ComponentRef<typeof Input>>;
+	/** react-hook-form passes a focus ref; these forms do not use it. */
+	ref?: unknown;
 };
 
 /** A react-hook-form field rendered as a HeroUI TextField. */
@@ -61,6 +62,7 @@ function FormInput(props: FormInputProps) {
 		onChange,
 		disabled,
 		name: _name,
+		ref: _ref,
 		...inputProps
 	} = props;
 
