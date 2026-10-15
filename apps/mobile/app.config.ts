@@ -5,7 +5,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 	name: "Hero App",
 	slug: "hero-app",
 	scheme: "hero-app",
-	version: "1.1.0",
+	version: "2.0.0",
 	orientation: "portrait",
 	icon: "./assets/icon.png",
 	userInterfaceStyle: "automatic",
@@ -29,14 +29,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 		entitlements: {
 			"com.apple.developer.applesignin": ["Default"],
 		},
-		buildNumber: "5",
 	},
 	android: {
 		adaptiveIcon: {
 			foregroundImage: "./assets/adaptive-icon.png",
 		},
 		package: "com.doncarlos.heroapp",
-		versionCode: 5,
 	},
 	experiments: {
 		typedRoutes: true,
