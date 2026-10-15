@@ -49,17 +49,20 @@ To point the mobile app at it, create `apps/mobile/.env.local` (gitignored) with
 
 Until the Supabase build of the mobile app is live in the stores, the store app keeps writing to MongoDB Atlas. `scripts/sync-mongo-delta.js` copies what was written there since the original copy (2026-04-06): profiles of users who signed up since, exercise types, sessions, exercise users and their sets, programs and feedbacks. Trophies are not copied: the database triggers evaluate them from the copied sets.
 
-- Mongo documents are matched to existing rows by owner + `created_at` (the first copy kept Mongo's timestamps), exercise types also by name, programs by session type. A matched row is only updated when its content differs and Mongo has the newer version, so the script can be re-run safely.
+- Mongo documents are matched to existing rows by owner + `created_at` (the first copy kept Mongo's timestamps) and content, since rows created in bulk share the same timestamp; exercise types also by name, programs by session type. A matched row is only updated when its content differs and Mongo has the newer version, so the script can be re-run safely.
 - Users without a profile go through `private.setup_user`, like a sign-up. Mongo users without a Supabase auth user, and documents whose owner no longer exists, are skipped and listed.
 - Everything runs in one transaction; `--dry-run` uses a read-only transaction and prints the same per-table counts.
-- `MONGODB_URI` comes from the root `.env`. The Supabase connection string (Dashboard → Connect → session pooler, `postgres` user) is passed in the environment only, never stored. Writing to a non-local database requires `--yes`.
+- `MONGODB_URI` comes from the root `.env`. Writing to a non-local database requires `--yes`.
+
+Against prod, `scripts/sync-mongo-delta-prod.sh` reads the database password from the macOS Keychain, so it is never typed on the command line or stored in the repo. Store it once (hidden prompt; reset it in Dashboard → Settings → Database if unknown — nothing else uses it):
 
 ```bash
-SUPABASE_DB_URL='postgresql://...' node scripts/sync-mongo-delta.js --dry-run
-SUPABASE_DB_URL='postgresql://...' node scripts/sync-mongo-delta.js --yes
+security add-generic-password -U -a postgres -s hero-app-supabase-db -w
+scripts/sync-mongo-delta-prod.sh --dry-run
+scripts/sync-mongo-delta-prod.sh --yes
 ```
 
-`--since=YYYY-MM-DD` changes the window (default 2026-03-01, before the copy: overlap is harmless). Run it once more after the last store app writes, i.e. once the old build is retired or the API is switched off.
+`SUPABASE_DB_URL='postgresql://...' node scripts/sync-mongo-delta.js` works too for another database. `--since=YYYY-MM-DD` changes the window (default 2026-03-01, before the copy: overlap is harmless). Last run: 2026-10-15 (nothing left to copy). Run it once more right before the Supabase build ships, and after the last store app writes, i.e. once the old build is retired or the API is switched off.
 
 Test against local databases only (needs `supabase start` and a throwaway Mongo):
 
