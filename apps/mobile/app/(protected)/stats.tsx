@@ -25,7 +25,10 @@ import { MovementPicker } from "@/components/movement-picker";
 import { SafeAreaView } from "@/components/safe-area-view";
 import { Button } from "heroui-native";
 import { Text } from "@/components/ui/text";
-import { useMovementHistory } from "@/lib/queries/exercises";
+import {
+	useLastLoggedMovementId,
+	useMovementHistory,
+} from "@/lib/queries/exercises";
 import { isLibraryMovement } from "@/lib/movement-library";
 import { useMovements } from "@/lib/queries/movements";
 import { setsToArrays, type Movement } from "@/lib/queries/types";
@@ -42,11 +45,15 @@ export default function Stats() {
 	const exerciseTypesQuery = useMovements();
 	const [pickedTypeId, setPickedTypeId] = useState<string | null>(null);
 
+	const lastLoggedQuery = useLastLoggedMovementId();
+
 	const allExerciseTypes = exerciseTypesQuery.data ?? [];
-	const isLoadingTypes = exerciseTypesQuery.isLoading;
-	// Default to the user's first movement, by name (the library comes after)
+	const isLoadingTypes =
+		exerciseTypesQuery.isLoading || lastLoggedQuery.isLoading;
+	// Default to the last movement logged, else the user's first movement by name (the library comes after)
 	const selectedExerciseType =
 		allExerciseTypes.find((type) => type.id === pickedTypeId) ??
+		allExerciseTypes.find((type) => type.id === lastLoggedQuery.data) ??
 		allExerciseTypes.find((type) => !isLibraryMovement(type)) ??
 		allExerciseTypes[0] ??
 		null;
