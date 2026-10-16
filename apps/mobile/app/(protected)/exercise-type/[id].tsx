@@ -91,7 +91,7 @@ export default function MovementDetail() {
 
 	const handleSave = () => {
 		if (formState.name.trim() === "") {
-			Alert.alert("Erreur", "Le nom de l'exercice est obligatoire.");
+			Alert.alert("Erreur", "Le nom de l’exercice est obligatoire.");
 			return;
 		}
 		const increment =
@@ -99,7 +99,7 @@ export default function MovementDetail() {
 				? null
 				: Number(formState.increment.replace(",", "."));
 		if (increment !== null && (Number.isNaN(increment) || increment <= 0)) {
-			Alert.alert("Erreur", "L'incrément doit être un nombre positif.");
+			Alert.alert("Erreur", "L’incrément doit être un nombre positif.");
 			return;
 		}
 		if (isSaving) return;
@@ -155,7 +155,8 @@ export default function MovementDetail() {
 					style: "destructive",
 					onPress: () =>
 						deleteMovement.mutate(movement.id, {
-							onSuccess: () => router.back(),
+							// The movement is gone: back to the list, not to its sheet
+							onSuccess: () => router.dismissTo("/exercise-types"),
 							onError: (error) =>
 								Alert.alert(
 									"Erreur",

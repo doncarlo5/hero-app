@@ -1,6 +1,6 @@
 import { format } from "date-fns";
 import { fr } from "date-fns/locale/fr";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { Button } from "heroui-native";
 import { ChevronRight, PencilIcon } from "lucide-react-native";
 import { ActivityIndicator, Pressable, SectionList, View } from "react-native";
@@ -27,15 +27,18 @@ function setsSummary(exercise: LoggedExerciseWithSession, timed: boolean) {
 	// Only warm-ups or finisher parts were logged (a session stopped early)
 	if (reps.length === 0) {
 		const others = exercise.logged_sets.length;
+		if (others === 0) return "Aucune série";
 		return `${others} série${others > 1 ? "s" : ""} hors séries de travail`;
 	}
+	// Bodyweight sets (0 kg) read "PDC"
+	const load = (weight: number) => (weight > 0 ? `${weight}` : "PDC");
 	return reps
 		.map((count, i) =>
 			timed
 				? weights[i] > 0
 					? `${weights[i]} kg · ${count} s`
 					: `${count} s`
-				: `${weights[i]}×${count}`,
+				: `${load(weights[i])}×${count}`,
 		)
 		.join("  ·  ");
 }
@@ -74,14 +77,27 @@ export default function MovementSheet() {
 		);
 	}
 	if (!movement) {
+		// PGRST116: the row does not exist (deleted); anything else is a load failure worth retrying
+		const notFound =
+			(movementQuery.error as { code?: string } | null)?.code === "PGRST116";
 		return (
-			<View className="flex-1 items-center justify-center bg-background p-6">
-				<Text className="text-center text-muted">Exercice introuvable.</Text>
+			<View className="flex-1 items-center justify-center gap-4 bg-background p-6">
+				<Text className="text-center text-muted">
+					{notFound || !movementQuery.error
+						? "Exercice introuvable."
+						: "Impossible de charger l’exercice."}
+				</Text>
+				{movementQuery.error && !notFound && (
+					<Button variant="secondary" onPress={() => movementQuery.refetch()}>
+						<Button.Label>Réessayer</Button.Label>
+					</Button>
+				)}
 			</View>
 		);
 	}
 
 	const timed = movement.measure === "duration";
+	const title = <Stack.Screen options={{ headerTitle: movement.name }} />;
 	const muscles = movement.primary_muscles.map(muscleLabel).join(", ");
 	const secondary = movement.secondary_muscles.map(muscleLabel).join(", ");
 	const sections = byMonth(historyQuery.data ?? []);
@@ -99,7 +115,7 @@ export default function MovementSheet() {
 					<Text className="text-base text-foreground">{muscles}</Text>
 				)}
 				{secondary !== "" && (
-					<Text className="text-sm text-muted">Aussi : {secondary}</Text>
+					<Text className="text-sm text-muted">Aussi : {secondary}</Text>
 				)}
 				<Text className="text-sm text-muted">
 					{[
@@ -157,41 +173,50 @@ export default function MovementSheet() {
 	);
 
 	return (
-		<SectionList
-			className="flex-1 bg-background"
-			contentContainerClassName="p-4 pb-16"
-			sections={sections}
-			keyExtractor={(item) => item.id}
-			ListHeaderComponent={header}
-			stickySectionHeadersEnabled={false}
-			renderSectionHeader={({ section }) => (
-				<Text className="text-sm font-medium text-muted mt-4 mb-1 capitalize">
-					{section.title}
-				</Text>
-			)}
-			renderItem={({ item }) => (
-				<Pressable
-					onPress={() =>
-						item.sessions && router.push(`/session/${item.sessions.id}`)
-					}
-					accessibilityRole="button"
-					className="flex-row items-center gap-3 border-b border-border py-3"
-				>
-					<View className="flex-1">
-						<Text className="text-sm text-muted">
-							{format(
-								new Date(item.sessions?.date_session ?? item.created_at),
-								"EEEE d",
-								{ locale: fr },
-							)}
-						</Text>
-						<Text className="text-base">{setsSummary(item, timed)}</Text>
-					</View>
-					{item.sessions && (
-						<ChevronRight size={18} color={themeColors.mutedForeground} />
-					)}
-				</Pressable>
-			)}
-		/>
+		<>
+			{title}
+			<SectionList
+				className="flex-1 bg-background"
+				contentContainerClassName="p-4 pb-16"
+				sections={sections}
+				keyExtractor={(item) => item.id}
+				ListHeaderComponent={header}
+				stickySectionHeadersEnabled={false}
+				renderSectionHeader={({ section }) => (
+					<Text className="text-sm font-medium text-muted mt-4 mb-1 capitalize">
+						{section.title}
+					</Text>
+				)}
+				renderItem={({ item }) => (
+					<Pressable
+						disabled={!item.sessions}
+						onPress={() =>
+							item.sessions && router.push(`/session/${item.sessions.id}`)
+						}
+						accessibilityRole={item.sessions ? "button" : "text"}
+						accessibilityLabel={`${format(
+							new Date(item.sessions?.date_session ?? item.created_at),
+							"EEEE d MMMM",
+							{ locale: fr },
+						)}, ${setsSummary(item, timed)}`}
+						className="flex-row items-center gap-3 border-b border-border py-3"
+					>
+						<View className="flex-1">
+							<Text className="text-sm text-muted">
+								{format(
+									new Date(item.sessions?.date_session ?? item.created_at),
+									"EEEE d",
+									{ locale: fr },
+								)}
+							</Text>
+							<Text className="text-base">{setsSummary(item, timed)}</Text>
+						</View>
+						{item.sessions && (
+							<ChevronRight size={18} color={themeColors.mutedForeground} />
+						)}
+					</Pressable>
+				)}
+			/>
+		</>
 	);
 }

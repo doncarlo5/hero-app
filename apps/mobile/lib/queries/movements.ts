@@ -94,7 +94,11 @@ export function useDeleteMovement() {
 	return useMutation({
 		mutationFn: async (id: string) =>
 			unwrap(await supabase.from("movements").delete().eq("id", id)),
-		// Deleting a movement cascades to its logs, program slots and trophies
-		onSuccess: () => queryClient.invalidateQueries(),
+		// Deleting a movement cascades to its logs, program slots and trophies. Its own queries are dropped
+		// (a refetch would fail and retry); the rest refresh without the caller waiting for them.
+		onSuccess: (_data, id) => {
+			queryClient.removeQueries({ queryKey: queryKeys.movement(id) });
+			queryClient.invalidateQueries();
+		},
 	});
 }

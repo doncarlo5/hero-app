@@ -39,3 +39,23 @@ test("anything else keeps the fallback, never a raw English message", () => {
 	);
 	assert.equal(errorMessage(null, fallback), fallback);
 });
+
+test("a server error mentioning a timeout is not a lost connection", () => {
+	assert.equal(
+		errorMessage(
+			{
+				code: "57014",
+				message: "canceling statement due to statement timeout",
+			},
+			fallback,
+		),
+		fallback,
+	);
+	assert.equal(
+		errorMessage(
+			{ code: "22023", message: "rest timeout must be positive" },
+			fallback,
+		),
+		`${fallback} Vérifie les valeurs saisies.`,
+	);
+});
