@@ -767,6 +767,10 @@ export type Database = {
 				Args: { p_day_id: string; p_slots: Json };
 				Returns: string;
 			};
+			save_slot: {
+				Args: { p_sets: Json; p_slot: Json; p_slot_id: string };
+				Returns: string;
+			};
 		};
 		Enums: {
 			alternative_reason:

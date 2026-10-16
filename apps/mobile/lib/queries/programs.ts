@@ -4,7 +4,7 @@ import { supabase } from "@/config/supabase";
 
 import { queryKeys, unwrap, unwrapMaybe } from "./client";
 import { useProfile } from "./profile";
-import type { Program, ProgramDay } from "./types";
+import type { LoadRule, Program, ProgramDay, ProgressionRule } from "./types";
 
 // slots has two foreign keys to movements (movement, finisher): name the one to embed
 const PROGRAM_SELECT =
@@ -76,6 +76,61 @@ export function useSaveProgramDay() {
 						...(slot.id ? { id: slot.id } : {}),
 						movement_id: slot.movementId,
 						alternative_ids: slot.alternativeIds,
+					})),
+				}),
+			),
+		onSuccess: () =>
+			queryClient.invalidateQueries({ queryKey: queryKeys.programs }),
+	});
+}
+
+export type SlotSettings = {
+	progressionRule: ProgressionRule;
+	restSeconds: number | null;
+	restPerSide: boolean;
+	tempo: string;
+	note: string;
+	/** Another slot of the same day to do as a superset with, or null */
+	supersetWith: string | null;
+};
+
+export type SetPrescriptionDraft = {
+	repMin: number | null;
+	repMax: number | null;
+	loadRule: LoadRule;
+	loadValue: number | null;
+	restSeconds: number | null;
+	label: string | null;
+};
+
+// save_slot writes the slot's settings and replaces its set prescriptions in one transaction
+export function useSaveSlot() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: async (input: {
+			slotId: string;
+			settings: SlotSettings;
+			sets: SetPrescriptionDraft[];
+		}) =>
+			unwrap(
+				await supabase.rpc("save_slot", {
+					p_slot_id: input.slotId,
+					p_slot: {
+						progression_rule: input.settings.progressionRule,
+						rest_seconds: input.settings.restSeconds,
+						rest_per_side: input.settings.restPerSide,
+						tempo: input.settings.tempo,
+						note: input.settings.note,
+						superset_with: input.settings.supersetWith,
+					},
+					p_sets: input.sets.map((set) => ({
+						rep_min: set.repMin,
+						rep_max: set.repMax,
+						load_rule: set.loadRule,
+						load_value: set.loadValue,
+						rest_seconds: set.restSeconds,
+						label: set.label,
 					})),
 				}),
 			),
