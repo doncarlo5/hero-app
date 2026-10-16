@@ -94,6 +94,25 @@ export function useSaveMovementSetting() {
 					),
 			);
 		},
+		// The new row is shown at once: a second change made before the refetch starts from it
+		onMutate: async (setting) => {
+			await queryClient.cancelQueries({ queryKey: queryKeys.movementSettings });
+			const previous = queryClient.getQueryData<MovementSetting[]>(
+				queryKeys.movementSettings,
+			);
+			const others = (previous ?? []).filter(
+				(row) => row.movement_id !== setting.movement_id,
+			);
+			const cleared =
+				setting.unilateral === null && setting.increment_kg === null;
+			queryClient.setQueryData<MovementSetting[]>(
+				queryKeys.movementSettings,
+				cleared ? others : [...others, setting],
+			);
+			return { previous };
+		},
+		onError: (_error, _setting, context) =>
+			queryClient.setQueryData(queryKeys.movementSettings, context?.previous),
 		onSettled: () =>
 			queryClient.invalidateQueries({ queryKey: queryKeys.movementSettings }),
 	});

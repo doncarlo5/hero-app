@@ -33,6 +33,7 @@ import {
 	isFinished,
 	markSent,
 	setRest,
+	sidesInDraft,
 	skipLoggedElsewhere,
 	skipStep,
 	swapMovement,
@@ -87,9 +88,12 @@ function queueSlots(
 	slots: Slot[],
 	swaps: Record<string, string>,
 	firstTargets: Map<string, number | null>,
+	draft: SessionDraft | null,
 ): QueueSlot[] {
 	return slots.map((slot) => {
 		const movement = movementFor(slot, swaps);
+		// A slot already started keeps its sides, whatever the setting says now
+		const started = draft ? sidesInDraft(draft, slot.id) : null;
 		const working = firstTargets.get(slot.id) ?? null;
 		return {
 			id: slot.id,
@@ -97,7 +101,7 @@ function queueSlots(
 			position: slot.position,
 			supersetGroup: slot.superset_group,
 			restSeconds: slot.rest_seconds,
-			unilateral: movement.unilateral,
+			unilateral: started ?? movement.unilateral,
 			measure: movement.measure,
 			restPerSide: slot.rest_per_side,
 			sets:
@@ -192,6 +196,7 @@ export function useGuidedSession(sessionId: string) {
 		new Map(
 			slots.map((slot) => [slot.id, workingTargets(slot)?.[0]?.weight ?? null]),
 		),
+		draft,
 	);
 	const queue = buildSetQueue(slotQueue);
 
@@ -484,6 +489,7 @@ export function useGuidedSession(sessionId: string) {
 				!sessionReady ||
 				!programReady ||
 				(lastPerformances.isLoading && !waitedTooLong) ||
+				(settingsQuery.isLoading && !waitedTooLong) ||
 				!draft),
 		isUnavailable,
 		isGone,

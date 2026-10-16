@@ -140,7 +140,8 @@ export default function MovementSheet() {
 				</View>
 			)}
 
-			{isLibraryMovement(movement) && row && (
+			{/* Once the settings are known: the card starts from them */}
+				{isLibraryMovement(movement) && row && settingsQuery.isSuccess && (
 				<MovementSettingsCard
 					key={`settings-${movement.id}`}
 					movement={row}

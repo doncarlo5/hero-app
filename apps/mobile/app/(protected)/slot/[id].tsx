@@ -312,7 +312,10 @@ export default function SlotSettings() {
 				settings: {
 					progressionRule: form.progressionRule,
 					restSeconds,
-					restPerSide: slot.movement.unilateral && form.restPerSide,
+					// Unknown settings (offline, nothing cached): keep the choice rather than reset it
+					restPerSide: settingsQuery.isSuccess
+						? slot.movement.unilateral && form.restPerSide
+						: form.restPerSide,
 					tempo: form.tempo,
 					note: form.note,
 					supersetWith: form.supersetWith,
