@@ -82,12 +82,10 @@ export function MovementPicker(props: {
 	const libraryCount = props.movements.filter(isLibraryMovement).length;
 	const isSearchingLibrary =
 		query.trim().length >= MIN_LIBRARY_QUERY || group !== null;
-	const library = isSearchingLibrary
-		? matches
-				.filter(isLibraryMovement)
-				.filter(inGroup)
-				.slice(0, MAX_LIBRARY_RESULTS)
+	const libraryMatches = isSearchingLibrary
+		? matches.filter(isLibraryMovement).filter(inGroup)
 		: [];
+	const library = libraryMatches.slice(0, MAX_LIBRARY_RESULTS);
 
 	const renderRow = (m: Movement) => (
 		<MovementRow
@@ -118,6 +116,7 @@ export function MovementPicker(props: {
 						<Pressable
 							key={g.key}
 							onPress={() => setGroup(group === g.key ? null : g.key)}
+							hitSlop={8}
 							accessibilityRole="button"
 							accessibilityState={{ selected: group === g.key }}
 							className={cn(
@@ -164,7 +163,15 @@ export function MovementPicker(props: {
 					) : library.length === 0 ? (
 						<Text className="text-sm text-muted">Aucun résultat.</Text>
 					) : (
-						library.map(renderRow)
+						<>
+							{library.map(renderRow)}
+							{libraryMatches.length > library.length && (
+								<Text className="text-sm text-muted mt-2">
+									{library.length} sur {libraryMatches.length} : précise la
+									recherche pour voir les autres.
+								</Text>
+							)}
+						</>
 					)}
 				</View>
 			)}

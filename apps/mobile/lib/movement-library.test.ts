@@ -53,3 +53,18 @@ test("muscle groups come from primary muscles", () => {
 		inMuscleGroup(movement({ primary_muscles: ["hamstrings"] }), "legs"),
 	);
 });
+
+test("apostrophes are ignored, typed straight or curly", () => {
+	const walk = movement({
+		name: "Farmer's Walk",
+		equipment: "other",
+		primary_muscles: ["forearms"],
+		aliases: [],
+	});
+	assert.ok(matchesMovementSearch(walk, "farmer’s"));
+	assert.ok(matchesMovementSearch(walk, "farmers walk"));
+});
+
+test("an unknown muscle group matches nothing", () => {
+	assert.equal(inMuscleGroup(movement({}), "neck"), false);
+});

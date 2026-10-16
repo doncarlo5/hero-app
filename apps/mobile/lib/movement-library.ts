@@ -112,8 +112,13 @@ export function isLibraryMovement(movement: Movement) {
 	return movement.owner_id === null;
 }
 
+// Lowercase, no accents (combining marks U+0300 to U+036F), no apostrophes ("farmer’s" = "farmers")
 const normalize = (value: string) =>
-	value.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+	value
+		.normalize("NFD")
+		.replace(/[\u0300-\u036f]/g, "")
+		.replace(/['’]/g, "")
+		.toLowerCase();
 
 // Every word of the query must appear in the name, an alias, the equipment or a primary muscle
 // (English or French)
