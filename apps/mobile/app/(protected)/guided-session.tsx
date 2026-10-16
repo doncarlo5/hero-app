@@ -341,7 +341,9 @@ export default function GuidedSession() {
 							</View>
 						</View>
 
-						{showFrames && <MovementFrames movement={movement} />}
+						{showFrames && (
+							<MovementFrames key={movement.id} movement={movement} />
+						)}
 
 						{canSwap && (
 							<View className="gap-2">
