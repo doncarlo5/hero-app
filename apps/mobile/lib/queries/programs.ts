@@ -202,6 +202,27 @@ export function useRenameProgramDay() {
 	});
 }
 
+/** Saves the days' order: positions 1..n in the order given */
+export function useReorderProgramDays() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: async (dayIds: string[]) => {
+			const results = await Promise.all(
+				dayIds.map((id, index) =>
+					supabase
+						.from("program_days")
+						.update({ position: index + 1 })
+						.eq("id", id),
+				),
+			);
+			for (const result of results) unwrap(result);
+		},
+		onSettled: () =>
+			queryClient.invalidateQueries({ queryKey: queryKeys.programs }),
+	});
+}
+
 // Sessions of the day keep their label; their link to the day is cleared
 export function useDeleteProgramDay() {
 	const queryClient = useQueryClient();
