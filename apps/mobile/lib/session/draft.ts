@@ -41,6 +41,11 @@ export type SessionDraft = {
 	updatedAt: string;
 	/** Current step in the queue; equals the queue length once every step is done or skipped */
 	stepIndex: number;
+	/**
+	 * Key of the current step, null once every step is handled (absent in older drafts). The queue can
+	 * change during a session (history loading, a swap), so the step is found again by its key.
+	 */
+	stepKey?: string | null;
 	/** Done sets, by step key */
 	sets: Record<string, DraftSet>;
 	/** Skipped step keys */
@@ -69,6 +74,25 @@ export type ExercisePayload = {
 		target_reason: DraftTarget["reason"] | null;
 	}[];
 };
+
+/** Index of the current step in this queue, found by key so a queue change cannot shift it */
+export function currentIndex(draft: SessionDraft, queue: QueueStep[]): number {
+	if (draft.stepKey === undefined)
+		return Math.min(draft.stepIndex, queue.length);
+	if (draft.stepKey !== null) {
+		const found = queue.findIndex((step) => step.key === draft.stepKey);
+		if (found !== -1) return found;
+	}
+	return nextOpenStep(draft, queue, -1);
+}
+
+function at(draft: SessionDraft, queue: QueueStep[], index: number) {
+	return {
+		...draft,
+		stepIndex: index,
+		stepKey: queue[index]?.key ?? null,
+	};
+}
 
 export function createDraft(sessionId: string, now: Date): SessionDraft {
 	const at = now.toISOString();
@@ -133,8 +157,7 @@ export function completeStep(
 	};
 	const next = nextOpenStep(updated, queue, index);
 	return {
-		...updated,
-		stepIndex: next,
+		...at(updated, queue, next),
 		rest:
 			next < queue.length && step.restAfterSeconds > 0
 				? { startedAt: now.getTime(), durationSeconds: step.restAfterSeconds }
@@ -156,7 +179,7 @@ export function skipStep(
 		updatedAt: now.toISOString(),
 		skipped: [...draft.skipped, step.key],
 	};
-	return { ...updated, stepIndex: nextOpenStep(updated, queue, index) };
+	return at(updated, queue, nextOpenStep(updated, queue, index));
 }
 
 export function goToStep(
@@ -166,7 +189,7 @@ export function goToStep(
 	now: Date,
 ): SessionDraft {
 	if (index < 0 || index > queue.length) return draft;
-	return { ...draft, stepIndex: index, updatedAt: now.toISOString() };
+	return { ...at(draft, queue, index), updatedAt: now.toISOString() };
 }
 
 export function setRest(
@@ -194,6 +217,36 @@ export function swapMovement(
 	if (movementId) swaps[slotId] = movementId;
 	else delete swaps[slotId];
 	return { ...draft, swaps, updatedAt: now.toISOString() };
+}
+
+/**
+ * Slots already logged in this session outside the guided session (the classic exercise screen): their
+ * open steps are skipped so the guided session does not log them a second time.
+ */
+export function skipLoggedElsewhere(
+	draft: SessionDraft,
+	queue: QueueStep[],
+	slotIds: string[],
+	now: Date,
+): SessionDraft {
+	const keys = queue
+		.filter(
+			(step) =>
+				slotIds.includes(step.slotId) &&
+				!draft.exercises[step.slotId] &&
+				!isHandled(draft, step),
+		)
+		.map((step) => step.key);
+	if (keys.length === 0) return draft;
+	const updated = {
+		...draft,
+		updatedAt: now.toISOString(),
+		skipped: [...draft.skipped, ...keys],
+	};
+	const index = currentIndex(draft, queue);
+	return queue[index] && keys.includes(queue[index].key)
+		? at(updated, queue, nextOpenStep(updated, queue, index))
+		: updated;
 }
 
 export function isSlotComplete(

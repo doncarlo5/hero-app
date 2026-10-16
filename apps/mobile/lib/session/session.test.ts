@@ -5,12 +5,14 @@ import { describe, test } from "node:test";
 import {
 	completeStep,
 	createDraft,
+	currentIndex,
 	exercisesToSend,
 	hasUnsent,
 	isFinished,
 	isStale,
 	markSent,
 	parseDraft,
+	skipLoggedElsewhere,
 	skipStep,
 } from "./draft.ts";
 import {
@@ -419,6 +421,53 @@ describe("session draft", () => {
 			exercisesToSend(untargeted, one)[0].sets[0].target_reason,
 			null,
 		);
+	});
+
+	test("the current step is found by key when the queue changes", () => {
+		const before = buildSetQueue([slot("A", 1, 2), slot("B", 2, 1)]);
+		let draft = completeStep(
+			createDraft("s1", at(0)),
+			before,
+			0,
+			{ weight: 60, reps: 8 },
+			at(1),
+			newId,
+		);
+		assert.equal(before[currentIndex(draft, before)].key, "A:1:-");
+		// History arrives: two warm-up sets are inserted before A's sets
+		const after = buildSetQueue([
+			slot("A", 1, 2, {
+				warmup: [
+					{ weight: 20, reps: 8 },
+					{ weight: 40, reps: 3 },
+				],
+			}),
+			slot("B", 2, 1),
+		]);
+		assert.equal(after[currentIndex(draft, after)].key, "A:1:-");
+		draft = completeStep(
+			draft,
+			after,
+			currentIndex(draft, after),
+			{ weight: 60, reps: 7 },
+			at(2),
+			newId,
+		);
+		assert.equal(after[currentIndex(draft, after)].key, "B:0:-");
+	});
+
+	test("a slot logged outside the guided session is skipped, not logged again", () => {
+		const two = buildSetQueue([slot("A", 1, 2), slot("B", 2, 2)]);
+		let draft = createDraft("s1", at(0));
+		draft = skipLoggedElsewhere(draft, two, ["A"], at(1));
+		assert.equal(two[currentIndex(draft, two)].key, "B:0:-");
+		assert.deepEqual(draft.skipped, ["A:0:-", "A:1:-"]);
+		assert.equal(
+			skipLoggedElsewhere(draft, two, ["A"], at(2)),
+			draft,
+			"nothing left to skip: same draft",
+		);
+		assert.deepEqual(exercisesToSend(draft, two), []);
 	});
 
 	test("finishing early sends unfinished slots too", () => {
