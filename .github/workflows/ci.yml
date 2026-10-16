@@ -1,0 +1,70 @@
+# Checks every pull request and push to main. Vercel builds the web app and the legacy API itself.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mobile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      # --ignore-scripts: the mobile postinstall builds the whole monorepo, not needed to check it
+      - run: npm ci --ignore-scripts
+      - name: Typecheck
+        working-directory: apps/mobile
+        run: npx tsc --noEmit
+      - name: Lint
+        working-directory: apps/mobile
+        run: npx eslint .
+      # Calendar logic breaks silently at UTC offsets: run the unit tests in several time zones
+      - name: Unit tests (UTC)
+        working-directory: apps/mobile
+        run: npm test
+        env:
+          TZ: UTC
+      - name: Unit tests (Europe/Paris)
+        working-directory: apps/mobile
+        run: npm test
+        env:
+          TZ: Europe/Paris
+      - name: Unit tests (Pacific/Auckland)
+        working-directory: apps/mobile
+        run: npm test
+        env:
+          TZ: Pacific/Auckland
+
+  database:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.121.0
+      # Applies every migration, then supabase/seed.sql, to a fresh Postgres
+      - run: supabase db start
+      - name: Seed account is set up
+        run: |
+          psql "postgresql://postgres:postgres@127.0.0.1:54322/postgres" -v ON_ERROR_STOP=1 -Atc "
+            do \$\$
+            begin
+              if (select count(*) from public.movements m join auth.users u on u.id = m.owner_id
+                  where u.email = 'test@hero.local') = 0 then
+                raise exception 'test account has no movements';
+              end if;
+              if (select count(*) from public.default_exercise_types where key like '%Séance%') > 0 then
+                raise exception 'program-specific default movements are back';
+              end if;
+            end \$\$;"
