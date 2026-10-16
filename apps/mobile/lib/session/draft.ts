@@ -354,3 +354,20 @@ export function parseDraft(raw: unknown): SessionDraft | null {
 		return null;
 	return draft as SessionDraft;
 }
+
+/**
+ * Whether a slot's working sets were done one side at a time in this draft (true), both sides at once
+ * (false), or not yet started (null). Once a set is done or skipped the queue keeps that shape, so a
+ * change to the movement's setting during the session cannot drop the sets already recorded.
+ */
+export function sidesInDraft(draft: SessionDraft, slotId: string): boolean | null {
+	const keys = [...Object.keys(draft.sets), ...draft.skipped];
+	let sides: boolean | null = null;
+	for (const key of keys) {
+		const [id, round, side] = key.split(":");
+		if (id !== slotId || !/^\d+$/.test(round ?? "")) continue;
+		if (side === "left" || side === "right") return true;
+		if (side === "-") sides = false;
+	}
+	return sides;
+}

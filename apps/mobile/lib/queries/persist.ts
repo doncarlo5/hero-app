@@ -16,6 +16,7 @@ const OFFLINE_QUERY_KEYS = [
 	[...queryKeys.sessions, "detail"],
 	queryKeys.programs,
 	[...queryKeys.exercises, "last"],
+	queryKeys.movementSettings,
 ];
 
 function isOfflineQuery(query: Query) {

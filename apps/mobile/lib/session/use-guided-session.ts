@@ -12,6 +12,8 @@ import {
 import { DEFAULT_SET_COUNT, targetsFor } from "@/lib/progression/slot-targets";
 import { queryClient } from "@/lib/queries/client";
 import { useLastPerformances, useSaveExercise } from "@/lib/queries/exercises";
+import { slotWithMovementSettings } from "@/lib/movement-settings";
+import { useMovementSettings } from "@/lib/queries/movements";
 import { useActiveProgram } from "@/lib/queries/programs";
 import { useSession, useUpdateSession } from "@/lib/queries/sessions";
 import {
@@ -31,6 +33,7 @@ import {
 	isFinished,
 	markSent,
 	setRest,
+	sidesInDraft,
 	skipLoggedElsewhere,
 	skipStep,
 	swapMovement,
@@ -85,9 +88,12 @@ function queueSlots(
 	slots: Slot[],
 	swaps: Record<string, string>,
 	firstTargets: Map<string, number | null>,
+	draft: SessionDraft | null,
 ): QueueSlot[] {
 	return slots.map((slot) => {
 		const movement = movementFor(slot, swaps);
+		// A slot already started keeps its sides, whatever the setting says now
+		const started = draft ? sidesInDraft(draft, slot.id) : null;
 		const working = firstTargets.get(slot.id) ?? null;
 		return {
 			id: slot.id,
@@ -95,7 +101,7 @@ function queueSlots(
 			position: slot.position,
 			supersetGroup: slot.superset_group,
 			restSeconds: slot.rest_seconds,
-			unilateral: movement.unilateral,
+			unilateral: started ?? movement.unilateral,
 			measure: movement.measure,
 			restPerSide: slot.rest_per_side,
 			sets:
@@ -135,6 +141,7 @@ function queueSlots(
 export function useGuidedSession(sessionId: string) {
 	const sessionQuery = useSession(sessionId);
 	const programQuery = useActiveProgram();
+	const settingsQuery = useMovementSettings();
 	const saveExercise = useSaveExercise();
 	const updateSession = useUpdateSession();
 	// The device copy of the queries is being read back (lib/queries/persist.ts)
@@ -144,7 +151,11 @@ export function useGuidedSession(sessionId: string) {
 		programQuery.data?.program_days.find(
 			(d) => d.id === sessionQuery.data?.program_day_id,
 		) ?? null;
-	const slots = day?.slots ?? [];
+	// The user's settings for library movements: sides and load step
+	const settings = settingsQuery.data ?? new Map();
+	const slots = (day?.slots ?? []).map((slot) =>
+		slotWithMovementSettings(slot, settings),
+	);
 
 	const [draft, setDraft] = useState<SessionDraft | null>(null);
 	const [now, setNow] = useState(() => Date.now());
@@ -200,6 +211,7 @@ export function useGuidedSession(sessionId: string) {
 		new Map(
 			slots.map((slot) => [slot.id, workingTargets(slot)?.[0]?.weight ?? null]),
 		),
+		draft,
 	);
 	const queue = buildSetQueue(slotQueue);
 
@@ -492,6 +504,7 @@ export function useGuidedSession(sessionId: string) {
 				!sessionReady ||
 				!programReady ||
 				(lastPerformances.isLoading && !waitedTooLong) ||
+				(settingsQuery.isLoading && !waitedTooLong) ||
 				!draft),
 		isUnavailable,
 		isGone,

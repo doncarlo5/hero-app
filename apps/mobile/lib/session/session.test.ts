@@ -14,6 +14,7 @@ import {
 	parseDraft,
 	skipLoggedElsewhere,
 	skipStep,
+	sidesInDraft,
 } from "./draft.ts";
 import {
 	adjustRest,
@@ -526,4 +527,20 @@ describe("session draft", () => {
 			true,
 		);
 	});
+});
+
+test("sidesInDraft: a started slot keeps the sides it was done with", () => {
+	const draft = createDraft("s1", new Date("2026-10-16T10:00:00Z"));
+	const done = { weight: 20, reps: 8, completedAt: "2026-10-16T10:01:00Z" };
+	assert.equal(sidesInDraft(draft, "a"), null);
+	assert.equal(sidesInDraft({ ...draft, sets: { "a:0:-": done } }, "a"), false);
+	assert.equal(
+		sidesInDraft({ ...draft, skipped: ["a:w0:-", "a:0:left"] }, "a"),
+		true,
+	);
+	// Warm-up and finisher keys say nothing about sides; other slots do not count
+	assert.equal(
+		sidesInDraft({ ...draft, sets: { "a:w0:-": done, "b:0:right": done } }, "a"),
+		null,
+	);
 });

@@ -16,6 +16,7 @@ export const queryKeys = {
 	session: (id: string) => ["sessions", "detail", id] as const,
 	movements: ["movements"] as const,
 	movement: (id: string) => ["movements", "detail", id] as const,
+	movementSettings: ["movement-settings"] as const,
 	exercises: ["exercises"] as const,
 	exercise: (id: string) => ["exercises", "detail", id] as const,
 	trophies: ["trophies"] as const,

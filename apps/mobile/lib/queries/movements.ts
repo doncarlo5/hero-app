@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { supabase } from "@/config/supabase";
 
+import type { MovementSetting } from "@/lib/movement-settings";
+
 import { queryKeys, unwrap } from "./client";
 import type { Movement } from "./types";
 
@@ -49,6 +51,70 @@ export function useMovement(id: string, options: { enabled: boolean }) {
 			unwrap(
 				await supabase.from("movements").select("*").eq("id", id).single(),
 			),
+	});
+}
+
+// The user's settings for library movements (one side at a time, load step), by movement id
+export function useMovementSettings() {
+	return useQuery({
+		queryKey: queryKeys.movementSettings,
+		// Rows are cached (and kept on the device for the guided session); the Map is built on read
+		queryFn: async (): Promise<MovementSetting[]> =>
+			unwrap(
+				await supabase
+					.from("movement_settings")
+					.select("movement_id, unilateral, increment_kg"),
+			),
+		select: (rows) =>
+			new Map(rows.map((row) => [row.movement_id, row] as const)),
+	});
+}
+
+/** Saves the user's settings for a library movement; all nulls remove them */
+export function useSaveMovementSetting() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: async (setting: MovementSetting) => {
+			if (setting.unilateral === null && setting.increment_kg === null) {
+				unwrap(
+					await supabase
+						.from("movement_settings")
+						.delete()
+						.eq("movement_id", setting.movement_id),
+				);
+				return;
+			}
+			unwrap(
+				await supabase
+					.from("movement_settings")
+					.upsert(
+						{ ...setting, updated_at: new Date().toISOString() },
+						{ onConflict: "user_id,movement_id" },
+					),
+			);
+		},
+		// The new row is shown at once: a second change made before the refetch starts from it
+		onMutate: async (setting) => {
+			await queryClient.cancelQueries({ queryKey: queryKeys.movementSettings });
+			const previous = queryClient.getQueryData<MovementSetting[]>(
+				queryKeys.movementSettings,
+			);
+			const others = (previous ?? []).filter(
+				(row) => row.movement_id !== setting.movement_id,
+			);
+			const cleared =
+				setting.unilateral === null && setting.increment_kg === null;
+			queryClient.setQueryData<MovementSetting[]>(
+				queryKeys.movementSettings,
+				cleared ? others : [...others, setting],
+			);
+			return { previous };
+		},
+		onError: (_error, _setting, context) =>
+			queryClient.setQueryData(queryKeys.movementSettings, context?.previous),
+		onSettled: () =>
+			queryClient.invalidateQueries({ queryKey: queryKeys.movementSettings }),
 	});
 }
 
