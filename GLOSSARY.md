@@ -8,6 +8,10 @@ A strength training logbook that runs a user's program: it proposes each set's t
 A way of moving a load, independent of any program, such as "incline bench press, barbell". History, records and trophies belong to a movement.
 _Avoid_: exercise type, exercice
 
+**Library movement**:
+A shared, read-only movement every user can pick, imported from a public domain source (free-exercise-db). A movement the user creates is a custom movement. UI: "Bibliothèque" / "Mes exercices".
+_Avoid_: default exercise, preset
+
 **Load type**:
 How a movement's load is counted: an external load, body weight plus an added load (weighted pull-ups, dips), or body weight minus an assistance.
 _Avoid_: lest (for the added load itself, say "added load")

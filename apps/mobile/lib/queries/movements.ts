@@ -10,17 +10,34 @@ export type MovementInput = Pick<
 	"name" | "notes" | "load_type" | "increment_kg" | "unilateral"
 >;
 
-// The user's movements and the shared library, by name
+const PAGE_SIZE = 1000;
+const IMAGE_BUCKET = "movement-images";
+
+// Public URL of a library image (an object path in image_paths)
+export function movementImageUrl(path: string) {
+	return supabase.storage.from(IMAGE_BUCKET).getPublicUrl(path).data.publicUrl;
+}
+
+// The user's movements and the shared library, by name. Paged: the library alone is close to the
+// API's row limit.
 export function useMovements() {
 	return useQuery({
 		queryKey: [...queryKeys.movements, "list"],
-		queryFn: async (): Promise<Movement[]> =>
-			unwrap(
-				await supabase
-					.from("movements")
-					.select("*")
-					.order("name", { ascending: true }),
-			),
+		queryFn: async (): Promise<Movement[]> => {
+			const movements: Movement[] = [];
+			for (let from = 0; ; from += PAGE_SIZE) {
+				const page = unwrap(
+					await supabase
+						.from("movements")
+						.select("*")
+						.order("name", { ascending: true })
+						.order("id", { ascending: true })
+						.range(from, from + PAGE_SIZE - 1),
+				);
+				movements.push(...page);
+				if (page.length < PAGE_SIZE) return movements;
+			}
+		},
 	});
 }
 

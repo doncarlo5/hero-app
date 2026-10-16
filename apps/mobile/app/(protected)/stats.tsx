@@ -21,10 +21,12 @@ import {
 	VictoryTheme,
 } from "victory-native";
 
+import { MovementPicker } from "@/components/movement-picker";
 import { SafeAreaView } from "@/components/safe-area-view";
 import { Button } from "heroui-native";
 import { Text } from "@/components/ui/text";
 import { useMovementHistory } from "@/lib/queries/exercises";
+import { isLibraryMovement } from "@/lib/movement-library";
 import { useMovements } from "@/lib/queries/movements";
 import { setsToArrays, type Movement } from "@/lib/queries/types";
 import { useThemeColors } from "@/lib/theme";
@@ -42,9 +44,10 @@ export default function Stats() {
 
 	const allExerciseTypes = exerciseTypesQuery.data ?? [];
 	const isLoadingTypes = exerciseTypesQuery.isLoading;
-	// Default to the first movement, by name
+	// Default to the user's first movement, by name (the library comes after)
 	const selectedExerciseType =
 		allExerciseTypes.find((type) => type.id === pickedTypeId) ??
+		allExerciseTypes.find((type) => !isLibraryMovement(type)) ??
 		allExerciseTypes[0] ??
 		null;
 
@@ -329,56 +332,14 @@ export default function Stats() {
 							</Text>
 						</View>
 					) : (
-						<View>
-							{allExerciseTypes.map((type) => {
-								const isSelected = selectedExerciseType?.id === type.id;
-								return (
-									<Pressable
-										key={type.id}
-										onPress={() => {
-											onExerciseTypeChange(type);
-											closeBottomSheet();
-										}}
-										style={({ pressed }) => [
-											{
-												opacity: pressed ? 0.7 : 1,
-											},
-										]}
-									>
-										<View
-											className={`flex-row items-center p-4 rounded-lg mb-2 ${
-												isSelected
-													? "bg-foreground/10 border border-foreground/20"
-													: "bg-default"
-											}`}
-										>
-											<View
-												className={`w-5 h-5 rounded-full border-2 ${
-													isSelected
-														? "bg-foreground border-foreground"
-														: "border-default"
-												}`}
-											>
-												{isSelected && (
-													<View className="w-2 h-2 bg-background rounded-full m-auto" />
-												)}
-											</View>
-											<View className="ml-3 flex-1">
-												<Text
-													className={`text-base ${
-														isSelected
-															? "text-foreground font-semibold"
-															: "text-foreground"
-													}`}
-												>
-													{type.name}
-												</Text>
-											</View>
-										</View>
-									</Pressable>
-								);
-							})}
-						</View>
+						<MovementPicker
+							movements={allExerciseTypes}
+							selectedId={selectedExerciseType?.id ?? null}
+							onPick={(type) => {
+								onExerciseTypeChange(type);
+								closeBottomSheet();
+							}}
+						/>
 					)}
 				</BottomSheetScrollView>
 			</BottomSheet>
