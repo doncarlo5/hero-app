@@ -3,7 +3,12 @@ import { randomUUID } from "expo-crypto";
 import { useEffect, useRef, useState } from "react";
 import { AppState } from "react-native";
 
-import type { SetTarget } from "@/lib/progression/engine";
+import {
+	DEFAULT_INCREMENT,
+	roundToIncrement,
+	warmupRamp,
+	type SetTarget,
+} from "@/lib/progression/engine";
 import { DEFAULT_SET_COUNT, targetsFor } from "@/lib/progression/slot-targets";
 import { queryClient } from "@/lib/queries/client";
 import { useLastPerformances, useSaveExercise } from "@/lib/queries/exercises";
@@ -26,12 +31,18 @@ import {
 	markSent,
 	setRest,
 	skipStep,
+	swapMovement,
 	type SessionDraft,
 } from "./draft";
 import { clearDraft, loadDraft, saveDraft } from "./draft-storage";
 import { adjustRest, type RestTimer } from "./rest";
 import { scheduleRestNotification } from "./rest-notification";
-import { buildSetQueue, type QueueStep } from "./set-queue";
+import {
+	buildSetQueue,
+	partLabel,
+	type QueueSlot,
+	type QueueStep,
+} from "./set-queue";
 
 // A poor connection can leave a request hanging: give up so the next change or foreground retries.
 // A late success is harmless, the write is idempotent on the logged exercise id.
@@ -59,26 +70,56 @@ function withTimeout<T>(promise: Promise<T>): Promise<T> {
 	});
 }
 
-function queueSlots(slots: Slot[]) {
-	return slots.map((slot) => ({
-		id: slot.id,
-		movementId: slot.movement_id,
-		position: slot.position,
-		supersetGroup: slot.superset_group,
-		restSeconds: slot.rest_seconds,
-		unilateral: slot.movement.unilateral,
-		restPerSide: slot.rest_per_side,
-		sets:
-			slot.set_prescriptions.length > 0
-				? slot.set_prescriptions.map((p) => ({
-						position: p.position,
-						restSeconds: p.rest_seconds,
-					}))
-				: Array.from({ length: DEFAULT_SET_COUNT }, (_, i) => ({
-						position: i + 1,
-						restSeconds: null,
-					})),
-	}));
+// Movement done for a slot this session: its own, or the alternative picked in the draft
+function movementFor(slot: Slot, swaps: Record<string, string>): Movement {
+	const swapped = swaps[slot.id];
+	return (
+		slot.alternatives.find((a) => a.movement.id === swapped)?.movement ??
+		slot.movement
+	);
+}
+
+function queueSlots(
+	slots: Slot[],
+	swaps: Record<string, string>,
+	firstTargets: Map<string, number | null>,
+): QueueSlot[] {
+	return slots.map((slot) => {
+		const movement = movementFor(slot, swaps);
+		const working = firstTargets.get(slot.id) ?? null;
+		return {
+			id: slot.id,
+			movementId: movement.id,
+			position: slot.position,
+			supersetGroup: slot.superset_group,
+			restSeconds: slot.rest_seconds,
+			unilateral: movement.unilateral,
+			restPerSide: slot.rest_per_side,
+			sets:
+				slot.set_prescriptions.length > 0
+					? slot.set_prescriptions.map((p) => ({
+							position: p.position,
+							restSeconds: p.rest_seconds,
+						}))
+					: Array.from({ length: DEFAULT_SET_COUNT }, (_, i) => ({
+							position: i + 1,
+							restSeconds: null,
+						})),
+			// Key lifts with an external load warm up from the empty bar to the first target
+			warmup:
+				slot.is_key_lift && movement.load_type === "external" && working
+					? warmupRamp({ workingWeight: working })
+					: [],
+			finisher: slot.finisher_kind
+				? {
+						kind: slot.finisher_kind,
+						count: slot.finisher_count ?? 1,
+						restSeconds: slot.finisher_rest_seconds,
+						movementId: slot.finisher_movement_id,
+					}
+				: null,
+		};
+	});
 }
 
 /**
@@ -98,10 +139,6 @@ export function useGuidedSession(sessionId: string) {
 			(d) => d.id === sessionQuery.data?.program_day_id,
 		) ?? null;
 	const slots = day?.slots ?? [];
-	const queue = buildSetQueue(queueSlots(slots));
-	const lastPerformances = useLastPerformances(
-		slots.map((slot) => slot.movement_id),
-	);
 
 	const [draft, setDraft] = useState<SessionDraft | null>(null);
 	const [now, setNow] = useState(() => Date.now());
@@ -111,6 +148,36 @@ export function useGuidedSession(sessionId: string) {
 	const [waitedTooLong, setWaitedTooLong] = useState(false);
 	const draftRef = useRef<SessionDraft | null>(null);
 	const sendingRef = useRef(false);
+
+	const swaps = draft?.swaps ?? {};
+	// Every movement the session may do: the slots', their alternatives' (to swap) and switch finishers'
+	const lastPerformances = useLastPerformances([
+		...new Set(
+			slots.flatMap((slot) => [
+				slot.movement_id,
+				...slot.alternatives.map((a) => a.movement.id),
+			]),
+		),
+	]);
+
+	// Targets of a slot's working sets, from the last performance of the movement done today
+	const workingTargets = (slot: Slot): SetTarget[] | null => {
+		const movement = movementFor(slot, swaps);
+		const last = lastPerformances.byMovement.get(movement.id);
+		// Unknown history (offline, not cached): no target rather than a wrong calibration
+		if (last === undefined) return null;
+		const { reps, weights } = setsToArrays(last?.logged_sets ?? []);
+		const lastSets = reps.map((r, i) => ({ reps: r, weight: weights[i] }));
+		return targetsFor(slot, movement, lastSets);
+	};
+	const slotQueue = queueSlots(
+		slots,
+		swaps,
+		new Map(
+			slots.map((slot) => [slot.id, workingTargets(slot)?.[0]?.weight ?? null]),
+		),
+	);
+	const queue = buildSetQueue(slotQueue);
 
 	// Every change goes through here: state, then device storage
 	const apply = (change: (current: SessionDraft) => SessionDraft) => {
@@ -127,18 +194,63 @@ export function useGuidedSession(sessionId: string) {
 
 	const slotOf = (step: QueueStep) =>
 		slots.find((slot) => slot.id === step.slotId) ?? null;
-	const movementOf = (step: QueueStep): Movement | null =>
-		slotOf(step)?.movement ?? null;
+	const movementOf = (step: QueueStep): Movement | null => {
+		const slot = slotOf(step);
+		if (!slot) return null;
+		if (step.kind === "switch") return slot.finisher_movement ?? slot.movement;
+		return movementFor(slot, swaps);
+	};
 
 	const targetOf = (step: QueueStep): SetTarget | null => {
 		const slot = slotOf(step);
 		if (!slot) return null;
-		const last = lastPerformances.byMovement.get(slot.movement_id);
-		// Unknown history (offline, not cached): no target rather than a wrong calibration
-		if (last === undefined) return null;
-		const { reps, weights } = setsToArrays(last?.logged_sets ?? []);
-		const lastSets = reps.map((r, i) => ({ reps: r, weight: weights[i] }));
-		return targetsFor(slot, slot.movement, lastSets)[step.setIndex] ?? null;
+		if (step.kind === "warmup") {
+			const set = slotQueue.find((s) => s.id === slot.id)?.warmup?.[
+				step.setIndex
+			];
+			return set
+				? {
+						position: step.setIndex + 1,
+						weight: set.weight,
+						repMin: set.reps,
+						repMax: set.reps,
+						reason: "derived",
+					}
+				: null;
+		}
+		if (step.kind === "drop") {
+			// Each drop removes the slot's step from the load just lifted (about 20 % without one)
+			const previous = [...queue.slice(0, queue.indexOf(step))]
+				.reverse()
+				.find((s) => s.slotId === slot.id && draft?.sets[s.key]);
+			const lifted = previous
+				? (draft?.sets[previous.key].weight ?? null)
+				: null;
+			if (lifted === null) return null;
+			const lighter =
+				slot.finisher_load_step !== null
+					? lifted - slot.finisher_load_step
+					: lifted * 0.8;
+			return {
+				position: step.setIndex + 1,
+				weight: roundToIncrement(
+					lighter,
+					movementFor(slot, swaps).increment_kg ?? DEFAULT_INCREMENT,
+				),
+				repMin: null,
+				repMax: null,
+				reason: "derived",
+			};
+		}
+		if (step.kind !== "working") return null;
+		return workingTargets(slot)?.[step.setIndex] ?? null;
+	};
+
+	const alternativesOf = (step: QueueStep) => {
+		const slot = slotOf(step);
+		return slot
+			? [slot.movement, ...slot.alternatives.map((a) => a.movement)]
+			: [];
 	};
 
 	const send = async (options: { includeIncomplete?: boolean } = {}) => {
@@ -176,7 +288,7 @@ export function useGuidedSession(sessionId: string) {
 	const nextLabel = (index: number) => {
 		const step = queue[index];
 		const movement = step ? movementOf(step) : null;
-		return movement ? `${movement.name}, série ${step.setIndex + 1}` : null;
+		return movement ? `${movement.name}, ${partLabel(step)}` : null;
 	};
 
 	const complete = (index: number, values: { weight: number; reps: number }) =>
@@ -198,6 +310,18 @@ export function useGuidedSession(sessionId: string) {
 				: current,
 		);
 	const stopRest = () => apply((current) => setRest(current, null, new Date()));
+	// Before the slot's first set only; the original movement passed back drops the swap
+	const swap = (slotId: string, movementId: string) =>
+		apply((current) => {
+			const slot = slots.find((s) => s.id === slotId);
+			return swapMovement(
+				current,
+				queue,
+				slotId,
+				slot && movementId !== slot.movement_id ? movementId : null,
+				new Date(),
+			);
+		});
 
 	// Sends what is left, then closes the session. False when something could not be sent.
 	const finish = async (): Promise<boolean> => {
@@ -317,6 +441,8 @@ export function useGuidedSession(sessionId: string) {
 		goTo,
 		changeRest,
 		stopRest,
+		swap,
+		alternativesOf,
 		retry: () => send(),
 		finish,
 		discard,

@@ -4,7 +4,7 @@
 // Pure functions, unit-tested with `npm test`; storage lives in draft-storage.ts.
 
 import type { RestTimer } from "./rest.ts";
-import type { QueueStep } from "./set-queue.ts";
+import type { QueueStep, StepKind } from "./set-queue.ts";
 
 export const DRAFT_VERSION = 1;
 /** A draft untouched for this long is offered to be finished or discarded rather than resumed */
@@ -35,6 +35,8 @@ export type SessionDraft = {
 	/** One logged exercise per slot that has a done set, by slot id */
 	exercises: Record<string, DraftExercise>;
 	rest: RestTimer | null;
+	/** Alternative done instead of a slot's movement this session, by slot id (absent in older drafts) */
+	swaps?: Record<string, string>;
 };
 
 export type ExercisePayload = {
@@ -45,7 +47,7 @@ export type ExercisePayload = {
 	sets: {
 		weight: number;
 		reps: number;
-		kind: "working";
+		kind: StepKind;
 		side: "left" | "right" | null;
 		completed_at: string;
 	}[];
@@ -158,6 +160,25 @@ export function setRest(
 	return { ...draft, rest, updatedAt: now.toISOString() };
 }
 
+/**
+ * Does an alternative instead of the slot's movement for this session (null goes back to it). Only
+ * before the slot's first set: its logged exercise is about one movement.
+ */
+export function swapMovement(
+	draft: SessionDraft,
+	queue: QueueStep[],
+	slotId: string,
+	movementId: string | null,
+	now: Date,
+): SessionDraft {
+	if (queue.some((step) => step.slotId === slotId && draft.sets[step.key]))
+		return draft;
+	const swaps = { ...(draft.swaps ?? {}) };
+	if (movementId) swaps[slotId] = movementId;
+	else delete swaps[slotId];
+	return { ...draft, swaps, updatedAt: now.toISOString() };
+}
+
 export function isSlotComplete(
 	draft: SessionDraft,
 	queue: QueueStep[],
@@ -200,7 +221,7 @@ export function exercisesToSend(
 				return {
 					weight: set.weight,
 					reps: set.reps,
-					kind: "working",
+					kind: step.kind,
 					side: step.side,
 					completed_at: set.completedAt,
 				};
