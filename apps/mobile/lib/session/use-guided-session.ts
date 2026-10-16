@@ -179,6 +179,21 @@ export function useGuidedSession(sessionId: string) {
 		const lastSets = reps.map((r, i) => ({ reps: r, weight: weights[i] }));
 		return targetsFor(slot, movement, lastSets);
 	};
+	// What was lifted last time on the movement of a working step: the sets to beat, and when
+	const lastOf = (step: QueueStep) => {
+		if (step.kind !== "working") return null;
+		const slot = slots.find((s) => s.id === step.slotId);
+		if (!slot) return null;
+		const last = lastPerformances.byMovement.get(movementFor(slot, swaps).id);
+		if (!last) return null;
+		const { reps, weights } = setsToArrays(last.logged_sets);
+		if (reps.length === 0) return null;
+		return {
+			date: last.sessions?.date_session ?? last.created_at,
+			sets: reps.map((count, i) => ({ weight: weights[i], count })),
+			setIndex: step.setIndex,
+		};
+	};
 	const slotQueue = queueSlots(
 		slots,
 		swaps,
@@ -497,6 +512,7 @@ export function useGuidedSession(sessionId: string) {
 		slotOf,
 		movementOf,
 		targetOf,
+		lastOf,
 		complete,
 		skip,
 		goTo,
