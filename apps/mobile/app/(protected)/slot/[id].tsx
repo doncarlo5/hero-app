@@ -16,7 +16,8 @@ import {
 import { MovementPicker } from "@/components/movement-picker";
 import { Text } from "@/components/ui/text";
 import { errorMessage } from "@/lib/errors";
-import { useMovements } from "@/lib/queries/movements";
+import { slotWithMovementSettings } from "@/lib/movement-settings";
+import { useMovementSettings, useMovements } from "@/lib/queries/movements";
 import { useActiveProgram, useSaveSlot } from "@/lib/queries/programs";
 import type {
 	FinisherKind,
@@ -198,13 +199,19 @@ export default function SlotSettings() {
 		programQuery.data?.program_days.find((d) =>
 			d.slots.some((s) => s.id === id),
 		) ?? null;
-	const slot = day?.slots.find((s) => s.id === id) ?? null;
+	const settingsQuery = useMovementSettings();
+	const daySlot = day?.slots.find((s) => s.id === id) ?? null;
+	// "Repos après chaque côté" follows the user's setting for a library movement
+	const slot = daySlot
+		? slotWithMovementSettings(daySlot, settingsQuery.data ?? new Map())
+		: null;
 	const otherSlots = day?.slots.filter((s) => s.id !== id) ?? [];
 
 	const [form, setForm] = useState<FormState | null>(null);
 	const [filledFrom, setFilledFrom] = useState<Slot | null>(null);
-	if (slot && day && slot !== filledFrom) {
-		setFilledFrom(slot);
+	// Compared on the loaded row: the slot with settings is a new object each render
+	if (slot && daySlot && day && daySlot !== filledFrom) {
+		setFilledFrom(daySlot);
 		setForm(formFromSlot(slot, day.slots));
 	}
 

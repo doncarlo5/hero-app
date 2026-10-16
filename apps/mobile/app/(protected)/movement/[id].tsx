@@ -6,6 +6,7 @@ import { ChevronRight, PencilIcon } from "lucide-react-native";
 import { ActivityIndicator, Pressable, SectionList, View } from "react-native";
 
 import { MovementFrames } from "@/components/movement-frames";
+import { MovementSettingsCard } from "@/components/movement-settings-card";
 import { MovementThumbnail } from "@/components/movement-thumbnail";
 import { Text } from "@/components/ui/text";
 import {
@@ -14,7 +15,8 @@ import {
 	muscleLabel,
 } from "@/lib/movement-library";
 import { useMovementHistory } from "@/lib/queries/exercises";
-import { useMovement } from "@/lib/queries/movements";
+import { withMovementSettings } from "@/lib/movement-settings";
+import { useMovement, useMovementSettings } from "@/lib/queries/movements";
 import {
 	setsToArrays,
 	type LoggedExerciseWithSession,
@@ -66,8 +68,12 @@ export default function MovementSheet() {
 	const themeColors = useThemeColors();
 	const movementQuery = useMovement(id, { enabled: true });
 	const historyQuery = useMovementHistory(id);
+	const settingsQuery = useMovementSettings();
 
-	const movement = movementQuery.data ?? null;
+	const settings = settingsQuery.data ?? new Map();
+	const row = movementQuery.data ?? null;
+	// With the user's settings, for a library movement
+	const movement = row ? withMovementSettings(row, settings) : null;
 
 	if (movementQuery.isLoading) {
 		return (
@@ -132,6 +138,14 @@ export default function MovementSheet() {
 				<View className="rounded-xl bg-default p-3">
 					<Text className="text-sm">{movement.notes}</Text>
 				</View>
+			)}
+
+			{isLibraryMovement(movement) && row && (
+				<MovementSettingsCard
+					key={`settings-${movement.id}`}
+					movement={row}
+					setting={settings.get(movement.id) ?? null}
+				/>
 			)}
 
 			{movement.instructions.length > 0 && (

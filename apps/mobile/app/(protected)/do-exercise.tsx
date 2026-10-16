@@ -34,7 +34,11 @@ import { MovementPicker } from "@/components/movement-picker";
 import { SafeAreaView } from "@/components/safe-area-view";
 import { Text } from "@/components/ui/text";
 import { useLastPerformance, useSaveExercise } from "@/lib/queries/exercises";
-import { useMovements } from "@/lib/queries/movements";
+import {
+	slotWithMovementSettings,
+	withMovementSettings,
+} from "@/lib/movement-settings";
+import { useMovementSettings, useMovements } from "@/lib/queries/movements";
 import { useActiveProgram } from "@/lib/queries/programs";
 import { useSession } from "@/lib/queries/sessions";
 import {
@@ -96,6 +100,7 @@ export default function DoExercise() {
 	const sessionQuery = useSession(sessionId);
 	const programQuery = useActiveProgram();
 	const movementsQuery = useMovements();
+	const settingsQuery = useMovementSettings();
 	const saveExercise = useSaveExercise();
 	const [pickedMovementId, setPickedMovementId] = useState<string | null>(
 		params.movementId ?? null,
@@ -110,11 +115,16 @@ export default function DoExercise() {
 		sessionQuery.isLoading ||
 		movementsQuery.isLoading ||
 		programQuery.isLoading;
-	const movement = allMovements.find((m) => m.id === pickedMovementId) ?? null;
+	const settings = settingsQuery.data ?? new Map();
+	const pickedMovement = allMovements.find((m) => m.id === pickedMovementId);
+	// With the user's settings for a library movement (load step)
+	const movement = pickedMovement
+		? withMovementSettings(pickedMovement, settings)
+		: null;
 
 	// The slot this exercise fills: the one passed by the session screen, else the day's slot that
 	// uses or offers the movement
-	const slot: Slot | null =
+	const daySlot: Slot | null =
 		day?.slots.find((s) => s.id === params.slotId) ??
 		day?.slots.find(
 			(s) =>
@@ -122,6 +132,7 @@ export default function DoExercise() {
 				s.alternatives.some((a) => a.movement.id === pickedMovementId),
 		) ??
 		null;
+	const slot = daySlot ? slotWithMovementSettings(daySlot, settings) : null;
 
 	// Movements of the day are pinned first in the picker (slot movements and their alternatives)
 	const dayMovementIds = new Set(

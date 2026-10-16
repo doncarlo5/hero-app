@@ -196,6 +196,46 @@ export type Database = {
 					},
 				];
 			};
+			movement_settings: {
+				Row: {
+					increment_kg: number | null;
+					movement_id: string;
+					unilateral: boolean | null;
+					updated_at: string;
+					user_id: string;
+				};
+				ComputedFields: never;
+				Insert: {
+					increment_kg?: number | null;
+					movement_id: string;
+					unilateral?: boolean | null;
+					updated_at?: string;
+					user_id?: string;
+				};
+				Update: {
+					increment_kg?: number | null;
+					movement_id?: string;
+					unilateral?: boolean | null;
+					updated_at?: string;
+					user_id?: string;
+				};
+				Relationships: [
+					{
+						foreignKeyName: "movement_settings_movement_id_fkey";
+						columns: ["movement_id"];
+						isOneToOne: false;
+						referencedRelation: "movements";
+						referencedColumns: ["id"];
+					},
+					{
+						foreignKeyName: "movement_settings_user_id_fkey";
+						columns: ["user_id"];
+						isOneToOne: false;
+						referencedRelation: "profiles";
+						referencedColumns: ["id"];
+					},
+				];
+			};
 			movements: {
 				Row: {
 					aliases: string[];

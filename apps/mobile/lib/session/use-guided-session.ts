@@ -12,6 +12,8 @@ import {
 import { DEFAULT_SET_COUNT, targetsFor } from "@/lib/progression/slot-targets";
 import { queryClient } from "@/lib/queries/client";
 import { useLastPerformances, useSaveExercise } from "@/lib/queries/exercises";
+import { slotWithMovementSettings } from "@/lib/movement-settings";
+import { useMovementSettings } from "@/lib/queries/movements";
 import { useActiveProgram } from "@/lib/queries/programs";
 import { useSession, useUpdateSession } from "@/lib/queries/sessions";
 import {
@@ -135,6 +137,7 @@ function queueSlots(
 export function useGuidedSession(sessionId: string) {
 	const sessionQuery = useSession(sessionId);
 	const programQuery = useActiveProgram();
+	const settingsQuery = useMovementSettings();
 	const saveExercise = useSaveExercise();
 	const updateSession = useUpdateSession();
 	// The device copy of the queries is being read back (lib/queries/persist.ts)
@@ -144,7 +147,11 @@ export function useGuidedSession(sessionId: string) {
 		programQuery.data?.program_days.find(
 			(d) => d.id === sessionQuery.data?.program_day_id,
 		) ?? null;
-	const slots = day?.slots ?? [];
+	// The user's settings for library movements: sides and load step
+	const settings = settingsQuery.data ?? new Map();
+	const slots = (day?.slots ?? []).map((slot) =>
+		slotWithMovementSettings(slot, settings),
+	);
 
 	const [draft, setDraft] = useState<SessionDraft | null>(null);
 	const [now, setNow] = useState(() => Date.now());
