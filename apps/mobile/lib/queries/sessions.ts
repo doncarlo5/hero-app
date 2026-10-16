@@ -14,7 +14,7 @@ import type { Session, SessionListItem, SessionWithExercises } from "./types";
 const SESSIONS_PAGE_SIZE = 30;
 
 const SESSION_DETAIL_SELECT =
-	"*, program_day:program_days(id, name, program_id), logged_exercises(*, logged_sets(set_order, weight, reps, kind, side), movement:movements(*))";
+	"*, program_day:program_days(id, name, program_id), logged_exercises(*, logged_sets(set_order, weight, reps, kind, side, duration_seconds), movement:movements(*))";
 
 export function useSessionsPages() {
 	return useInfiniteQuery({

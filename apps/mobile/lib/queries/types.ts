@@ -8,12 +8,23 @@ export type ProgressionRule = Enums<"progression_rule">;
 export type LoadRule = Enums<"load_rule">;
 export type SetKind = Enums<"set_kind">;
 export type FinisherKind = Enums<"finisher_kind">;
+export type MovementMeasure = Enums<"movement_measure">;
 export type SetPrescriptionRow = Tables<"set_prescriptions">;
 
 export type LoggedSet = Pick<
 	Tables<"logged_sets">,
-	"set_order" | "weight" | "reps" | "kind" | "side"
->;
+	"set_order" | "weight" | "reps" | "kind" | "side" | "duration_seconds"
+> &
+	Partial<
+		Pick<
+			Tables<"logged_sets">,
+			| "completed_at"
+			| "target_weight"
+			| "target_rep_min"
+			| "target_rep_max"
+			| "target_reason"
+		>
+	>;
 
 export type SlotAlternative = {
 	position: number;
@@ -64,8 +75,9 @@ export function setsToArrays(sets: LoggedSet[]) {
 	const ordered = sets
 		.filter((set) => set.kind === "working" && set.side !== "right")
 		.sort((a, b) => a.set_order - b.set_order);
+	// A timed set counts its seconds where a set counts its reps (the engine treats both the same way)
 	return {
-		reps: ordered.map((set) => set.reps),
+		reps: ordered.map((set) => set.duration_seconds ?? set.reps),
 		weights: ordered.map((set) => set.weight),
 	};
 }

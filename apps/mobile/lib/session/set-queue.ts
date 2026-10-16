@@ -12,6 +12,8 @@ export type QueueSlot = {
 	restSeconds: number | null;
 	/** Unilateral movement: each set is done once per side */
 	unilateral: boolean;
+	/** Timed movement: a set records seconds instead of reps (default reps) */
+	measure?: "reps" | "duration";
 	/** Unilateral only: rest after each side instead of only after the second one */
 	restPerSide: boolean;
 	sets: { position: number; restSeconds: number | null }[];
@@ -51,6 +53,8 @@ export type QueueStep = {
 	/** Stable id of the step: `${slotId}:${setIndex}:${side}`, `w` / `f` prefixes for warm-up and finisher parts */
 	key: string;
 	kind: StepKind;
+	/** Reps or seconds, from the movement done in the step */
+	measure: "reps" | "duration";
 	slotId: string;
 	movementId: string;
 	/** Index of the set in the slot's prescriptions, from 0 (of the part for warm-up and finisher steps) */
@@ -148,7 +152,13 @@ export function buildSetQueue(
 				if (!set) return;
 				const fullRest = set.restSeconds ?? slot.restSeconds ?? defaultRest;
 				const transitionRest = set.restSeconds ?? transition;
-				const common = { slotId: slot.id, round, fullRest, transitionRest };
+				const common = {
+					slotId: slot.id,
+					round,
+					fullRest,
+					transitionRest,
+					measure: slot.measure ?? ("reps" as const),
+				};
 				if (round === 0) {
 					(slot.warmup ?? []).forEach((_, w) =>
 						drafts.push({

@@ -5,6 +5,7 @@ import { Pressable, View } from "react-native";
 import { MovementThumbnail } from "@/components/movement-thumbnail";
 import { Text } from "@/components/ui/text";
 import {
+	equipmentLabel,
 	isLibraryMovement,
 	matchesMovementSearch,
 	muscleLabel,
@@ -20,7 +21,13 @@ function MovementRow(props: {
 	isSelected: boolean;
 	onPress: (movement: Movement) => void;
 }) {
-	const muscles = props.movement.primary_muscles.map(muscleLabel).join(", ");
+	const details = [
+		...props.movement.primary_muscles.map(muscleLabel),
+		props.movement.equipment ? equipmentLabel(props.movement.equipment) : null,
+		props.movement.measure === "duration" ? "durée" : null,
+	]
+		.filter(Boolean)
+		.join(" · ");
 
 	return (
 		<Pressable onPress={() => props.onPress(props.movement)}>
@@ -40,8 +47,8 @@ function MovementRow(props: {
 					>
 						{props.movement.name}
 					</Text>
-					{muscles !== "" && (
-						<Text className="text-xs text-muted">{muscles}</Text>
+					{details !== "" && (
+						<Text className="text-xs text-muted">{details}</Text>
 					)}
 				</View>
 			</View>

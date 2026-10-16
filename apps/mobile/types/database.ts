@@ -137,6 +137,7 @@ export type Database = {
 				Row: {
 					completed_at: string | null;
 					created_at: string;
+					duration_seconds: number | null;
 					id: string;
 					kind: Database["public"]["Enums"]["set_kind"];
 					logged_exercise_id: string;
@@ -154,6 +155,7 @@ export type Database = {
 				Insert: {
 					completed_at?: string | null;
 					created_at?: string;
+					duration_seconds?: number | null;
 					id?: string;
 					kind?: Database["public"]["Enums"]["set_kind"];
 					logged_exercise_id: string;
@@ -170,6 +172,7 @@ export type Database = {
 				Update: {
 					completed_at?: string | null;
 					created_at?: string;
+					duration_seconds?: number | null;
 					id?: string;
 					kind?: Database["public"]["Enums"]["set_kind"];
 					logged_exercise_id?: string;
@@ -195,14 +198,18 @@ export type Database = {
 			};
 			movements: {
 				Row: {
+					aliases: string[];
+					category: string | null;
 					created_at: string;
 					definition_key: string | null;
 					equipment: string | null;
 					id: string;
 					image_paths: string[];
 					increment_kg: number | null;
+					instructions: string[];
 					library_key: string | null;
 					load_type: Database["public"]["Enums"]["load_type"];
+					measure: Database["public"]["Enums"]["movement_measure"];
 					name: string;
 					notes: string | null;
 					owner_id: string | null;
@@ -213,14 +220,18 @@ export type Database = {
 				};
 				ComputedFields: never;
 				Insert: {
+					aliases?: string[];
+					category?: string | null;
 					created_at?: string;
 					definition_key?: string | null;
 					equipment?: string | null;
 					id?: string;
 					image_paths?: string[];
 					increment_kg?: number | null;
+					instructions?: string[];
 					library_key?: string | null;
 					load_type?: Database["public"]["Enums"]["load_type"];
+					measure?: Database["public"]["Enums"]["movement_measure"];
 					name: string;
 					notes?: string | null;
 					owner_id?: string | null;
@@ -230,14 +241,18 @@ export type Database = {
 					updated_at?: string;
 				};
 				Update: {
+					aliases?: string[];
+					category?: string | null;
 					created_at?: string;
 					definition_key?: string | null;
 					equipment?: string | null;
 					id?: string;
 					image_paths?: string[];
 					increment_kg?: number | null;
+					instructions?: string[];
 					library_key?: string | null;
 					load_type?: Database["public"]["Enums"]["load_type"];
+					measure?: Database["public"]["Enums"]["movement_measure"];
 					name?: string;
 					notes?: string | null;
 					owner_id?: string | null;
@@ -795,6 +810,7 @@ export type Database = {
 			finisher_kind: "drop_sets" | "cheat_reps" | "switch" | "mini_sets";
 			load_rule: "none" | "same" | "percent" | "step";
 			load_type: "external" | "bodyweight_plus" | "assisted";
+			movement_measure: "reps" | "duration";
 			progression_rule: "per_set" | "all_sets" | "manual";
 			session_type:
 				| "Upper A"
@@ -953,6 +969,7 @@ export const Constants = {
 			finisher_kind: ["drop_sets", "cheat_reps", "switch", "mini_sets"],
 			load_rule: ["none", "same", "percent", "step"],
 			load_type: ["external", "bodyweight_plus", "assisted"],
+			movement_measure: ["reps", "duration"],
 			progression_rule: ["per_set", "all_sets", "manual"],
 			session_type: [
 				"Upper A",

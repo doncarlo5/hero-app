@@ -11,6 +11,7 @@ import {
 
 import { Button, Input, TextArea } from "heroui-native";
 import { Text } from "@/components/ui/text";
+import { applyEditedSets } from "@/lib/logged-sets";
 import {
 	useDeleteExercise,
 	useLoggedExercise,
@@ -22,6 +23,7 @@ import {
 	setsToArrays,
 	type LoggedExerciseWithSession,
 	type Movement,
+	type SetKind,
 } from "@/lib/queries/types";
 import { useThemeColors } from "@/lib/theme";
 import { useColorScheme } from "@/lib/useColorScheme";
@@ -118,33 +120,44 @@ export default function ExerciseDetail() {
 	const handleSave = () => {
 		if (!exercise || !selectedExerciseType || isSaving) return;
 
-		const sets = [
-			{
-				reps: parseNumber(formState.rep1),
-				weight: parseNumber(formState.weight1),
-			},
-			{
-				reps: parseNumber(formState.rep2),
-				weight: parseNumber(formState.weight2),
-			},
-			{
-				reps: parseNumber(formState.rep3),
-				weight: parseNumber(formState.weight3),
-			},
-		];
-		if (isRep4) {
-			sets.push({
-				reps: parseNumber(formState.rep4),
-				weight: parseNumber(formState.weight4),
-			});
-		}
+		const edited = [
+			{ count: formState.rep1, weight: formState.weight1 },
+			{ count: formState.rep2, weight: formState.weight2 },
+			{ count: formState.rep3, weight: formState.weight3 },
+			...(isRep4 ? [{ count: formState.rep4, weight: formState.weight4 }] : []),
+		].map((set) => ({
+			count: Math.round(parseNumber(set.count)),
+			weight: parseNumber(set.weight),
+		}));
+		// The edit only touches working sets: warm-ups, finishers, sides and targets are kept
+		const sets = applyEditedSets(
+			exercise.logged_sets,
+			edited,
+			selectedExerciseType.measure,
+		).map((set) => ({
+			weight: set.weight,
+			reps: set.reps,
+			kind: set.kind as SetKind,
+			side: set.side,
+			duration_seconds: set.duration_seconds,
+			completed_at: set.completed_at ?? undefined,
+			target_weight: set.target_weight ?? null,
+			target_rep_min: set.target_rep_min ?? null,
+			target_rep_max: set.target_rep_max ?? null,
+			target_reason: (set.target_reason ?? null) as
+				| "increase"
+				| "repeat"
+				| "derived"
+				| "calibration"
+				| null,
+		}));
 
 		saveExercise.mutate(
 			{
 				id: exercise.id,
 				movementId: selectedExerciseType.id,
 				comment: formState.comment,
-				sets: sets.map((set) => ({ ...set, reps: Math.round(set.reps) })),
+				sets,
 			},
 			{
 				onSuccess: () => setIsEditable(false),
@@ -282,7 +295,11 @@ export default function ExerciseDetail() {
 							</Text>
 							<View className="flex-row space-x-3">
 								<View className="flex-1">
-									<Text className="text-xs text-muted mb-1">Reps</Text>
+									<Text className="text-xs text-muted mb-1">
+										{selectedExerciseType?.measure === "duration"
+											? "Sec"
+											: "Reps"}
+									</Text>
 									<Input
 										value={formState.rep1}
 										onChangeText={(value) => handleInputChange("rep1", value)}
@@ -313,7 +330,11 @@ export default function ExerciseDetail() {
 							</Text>
 							<View className="flex-row space-x-3">
 								<View className="flex-1">
-									<Text className="text-xs text-muted mb-1">Reps</Text>
+									<Text className="text-xs text-muted mb-1">
+										{selectedExerciseType?.measure === "duration"
+											? "Sec"
+											: "Reps"}
+									</Text>
 									<Input
 										value={formState.rep2}
 										onChangeText={(value) => handleInputChange("rep2", value)}
@@ -344,7 +365,11 @@ export default function ExerciseDetail() {
 							</Text>
 							<View className="flex-row space-x-3">
 								<View className="flex-1">
-									<Text className="text-xs text-muted mb-1">Reps</Text>
+									<Text className="text-xs text-muted mb-1">
+										{selectedExerciseType?.measure === "duration"
+											? "Sec"
+											: "Reps"}
+									</Text>
 									<Input
 										value={formState.rep3}
 										onChangeText={(value) => handleInputChange("rep3", value)}
@@ -376,7 +401,11 @@ export default function ExerciseDetail() {
 								</Text>
 								<View className="flex-row space-x-3">
 									<View className="flex-1">
-										<Text className="text-xs text-muted mb-1">Reps</Text>
+										<Text className="text-xs text-muted mb-1">
+											{selectedExerciseType?.measure === "duration"
+												? "Sec"
+												: "Reps"}
+										</Text>
 										<Input
 											value={formState.rep4}
 											onChangeText={(value) => handleInputChange("rep4", value)}
@@ -415,7 +444,8 @@ export default function ExerciseDetail() {
 					<View className="space-y-3">
 						<View className="flex-row gap-2 w-full">
 							{exerciseReps.map((rep, index) => {
-								if (rep <= 0 || exerciseWeights[index] <= 0) return null;
+								// Bodyweight sets have 0 kg: only empty sets are hidden
+								if (rep <= 0 || exerciseWeights[index] < 0) return null;
 
 								return (
 									<View
@@ -426,7 +456,10 @@ export default function ExerciseDetail() {
 											Set {index + 1}
 										</Text>
 										<Text className="text-sm font-bold text-foreground">
-											{rep} reps
+											{rep}{" "}
+											{selectedExerciseType?.measure === "duration"
+												? "s"
+												: "reps"}
 										</Text>
 										<Text className="text-xs text-muted">
 											{exerciseWeights[index]} kg

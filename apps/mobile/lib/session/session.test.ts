@@ -470,6 +470,34 @@ describe("session draft", () => {
 		assert.deepEqual(exercisesToSend(draft, two), []);
 	});
 
+	test("a timed movement sends seconds, with reps 0", () => {
+		const timed = buildSetQueue([slot("A", 1, 1, { measure: "duration" })]);
+		assert.equal(timed[0].measure, "duration");
+		const draft = completeStep(
+			createDraft("s1", at(0)),
+			timed,
+			0,
+			{ weight: 0, reps: 45 },
+			at(1),
+			newId,
+		);
+		const [set] = exercisesToSend(draft, timed)[0].sets;
+		assert.deepEqual([set.reps, set.duration_seconds], [0, 45]);
+		const counted = buildSetQueue([slot("B", 1, 1)]);
+		const repsDraft = completeStep(
+			createDraft("s1", at(0)),
+			counted,
+			0,
+			{ weight: 50, reps: 8 },
+			at(1),
+			newId,
+		);
+		assert.equal(
+			exercisesToSend(repsDraft, counted)[0].sets[0].duration_seconds,
+			null,
+		);
+	});
+
 	test("finishing early sends unfinished slots too", () => {
 		let draft = createDraft("s1", at(0));
 		draft = completeStep(

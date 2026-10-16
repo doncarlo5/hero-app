@@ -37,7 +37,7 @@ function parseNumber(value: string): number | null {
 	return Number.isNaN(parsed) ? null : parsed;
 }
 
-function targetLabel(target: SetTarget | null) {
+function targetLabel(target: SetTarget | null, unit: "reps" | "s") {
 	if (!target) return null;
 	const reps =
 		target.repMin === null || target.repMax === null
@@ -45,7 +45,9 @@ function targetLabel(target: SetTarget | null) {
 			: target.repMin === target.repMax
 				? `${target.repMin}`
 				: `${target.repMin}-${target.repMax}`;
-	if (target.weight === null) return reps ? `${reps} reps` : null;
+	if (target.weight === null) return reps ? `${reps} ${unit}` : null;
+	if (unit === "s")
+		return reps ? `${target.weight} kg · ${reps} s` : `${target.weight} kg`;
 	return reps ? `${target.weight} kg × ${reps}` : `${target.weight} kg`;
 }
 
@@ -137,7 +139,12 @@ export default function GuidedSession() {
 			parseNumber(reps) ??
 			(step.kind === "warmup" ? (target?.repMax ?? null) : null);
 		if (w === null || w < 0 || r === null || r < 0 || !Number.isInteger(r)) {
-			Alert.alert("Série", "Indique la charge et un nombre entier de reps.");
+			Alert.alert(
+				"Série",
+				step.measure === "duration"
+					? "Indique la charge et la durée en secondes (entier)."
+					: "Indique la charge et un nombre entier de reps.",
+			);
 			return;
 		}
 		Keyboard.dismiss();
@@ -258,6 +265,7 @@ export default function GuidedSession() {
 
 	const movement = step ? guided.movementOf(step) : null;
 	const slot = step ? guided.slotOf(step) : null;
+	const unit = step?.measure === "duration" ? "s" : "reps";
 	const setCount = step
 		? guided.queue.filter(
 				(s) =>
@@ -364,11 +372,11 @@ export default function GuidedSession() {
 								Pas d’historique : commence léger et trouve ta charge.
 							</Text>
 						) : (
-							targetLabel(target) && (
+							targetLabel(target, unit) && (
 								<View className="gap-0.5">
 									<View className="flex-row items-center gap-1">
 										<Text className="text-base">
-											Objectif : {targetLabel(target)}
+											Objectif : {targetLabel(target, unit)}
 										</Text>
 										{target?.reason === "increase" && (
 											<ArrowUpIcon size={16} color={themeColors.brand} />
@@ -402,7 +410,9 @@ export default function GuidedSession() {
 								/>
 							</View>
 							<View className="flex-1">
-								<Text className="text-sm text-muted mb-1">Reps</Text>
+								<Text className="text-sm text-muted mb-1">
+									{unit === "s" ? "Durée (s)" : "Reps"}
+								</Text>
 								<Input
 									variant="secondary"
 									value={reps}
@@ -502,7 +512,9 @@ export default function GuidedSession() {
 								</Text>
 								<Text className="text-sm text-muted">
 									{logged
-										? `${logged.weight} × ${logged.reps}`
+										? s.measure === "duration"
+											? `${logged.weight} kg · ${logged.reps} s`
+											: `${logged.weight} × ${logged.reps}`
 										: skipped
 											? "passée"
 											: ""}

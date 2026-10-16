@@ -11,7 +11,7 @@ import { queryKeys, unwrap, unwrapMaybe } from "./client";
 import type { LoggedExerciseWithSession, SetKind, Trophy } from "./types";
 
 const EXERCISE_SELECT =
-	"*, logged_sets(set_order, weight, reps, kind, side), movement:movements(*), sessions(id, date_session)";
+	"*, logged_sets(set_order, weight, reps, kind, side, duration_seconds, completed_at, target_weight, target_rep_min, target_rep_max, target_reason), movement:movements(*), sessions(id, date_session)";
 
 export function useLoggedExercise(id: string) {
 	return useQuery({
@@ -130,6 +130,7 @@ export type SaveExerciseInput = {
 		target_rep_min?: number | null;
 		target_rep_max?: number | null;
 		target_reason?: "increase" | "repeat" | "derived" | "calibration" | null;
+		duration_seconds?: number | null;
 	}[];
 };
 

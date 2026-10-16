@@ -548,7 +548,11 @@ export default function SessionDetail() {
 											.sort((a, b) => a.set_order - b.set_order)
 											.map((set, index) => {
 												// Only show sets with actual data
-												if (set.reps <= 0 || set.weight <= 0) return null;
+												if (
+													(set.duration_seconds ?? set.reps) <= 0 ||
+													set.weight < 0
+												)
+													return null;
 
 												return (
 													<View
@@ -564,7 +568,9 @@ export default function SessionDetail() {
 																	: ""}
 														</Text>
 														<Text className="text-sm font-bold text-foreground">
-															{set.reps} reps
+															{set.duration_seconds != null
+																? `${set.duration_seconds} s`
+																: `${set.reps} reps`}
 														</Text>
 														<Text className="text-xs text-muted">
 															{set.weight} kg

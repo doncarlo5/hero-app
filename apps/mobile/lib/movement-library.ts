@@ -25,6 +25,26 @@ export function muscleLabel(muscle: string) {
 	return MUSCLE_LABELS[muscle] ?? muscle;
 }
 
+// French labels of the library's equipment (free-exercise-db values)
+const EQUIPMENT_LABELS: Record<string, string> = {
+	barbell: "Barre",
+	dumbbell: "Haltères",
+	cable: "Poulie",
+	machine: "Machine",
+	kettlebells: "Kettlebell",
+	bands: "Élastiques",
+	"body only": "Poids du corps",
+	"medicine ball": "Médecine-ball",
+	"exercise ball": "Swiss ball",
+	"e-z curl bar": "Barre EZ",
+	"foam roll": "Rouleau",
+	other: "Autre",
+};
+
+export function equipmentLabel(equipment: string) {
+	return EQUIPMENT_LABELS[equipment] ?? equipment;
+}
+
 // Library movements are shared (no owner) and read-only
 export function isLibraryMovement(movement: Movement) {
 	return movement.owner_id === null;
@@ -33,14 +53,17 @@ export function isLibraryMovement(movement: Movement) {
 const normalize = (value: string) =>
 	value.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
-// Every word of the query must appear in the name, the equipment or a muscle (English or French)
+// Every word of the query must appear in the name, an alias, the equipment or a primary muscle
+// (English or French)
 export function matchesMovementSearch(movement: Movement, query: string) {
 	const words = normalize(query).split(/\s+/).filter(Boolean);
 	if (words.length === 0) return true;
 	const haystack = normalize(
 		[
 			movement.name,
+			...(movement.aliases ?? []),
 			movement.equipment ?? "",
+			movement.equipment ? equipmentLabel(movement.equipment) : "",
 			...movement.primary_muscles,
 			...movement.primary_muscles.map(muscleLabel),
 		].join(" "),

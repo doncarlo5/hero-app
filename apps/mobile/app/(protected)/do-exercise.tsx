@@ -192,10 +192,19 @@ export default function DoExercise() {
 				slotId: slot?.id ?? null,
 				sessionId,
 				comment,
-				sets: sets.map((s) => ({
-					reps: Math.round(parseNumber(s.reps)),
-					weight: parseNumber(s.weight),
-				})),
+				// A timed movement's first column is seconds
+				sets: sets.map((s) =>
+					movement.measure === "duration"
+						? {
+								reps: 0,
+								duration_seconds: Math.round(parseNumber(s.reps)),
+								weight: parseNumber(s.weight),
+							}
+						: {
+								reps: Math.round(parseNumber(s.reps)),
+								weight: parseNumber(s.weight),
+							},
+				),
 			},
 			{
 				onSuccess: (result) => {
@@ -337,7 +346,7 @@ export default function DoExercise() {
 							<View className="bg-slate-50 dark:bg-slate-900/40 rounded-2xl py-4 px-2 mb-5">
 								<View className="flex-row justify-between gap-1 px-2 mb-2">
 									<Text className="flex-1 max-w-[25%] text-sm text-muted text-center">
-										Reps
+										{movement?.measure === "duration" ? "Sec" : "Reps"}
 									</Text>
 									<Text className="flex-1 max-w-[35%] text-sm text-muted text-center">
 										KG

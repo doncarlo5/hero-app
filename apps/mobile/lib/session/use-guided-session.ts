@@ -96,6 +96,7 @@ function queueSlots(
 			supersetGroup: slot.superset_group,
 			restSeconds: slot.rest_seconds,
 			unilateral: movement.unilateral,
+			measure: movement.measure,
 			restPerSide: slot.rest_per_side,
 			sets:
 				slot.set_prescriptions.length > 0
@@ -109,7 +110,10 @@ function queueSlots(
 						})),
 			// Key lifts with an external load warm up from the empty bar to the first target
 			warmup:
-				slot.is_key_lift && movement.load_type === "external" && working
+				slot.is_key_lift &&
+				movement.load_type === "external" &&
+				movement.measure !== "duration" &&
+				working
 					? warmupRamp({ workingWeight: working })
 					: [],
 			finisher: slot.finisher_kind
