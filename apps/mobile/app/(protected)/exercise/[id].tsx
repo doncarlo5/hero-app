@@ -10,6 +10,7 @@ import {
 } from "react-native";
 
 import { Button, Input, TextArea } from "heroui-native";
+import { errorMessage } from "@/lib/errors";
 import { Text } from "@/components/ui/text";
 import { applyEditedSets } from "@/lib/logged-sets";
 import {
@@ -163,7 +164,10 @@ export default function ExerciseDetail() {
 				onSuccess: () => setIsEditable(false),
 				// The edited values stay in the form so the user can retry
 				onError: (error) =>
-					Alert.alert("Error", error.message || "Failed to update exercise"),
+					Alert.alert(
+						"Erreur",
+						errorMessage(error, "Impossible d’enregistrer l’exercice."),
+					),
 			},
 		);
 	};
@@ -183,7 +187,11 @@ export default function ExerciseDetail() {
 						deleteExercise.mutate(exercise.id, {
 							// Back to the screen that opened it (the session), not a new copy of it
 							onSuccess: () => router.back(),
-							onError: () => Alert.alert("Error", "Failed to delete exercise"),
+							onError: (error) =>
+								Alert.alert(
+									"Erreur",
+									errorMessage(error, "Impossible de supprimer l’exercice."),
+								),
 						}),
 				},
 			],

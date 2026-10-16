@@ -23,6 +23,7 @@ import { MovementFrames } from "@/components/movement-frames";
 import { MovementThumbnail } from "@/components/movement-thumbnail";
 import { RestPanel } from "@/components/rest-panel";
 import { Text } from "@/components/ui/text";
+import { errorMessage } from "@/lib/errors";
 import type { SetTarget } from "@/lib/progression/engine";
 import { currentIndex } from "@/lib/session/draft";
 import { restPhase } from "@/lib/session/rest";
@@ -184,7 +185,7 @@ export default function GuidedSession() {
 			} catch (error) {
 				Alert.alert(
 					"Erreur",
-					error instanceof Error ? error.message : "Impossible de terminer.",
+					errorMessage(error, "Impossible de terminer la séance."),
 				);
 			} finally {
 				setIsFinishing(false);

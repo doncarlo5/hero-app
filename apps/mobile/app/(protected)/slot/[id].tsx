@@ -15,6 +15,7 @@ import {
 
 import { MovementPicker } from "@/components/movement-picker";
 import { Text } from "@/components/ui/text";
+import { errorMessage } from "@/lib/errors";
 import { useMovements } from "@/lib/queries/movements";
 import { useActiveProgram, useSaveSlot } from "@/lib/queries/programs";
 import type {
@@ -326,7 +327,7 @@ export default function SlotSettings() {
 				onError: (error) =>
 					Alert.alert(
 						"Erreur",
-						error.message || "Impossible d’enregistrer l’exercice.",
+						errorMessage(error, "Impossible d’enregistrer l’exercice."),
 					),
 			},
 		);

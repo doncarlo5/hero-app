@@ -68,6 +68,16 @@ export default function ProtectedLayout() {
 					}}
 				/>
 				<Stack.Screen
+					name="movement/[id]"
+					options={{
+						presentation: "card",
+						headerShown: true,
+						headerTitle: "Exercice",
+						headerBackTitle: "Retour",
+						headerShadowVisible: true,
+					}}
+				/>
+				<Stack.Screen
 					name="slot/[id]"
 					options={{
 						presentation: "card",
