@@ -9,9 +9,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { Alert, Pressable, ScrollView, View } from "react-native";
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Button, Input, Label } from "heroui-native";
 import { Text } from "@/components/ui/text";
 import { useAuth } from "@/context/supabase-provider";
 import { useProfile, useUpdateProfile } from "@/lib/queries/profile";
@@ -111,8 +109,8 @@ export default function Informations() {
 									onPress={() => handleColorSchemeChange("light")}
 									className={`flex-1 flex-row items-center justify-center gap-2 p-4 rounded-lg border-2 ${
 										colorSchemePreference === "light"
-											? "border-primary bg-primary/10"
-											: "border-border bg-muted/10"
+											? "border-foreground bg-foreground/10"
+											: "border-border bg-default/10"
 									}`}
 								>
 									<Sun
@@ -126,8 +124,8 @@ export default function Informations() {
 									<Text
 										className={
 											colorSchemePreference === "light"
-												? "font-semibold text-primary"
-												: "text-muted-foreground"
+												? "font-semibold text-foreground"
+												: "text-muted"
 										}
 									>
 										Clair
@@ -138,8 +136,8 @@ export default function Informations() {
 									onPress={() => handleColorSchemeChange("dark")}
 									className={`flex-1 flex-row items-center justify-center gap-2 p-4 rounded-lg border-2 ${
 										colorSchemePreference === "dark"
-											? "border-primary bg-primary/10"
-											: "border-border bg-muted/10"
+											? "border-foreground bg-foreground/10"
+											: "border-border bg-default/10"
 									}`}
 								>
 									<Moon
@@ -153,8 +151,8 @@ export default function Informations() {
 									<Text
 										className={
 											colorSchemePreference === "dark"
-												? "font-semibold text-primary"
-												: "text-muted-foreground"
+												? "font-semibold text-foreground"
+												: "text-muted"
 										}
 									>
 										Sombre
@@ -165,8 +163,8 @@ export default function Informations() {
 									onPress={() => handleColorSchemeChange("system")}
 									className={`flex-1 flex-row items-center justify-center gap-2 p-4 rounded-lg border-2 ${
 										colorSchemePreference === "system"
-											? "border-primary bg-primary/10"
-											: "border-border bg-muted/10"
+											? "border-foreground bg-foreground/10"
+											: "border-border bg-default/10"
 									}`}
 								>
 									<Monitor
@@ -180,8 +178,8 @@ export default function Informations() {
 									<Text
 										className={
 											colorSchemePreference === "system"
-												? "font-semibold text-primary"
-												: "text-muted-foreground"
+												? "font-semibold text-foreground"
+												: "text-muted"
 										}
 									>
 										Auto
@@ -191,12 +189,12 @@ export default function Informations() {
 						</View>
 
 						{/* Divider */}
-						<View className="h-px bg-border" />
+						<View className="h-px bg-separator" />
 
 						{/* First Name and Last Name */}
 						<View className="flex-row" style={{ gap: 16 }}>
 							<View className="flex-1" style={{ gap: 8 }}>
-								<Label htmlFor="firstName">Prénom</Label>
+								<Label>Prénom</Label>
 								<Input
 									id="firstName"
 									placeholder="Prénom"
@@ -205,7 +203,7 @@ export default function Informations() {
 								/>
 							</View>
 							<View className="flex-1" style={{ gap: 8 }}>
-								<Label htmlFor="lastName">Nom</Label>
+								<Label>Nom</Label>
 								<Input
 									id="lastName"
 									placeholder="Nom"
@@ -217,7 +215,7 @@ export default function Informations() {
 
 						{/* Email */}
 						<View style={{ gap: 8 }}>
-							<Label htmlFor="email">Email</Label>
+							<Label>Email</Label>
 							<Input
 								id="email"
 								placeholder="Email"
@@ -231,7 +229,7 @@ export default function Informations() {
 						{/* Password (only for email users) */}
 						{session?.user.app_metadata.provider === "email" && (
 							<View style={{ gap: 8 }}>
-								<Label htmlFor="password">Mot de passe</Label>
+								<Label>Mot de passe</Label>
 								<Input
 									id="password"
 									placeholder="Nouveau mot de passe"
@@ -245,24 +243,24 @@ export default function Informations() {
 						{/* Submit Button */}
 						<Button
 							onPress={handleSubmit}
-							disabled={isLoading}
-							className="flex-1 flex-row items-center justify-center"
+							isDisabled={isLoading}
+							className="flex-1"
 							style={{ marginTop: 24 }}
 						>
 							{isLoading ? (
 								<>
 									<LucideLoader2
 										size={16}
-										color={themeColors.primaryForeground}
+										color={themeColors.accentForeground}
 									/>
-									<Text className="ml-2">
+									<Button.Label>
 										{isLoading ? "Mise à jour..." : "Mettre à jour"}
-									</Text>
+									</Button.Label>
 								</>
 							) : (
 								<>
-									<SaveIcon size={16} color={themeColors.primaryForeground} />
-									<Text className="ml-2">Mettre à jour</Text>
+									<SaveIcon size={16} color={themeColors.accentForeground} />
+									<Button.Label>Mettre à jour</Button.Label>
 								</>
 							)}
 						</Button>

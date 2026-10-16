@@ -4,6 +4,7 @@ import "../global.css";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Stack, ThemeProvider, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
+import { HeroUINativeProvider } from "heroui-native";
 import { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -11,11 +12,10 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AuthProvider, useAuth } from "@/context/supabase-provider";
 import { useApplyColorSchemePreference } from "@/lib/color-scheme-preference";
 import { queryClient } from "@/lib/queries/client";
-import { navigationThemes } from "@/lib/theme";
-import { useColorScheme } from "@/lib/useColorScheme";
+import { useNavigationTheme } from "@/lib/theme";
 
 export default function AppLayout() {
-	const { isDarkColorScheme } = useColorScheme();
+	const navigationTheme = useNavigationTheme();
 	const preferenceApplied = useApplyColorSchemePreference();
 
 	// The splash screen stays up until AuthProvider hides it, so rendering
@@ -26,46 +26,46 @@ export default function AppLayout() {
 
 	return (
 		<GestureHandlerRootView style={{ flex: 1 }}>
-			<ThemeProvider
-				value={
-					isDarkColorScheme ? navigationThemes.dark : navigationThemes.light
-				}
-			>
+			<ThemeProvider value={navigationTheme}>
 				<StatusBar style="auto" />
-				<QueryClientProvider client={queryClient}>
-					<AuthProvider>
-						<View className="flex-1 bg-background">
-							<Stack
-								screenOptions={{ headerShown: false, gestureEnabled: false }}
-							>
-								<Stack.Screen name="(protected)" />
-								<Stack.Screen name="welcome" />
-								<Stack.Screen
-									name="sign-up"
-									options={{
-										presentation: "modal",
-										headerShown: true,
-										headerTitle: "Sign Up",
-										headerShadowVisible: true,
-										gestureEnabled: true,
-									}}
-								/>
-								<Stack.Screen
-									name="sign-in"
-									options={{
-										presentation: "modal",
-										headerShown: true,
-										headerTitle: "Sign In",
-										headerShadowVisible: true,
-										gestureEnabled: true,
-									}}
-								/>
-							</Stack>
-							<AuthRedirector />
-							<AuthLoadingOverlay />
-						</View>
-					</AuthProvider>
-				</QueryClientProvider>
+				<HeroUINativeProvider
+					config={{ devInfo: { stylingPrinciples: false } }}
+				>
+					<QueryClientProvider client={queryClient}>
+						<AuthProvider>
+							<View className="flex-1 bg-background">
+								<Stack
+									screenOptions={{ headerShown: false, gestureEnabled: false }}
+								>
+									<Stack.Screen name="(protected)" />
+									<Stack.Screen name="welcome" />
+									<Stack.Screen
+										name="sign-up"
+										options={{
+											presentation: "modal",
+											headerShown: true,
+											headerTitle: "Sign Up",
+											headerShadowVisible: true,
+											gestureEnabled: true,
+										}}
+									/>
+									<Stack.Screen
+										name="sign-in"
+										options={{
+											presentation: "modal",
+											headerShown: true,
+											headerTitle: "Sign In",
+											headerShadowVisible: true,
+											gestureEnabled: true,
+										}}
+									/>
+								</Stack>
+								<AuthRedirector />
+								<AuthLoadingOverlay />
+							</View>
+						</AuthProvider>
+					</QueryClientProvider>
+				</HeroUINativeProvider>
 			</ThemeProvider>
 		</GestureHandlerRootView>
 	);

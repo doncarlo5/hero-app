@@ -1,6 +1,6 @@
 import { LegendList } from "@legendapp/list";
-import DateTimePicker from "@react-native-community/datetimepicker";
-import { Picker } from "@react-native-picker/picker";
+import { DateTimePicker } from "@expo/ui/community/datetime-picker";
+import { Picker } from "@expo/ui/community/picker";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale/fr";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -17,7 +17,7 @@ import {
 	View,
 } from "react-native";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "heroui-native";
 import { Text } from "@/components/ui/text";
 import { useProgram } from "@/lib/queries/programs";
 import {
@@ -355,11 +355,9 @@ export default function SessionDetail() {
 								<Text className="text-2xl font-bold text-foreground mb-1">
 									{session.type_session}
 								</Text>
-								<Text className="text-sm text-muted-foreground">
-									What{"'"}s next?
-								</Text>
+								<Text className="text-sm text-muted">What{"'"}s next?</Text>
 							</Pressable>
-							<Text className="text-sm text-muted-foreground">
+							<Text className="text-sm text-muted">
 								{format(new Date(session.date_session), "EEEE d MMMM yyyy", {
 									locale: fr,
 								})}
@@ -389,30 +387,52 @@ export default function SessionDetail() {
 						{/* Date Picker */}
 						<View className="flex-row items-center gap-2 mb-2">
 							<View className="flex-1">
-								<Button
-									onPress={() => setIsCalendarOpen(true)}
-									variant="ghost"
-									className="flex-row w-full items-center bg-muted rounded-md justify-between"
-								>
-									<Text className="text-foreground">
-										{selectedDate
-											? format(selectedDate, "d MMM yyyy", { locale: fr })
-											: "Select date"}
-									</Text>
-									<CalendarIcon
-										size={20}
-										color={themeColors.foreground}
-										strokeWidth={1.5}
+								{Platform.OS === "ios" ? (
+									<View className="flex-row items-center w-full bg-default rounded-md justify-between px-2 h-12">
+										<DateTimePicker
+											value={selectedDate || new Date()}
+											mode="date"
+											display="compact"
+											accentColor={themeColors.brand}
+											onValueChange={(_event, date) => handleDateSelect(date)}
+											style={{ flex: 1, height: 40 }}
+										/>
+									</View>
+								) : (
+									<Pressable
+										onPress={() => setIsCalendarOpen(true)}
+										className="flex-row items-center w-full bg-default rounded-md justify-between px-4 h-12"
+									>
+										<Text className="text-foreground">
+											{selectedDate
+												? format(selectedDate, "d MMM yyyy", { locale: fr })
+												: "Select date"}
+										</Text>
+										<CalendarIcon
+											size={20}
+											color={themeColors.foreground}
+											strokeWidth={1.5}
+										/>
+									</Pressable>
+								)}
+								{Platform.OS === "android" && isCalendarOpen && (
+									<DateTimePicker
+										value={selectedDate || new Date()}
+										mode="date"
+										onValueChange={(_event, date) => {
+											setIsCalendarOpen(false);
+											handleDateSelect(date);
+										}}
+										onDismiss={() => setIsCalendarOpen(false)}
 									/>
-								</Button>
+								)}
 							</View>
 
 							{/* Body Weight */}
 							<View className="flex-1">
-								<Button
+								<Pressable
 									onPress={() => setIsWeightPickerOpen(true)}
-									variant="ghost"
-									className="flex-row w-full items-center bg-muted rounded-md justify-between"
+									className="flex-row items-center w-full bg-default rounded-md justify-between px-4 h-12"
 								>
 									<Text className="text-foreground">
 										{selectedWeight ? `${selectedWeight} kg` : "Select weight"}
@@ -422,7 +442,7 @@ export default function SessionDetail() {
 										color={themeColors.foreground}
 										strokeWidth={1.5}
 									/>
-								</Button>
+								</Pressable>
 							</View>
 						</View>
 
@@ -431,9 +451,9 @@ export default function SessionDetail() {
 							onPress={handleOpenCommentSheet}
 							android_ripple={{ color: "rgba(0,0,0,0.1)" }}
 							hitSlop={{ top: 5, bottom: 5, left: 5, right: 5 }}
-							className="bg-muted rounded-lg py-3 px-4 active:opacity-70"
+							className="bg-default rounded-lg py-3 px-4 active:opacity-70"
 						>
-							<Text className="text-sm underline text-muted-foreground font-semibold">
+							<Text className="text-sm underline text-muted font-semibold">
 								{formState.comment ||
 									(lastSession?.comment
 										? `Your last notes: ${lastSession.comment}`
@@ -449,7 +469,7 @@ export default function SessionDetail() {
 								<Text className="text-2xl font-bold text-foreground">
 									Exercises
 								</Text>
-								<Text className="text-sm text-muted-foreground">
+								<Text className="text-sm text-muted">
 									{session.exercise_users.length} exercise
 									{session.exercise_users.length !== 1 ? "s" : ""} completed
 								</Text>
@@ -460,11 +480,10 @@ export default function SessionDetail() {
 							onPress={() =>
 								router.push(`/(protected)/do-exercise?sessionId=${session.id}`)
 							}
-							variant="default"
-							className="flex-row items-center justify-center gap-2 my-4"
+							className="my-4"
 						>
-							<PlusIcon size={16} color={themeColors.primaryForeground} />
-							<Text className="text-primary-foreground">Add an exercise</Text>
+							<PlusIcon size={16} color={themeColors.accentForeground} />
+							<Button.Label>Add an exercise</Button.Label>
 						</Button>
 
 						<LegendList
@@ -473,7 +492,7 @@ export default function SessionDetail() {
 							renderItem={({ item }) => (
 								<Pressable
 									onPress={() => router.push(`/exercise/${item.id}`)}
-									className="mb-4 overflow-hidden rounded-xl bg-background shadow-sm border border-muted/20"
+									className="mb-4 overflow-hidden rounded-xl bg-background shadow-sm border border-default/20"
 								>
 									{/* Exercise Header */}
 									<View className="flex-row items-center justify-between mb-3 ">
@@ -499,15 +518,15 @@ export default function SessionDetail() {
 													return (
 														<View
 															key={index}
-															className="bg-primary/5 flex-1 rounded-lg px-3 py-2 border border-primary/10"
+															className="bg-foreground/5 flex-1 rounded-lg px-3 py-2 border border-foreground/10"
 														>
-															<Text className="text-xs font-medium text-primary">
+															<Text className="text-xs font-medium text-foreground">
 																Set {index + 1}
 															</Text>
 															<Text className="text-sm font-bold text-foreground">
 																{set.reps} reps
 															</Text>
-															<Text className="text-xs text-muted-foreground">
+															<Text className="text-xs text-muted">
 																{set.weight} kg
 															</Text>
 														</View>
@@ -517,7 +536,7 @@ export default function SessionDetail() {
 									</View>
 
 									{item.comment && (
-										<View className="bg-muted/20 rounded-lg mb-4">
+										<View className="bg-default/20 rounded-lg mb-4">
 											<Text className="text-sm text-foreground">
 												{item.comment}
 											</Text>
@@ -547,22 +566,20 @@ export default function SessionDetail() {
 											}
 										}}
 										variant="outline"
-										className="flex-1 flex-row items-center justify-center gap-2 border-2 border-dotted bg-slate-100/20 dark:bg-slate-900/20"
+										className="flex-1 border-2 border-dotted bg-slate-100/20 dark:bg-slate-900/20"
 									>
-										<Text className="text-foreground">
+										<Button.Label>
 											{getNextExercise()?.exerciseType?.name}
-										</Text>
+										</Button.Label>
 									</Button>
 
 									{/* Skip button */}
 									<Button
 										onPress={handleSkipExercise}
 										variant="outline"
-										className="w-20 flex-row items-center justify-center gap-1 border-none bg-slate-100/60 dark:bg-slate-900/60"
+										className="w-20 border-none bg-slate-100/60 dark:bg-slate-900/60"
 									>
-										<Text className="text-sm italic text-muted-foreground">
-											Skip
-										</Text>
+										<Button.Label>Skip</Button.Label>
 										<ChevronsRight
 											size={16}
 											color={themeColors.mutedForeground}
@@ -573,7 +590,7 @@ export default function SessionDetail() {
 								{/* Alternative exercises */}
 								{(getNextExercise()?.alternatives?.length ?? 0) > 0 && (
 									<View className="mb-3">
-										<Text className="text-sm font-medium text-muted-foreground mb-2">
+										<Text className="text-sm font-medium text-muted mb-2">
 											Alternatives:
 										</Text>
 										{getNextExercise()?.alternatives?.map((alt) => (
@@ -585,11 +602,9 @@ export default function SessionDetail() {
 													)
 												}
 												variant="outline"
-												className="mb-2 flex-row items-center justify-center gap-2 border-2 border-dotted bg-slate-100/20 dark:bg-slate-900/20"
+												className="mb-2 border-2 border-dotted bg-slate-100/20 dark:bg-slate-900/20"
 											>
-												<Text className="text-muted-foreground">
-													{alt.name}
-												</Text>
+												<Button.Label>{alt.name}</Button.Label>
 											</Button>
 										))}
 									</View>
@@ -603,41 +618,36 @@ export default function SessionDetail() {
 						<Button
 							variant="outline"
 							onPress={handleDeleteSession}
-							disabled={isDeleting}
-							className="flex-1 flex-row items-center justify-center"
+							isDisabled={isDeleting}
+							className="flex-1"
 						>
 							<TrashIcon size={16} color="#ef4444" />
-							<Text className="ml-2 text-red-500">
+							<Button.Label>
 								{isDeleting ? "Deleting..." : "Delete"}
-							</Text>
+							</Button.Label>
 						</Button>
 
 						{!session.is_done ? (
 							<Button
 								onPress={handleCompleteSession}
-								disabled={isCompleting}
-								className="flex-1 flex-row items-center justify-center"
+								isDisabled={isCompleting}
+								className="flex-1"
 							>
 								<CheckCircleIcon
 									size={16}
-									color={themeColors.primaryForeground}
+									color={themeColors.accentForeground}
 								/>
-								<Text className="ml-2 text-primary-foreground">
+								<Button.Label>
 									{isCompleting ? "Completing..." : "Complete"}
-								</Text>
+								</Button.Label>
 							</Button>
 						) : (
 							<Button
 								onPress={() => router.replace("/(protected)/(tabs)")}
-								className="flex-1 flex-row items-center justify-center"
+								className="flex-1"
 							>
-								<ArrowLeftIcon
-									size={16}
-									color={themeColors.primaryForeground}
-								/>
-								<Text className="ml-2 text-primary-foreground">
-									Go back to list
-								</Text>
+								<ArrowLeftIcon size={16} color={themeColors.accentForeground} />
+								<Button.Label>Go back to list</Button.Label>
 							</Button>
 						)}
 					</View>
@@ -650,7 +660,7 @@ export default function SessionDetail() {
 							onPress={handleSave}
 							disabled={isSaving}
 							className={`w-14 h-14 rounded-full items-center justify-center shadow-lg ${
-								isSaving ? "bg-primary/50" : "bg-primary"
+								isSaving ? "bg-foreground/50" : "bg-foreground"
 							}`}
 						>
 							{isSaving ? (
@@ -665,67 +675,6 @@ export default function SessionDetail() {
 					</View>
 				)}
 			</View>
-
-			{/* Calendar Modal */}
-			<Modal
-				visible={isCalendarOpen}
-				transparent={true}
-				animationType="fade"
-				onRequestClose={() => setIsCalendarOpen(false)}
-			>
-				<Pressable
-					style={{
-						flex: 1,
-						backgroundColor: "rgba(0, 0, 0, 0.5)",
-						justifyContent: "center",
-						alignItems: "center",
-					}}
-					onPress={() => setIsCalendarOpen(false)}
-				>
-					<Pressable
-						style={{
-							backgroundColor: themeColors.popover,
-							borderRadius: 24,
-							padding: 24,
-							width: "90%",
-							maxWidth: 400,
-						}}
-						onPress={(e) => e.stopPropagation()}
-					>
-						<View className="flex-row items-center justify-between mb-4">
-							<Text className="text-lg font-bold">Date of the session</Text>
-							<Pressable
-								onPress={() => setIsCalendarOpen(false)}
-								className="p-2"
-							>
-								<XIcon
-									size={20}
-									color={themeColors.foreground}
-									strokeWidth={2}
-								/>
-							</Pressable>
-						</View>
-						<DateTimePicker
-							value={selectedDate || new Date()}
-							mode="date"
-							onChange={(event, date) => {
-								if (date) {
-									handleDateSelect(date);
-									if (Platform.OS === "android") {
-										setIsCalendarOpen(false);
-									}
-								}
-							}}
-							display={Platform.OS === "ios" ? "spinner" : "default"}
-						/>
-						{Platform.OS === "ios" && (
-							<Button onPress={() => setIsCalendarOpen(false)} className="mt-4">
-								<Text className="text-primary-foreground">Done</Text>
-							</Button>
-						)}
-					</Pressable>
-				</Pressable>
-			</Modal>
 
 			{/* Weight Picker Modal */}
 			<Modal
@@ -789,16 +738,16 @@ export default function SessionDetail() {
 						</Picker>
 						<Button
 							onPress={handleWeightDone}
-							disabled={isSaving}
+							isDisabled={isSaving}
 							className="mt-4"
 						>
 							{isSaving ? (
 								<ActivityIndicator
 									size="small"
-									color={themeColors.primaryForeground}
+									color={themeColors.accentForeground}
 								/>
 							) : (
-								<Text className="text-primary-foreground">Done</Text>
+								<Button.Label>Done</Button.Label>
 							)}
 						</Button>
 					</Pressable>
@@ -859,8 +808,8 @@ export default function SessionDetail() {
 											key={index}
 											className="flex-row items-center gap-3 mb-1"
 										>
-											<View className="w-6 h-6 rounded-full bg-primary/10 items-center justify-center">
-												<Text className="text-xs font-bold text-primary">
+											<View className="w-6 h-6 rounded-full bg-foreground/10 items-center justify-center">
+												<Text className="text-xs font-bold text-foreground">
 													{index + 1}
 												</Text>
 											</View>
@@ -955,31 +904,23 @@ export default function SessionDetail() {
 							<Button
 								onPress={handleCommentClear}
 								variant="outline"
-								disabled={!commentDraft.trim()}
+								isDisabled={!commentDraft.trim()}
 								className="flex-1"
 							>
-								<Text
-									className={
-										commentDraft.trim()
-											? "text-foreground"
-											: "text-muted-foreground"
-									}
-								>
-									Clear
-								</Text>
+								<Button.Label>Clear</Button.Label>
 							</Button>
 							<Button
 								onPress={handleCommentSave}
-								disabled={isSaving}
+								isDisabled={isSaving}
 								className="flex-1"
 							>
 								{isSaving ? (
 									<ActivityIndicator
 										size="small"
-										color={themeColors.primaryForeground}
+										color={themeColors.accentForeground}
 									/>
 								) : (
-									<Text className="text-primary-foreground">Done</Text>
+									<Button.Label>Done</Button.Label>
 								)}
 							</Button>
 						</View>

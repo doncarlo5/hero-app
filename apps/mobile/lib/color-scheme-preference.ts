@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { colorScheme } from "nativewind";
 import { useEffect, useState } from "react";
+import { Uniwind } from "uniwind";
 
 export type ColorSchemePreference = "light" | "dark" | "system";
 
@@ -23,7 +23,7 @@ export async function getColorSchemePreference(): Promise<ColorSchemePreference>
 export async function setColorSchemePreference(
 	preference: ColorSchemePreference,
 ) {
-	colorScheme.set(preference);
+	Uniwind.setTheme(preference);
 	try {
 		await AsyncStorage.setItem(STORAGE_KEY, preference);
 	} catch (error) {
@@ -33,7 +33,7 @@ export async function setColorSchemePreference(
 
 // Started at import time so the read overlaps with the rest of the JS startup
 const initialPreference = getColorSchemePreference().then((preference) => {
-	colorScheme.set(preference);
+	Uniwind.setTheme(preference);
 	return preference;
 });
 

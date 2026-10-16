@@ -162,7 +162,7 @@ export default function Home() {
 							<View className="rounded-2xl bg-slate-100/80 dark:bg-slate-900/80 shadow-md p-3 mb-6">
 								<View className="flex-col justify-between gap-4">
 									<View className="flex-row items-center justify-between">
-										<Text className="text-xs font-semibold uppercase tracking-tight text-muted-foreground">
+										<Text className="text-xs font-semibold uppercase tracking-tight text-muted">
 											{lastSession ? "Séance précédente" : "Aucune séance"}
 										</Text>
 										<View className="bg-slate-800/30 rounded-full h-5 w-5 flex justify-center items-center">
@@ -268,7 +268,7 @@ export default function Home() {
 							>
 								<View className="items-center gap-2">
 									<View className="items-center">
-										<Text className="leading-4 text-muted-foreground text-sm">
+										<Text className="leading-4 text-muted text-sm">
 											Créer un
 										</Text>
 										<Text className="font-bold leading-4 tracking-tighter text-sm dark:text-gray-300">

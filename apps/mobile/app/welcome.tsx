@@ -4,7 +4,7 @@ import { View } from "react-native";
 
 import { Image } from "@/components/image";
 import { SafeAreaView } from "@/components/safe-area-view";
-import { Button } from "@/components/ui/button";
+import { Button } from "heroui-native";
 import { Text } from "@/components/ui/text";
 import { Muted } from "@/components/ui/typography";
 import { useColorScheme } from "@/lib/useColorScheme";
@@ -45,22 +45,19 @@ export default function WelcomeScreen() {
 			</View>
 			<View className="flex flex-col gap-y-4 web:m-4">
 				<Button
-					size="default"
-					variant="default"
 					onPress={() => {
 						router.push("/sign-up");
 					}}
 				>
-					<Text>Sign Up</Text>
+					<Button.Label>Sign Up</Button.Label>
 				</Button>
 				<Button
-					size="default"
 					variant="secondary"
 					onPress={() => {
 						router.push("/sign-in");
 					}}
 				>
-					<Text>Sign In</Text>
+					<Button.Label>Sign In</Button.Label>
 				</Button>
 			</View>
 		</SafeAreaView>

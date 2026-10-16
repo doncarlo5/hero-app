@@ -1,4 +1,7 @@
-import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import {
+	BottomSheet,
+	BottomSheetScrollView,
+} from "@expo/ui/community/bottom-sheet";
 import { Lock } from "lucide-react-native";
 import { useRef, useState } from "react";
 import { ActivityIndicator, Pressable, ScrollView, View } from "react-native";
@@ -44,7 +47,7 @@ export default function TrophyScreen() {
 				{trophiesQuery.data === undefined &&
 					(trophiesQuery.error ? (
 						<Pressable onPress={() => trophiesQuery.refetch()} className="py-8">
-							<Text className="text-center text-muted-foreground">
+							<Text className="text-center text-muted">
 								Impossible de charger les trophées. Toucher pour réessayer.
 							</Text>
 						</Pressable>
@@ -59,7 +62,7 @@ export default function TrophyScreen() {
 						<View key={groupName} className="mb-6">
 							<Text className="mb-2 text-lg font-medium">
 								{groupName}{" "}
-								<Text className="text-muted-foreground">
+								<Text className="text-muted">
 									({achievedCount}/{totalCount})
 								</Text>
 							</Text>
@@ -103,7 +106,7 @@ export default function TrophyScreen() {
 													: "???"}
 											</Text>
 											{trophy.achieved ? (
-												<Text className="text-xs text-muted-foreground">
+												<Text className="text-xs text-muted">
 													Obtenu le{" "}
 													{trophy.awarded_at
 														? new Date(trophy.awarded_at).toLocaleDateString()
@@ -112,7 +115,7 @@ export default function TrophyScreen() {
 											) : (
 												<View className="mt-1 flex-row items-center gap-1">
 													<Lock size={14} color={themeColors.mutedForeground} />
-													<Text className="text-xs text-muted-foreground">
+													<Text className="text-xs text-muted">
 														{trophy.reps_goal} reps min
 													</Text>
 												</View>
@@ -132,7 +135,6 @@ export default function TrophyScreen() {
 				index={-1}
 				enableDynamicSizing={true}
 				enablePanDownToClose={true}
-				maxDynamicContentSize={600}
 				onClose={() => setSelected(null)}
 				backgroundStyle={{
 					backgroundColor: themeColors.popover,
@@ -161,7 +163,7 @@ export default function TrophyScreen() {
 									<Text className="mt-3 text-center text-2xl font-semibold">
 										{selected.reward_text}
 									</Text>
-									<Text className="mt-2 text-center text-muted-foreground">
+									<Text className="mt-2 text-center text-muted">
 										Tu as obtenu le trophée {selected.trophy_type} pour
 										l&apos;exercice {selected.exercise_types?.name} avec{" "}
 										{selected.reps_user} reps.
@@ -179,10 +181,10 @@ export default function TrophyScreen() {
 									>
 										<Lock size={16} color={themeColors.mutedForeground} />
 										<View className="flex-1">
-											<Text className="text-xs text-muted-foreground">
+											<Text className="text-xs text-muted">
 												{selected.description}
 											</Text>
-											<Text className="text-xs text-muted-foreground">
+											<Text className="text-xs text-muted">
 												{selected.reps_goal} reps min requises
 											</Text>
 										</View>
@@ -202,7 +204,7 @@ export default function TrophyScreen() {
 									<Text className="mb-2 text-center text-xl font-semibold text-gray-700 dark:text-gray-300">
 										Trophée verrouillé
 									</Text>
-									<Text className="mb-4 text-center text-base text-muted-foreground">
+									<Text className="mb-4 text-center text-base text-muted">
 										{selected.description}
 									</Text>
 									<View
@@ -217,10 +219,10 @@ export default function TrophyScreen() {
 										<Text className="text-center text-sm font-medium text-gray-700 dark:text-gray-300">
 											Objectif requis
 										</Text>
-										<Text className="mt-1 text-center text-lg font-bold text-primary">
+										<Text className="mt-1 text-center text-lg font-bold text-foreground">
 											{selected.reps_goal} reps
 										</Text>
-										<Text className="mt-1 text-center text-xs text-muted-foreground">
+										<Text className="mt-1 text-center text-xs text-muted">
 											pour l&apos;exercice {selected.exercise_types?.name}
 										</Text>
 									</View>

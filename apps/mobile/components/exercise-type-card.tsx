@@ -46,7 +46,7 @@ export default function ExerciseTypeCard({
 							<Text>
 								<LucideInfo size={12} color={themeColors.mutedForeground} />
 							</Text>
-							<Text className="truncate text-left text-xs text-muted-foreground">
+							<Text className="truncate text-left text-xs text-muted">
 								{exerciseType.advice}
 							</Text>
 						</View>

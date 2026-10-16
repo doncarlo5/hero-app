@@ -1,5 +1,5 @@
 const { getDefaultConfig } = require("expo/metro-config");
-const { withNativeWind } = require("nativewind/metro");
+const { withUniwindConfig } = require("uniwind/metro");
 const path = require("path");
 
 // Find the project and workspace directories
@@ -18,11 +18,9 @@ config.resolver.nodeModulesPaths = [
 	path.resolve(monorepoRoot, "node_modules"),
 ];
 
-// https://github.com/supabase/supabase-js/issues/1258#issuecomment-2801695478
-config.resolver = {
-	...config.resolver,
-	unstable_conditionNames: ["browser"],
-	unstable_enablePackageExports: false,
-};
-
-module.exports = withNativeWind(config, { input: "./global.css" });
+// Package exports stay enabled (Metro's default): Uniwind and the
+// @expo/ui/community/* entry points are only reachable through them.
+module.exports = withUniwindConfig(config, {
+	cssEntryFile: "./global.css",
+	dtsFile: "./uniwind-types.d.ts",
+});
