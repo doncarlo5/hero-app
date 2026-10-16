@@ -77,14 +77,15 @@ export function MovementPicker(props: {
 	const pinned = (props.pinned?.movements ?? []).filter((m) =>
 		matchesMovementSearch(m, query),
 	);
-	const own = matches.filter((m) => !isLibraryMovement(m));
+	const inGroup = (m: Movement) => group === null || inMuscleGroup(m, group);
+	const own = matches.filter((m) => !isLibraryMovement(m) && inGroup(m));
 	const libraryCount = props.movements.filter(isLibraryMovement).length;
 	const isSearchingLibrary =
 		query.trim().length >= MIN_LIBRARY_QUERY || group !== null;
 	const library = isSearchingLibrary
 		? matches
 				.filter(isLibraryMovement)
-				.filter((m) => group === null || inMuscleGroup(m, group))
+				.filter(inGroup)
 				.slice(0, MAX_LIBRARY_RESULTS)
 		: [];
 
@@ -107,6 +108,39 @@ export function MovementPicker(props: {
 				autoCapitalize="none"
 				clearButtonMode="while-editing"
 			/>
+			<ScrollView
+				horizontal
+				showsHorizontalScrollIndicator={false}
+				keyboardShouldPersistTaps="handled"
+			>
+				<View className="flex-row gap-2">
+					{MUSCLE_GROUPS.map((g) => (
+						<Pressable
+							key={g.key}
+							onPress={() => setGroup(group === g.key ? null : g.key)}
+							accessibilityRole="button"
+							accessibilityState={{ selected: group === g.key }}
+							className={cn(
+								"px-3 py-1.5 rounded-full border",
+								group === g.key
+									? "bg-foreground border-foreground"
+									: "border-border bg-default/30",
+							)}
+						>
+							<Text
+								className={cn(
+									"text-sm",
+									group === g.key
+										? "text-background font-medium"
+										: "text-foreground",
+								)}
+							>
+								{g.label}
+							</Text>
+						</Pressable>
+					))}
+				</View>
+			</ScrollView>
 			{props.pinned && pinned.length > 0 && (
 				<View>
 					<Text className="text-xl font-bold mb-2">{props.pinned.title}</Text>
@@ -122,40 +156,6 @@ export function MovementPicker(props: {
 			{libraryCount > 0 && (
 				<View>
 					<Text className="text-xl font-bold mb-2">Bibliothèque</Text>
-					<ScrollView
-						horizontal
-						showsHorizontalScrollIndicator={false}
-						keyboardShouldPersistTaps="handled"
-						className="mb-3"
-					>
-						<View className="flex-row gap-2">
-							{MUSCLE_GROUPS.map((g) => (
-								<Pressable
-									key={g.key}
-									onPress={() => setGroup(group === g.key ? null : g.key)}
-									accessibilityRole="button"
-									accessibilityState={{ selected: group === g.key }}
-									className={cn(
-										"px-3 py-1.5 rounded-full border",
-										group === g.key
-											? "bg-foreground border-foreground"
-											: "border-border bg-default/30",
-									)}
-								>
-									<Text
-										className={cn(
-											"text-sm",
-											group === g.key
-												? "text-background font-medium"
-												: "text-foreground",
-										)}
-									>
-										{g.label}
-									</Text>
-								</Pressable>
-							))}
-						</View>
-					</ScrollView>
 					{!isSearchingLibrary ? (
 						<Text className="text-sm text-muted">
 							Recherche parmi {libraryCount} exercices (nom, muscle, matériel),
