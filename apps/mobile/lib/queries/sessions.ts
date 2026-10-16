@@ -14,7 +14,7 @@ import type { Session, SessionListItem, SessionWithExercises } from "./types";
 const SESSIONS_PAGE_SIZE = 30;
 
 const SESSION_DETAIL_SELECT =
-	"*, program_day:program_days(id, name, program_id), logged_exercises(*, logged_sets(set_order, weight, reps, kind), movement:movements(*))";
+	"*, program_day:program_days(id, name, program_id), logged_exercises(*, logged_sets(set_order, weight, reps, kind, side), movement:movements(*))";
 
 export function useSessionsPages() {
 	return useInfiniteQuery({
@@ -148,7 +148,15 @@ export function useUpdateSession() {
 		mutationFn: async (input: {
 			id: string;
 			changes: Partial<
-				Pick<Session, "body_weight" | "comment" | "date_session" | "is_done">
+				Pick<
+					Session,
+					| "body_weight"
+					| "comment"
+					| "date_session"
+					| "is_done"
+					| "started_at"
+					| "ended_at"
+				>
 			>;
 		}) =>
 			unwrap(

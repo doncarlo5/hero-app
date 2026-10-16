@@ -38,6 +38,7 @@ declare
   v_slot_incline uuid;
   v_slot_pullups uuid;
   v_slot uuid;
+  v_movement uuid;
   v_session uuid;
   v_exercise uuid;
   v_week int;
@@ -79,6 +80,26 @@ begin
   values (v_day_b, 1, v_squat, true, 'all_sets', 120) returning id into v_slot;
   insert into public.set_prescriptions (slot_id, position, rep_min, rep_max, load_rule)
   select v_slot, g, 6, 10, case when g = 1 then 'none'::public.load_rule else 'same' end from generate_series(1, 3) g;
+
+  -- Unilateral movement, one set per side
+  update public.movements set unilateral = true
+  where owner_id = v_uid and definition_key = 'Fentes Bulgare - Haltères' returning id into v_movement;
+  insert into public.slots (program_day_id, position, movement_id, progression_rule, rest_seconds)
+  values (v_day_b, 2, v_movement, 'all_sets', 90) returning id into v_slot;
+  insert into public.set_prescriptions (slot_id, position, rep_min, rep_max, load_rule)
+  select v_slot, g, 8, 12, case when g = 1 then 'none'::public.load_rule else 'same' end from generate_series(1, 2) g;
+
+  -- Superset: leg curl (3 sets) alternates with leg extension (2 sets)
+  select id into v_movement from public.movements where owner_id = v_uid and definition_key = 'Leg Curl';
+  insert into public.slots (program_day_id, position, movement_id, superset_group, progression_rule, rest_seconds)
+  values (v_day_b, 3, v_movement, 1, 'all_sets', 75) returning id into v_slot;
+  insert into public.set_prescriptions (slot_id, position, rep_min, rep_max, load_rule)
+  select v_slot, g, 10, 15, case when g = 1 then 'none'::public.load_rule else 'same' end from generate_series(1, 3) g;
+  select id into v_movement from public.movements where owner_id = v_uid and definition_key = 'Leg Extension';
+  insert into public.slots (program_day_id, position, movement_id, superset_group, progression_rule, rest_seconds)
+  values (v_day_b, 4, v_movement, 1, 'all_sets', 75) returning id into v_slot;
+  insert into public.set_prescriptions (slot_id, position, rep_min, rep_max, load_rule)
+  select v_slot, g, 10, 15, case when g = 1 then 'none'::public.load_rule else 'same' end from generate_series(1, 2) g;
 
   for v_week in 1..3 loop
     -- created_at follows the session date so "last performance" lookups see a real history

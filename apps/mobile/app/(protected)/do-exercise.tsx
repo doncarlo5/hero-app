@@ -39,21 +39,15 @@ import { useSession } from "@/lib/queries/sessions";
 import {
 	prescriptionLabels,
 	setsToArrays,
-	type Movement,
 	type Slot,
 } from "@/lib/queries/types";
-import {
-	computeTargets,
-	DEFAULT_INCREMENT,
-	type SetTarget,
-} from "@/lib/progression/engine";
+import { targetsFor } from "@/lib/progression/slot-targets";
 import { useThemeColors } from "@/lib/theme";
 import { useColorScheme } from "@/lib/useColorScheme";
 
 // Fixed height: the picker can list more movements than fit on screen
 const PICKER_SNAP_POINTS = ["90%"];
 
-const DEFAULT_SET_COUNT = 3;
 const DEFAULT_REST_SECONDS = 90;
 
 // "12,5" and "12.5" are both accepted; empty or invalid input counts as 0
@@ -83,36 +77,6 @@ function CheckboxComponent(props: { isChecked: boolean; onPress: () => void }) {
 }
 
 type SetDraft = { reps: string; weight: string; done: boolean };
-
-// Targets of the slot from the last performance; without a slot, the last loads are repeated
-function targetsFor(
-	slot: Slot | null,
-	movement: Movement,
-	lastSets: { weight: number; reps: number }[],
-): SetTarget[] {
-	if (slot && slot.set_prescriptions.length > 0) {
-		return computeTargets({
-			prescriptions: slot.set_prescriptions.map((p) => ({
-				position: p.position,
-				repMin: p.rep_min,
-				repMax: p.rep_max,
-				loadRule: p.load_rule,
-				loadValue: p.load_value,
-			})),
-			progressionRule: slot.progression_rule,
-			lastSets,
-			increment: movement.increment_kg ?? DEFAULT_INCREMENT,
-		});
-	}
-	const count = Math.max(lastSets.length, DEFAULT_SET_COUNT);
-	return Array.from({ length: count }, (_, i) => ({
-		position: i + 1,
-		weight: lastSets[i]?.weight ?? null,
-		repMin: null,
-		repMax: null,
-		reason: lastSets[i] ? "repeat" : "calibration",
-	}));
-}
 
 export default function DoExercise() {
 	const router = useRouter();

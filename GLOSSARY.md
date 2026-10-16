@@ -109,7 +109,11 @@ Short sets of the same movement separated by about ten seconds, counted as one s
 _Avoid_: méga série, rest-pause, cluster
 
 **Superset**:
-Two slots done alternately, with a short rest between the two movements.
+Two or more slots done alternately, round by round, with a short transition between the movements and the full rest after each round.
+
+**Round**:
+In a superset, one set of each of its slots, done back to back (A1 then B1).
+_Avoid_: circuit, tour
 
 **Rest**:
 The pause after a set before the next one; for a unilateral movement it can be taken after each side.
@@ -145,12 +149,16 @@ The first sessions on a movement without history, used to find working loads, st
 One training occurrence on a date, for one program day, with the lifter's body weight.
 _Avoid_: workout, séance, training
 
+**Guided session**:
+A session run set by set from its program day: the app shows the next set and its target, starts the rest when a set is done, and keeps the session on the phone until each logged exercise is saved.
+_Avoid_: live workout, active workout, mode guidé
+
 **Logged exercise**:
 A movement performed in a session, with its logged sets and comment.
 _Avoid_: exercise user
 
 **Logged set**:
-One set as actually performed: kind (warm-up or working), load, repetitions, side, and any finisher parts.
+One set as actually performed: kind (warm-up or working), load, repetitions, side, when it was done, and any finisher parts.
 
 ## Tracking
 

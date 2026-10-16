@@ -43,6 +43,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 		"expo-router",
 		"expo-secure-store",
 		"expo-apple-authentication",
+		// Local notifications only (end of rest): no push
+		"expo-notifications",
 		[
 			"expo-splash-screen",
 			{

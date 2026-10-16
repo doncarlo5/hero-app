@@ -9,7 +9,7 @@ Hero App is a strength training logbook that runs a user's program: it proposes 
 - [docs/PRODUCT.md](docs/PRODUCT.md): who it is for, principles, scope.
 - [docs/FLOWS.md](docs/FLOWS.md): user flows, today and v1 target.
 - [GLOSSARY.md](GLOSSARY.md): canonical terms. Use them in code, UI copy and docs; update the glossary when a term is decided.
-- [docs/adr/](docs/adr/): architecture decisions. [ADR-0001](docs/adr/0001-programs-as-data.md) is the data model.
+- [docs/adr/](docs/adr/): architecture decisions. [ADR-0001](docs/adr/0001-programs-as-data.md) is the data model, [ADR-0002](docs/adr/0002-session-in-progress-on-device.md) the guided session.
 
 The app is generic: never commit a third-party program, its texts, technique names, videos or transcripts (seeds, fixtures, docs or tests). A user's program is their private data.
 
@@ -66,7 +66,7 @@ Local test account: `test@hero.local` / `hero-local-test`. The movement library 
 - Model ([ADR-0001](docs/adr/0001-programs-as-data.md)): `movements` (owner null = shared library, from free-exercise-db: `library_key`, muscles, `image_paths` in the public `movement-images` bucket), `programs` → `program_days` → `slots` → `set_prescriptions` / `slot_alternatives`, `profiles.active_program_id`, `sessions` (→ program day, `label` kept) → `logged_exercises` (→ movement, slot) → `logged_sets` (kind, side), `trophies` (by movement, + `trophy_definitions`), `feedbacks`. `default_exercise_types` is the movement list new users get.
 - RLS on every table: a user only sees and writes rows they own; library movements are readable by everyone.
 - Sign-up: the `on_auth_user_created` trigger calls `private.setup_user` (profile, default movements, an empty program). `ensure_profile()` repairs accounts created without it.
-- Writes that span several tables go through RPCs: `save_exercise` (returns new trophies) and `save_program_day`.
+- Writes that span several tables go through RPCs: `save_exercise` (returns new trophies; idempotent on the id the app passes) and `save_program_day`.
 - Trophies are evaluated in SQL by triggers on logged sets (working sets only); the app never computes them. Set targets are computed in the app by `apps/mobile/lib/progression/engine.ts`.
 - `legacy` schema: the Mongo-era tables, not exposed to clients. `scripts/sync-mongo-delta.js` writes there, then `private.migrate_legacy()` converts them (idempotent, newest version wins). Dropped once the Supabase build ships and the final sync ran.
 - Security definer helpers live in the `private` schema.
@@ -77,6 +77,7 @@ Local test account: `test@hero.local` / `hero-local-test`. The movement library 
 - `config/supabase.ts`: typed client. The session is stored encrypted: an AES key in SecureStore, the ciphertext in AsyncStorage.
 - `context/supabase-provider.tsx`: auth state, Apple/Google/email sign-in.
 - `lib/queries/`: every data access, as TanStack Query hooks (`queryKeys`, `unwrap` in `client.ts`).
+- `lib/session/`: the guided session ([ADR-0002](docs/adr/0002-session-in-progress-on-device.md)): set queue (supersets, sides), rest timer from stored times, device draft and its storage, end-of-rest notification, and `useGuidedSession`. Screen: `app/(protected)/guided-session.tsx`.
 - `lib/color-scheme-preference.ts`, `lib/theme.ts`: light/dark/auto preference (`Uniwind.setTheme`), theme colors for non-className props (`useThemeColors`) and the navigation theme.
 - Styling: Uniwind (Tailwind v4) with HeroUI Native's semantic tokens (`background`, `foreground`, `surface`, `default`, `muted`, `accent` = brand teal, `danger`, `border`…), set in `global.css`. Never hardcode a color a token covers.
 - Components: HeroUI Native (`heroui-native`) for buttons, fields and labels; Expo UI (`@expo/ui`) for native controls: bottom sheets, pickers, date pickers, switches, pager (drop-ins from `@expo/ui/community/*`). `components/ui/` only keeps the react-hook-form bridge (`form.tsx`), `Text` and typography.
@@ -94,7 +95,7 @@ Local test account: `test@hero.local` / `hero-local-test`. The movement library 
 
 - Mongo → Supabase sync: `node --test scripts/sync-mongo-delta.test.js` (local Supabase + throwaway Mongo, see README).
 - Legacy API: Jest in `apps/api/test/`.
-- Mobile: `npm test` in `apps/mobile` runs the progression engine's unit tests (Node test runner). Screens: verify on the iOS simulator against the local Supabase.
+- Mobile: `npm test` in `apps/mobile` runs the unit tests of the progression engine and the guided session modules (Node test runner; pure modules import each other with `.ts` extensions and no `@/` alias). Screens: verify on the iOS simulator against the local Supabase.
 
 ## Release
 
