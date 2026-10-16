@@ -44,17 +44,15 @@ jobs:
         run: npm test
         env:
           TZ: Pacific/Auckland
+      # The French overrides must point at exercises of the pinned source: a typo would silently do nothing
+      - name: Movement library overrides match the source
+        run: node scripts/import-movement-library.js --check-overrides
 
   database:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: npm
-      - run: npm ci --ignore-scripts
       - uses: supabase/setup-cli@v1
         with:
           version: 2.121.0
@@ -73,9 +71,3 @@ jobs:
                 raise exception 'program-specific default movements are back';
               end if;
             end \$\$;"
-      # The French overrides must point at exercises of the pinned source (a typo would silently do
-      # nothing): the import's dry run fetches the source and checks them, without writing anything
-      - name: Movement library overrides match the source
-        run: |
-          SUPABASE_SERVICE_ROLE_KEY=$(supabase status -o json | jq -r .SERVICE_ROLE_KEY) \
-            node scripts/import-movement-library.js --dry-run

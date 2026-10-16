@@ -8,7 +8,6 @@
 //   SUPABASE_DB_URL=postgresql://… node scripts/audit-movement-library.js --url=https://<ref>.supabase.co
 // For prod, scripts/audit-movement-library-prod.sh reads the database password from the Keychain.
 // Exits with code 1 when a problem is found, so it can gate a deploy or a CI job.
-require("../apps/api/config/load-env");
 const { Client } = require("pg");
 const sharp = require("sharp");
 
@@ -22,8 +21,10 @@ function parseArgs(argv) {
   const args = { url: "http://127.0.0.1:54321", sample: null };
   for (const a of argv) {
     if (a.startsWith("--url=")) args.url = a.slice("--url=".length);
-    else if (a.startsWith("--sample=")) args.sample = Number(a.slice("--sample=".length));
-    else throw new Error(`Unknown option ${a}`);
+    else if (a.startsWith("--sample=")) {
+      args.sample = Number(a.slice("--sample=".length));
+      if (!Number.isInteger(args.sample) || args.sample < 1) throw new Error("--sample must be a positive integer");
+    } else throw new Error(`Unknown option ${a}`);
   }
   return args;
 }
@@ -38,9 +39,12 @@ async function eachLimit(items, limit, fn) {
 
 // Downloads a public object and checks it decodes; returns its size or a problem
 async function checkImage(baseUrl, path, expected) {
-  const res = await fetch(`${baseUrl}/storage/v1/object/public/${BUCKET}/${path}`);
-  if (!res.ok) return { problem: `${path}: HTTP ${res.status}` };
   try {
+    // A stalled request must not hold a worker for minutes
+    const res = await fetch(`${baseUrl}/storage/v1/object/public/${BUCKET}/${path}`, {
+      signal: AbortSignal.timeout(30_000),
+    });
+    if (!res.ok) return { problem: `${path}: HTTP ${res.status}` };
     const meta = await sharp(Buffer.from(await res.arrayBuffer())).metadata();
     if (expected && (meta.width !== expected.width || meta.height !== expected.height)) {
       return { problem: `${path}: ${meta.width}×${meta.height}, expected ${expected.width}×${expected.height}` };
@@ -50,13 +54,18 @@ async function checkImage(baseUrl, path, expected) {
     }
     return { ok: true };
   } catch (error) {
-    return { problem: `${path}: does not decode (${error.message})` };
+    return { problem: `${path}: ${error.name === "TimeoutError" ? "timed out" : `failed (${error.message})`}` };
   }
 }
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   const dbUrl = process.env.SUPABASE_DB_URL ?? "postgresql://postgres:postgres@127.0.0.1:54322/postgres";
+  // Rows and images must come from the same project
+  const isLocal = (value) => /\/\/[^/]*(127\.0\.0\.1|localhost)/.test(value);
+  if (isLocal(dbUrl) !== isLocal(args.url)) {
+    throw new Error("SUPABASE_DB_URL and --url point at different projects (one local, one not)");
+  }
   const pg = new Client({ connectionString: dbUrl });
   await pg.connect();
   const { rows } = await pg.query(
