@@ -68,6 +68,16 @@ export default function ProtectedLayout() {
 					}}
 				/>
 				<Stack.Screen
+					name="slot/[id]"
+					options={{
+						presentation: "card",
+						headerShown: true,
+						headerTitle: "Réglages",
+						headerBackTitle: "Programme",
+						headerShadowVisible: true,
+					}}
+				/>
+				<Stack.Screen
 					name="guided-session"
 					options={{
 						presentation: "card",

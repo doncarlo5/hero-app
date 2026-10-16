@@ -9,6 +9,7 @@ import {
 	Minus,
 	PlusCircle,
 	SaveIcon,
+	SlidersHorizontal,
 	XIcon,
 } from "lucide-react-native";
 import React, { useRef, useState } from "react";
@@ -85,12 +86,22 @@ export default function ProgramPage() {
 		setExercises(
 			day.slots.map((slot, index) => {
 				const labels = prescriptionLabels(slot);
+				const partners = slot.superset_group
+					? day.slots.filter(
+							(s) =>
+								s.id !== slot.id && s.superset_group === slot.superset_group,
+						)
+					: [];
+				const parts = [
+					labels.length > 0 ? `${labels.length} × ${labels.join(" / ")}` : null,
+					slot.rest_seconds !== null ? `repos ${slot.rest_seconds} s` : null,
+					partners.length > 0
+						? `superset avec ${partners.map((p) => p.movement.name).join(", ")}`
+						: null,
+				].filter(Boolean);
 				return {
 					slotId: slot.id,
-					summary:
-						labels.length > 0
-							? `${labels.length} × ${labels.join(" / ")}`
-							: undefined,
+					summary: parts.length > 0 ? parts.join(" · ") : undefined,
 					exerciseType: slot.movement,
 					alternatives: slot.alternatives.map(
 						(alternative) => alternative.movement,
@@ -122,6 +133,28 @@ export default function ProgramPage() {
 		} else {
 			addDay(fallback);
 		}
+	};
+
+	// The slot screen saves on its own and reloads the day: unsaved changes here would be lost
+	const isDirty =
+		!!day &&
+		(exercises.length !== day.slots.length ||
+			exercises.some(
+				(e, i) =>
+					e.slotId !== day.slots[i]?.id ||
+					e.alternatives.map((a) => a.id).join() !==
+						day.slots[i]?.alternatives.map((a) => a.movement.id).join(),
+			));
+
+	const openSlotSettings = (slotId: string) => {
+		if (isDirty) {
+			Alert.alert(
+				"Modifications non enregistrées",
+				"Enregistre d’abord le jour, puis règle l’exercice.",
+			);
+			return;
+		}
+		router.push(`/slot/${slotId}`);
 	};
 
 	const openAddExercise = () => {
@@ -313,6 +346,19 @@ export default function ProgramPage() {
 											</Text>
 										</View>
 										<View className="flex-row items-center gap-1">
+											{exercise.slotId && (
+												<TouchableOpacity
+													onPress={() => openSlotSettings(exercise.slotId!)}
+													accessibilityRole="button"
+													accessibilityLabel={`Régler ${exercise.exerciseType.name}`}
+													className="p-2 rounded-lg bg-default/50"
+												>
+													<SlidersHorizontal
+														size={16}
+														color={themeColors.foreground}
+													/>
+												</TouchableOpacity>
+											)}
 											<TouchableOpacity
 												onPress={() => openAddAlternative(index)}
 												className="p-2 rounded-lg bg-foreground/10"
