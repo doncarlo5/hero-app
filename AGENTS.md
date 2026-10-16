@@ -74,9 +74,10 @@ Local test account: `test@hero.local` / `hero-local-test`. The movement library 
 ## Mobile Architecture
 
 - `app/`: Expo Router screens; `(protected)/` requires a session.
-- `config/supabase.ts`: typed client. The session is stored encrypted: an AES key in SecureStore, the ciphertext in AsyncStorage.
+- `config/supabase.ts`: typed client. The session is stored encrypted: an AES key in SecureStore, the ciphertext in AsyncStorage. Auth requests time out after 10 s; `loadStoredSession()` reads the stored session, even expired, so an offline launch stays signed in.
 - `context/supabase-provider.tsx`: auth state, Apple/Google/email sign-in.
 - `lib/queries/`: every data access, as TanStack Query hooks (`queryKeys`, `unwrap` in `client.ts`).
+- `lib/queries/persist.ts`: the device copy of the queries the guided session needs offline (profile, session detail, programs, last performances), restored by `PersistQueryClientProvider` in `app/_layout.tsx`, cleared on sign-out. A new query the guided session reads offline must be added to `OFFLINE_QUERY_KEYS`.
 - `lib/session/`: the guided session ([ADR-0002](docs/adr/0002-session-in-progress-on-device.md)): set queue (supersets, sides), rest timer from stored times, device draft and its storage, end-of-rest notification, and `useGuidedSession`. Screen: `app/(protected)/guided-session.tsx`.
 - `lib/color-scheme-preference.ts`, `lib/theme.ts`: light/dark/auto preference (`Uniwind.setTheme`), theme colors for non-className props (`useThemeColors`) and the navigation theme.
 - Styling: Uniwind (Tailwind v4) with HeroUI Native's semantic tokens (`background`, `foreground`, `surface`, `default`, `muted`, `accent` = brand teal, `danger`, `border`…), set in `global.css`. Never hardcode a color a token covers.

@@ -1,9 +1,11 @@
+import { useIsRestoring } from "@tanstack/react-query";
 import { randomUUID } from "expo-crypto";
 import { useEffect, useRef, useState } from "react";
 import { AppState } from "react-native";
 
 import type { SetTarget } from "@/lib/progression/engine";
 import { DEFAULT_SET_COUNT, targetsFor } from "@/lib/progression/slot-targets";
+import { queryClient } from "@/lib/queries/client";
 import { useLastPerformances, useSaveExercise } from "@/lib/queries/exercises";
 import { useActiveProgram } from "@/lib/queries/programs";
 import { useSession, useUpdateSession } from "@/lib/queries/sessions";
@@ -34,6 +36,9 @@ import { buildSetQueue, type QueueStep } from "./set-queue";
 // A poor connection can leave a request hanging: give up so the next change or foreground retries.
 // A late success is harmless, the write is idempotent on the logged exercise id.
 const SEND_TIMEOUT_MS = 15_000;
+
+// Offline, a request can hang instead of failing: past this delay, render from what the device has
+const LOAD_TIMEOUT_MS = 10_000;
 
 function withTimeout<T>(promise: Promise<T>): Promise<T> {
 	return new Promise((resolve, reject) => {
@@ -85,6 +90,8 @@ export function useGuidedSession(sessionId: string) {
 	const programQuery = useActiveProgram();
 	const saveExercise = useSaveExercise();
 	const updateSession = useUpdateSession();
+	// The device copy of the queries is being read back (lib/queries/persist.ts)
+	const isRestoring = useIsRestoring();
 
 	const day =
 		programQuery.data?.program_days.find(
@@ -101,6 +108,7 @@ export function useGuidedSession(sessionId: string) {
 	const [sendError, setSendError] = useState<string | null>(null);
 	const [isSending, setIsSending] = useState(false);
 	const [newTrophies, setNewTrophies] = useState<Trophy[]>([]);
+	const [waitedTooLong, setWaitedTooLong] = useState(false);
 	const draftRef = useRef<SessionDraft | null>(null);
 	const sendingRef = useRef(false);
 
@@ -126,6 +134,8 @@ export function useGuidedSession(sessionId: string) {
 		const slot = slotOf(step);
 		if (!slot) return null;
 		const last = lastPerformances.byMovement.get(slot.movement_id);
+		// Unknown history (offline, not cached): no target rather than a wrong calibration
+		if (last === undefined) return null;
 		const { reps, weights } = setsToArrays(last?.logged_sets ?? []);
 		const lastSets = reps.map((r, i) => ({ reps: r, weight: weights[i] }));
 		return targetsFor(slot, slot.movement, lastSets)[step.setIndex] ?? null;
@@ -207,6 +217,11 @@ export function useGuidedSession(sessionId: string) {
 		await clearDraft(sessionId);
 	};
 
+	useEffect(() => {
+		const timer = setTimeout(() => setWaitedTooLong(true), LOAD_TIMEOUT_MS);
+		return () => clearTimeout(timer);
+	}, [sessionId]);
+
 	// Load the draft of this session, or start one
 	useEffect(() => {
 		let cancelled = false;
@@ -262,12 +277,27 @@ export function useGuidedSession(sessionId: string) {
 		return () => subscription.remove();
 	}, [day]);
 
+	const sessionReady = Boolean(sessionQuery.data);
+	const programReady =
+		!programQuery.isLoading && !(programQuery.isError && !programQuery.data);
+	// Neither the server nor the device copy has the session or the program
+	const isUnavailable =
+		!isRestoring &&
+		!(sessionReady && programReady) &&
+		(sessionQuery.isError || programQuery.isError || waitedTooLong);
+
 	return {
 		isLoading:
-			sessionQuery.isLoading ||
-			programQuery.isLoading ||
-			lastPerformances.isLoading ||
-			!draft,
+			!isUnavailable &&
+			(isRestoring ||
+				!sessionReady ||
+				!programReady ||
+				(lastPerformances.isLoading && !waitedTooLong) ||
+				!draft),
+		isUnavailable,
+		// Past the wait, the screen renders while the last performances may still arrive
+		targetsPending: lastPerformances.isLoading,
+		reload: () => queryClient.refetchQueries({ type: "active" }),
 		session: sessionQuery.data ?? null,
 		day,
 		queue,
