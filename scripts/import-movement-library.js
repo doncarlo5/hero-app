@@ -16,6 +16,7 @@
 // Usage (local):
 //   SUPABASE_SERVICE_ROLE_KEY=$(supabase status -o json | jq -r .SERVICE_ROLE_KEY) \
 //     node scripts/import-movement-library.js [--dry-run] [--refresh-images] [--thumbnails]
+// --check-overrides only validates scripts/movement-library-overrides.json against the source (CI).
 // Each movement's first image also gets a 160 px WebP thumbnail at thumbs/<id>/0.webp;
 // --thumbnails rebuilds them from the bucket without touching the rows: run it once on a target
 // imported before thumbnails existed (the app falls back to the full image meanwhile).
@@ -44,6 +45,7 @@ function parseArgs(argv) {
   for (const a of argv) {
     if (a === "--dry-run") args.dryRun = true;
     else if (a === "--thumbnails") args.thumbnails = true;
+    else if (a === "--check-overrides") args.checkOverrides = true;
     else if (a === "--yes") args.yes = true;
     else if (a === "--refresh-images") args.refreshImages = true;
     else if (a.startsWith("--url=")) args.url = a.slice("--url=".length);
@@ -190,6 +192,14 @@ async function eachLimit(items, limit, fn) {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
+  // --check-overrides: only checks the overrides file against the pinned source (no target needed, for CI)
+  if (args.checkOverrides) {
+    const exercises = await (await fetchOk(`${SOURCE_BASE}/dist/exercises.json`)).json();
+    checkOverrides(exercises);
+    exercises.filter((e) => OVERRIDES[e.id]).forEach(toMovement);
+    console.log(`Overrides OK: ${Object.keys(OVERRIDES).filter((k) => !k.startsWith("_")).length} entries`);
+    return;
+  }
   const url = args.url;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!key) throw new Error("SUPABASE_SERVICE_ROLE_KEY is required");
