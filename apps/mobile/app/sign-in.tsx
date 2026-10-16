@@ -155,6 +155,7 @@ export default function SignIn() {
 									placeholder="Email"
 									autoCapitalize="none"
 									autoComplete="email"
+									textContentType="username"
 									autoCorrect={false}
 									keyboardType="email-address"
 									{...field}
@@ -169,9 +170,27 @@ export default function SignIn() {
 									label="Password"
 									placeholder="Password"
 									autoCapitalize="none"
+									autoComplete="current-password"
+									textContentType="password"
 									autoCorrect={false}
 									secureTextEntry
+									returnKeyType="go"
+									onSubmitEditing={form.handleSubmit(onSubmit)}
 									{...field}
+									onChange={(value) => {
+										const previous = field.value;
+										field.onChange(value);
+										// Keychain autofill (Face ID) fills the whole password at once: sign in
+										// straight away. Deferred so the email filled with it is in the form too.
+										if (previous === "" && value.length >= 8) {
+											setTimeout(() => {
+												const email = form.getValues("email");
+												if (formSchema.shape.email.safeParse(email).success) {
+													form.handleSubmit(onSubmit)();
+												}
+											}, 0);
+										}
+									}}
 								/>
 							)}
 						/>
