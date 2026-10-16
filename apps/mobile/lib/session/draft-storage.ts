@@ -38,3 +38,11 @@ export async function loadActiveDraft(): Promise<SessionDraft | null> {
 	const sessionId = await AsyncStorage.getItem(ACTIVE_KEY);
 	return sessionId ? loadDraft(sessionId) : null;
 }
+
+/** Drops every draft and the pointer: they are the signed-out user's data */
+export async function clearAllDrafts() {
+	const keys = await AsyncStorage.getAllKeys();
+	await AsyncStorage.multiRemove(
+		keys.filter((key) => key.startsWith("guided-session:")),
+	);
+}

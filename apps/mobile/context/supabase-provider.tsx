@@ -14,6 +14,8 @@ import { Session } from "@supabase/supabase-js";
 import { loadStoredSession, supabase } from "@/config/supabase";
 import { queryClient } from "@/lib/queries/client";
 import { clearPersistedQueries } from "@/lib/queries/persist";
+import { clearAllDrafts } from "@/lib/session/draft-storage";
+import { scheduleRestNotification } from "@/lib/session/rest-notification";
 
 import * as AppleAuthentication from "expo-apple-authentication";
 import { makeRedirectUri } from "expo-auth-session";
@@ -294,6 +296,10 @@ export function AuthProvider({ children }: PropsWithChildren) {
 				clearPersistedQueries().catch((error) =>
 					console.warn("Query cache:", error),
 				);
+				clearAllDrafts().catch((error) =>
+					console.warn("Guided session drafts:", error),
+				);
+				scheduleRestNotification(null, null);
 				setSession(null);
 				setAuthenticated(false);
 			}
