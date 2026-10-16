@@ -609,7 +609,7 @@ export default function SlotSettings() {
 							{form.finisherKind === "drop_sets" ? (
 								<View className="flex-1">
 									<Text className="text-xs text-muted mb-1">
-										kg en moins par drop
+										kg en moins (vide : −20 %)
 									</Text>
 									<Input
 										variant="secondary"
@@ -618,7 +618,7 @@ export default function SlotSettings() {
 											setForm({ ...form, finisherLoadStep })
 										}
 										keyboardType="decimal-pad"
-										placeholder="−20 %"
+										placeholder="4"
 									/>
 								</View>
 							) : (

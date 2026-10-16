@@ -36,17 +36,17 @@ import {
 	XIcon,
 } from "lucide-react-native";
 
+type FormSet = { count: string; weight: string };
+
+// One row per working set, however many were logged (a unilateral pair is one row, see setsToArrays)
 function formFromExercise(exercise: LoggedExerciseWithSession) {
 	const { reps, weights } = setsToArrays(exercise.logged_sets);
+	const sets: FormSet[] = reps.map((count, i) => ({
+		count: count.toString(),
+		weight: weights[i]?.toString() ?? "",
+	}));
 	return {
-		rep1: reps[0]?.toString() || "",
-		rep2: reps[1]?.toString() || "",
-		rep3: reps[2]?.toString() || "",
-		rep4: reps[3]?.toString() || "",
-		weight1: weights[0]?.toString() || "",
-		weight2: weights[1]?.toString() || "",
-		weight3: weights[2]?.toString() || "",
-		weight4: weights[3]?.toString() || "",
+		sets: sets.length > 0 ? sets : [{ count: "", weight: "" }],
 		comment: exercise.comment || "",
 	};
 }
@@ -80,24 +80,13 @@ export default function ExerciseDetail() {
 	const [isEditable, setIsEditable] = useState(false);
 	const [selectedExerciseType, setSelectedExerciseType] =
 		useState<Movement | null>(null);
-	const [isRep4, setIsRep4] = useState(false);
-
-	const [formState, setFormState] = useState({
-		rep1: "",
-		rep2: "",
-		rep3: "",
-		rep4: "",
-		weight1: "",
-		weight2: "",
-		weight3: "",
-		weight4: "",
-		comment: "",
-	});
+	const [formState, setFormState] = useState<{
+		sets: FormSet[];
+		comment: string;
+	}>({ sets: [], comment: "" });
 
 	const resetForm = (loaded: LoggedExerciseWithSession) => {
 		setFormState(formFromExercise(loaded));
-		const reps = setsToArrays(loaded.logged_sets).reps;
-		setIsRep4(Boolean(reps[3] && reps[3] > 0));
 		setSelectedExerciseType(loaded.movement);
 	};
 
@@ -114,19 +103,37 @@ export default function ExerciseDetail() {
 		setRefreshing(false);
 	};
 
-	const handleInputChange = (field: string, value: string) => {
-		setFormState((prev) => ({ ...prev, [field]: value }));
+	const handleSetChange = (index: number, field: keyof FormSet, value: string) => {
+		setFormState((prev) => ({
+			...prev,
+			sets: prev.sets.map((set, i) =>
+				i === index ? { ...set, [field]: value } : set,
+			),
+		}));
+	};
+
+	// A new set starts at the last set's weight
+	const addSet = () => {
+		setFormState((prev) => ({
+			...prev,
+			sets: [
+				...prev.sets,
+				{ count: "", weight: prev.sets[prev.sets.length - 1]?.weight ?? "" },
+			],
+		}));
+	};
+
+	const removeSet = (index: number) => {
+		setFormState((prev) => ({
+			...prev,
+			sets: prev.sets.filter((_, i) => i !== index),
+		}));
 	};
 
 	const handleSave = () => {
 		if (!exercise || !selectedExerciseType || isSaving) return;
 
-		const edited = [
-			{ count: formState.rep1, weight: formState.weight1 },
-			{ count: formState.rep2, weight: formState.weight2 },
-			{ count: formState.rep3, weight: formState.weight3 },
-			...(isRep4 ? [{ count: formState.rep4, weight: formState.weight4 }] : []),
-		].map((set) => ({
+		const edited = formState.sets.map((set) => ({
 			count: Math.round(parseNumber(set.count)),
 			weight: parseNumber(set.weight),
 		}));
@@ -295,119 +302,28 @@ export default function ExerciseDetail() {
 				</Text>
 
 				{isEditable ? (
-					<View className="space-y-4">
-						{/* Set 1 */}
-						<View className="bg-foreground/5 rounded-lg p-4 border border-foreground/10">
-							<Text className="text-sm font-medium text-foreground mb-3">
-								Set 1
-							</Text>
-							<View className="flex-row space-x-3">
-								<View className="flex-1">
-									<Text className="text-xs text-muted mb-1">
-										{selectedExerciseType?.measure === "duration"
-											? "Sec"
-											: "Reps"}
+					<View className="gap-4">
+						{formState.sets.map((set, index) => (
+							<View
+								key={index}
+								className="bg-foreground/5 rounded-lg p-4 border border-foreground/10"
+							>
+								<View className="flex-row items-center justify-between mb-3">
+									<Text className="text-sm font-medium text-foreground">
+										Set {index + 1}
 									</Text>
-									<Input
-										value={formState.rep1}
-										onChangeText={(value) => handleInputChange("rep1", value)}
-										placeholder="0"
-										keyboardType="numeric"
-										className="text-center"
-									/>
+									{formState.sets.length > 1 && (
+										<TouchableOpacity
+											onPress={() => removeSet(index)}
+											accessibilityRole="button"
+											accessibilityLabel={`Remove set ${index + 1}`}
+											hitSlop={8}
+										>
+											<XIcon size={16} color={themeColors.mutedForeground} />
+										</TouchableOpacity>
+									)}
 								</View>
-								<View className="flex-1">
-									<Text className="text-xs text-muted mb-1">Weight (kg)</Text>
-									<Input
-										value={formState.weight1}
-										onChangeText={(value) =>
-											handleInputChange("weight1", value)
-										}
-										placeholder="0"
-										keyboardType="numeric"
-										className="text-center"
-									/>
-								</View>
-							</View>
-						</View>
-
-						{/* Set 2 */}
-						<View className="bg-foreground/5 rounded-lg p-4 border border-foreground/10">
-							<Text className="text-sm font-medium text-foreground mb-3">
-								Set 2
-							</Text>
-							<View className="flex-row space-x-3">
-								<View className="flex-1">
-									<Text className="text-xs text-muted mb-1">
-										{selectedExerciseType?.measure === "duration"
-											? "Sec"
-											: "Reps"}
-									</Text>
-									<Input
-										value={formState.rep2}
-										onChangeText={(value) => handleInputChange("rep2", value)}
-										placeholder="0"
-										keyboardType="numeric"
-										className="text-center"
-									/>
-								</View>
-								<View className="flex-1">
-									<Text className="text-xs text-muted mb-1">Weight (kg)</Text>
-									<Input
-										value={formState.weight2}
-										onChangeText={(value) =>
-											handleInputChange("weight2", value)
-										}
-										placeholder="0"
-										keyboardType="numeric"
-										className="text-center"
-									/>
-								</View>
-							</View>
-						</View>
-
-						{/* Set 3 */}
-						<View className="bg-foreground/5 rounded-lg p-4 border border-foreground/10">
-							<Text className="text-sm font-medium text-foreground mb-3">
-								Set 3
-							</Text>
-							<View className="flex-row space-x-3">
-								<View className="flex-1">
-									<Text className="text-xs text-muted mb-1">
-										{selectedExerciseType?.measure === "duration"
-											? "Sec"
-											: "Reps"}
-									</Text>
-									<Input
-										value={formState.rep3}
-										onChangeText={(value) => handleInputChange("rep3", value)}
-										placeholder="0"
-										keyboardType="numeric"
-										className="text-center"
-									/>
-								</View>
-								<View className="flex-1">
-									<Text className="text-xs text-muted mb-1">Weight (kg)</Text>
-									<Input
-										value={formState.weight3}
-										onChangeText={(value) =>
-											handleInputChange("weight3", value)
-										}
-										placeholder="0"
-										keyboardType="numeric"
-										className="text-center"
-									/>
-								</View>
-							</View>
-						</View>
-
-						{/* Set 4 (conditional) */}
-						{isRep4 && (
-							<View className="bg-foreground/5 rounded-lg p-4 border border-foreground/10">
-								<Text className="text-sm font-medium text-foreground mb-3">
-									Set 4
-								</Text>
-								<View className="flex-row space-x-3">
+								<View className="flex-row gap-3">
 									<View className="flex-1">
 										<Text className="text-xs text-muted mb-1">
 											{selectedExerciseType?.measure === "duration"
@@ -415,8 +331,10 @@ export default function ExerciseDetail() {
 												: "Reps"}
 										</Text>
 										<Input
-											value={formState.rep4}
-											onChangeText={(value) => handleInputChange("rep4", value)}
+											value={set.count}
+											onChangeText={(value) =>
+												handleSetChange(index, "count", value)
+											}
 											placeholder="0"
 											keyboardType="numeric"
 											className="text-center"
@@ -425,32 +343,29 @@ export default function ExerciseDetail() {
 									<View className="flex-1">
 										<Text className="text-xs text-muted mb-1">Weight (kg)</Text>
 										<Input
-											value={formState.weight4}
+											value={set.weight}
 											onChangeText={(value) =>
-												handleInputChange("weight4", value)
+												handleSetChange(index, "weight", value)
 											}
 											placeholder="0"
-											keyboardType="numeric"
+											keyboardType="decimal-pad"
 											className="text-center"
 										/>
 									</View>
 								</View>
 							</View>
-						)}
+						))}
 
-						{/* Add Set 4 button */}
-						{!isRep4 && (
-							<TouchableOpacity
-								onPress={() => setIsRep4(true)}
-								className="bg-default/30 rounded-lg p-4 border border-dashed border-default"
-							>
-								<Text className="text-center text-muted">+ Add Set 4</Text>
-							</TouchableOpacity>
-						)}
+						<TouchableOpacity
+							onPress={addSet}
+							className="bg-default/30 rounded-lg p-4 border border-dashed border-default"
+						>
+							<Text className="text-center text-muted">+ Add a set</Text>
+						</TouchableOpacity>
 					</View>
 				) : (
 					<View className="space-y-3">
-						<View className="flex-row gap-2 w-full">
+						<View className="flex-row flex-wrap gap-2 w-full">
 							{exerciseReps.map((rep, index) => {
 								// Bodyweight sets have 0 kg: only empty sets are hidden
 								if (rep <= 0 || exerciseWeights[index] < 0) return null;
@@ -458,7 +373,7 @@ export default function ExerciseDetail() {
 								return (
 									<View
 										key={index}
-										className="bg-foreground/5 flex-1 rounded-lg px-3 py-2 border border-foreground/10"
+										className="bg-foreground/5 flex-1 min-w-[22%] rounded-lg px-3 py-2 border border-foreground/10"
 									>
 										<Text className="text-xs font-medium text-foreground">
 											Set {index + 1}
@@ -486,7 +401,9 @@ export default function ExerciseDetail() {
 				{isEditable ? (
 					<TextArea
 						value={formState.comment}
-						onChangeText={(value) => handleInputChange("comment", value)}
+						onChangeText={(value) =>
+							setFormState((prev) => ({ ...prev, comment: value }))
+						}
 						placeholder="Add notes about this exercise..."
 						className="bg-default/20 rounded-lg p-4"
 						multiline
@@ -503,10 +420,13 @@ export default function ExerciseDetail() {
 
 			{/* Action Buttons */}
 			<View className="flex-row gap-2 mb-6">
-				<Button variant="outline" onPress={handleDelete} className="flex-1">
-					<TrashIcon size={16} color="#ef4444" />
-					<Button.Label>Delete</Button.Label>
-				</Button>
+				{/* While editing, only Cancel and Save: three buttons do not fit a phone's width */}
+				{!isEditable && (
+					<Button variant="outline" onPress={handleDelete} className="flex-1">
+						<TrashIcon size={16} color="#ef4444" />
+						<Button.Label>Delete</Button.Label>
+					</Button>
+				)}
 
 				{!isEditable ? (
 					<Button onPress={() => setIsEditable(true)} className="flex-1">

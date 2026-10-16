@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as AppleAuthentication from "expo-apple-authentication";
 import * as Haptics from "expo-haptics";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { ActivityIndicator, Platform, View } from "react-native";
 import * as z from "zod";
@@ -31,6 +31,8 @@ export default function SignIn() {
 	const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 	const [isAppleLoading, setIsAppleLoading] = useState(false);
 	const [isAppleAvailable, setIsAppleAvailable] = useState(false);
+	// One sign-in request at a time (autofill, the Go key and the button can all submit)
+	const isSigningIn = useRef(false);
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
@@ -51,6 +53,8 @@ export default function SignIn() {
 	}, []);
 
 	async function onSubmit(data: z.infer<typeof formSchema>) {
+		if (isSigningIn.current) return;
+		isSigningIn.current = true;
 		try {
 			const result = await signIn(data.email, data.password);
 
@@ -60,6 +64,8 @@ export default function SignIn() {
 			}
 		} catch (error: Error | any) {
 			console.error(error.message);
+		} finally {
+			isSigningIn.current = false;
 		}
 	}
 
@@ -175,10 +181,12 @@ export default function SignIn() {
 									autoCorrect={false}
 									secureTextEntry
 									returnKeyType="go"
-									onSubmitEditing={form.handleSubmit(onSubmit)}
+									onSubmitEditing={() => form.handleSubmit(onSubmit)()}
 									{...field}
 									onChange={(value) => {
-										const previous = field.value;
+										// The form's current value, not this render's: keystrokes can arrive
+										// faster than renders
+										const previous = form.getValues("password");
 										field.onChange(value);
 										// Keychain autofill (Face ID) fills the whole password at once: sign in
 										// straight away. Deferred so the email filled with it is in the form too.
@@ -198,7 +206,7 @@ export default function SignIn() {
 				</Form>
 			</View>
 			<Button
-				onPress={form.handleSubmit(onSubmit)}
+				onPress={() => form.handleSubmit(onSubmit)()}
 				isDisabled={form.formState.isSubmitting || isGoogleLoading}
 			>
 				{form.formState.isSubmitting ? (
