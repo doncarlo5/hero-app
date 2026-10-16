@@ -4,11 +4,17 @@ import { supabase } from "@/config/supabase";
 
 import { queryKeys, unwrap, unwrapMaybe } from "./client";
 import { useProfile } from "./profile";
-import type { LoadRule, Program, ProgramDay, ProgressionRule } from "./types";
+import type {
+	FinisherKind,
+	LoadRule,
+	Program,
+	ProgramDay,
+	ProgressionRule,
+} from "./types";
 
-// slots has two foreign keys to movements (movement, finisher): name the one to embed
+// slots has two foreign keys to movements (movement, finisher): each embed names its own
 const PROGRAM_SELECT =
-	"*, program_days(*, slots(*, movement:movements!slots_movement_id_fkey(*), alternatives:slot_alternatives(position, reason, movement:movements(*)), set_prescriptions(*)))";
+	"*, program_days(*, slots(*, movement:movements!slots_movement_id_fkey(*), finisher_movement:movements!slots_finisher_movement_id_fkey(*), alternatives:slot_alternatives(position, reason, movement:movements(*)), set_prescriptions(*)))";
 
 const byPosition = (a: { position: number }, b: { position: number }) =>
 	a.position - b.position;
@@ -92,6 +98,16 @@ export type SlotSettings = {
 	note: string;
 	/** Another slot of the same day to do as a superset with, or null */
 	supersetWith: string | null;
+	isKeyLift: boolean;
+	finisher: {
+		kind: FinisherKind;
+		count: number | null;
+		/** Drop sets: kg removed per drop */
+		loadStep: number | null;
+		restSeconds: number | null;
+		/** Switch: the easier movement */
+		movementId: string | null;
+	} | null;
 };
 
 export type SetPrescriptionDraft = {
@@ -123,6 +139,12 @@ export function useSaveSlot() {
 						tempo: input.settings.tempo,
 						note: input.settings.note,
 						superset_with: input.settings.supersetWith,
+						is_key_lift: input.settings.isKeyLift,
+						finisher_kind: input.settings.finisher?.kind ?? null,
+						finisher_count: input.settings.finisher?.count ?? null,
+						finisher_load_step: input.settings.finisher?.loadStep ?? null,
+						finisher_rest_seconds: input.settings.finisher?.restSeconds ?? null,
+						finisher_movement_id: input.settings.finisher?.movementId ?? null,
 					},
 					p_sets: input.sets.map((set) => ({
 						rep_min: set.repMin,

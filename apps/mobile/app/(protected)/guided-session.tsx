@@ -23,7 +23,7 @@ import { RestPanel } from "@/components/rest-panel";
 import { Text } from "@/components/ui/text";
 import type { SetTarget } from "@/lib/progression/engine";
 import { restPhase } from "@/lib/session/rest";
-import type { QueueStep } from "@/lib/session/set-queue";
+import { partLabel, type QueueStep } from "@/lib/session/set-queue";
 import { useGuidedSession } from "@/lib/session/use-guided-session";
 import { useThemeColors } from "@/lib/theme";
 import { cn } from "@/lib/utils";
@@ -99,7 +99,7 @@ export default function GuidedSession() {
 	const stepLabel = (s: QueueStep) => {
 		const movement = guided.movementOf(s);
 		const side = sideLabel(s.side);
-		return `${movement?.name ?? "?"}, série ${s.setIndex + 1}${side ? ` (${side})` : ""}`;
+		return `${movement?.name ?? "?"}, ${partLabel(s)}${side ? ` (${side})` : ""}`;
 	};
 
 	const handleDone = () => {
@@ -205,9 +205,20 @@ export default function GuidedSession() {
 	const movement = step ? guided.movementOf(step) : null;
 	const slot = step ? guided.slotOf(step) : null;
 	const setCount = step
-		? guided.queue.filter((s) => s.slotId === step.slotId && s.side !== "right")
-				.length
+		? guided.queue.filter(
+				(s) =>
+					s.slotId === step.slotId &&
+					s.kind === "working" &&
+					s.side !== "right",
+			).length
 		: 0;
+	// An alternative can replace the slot's movement until its first set is logged
+	const alternatives = step ? guided.alternativesOf(step) : [];
+	const canSwap =
+		!!step &&
+		step.kind !== "switch" &&
+		alternatives.length > 1 &&
+		!guided.queue.some((s) => s.slotId === step.slotId && draft?.sets[s.key]);
 	const supersetMembers = slot?.superset_group
 		? guided.day.slots.filter((s) => s.superset_group === slot.superset_group)
 		: [];
@@ -242,7 +253,9 @@ export default function GuidedSession() {
 							<View className="flex-1">
 								<Text className="text-xl font-bold">{movement.name}</Text>
 								<Text className="text-sm text-muted">
-									Série {step.setIndex + 1}/{setCount}
+									{step.kind === "working"
+										? `Série ${step.setIndex + 1}/${setCount}`
+										: partLabel(step).replace(/^./, (c) => c.toUpperCase())}
 									{sideLabel(step.side) ? ` · ${sideLabel(step.side)}` : ""}
 									{supersetMembers.length > 1
 										? ` · superset avec ${supersetMembers
@@ -253,6 +266,43 @@ export default function GuidedSession() {
 								</Text>
 							</View>
 						</View>
+
+						{canSwap && (
+							<View className="gap-2">
+								<Text className="text-sm text-muted">
+									Exercice fait aujourd’hui
+								</Text>
+								<View className="flex-row flex-wrap gap-2">
+									{alternatives.map((option) => (
+										<Pressable
+											key={option.id}
+											onPress={() => guided.swap(step.slotId, option.id)}
+											accessibilityRole="button"
+											accessibilityState={{
+												selected: option.id === movement.id,
+											}}
+											className={cn(
+												"px-3 py-1.5 rounded-lg border",
+												option.id === movement.id
+													? "bg-foreground border-foreground"
+													: "border-border bg-default/30",
+											)}
+										>
+											<Text
+												className={cn(
+													"text-sm",
+													option.id === movement.id
+														? "text-background font-medium"
+														: "text-foreground",
+												)}
+											>
+												{option.name}
+											</Text>
+										</Pressable>
+									))}
+								</View>
+							</View>
+						)}
 
 						{target?.reason === "calibration" ? (
 							<Text className="text-sm text-muted">

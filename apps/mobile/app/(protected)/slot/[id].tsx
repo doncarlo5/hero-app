@@ -13,9 +13,16 @@ import {
 	View,
 } from "react-native";
 
+import { MovementPicker } from "@/components/movement-picker";
 import { Text } from "@/components/ui/text";
+import { useMovements } from "@/lib/queries/movements";
 import { useActiveProgram, useSaveSlot } from "@/lib/queries/programs";
-import type { LoadRule, ProgressionRule, Slot } from "@/lib/queries/types";
+import type {
+	FinisherKind,
+	LoadRule,
+	ProgressionRule,
+	Slot,
+} from "@/lib/queries/types";
 import { useThemeColors } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
@@ -63,8 +70,39 @@ type FormState = {
 	tempo: string;
 	note: string;
 	supersetWith: string | null;
+	isKeyLift: boolean;
+	finisherKind: FinisherKind | null;
+	finisherCount: string;
+	finisherLoadStep: string;
+	finisherRestSeconds: string;
+	finisherMovementId: string | null;
 	sets: SetForm[];
 };
+
+const FINISHERS: { value: FinisherKind | null; label: string; help: string }[] =
+	[
+		{ value: null, label: "Aucun", help: "" },
+		{
+			value: "drop_sets",
+			label: "Drop sets",
+			help: "Après la dernière série, la charge baisse et tu enchaînes sans repos.",
+		},
+		{
+			value: "cheat_reps",
+			label: "Reps trichées",
+			help: "Quelques reps de plus après l’échec, avec un peu d’élan. Exercices d’isolation seulement.",
+		},
+		{
+			value: "switch",
+			label: "Switch",
+			help: "Après l’échec, tu passes sans repos sur un exercice plus facile qui travaille le même muscle.",
+		},
+		{
+			value: "mini_sets",
+			label: "Mini-séries",
+			help: "De courtes séries séparées d’une dizaine de secondes, comptées comme une seule.",
+		},
+	];
 
 // "12,5" and "12.5" are both accepted; empty input is null, invalid input is NaN
 function parseOptional(value: string): number | null {
@@ -88,6 +126,12 @@ function formFromSlot(slot: Slot, daySlots: Slot[]): FormState {
 		tempo: slot.tempo ?? "",
 		note: slot.note ?? "",
 		supersetWith: partner?.id ?? null,
+		isKeyLift: slot.is_key_lift,
+		finisherKind: slot.finisher_kind,
+		finisherCount: slot.finisher_count?.toString() ?? "",
+		finisherLoadStep: slot.finisher_load_step?.toString() ?? "",
+		finisherRestSeconds: slot.finisher_rest_seconds?.toString() ?? "",
+		finisherMovementId: slot.finisher_movement_id,
 		sets: (sets.length > 0
 			? sets
 			: [
@@ -147,6 +191,7 @@ export default function SlotSettings() {
 	const themeColors = useThemeColors();
 	const programQuery = useActiveProgram();
 	const saveSlot = useSaveSlot();
+	const movementsQuery = useMovements();
 
 	const day =
 		programQuery.data?.program_days.find((d) =>
@@ -237,6 +282,22 @@ export default function SlotSettings() {
 			);
 			return;
 		}
+		const finisherNumbers = [
+			form.finisherCount,
+			form.finisherLoadStep,
+			form.finisherRestSeconds,
+		].map(parseOptional);
+		if (
+			form.finisherKind &&
+			finisherNumbers.some((n) => n !== null && (Number.isNaN(n) || n < 0))
+		) {
+			Alert.alert("Finisher", "Les nombres du finisher doivent être positifs.");
+			return;
+		}
+		if (form.finisherKind === "switch" && !form.finisherMovementId) {
+			Alert.alert("Switch", "Choisis l’exercice sur lequel enchaîner.");
+			return;
+		}
 		saveSlot.mutate(
 			{
 				slotId: slot.id,
@@ -247,6 +308,16 @@ export default function SlotSettings() {
 					tempo: form.tempo,
 					note: form.note,
 					supersetWith: form.supersetWith,
+					isKeyLift: form.isKeyLift,
+					finisher: form.finisherKind
+						? {
+								kind: form.finisherKind,
+								count: parseOptional(form.finisherCount),
+								loadStep: parseOptional(form.finisherLoadStep),
+								restSeconds: parseOptional(form.finisherRestSeconds),
+								movementId: form.finisherMovementId,
+							}
+						: null,
 				},
 				sets,
 			},
@@ -280,6 +351,10 @@ export default function SlotSettings() {
 	}
 
 	const rule = PROGRESSION_RULES.find((r) => r.value === form.progressionRule);
+	const finisher = FINISHERS.find((f) => f.value === form.finisherKind);
+	const switchMovement =
+		(movementsQuery.data ?? []).find((m) => m.id === form.finisherMovementId) ??
+		null;
 
 	return (
 		<KeyboardAvoidingView
@@ -472,6 +547,106 @@ export default function SlotSettings() {
 							/>
 						))}
 					</View>
+				</View>
+
+				<View className="flex-row items-center justify-between gap-4">
+					<View className="flex-1">
+						<Text className="text-lg font-semibold">Exercice clé</Text>
+						<Text className="text-sm text-muted">
+							La priorité du jour : la séance guidée propose un échauffement
+							jusqu’à la première charge.
+						</Text>
+					</View>
+					<Host matchContents>
+						<Switch
+							value={form.isKeyLift}
+							onValueChange={(isKeyLift: boolean) =>
+								setForm({ ...form, isKeyLift })
+							}
+						/>
+					</Host>
+				</View>
+
+				<View className="gap-2">
+					<Text className="text-lg font-semibold">Finisher</Text>
+					<View className="flex-row flex-wrap gap-2">
+						{FINISHERS.map((option) => (
+							<Chip
+								key={option.value ?? "none"}
+								label={option.label}
+								isSelected={form.finisherKind === option.value}
+								onPress={() => setForm({ ...form, finisherKind: option.value })}
+							/>
+						))}
+					</View>
+					{finisher?.help ? (
+						<Text className="text-sm text-muted">{finisher.help}</Text>
+					) : null}
+					{(form.finisherKind === "drop_sets" ||
+						form.finisherKind === "mini_sets") && (
+						<View className="flex-row gap-2">
+							<View className="flex-1">
+								<Text className="text-xs text-muted mb-1">
+									{form.finisherKind === "drop_sets" ? "Drops" : "Mini-séries"}
+								</Text>
+								<Input
+									variant="secondary"
+									value={form.finisherCount}
+									onChangeText={(finisherCount) =>
+										setForm({ ...form, finisherCount })
+									}
+									keyboardType="number-pad"
+									placeholder={form.finisherKind === "drop_sets" ? "2" : "3"}
+								/>
+							</View>
+							{form.finisherKind === "drop_sets" ? (
+								<View className="flex-1">
+									<Text className="text-xs text-muted mb-1">
+										kg en moins par drop
+									</Text>
+									<Input
+										variant="secondary"
+										value={form.finisherLoadStep}
+										onChangeText={(finisherLoadStep) =>
+											setForm({ ...form, finisherLoadStep })
+										}
+										keyboardType="decimal-pad"
+										placeholder="−20 %"
+									/>
+								</View>
+							) : (
+								<View className="flex-1">
+									<Text className="text-xs text-muted mb-1">Pause (s)</Text>
+									<Input
+										variant="secondary"
+										value={form.finisherRestSeconds}
+										onChangeText={(finisherRestSeconds) =>
+											setForm({ ...form, finisherRestSeconds })
+										}
+										keyboardType="number-pad"
+										placeholder="10"
+									/>
+								</View>
+							)}
+						</View>
+					)}
+					{form.finisherKind === "switch" && (
+						<View className="gap-2">
+							<Text className="text-sm">
+								Enchaîner sur :{" "}
+								<Text className="font-medium">
+									{switchMovement?.name ?? "à choisir"}
+								</Text>
+							</Text>
+							<View>
+								<MovementPicker
+									movements={movementsQuery.data ?? []}
+									selectedId={form.finisherMovementId}
+									onPick={(m) => setForm({ ...form, finisherMovementId: m.id })}
+								/>
+							</View>
+						</View>
+					)}
 				</View>
 
 				<View className="gap-2">

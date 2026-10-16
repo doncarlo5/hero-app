@@ -91,7 +91,7 @@ flowchart TD
 - A superset alternates its two slots with the prescribed short rest; a unilateral slot rests after each side.
 - With no history on a movement, the set card is in **calibration**: no target, a hint to start light.
 - A killed app offers to resume the session where it was; the rest keeps counting from its stored start ([ADR-0002](adr/0002-session-in-progress-on-device.md)).
-- Built so far: the set queue (supersets, sides), the rest with its notification, the device draft and resume. Not yet: the warm-up ramp, finishers, swapping a movement during the session.
+- Built so far: the set queue (supersets, sides), the warm-up ramp before key lifts (from the empty bar to the first target), finishers after the last set (drop sets, cheat reps, a switch, mini-sets), swapping to an alternative before a slot's first set, the rest with its notification, the device draft and resume.
 
 ### Swap a movement
 

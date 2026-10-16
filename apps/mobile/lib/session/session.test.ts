@@ -113,6 +113,85 @@ describe("set queue", () => {
 		assert.deepEqual(order(perSide), ["A1l:120", "A1r:0"]);
 	});
 
+	test("warm-up sets come before the first working set, with a short rest", () => {
+		const queue = buildSetQueue([
+			slot("A", 1, 2, {
+				warmup: [
+					{ weight: 20, reps: 8 },
+					{ weight: 40, reps: 3 },
+				],
+			}),
+		]);
+		assert.deepEqual(
+			queue.map((s) => `${s.kind}:${s.restAfterSeconds}`),
+			["warmup:60", "warmup:60", "working:120", "working:0"],
+		);
+		assert.equal(queue[0].key, "A:w0:-");
+		assert.equal(queue[2].key, "A:0:-", "working keys are unchanged");
+	});
+
+	test("drop sets follow the last set with no rest; the slot's rest comes after them", () => {
+		const queue = buildSetQueue([
+			slot("A", 1, 2, {
+				finisher: {
+					kind: "drop_sets",
+					count: 2,
+					restSeconds: null,
+					movementId: null,
+				},
+			}),
+			slot("B", 2, 1),
+		]);
+		assert.deepEqual(
+			queue.map((s) => `${s.key}:${s.kind}:${s.restAfterSeconds}`),
+			[
+				"A:0:-:working:120",
+				"A:1:-:working:0",
+				"A:f0:-:drop:0",
+				"A:f1:-:drop:120",
+				"B:0:-:working:0",
+			],
+		);
+		assert.deepEqual(
+			queue.filter((s) => s.isLastOfSlot).map((s) => s.key),
+			["A:f1:-", "B:0:-"],
+		);
+	});
+
+	test("a switch is one part on the other movement; mini-sets pause about ten seconds", () => {
+		const switchQueue = buildSetQueue([
+			slot("A", 1, 1, {
+				finisher: {
+					kind: "switch",
+					count: 3,
+					restSeconds: null,
+					movementId: "m-upright",
+				},
+			}),
+		]);
+		assert.deepEqual(
+			switchQueue.map((s) => [s.kind, s.movementId]),
+			[
+				["working", "m-A"],
+				["switch", "m-upright"],
+			],
+		);
+		const mini = buildSetQueue([
+			slot("A", 1, 1, {
+				finisher: {
+					kind: "mini_sets",
+					count: 3,
+					restSeconds: null,
+					movementId: null,
+				},
+			}),
+		]);
+		assert.deepEqual(
+			mini.map((s) => s.restAfterSeconds),
+			[10, 10, 10, 0],
+		);
+	});
+
 	test("a slot without rest uses the default", () => {
 		const queue = buildSetQueue([slot("A", 1, 2, { restSeconds: null })], {
 			defaultRestSeconds: 75,
@@ -272,6 +351,35 @@ describe("session draft", () => {
 			exercisesToSend(draft, queue).map((p) => [p.slotId, p.sets.length]),
 			[["A", 1]],
 			"B has no done set: nothing to log",
+		);
+	});
+
+	test("warm-up and finisher sets are sent with their kind", () => {
+		const withParts = buildSetQueue([
+			slot("A", 1, 1, {
+				warmup: [{ weight: 20, reps: 8 }],
+				finisher: {
+					kind: "drop_sets",
+					count: 1,
+					restSeconds: null,
+					movementId: null,
+				},
+			}),
+		]);
+		let draft = createDraft("s1", at(0));
+		withParts.forEach((_, i) => {
+			draft = completeStep(
+				draft,
+				withParts,
+				i,
+				{ weight: 50 - i * 10, reps: 8 },
+				at(i),
+				newId,
+			);
+		});
+		assert.deepEqual(
+			exercisesToSend(draft, withParts)[0].sets.map((s) => s.kind),
+			["warmup", "working", "drop"],
 		);
 	});
 

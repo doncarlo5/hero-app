@@ -7,6 +7,7 @@ export type LoadType = Enums<"load_type">;
 export type ProgressionRule = Enums<"progression_rule">;
 export type LoadRule = Enums<"load_rule">;
 export type SetKind = Enums<"set_kind">;
+export type FinisherKind = Enums<"finisher_kind">;
 export type SetPrescriptionRow = Tables<"set_prescriptions">;
 
 export type LoggedSet = Pick<
@@ -22,6 +23,8 @@ export type SlotAlternative = {
 
 export type Slot = Tables<"slots"> & {
 	movement: Movement;
+	/** Switch finisher: the easier movement */
+	finisher_movement: Movement | null;
 	alternatives: SlotAlternative[];
 	set_prescriptions: SetPrescriptionRow[];
 };
