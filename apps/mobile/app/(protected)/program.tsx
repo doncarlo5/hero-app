@@ -16,7 +16,6 @@ import React, { useRef, useState } from "react";
 import {
 	ActivityIndicator,
 	Alert,
-	Platform,
 	ScrollView,
 	TouchableOpacity,
 	View,
@@ -25,12 +24,15 @@ import {
 import { errorMessage } from "@/lib/errors";
 import { MovementPicker } from "@/components/movement-picker";
 import { SafeAreaView } from "@/components/safe-area-view";
-import { Button } from "heroui-native";
+import { Button, Input } from "heroui-native";
 import { Text } from "@/components/ui/text";
 import { useMovements } from "@/lib/queries/movements";
 import {
 	useActiveProgram,
 	useCreateProgramDay,
+	useDeleteProgramDay,
+	useRenameProgramDay,
+	useReorderProgramDays,
 	useSaveProgramDay,
 } from "@/lib/queries/programs";
 import {
@@ -70,9 +72,17 @@ export default function ProgramPage() {
 	const exerciseTypesQuery = useMovements();
 	const saveProgramMutation = useSaveProgramDay();
 	const createDay = useCreateProgramDay();
+	const renameDay = useRenameProgramDay();
+	const reorderDays = useReorderProgramDays();
+	const deleteDay = useDeleteProgramDay();
 	// Local draft, edited until saved
 	const [exercises, setExercises] = useState<ExerciseProgram[]>([]);
 	const [targetExercise, setTargetExercise] = useState<number | null>(null);
+	// Day being named: a new one (id null) or an existing one
+	const [dayName, setDayName] = useState<{
+		id: string | null;
+		value: string;
+	} | null>(null);
 
 	const availableExercises = exerciseTypesQuery.data ?? [];
 	const isLoading = programQuery.isLoading;
@@ -113,31 +123,109 @@ export default function ProgramPage() {
 		);
 	}
 
-	const addDay = (name: string) => {
-		const programId = programQuery.data?.id;
-		if (!programId || !name.trim()) return;
-		createDay.mutate(
-			{ programId, name: name.trim(), position: days.length + 1 },
-			{
-				onSuccess: (created) => setSelectedDayId(created.id),
-				onError: (error) =>
-					Alert.alert(
-						"Erreur",
-						errorMessage(error, "Impossible d’ajouter le jour."),
-					),
-			},
+	const showError = (fallback: string) => (error: unknown) =>
+		Alert.alert("Erreur", errorMessage(error, fallback));
+
+	// Names a new day or renames one, from the inline field under the day chips
+	const submitDayName = () => {
+		if (!dayName) return;
+		const name = dayName.value.trim();
+		if (!name) {
+			setDayName(null);
+			return;
+		}
+		if (dayName.id) {
+			renameDay.mutate(
+				{ id: dayName.id, name },
+				{ onError: showError("Impossible de renommer le jour.") },
+			);
+		} else {
+			const programId = programQuery.data?.id;
+			if (!programId) return;
+			createDay.mutate(
+				{
+					programId,
+					name,
+					// After the last day, even with gaps left by deleted days
+					position: Math.max(0, ...days.map((d) => d.position)) + 1,
+				},
+				{
+					onSuccess: (created) => setSelectedDayId(created.id),
+					onError: showError("Impossible d’ajouter le jour."),
+				},
+			);
+		}
+		setDayName(null);
+	};
+
+	const moveDay = (dayId: string, offset: -1 | 1) => {
+		const ids = days.map((d) => d.id);
+		const from = ids.indexOf(dayId);
+		const to = from + offset;
+		if (from < 0 || to < 0 || to >= ids.length) return;
+		[ids[from], ids[to]] = [ids[to], ids[from]];
+		// The moved day stays selected (the default selection is the first day)
+		setSelectedDayId(dayId);
+		reorderDays.mutate(ids, {
+			onError: showError("Impossible de déplacer le jour."),
+		});
+	};
+
+	const confirmDeleteDay = (target: ProgramDay) => {
+		Alert.alert(
+			`Supprimer « ${target.name} » ?`,
+			"Ses exercices et leurs réglages sont supprimés. Les séances déjà faites restent dans l’historique.",
+			[
+				{ text: "Annuler", style: "cancel" },
+				{
+					text: "Supprimer",
+					style: "destructive",
+					onPress: () =>
+						deleteDay.mutate(target.id, {
+							onSuccess: () => setSelectedDayId(null),
+							onError: showError("Impossible de supprimer le jour."),
+						}),
+				},
+			],
 		);
 	};
 
-	const promptNewDay = () => {
-		const fallback = `Jour ${days.length + 1}`;
-		if (Platform.OS === "ios") {
-			Alert.prompt("Nouveau jour", "Nom du jour d'entraînement", (name) =>
-				addDay(name || fallback),
-			);
-		} else {
-			addDay(fallback);
-		}
+	// A change to the days reloads the program, and with it this draft
+	const blockedByDraft = () => {
+		if (!isDirty) return false;
+		Alert.alert(
+			"Modifications non enregistrées",
+			"Enregistre d’abord les exercices du jour.",
+		);
+		return true;
+	};
+
+	// Tapping the selected day opens its actions
+	const openDayMenu = (target: ProgramDay) => {
+		if (blockedByDraft()) return;
+		const index = days.findIndex((d) => d.id === target.id);
+		Alert.alert(target.name, undefined, [
+			{
+				text: "Renommer",
+				onPress: () => setDayName({ id: target.id, value: target.name }),
+			},
+			...(index > 0
+				? [{ text: "Déplacer avant", onPress: () => moveDay(target.id, -1) }]
+				: []),
+			...(index < days.length - 1
+				? [{ text: "Déplacer après", onPress: () => moveDay(target.id, 1) }]
+				: []),
+			...(days.length > 1
+				? [
+						{
+							text: "Supprimer",
+							style: "destructive" as const,
+							onPress: () => confirmDeleteDay(target),
+						},
+					]
+				: []),
+			{ text: "Annuler", style: "cancel" },
+		]);
 	};
 
 	// The slot screen saves on its own and reloads the day: unsaved changes here would be lost
@@ -273,7 +361,10 @@ export default function ProgramPage() {
 				}}
 			/>
 			<SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
-				<ScrollView className="flex-1 px-4 pt-4">
+				<ScrollView
+					className="flex-1 px-4 pt-4"
+					keyboardShouldPersistTaps="handled"
+				>
 					{/* Program days */}
 					<View className="mb-4">
 						<Text className="text-lg font-semibold text-foreground">
@@ -291,8 +382,15 @@ export default function ProgramPage() {
 								{days.map((d) => (
 									<TouchableOpacity
 										key={d.id}
-										onPress={() => setSelectedDayId(d.id)}
-										className={`px-4 py-2 rounded-lg border ${
+										onPress={() =>
+											day?.id === d.id ? openDayMenu(d) : setSelectedDayId(d.id)
+										}
+										accessibilityHint={
+											day?.id === d.id
+												? "Renommer, déplacer ou supprimer ce jour"
+												: undefined
+										}
+										className={`flex-row items-center gap-1 px-4 py-2 rounded-lg border ${
 											day?.id === d.id
 												? "bg-foreground border-foreground"
 												: "border-border bg-default/30"
@@ -307,16 +405,48 @@ export default function ProgramPage() {
 										>
 											{d.name}
 										</Text>
+										{day?.id === d.id && (
+											<ChevronDown size={14} color={themeColors.background} />
+										)}
 									</TouchableOpacity>
 								))}
 								<TouchableOpacity
-									onPress={promptNewDay}
+									onPress={() => {
+										if (blockedByDraft()) return;
+										setDayName({ id: null, value: `Jour ${days.length + 1}` });
+									}}
 									className="px-4 py-2 rounded-lg border border-dashed border-border"
 								>
 									<Text className="text-muted">+ Jour</Text>
 								</TouchableOpacity>
 							</View>
 						</ScrollView>
+						{dayName && (
+							<View className="mb-4 flex-row items-center gap-2">
+								<Input
+									className="flex-1"
+									value={dayName.value}
+									onChangeText={(value) => setDayName({ ...dayName, value })}
+									placeholder="Nom du jour"
+									autoFocus
+									selectTextOnFocus
+									clearButtonMode="while-editing"
+									returnKeyType="done"
+									onSubmitEditing={submitDayName}
+								/>
+								<Button size="sm" onPress={submitDayName}>
+									<Button.Label>{dayName.id ? "Renommer" : "Ajouter"}</Button.Label>
+								</Button>
+								<TouchableOpacity
+									onPress={() => setDayName(null)}
+									accessibilityRole="button"
+									accessibilityLabel="Annuler"
+									hitSlop={8}
+								>
+									<XIcon size={18} color={themeColors.mutedForeground} />
+								</TouchableOpacity>
+							</View>
+						)}
 					</View>
 
 					{/* Add Exercise Button */}
