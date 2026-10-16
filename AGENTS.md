@@ -1,10 +1,21 @@
 # AGENTS.md
 
-This file provides guidance to coding agents when working with code in this repository.
+Guidance for coding agents (Claude Code, Cursor, Codex…) working in this repository. `CLAUDE.md` only imports this file.
+
+## Product
+
+Hero App is a strength training logbook that runs a user's program: it proposes each set's target, records what was lifted, and computes the next target. Read before changing the domain:
+
+- [docs/PRODUCT.md](docs/PRODUCT.md): who it is for, principles, scope.
+- [docs/FLOWS.md](docs/FLOWS.md): user flows, today and v1 target.
+- [GLOSSARY.md](GLOSSARY.md): canonical terms. Use them in code, UI copy and docs; update the glossary when a term is decided.
+- [docs/adr/](docs/adr/): architecture decisions. [ADR-0001](docs/adr/0001-programs-as-data.md) (proposed) is the target data model.
+
+The app is generic: never commit a third-party program, its texts, technique names, videos or transcripts (seeds, fixtures, docs or tests). A user's program is their private data.
 
 ## Project Structure
 
-Hero App is a workout tracking app. Monorepo (npm workspaces + Turborepo):
+Monorepo (npm workspaces + Turborepo):
 
 - **apps/mobile**: the product. Expo SDK 57 / React Native app (TypeScript, Expo Router, NativeWind, TanStack Query) that talks to Supabase directly: Auth, Postgres through PostgREST with RLS, and RPCs.
 - **apps/web**: marketing site only (Vite + React + Tailwind): landing page, support page, static privacy policy (`public/privacy-policy/`). Deployed on Vercel (`hero-app-web`). The old PWA is unregistered by `vite-plugin-pwa` with `selfDestroying`.
@@ -67,6 +78,15 @@ Local test account: `test@hero.local` / `hero-local-test`.
 - `lib/queries/`: every data access, as TanStack Query hooks (`queryKeys`, `unwrap` in `client.ts`).
 - `lib/color-scheme-preference.ts`, `lib/theme.ts`: light/dark/auto preference and navigation themes.
 - `components/ui/`: shared primitives (rn-primitives + NativeWind).
+
+## Code Conventions (mobile and web)
+
+- Files in kebab-case (`component-name.tsx`); `@/` absolute imports; named exports preferred.
+- Components take a typed `props` object and read `props.x`; do not destructure props.
+- No `useCallback` / `useMemo`: simplicity over micro-optimisation.
+- Component order: hooks and stores → `useState` → `useRef` → functions → `useEffect` → JSX. Only list values that change in an effect's dependency array.
+- Compose class names with `cn(...)`; dates with `date-fns`; validation with `zod`.
+- Call promises directly (`updateLifts(map)`), no `void` prefix.
 
 ## Testing
 

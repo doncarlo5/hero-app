@@ -1,6 +1,8 @@
 # hero-app
 
-Workout tracking app: Expo mobile app (`apps/mobile`), web app (`apps/web`) and a legacy Express API (`apps/api`), backed by Supabase.
+Strength training logbook that runs your program: Expo mobile app (`apps/mobile`), marketing site (`apps/web`) and a legacy Express API (`apps/api`), backed by Supabase.
+
+Product and domain docs: [PRODUCT](docs/PRODUCT.md), [FLOWS](docs/FLOWS.md), [GLOSSARY](GLOSSARY.md), [ADRs](docs/adr/). Agent guidance: [AGENTS.md](AGENTS.md).
 
 ## Environment variables
 
