@@ -19,6 +19,7 @@ import {
 	View,
 } from "react-native";
 
+import { MovementFrames } from "@/components/movement-frames";
 import { MovementThumbnail } from "@/components/movement-thumbnail";
 import { RestPanel } from "@/components/rest-panel";
 import { Text } from "@/components/ui/text";
@@ -88,6 +89,7 @@ export default function GuidedSession() {
 	const [reps, setReps] = useState("");
 	const [filledFor, setFilledFor] = useState<string | null>(null);
 	const [isFinishing, setIsFinishing] = useState(false);
+	const [showFrames, setShowFrames] = useState(false);
 
 	const draft = guided.draft;
 	const index = draft ? currentIndex(draft, guided.queue) : 0;
@@ -312,7 +314,16 @@ export default function GuidedSession() {
 				{step && movement ? (
 					<View className="rounded-2xl border border-border bg-surface p-4 gap-3">
 						<View className="flex-row items-center gap-3">
-							<MovementThumbnail movement={movement} />
+							<Pressable
+								onPress={() => setShowFrames((v) => !v)}
+								disabled={movement.image_paths.length === 0}
+								accessibilityRole="button"
+								accessibilityLabel={
+									showFrames ? "Masquer le mouvement" : "Voir le mouvement"
+								}
+							>
+								<MovementThumbnail movement={movement} />
+							</Pressable>
 							<View className="flex-1">
 								<Text className="text-xl font-bold">{movement.name}</Text>
 								<Text className="text-sm text-muted">
@@ -329,6 +340,8 @@ export default function GuidedSession() {
 								</Text>
 							</View>
 						</View>
+
+						{showFrames && <MovementFrames movement={movement} />}
 
 						{canSwap && (
 							<View className="gap-2">
@@ -369,7 +382,9 @@ export default function GuidedSession() {
 
 						{target?.reason === "calibration" ? (
 							<Text className="text-sm text-muted">
-								Pas d’historique : commence léger et trouve ta charge.
+								{unit === "s"
+									? "Pas d’historique : tiens le temps qui te va, la prochaine fois l’app partira de là."
+									: "Pas d’historique : commence léger et trouve ta charge."}
 							</Text>
 						) : (
 							targetLabel(target, unit) && (
