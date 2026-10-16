@@ -67,6 +67,8 @@ export type ExercisePayload = {
 		reps: number;
 		kind: StepKind;
 		side: "left" | "right" | null;
+		/** Timed set: the seconds, with reps 0 */
+		duration_seconds: number | null;
 		completed_at: string;
 		target_weight: number | null;
 		target_rep_min: number | null;
@@ -290,7 +292,9 @@ export function exercisesToSend(
 				const set = draft.sets[step.key];
 				return {
 					weight: set.weight,
-					reps: set.reps,
+					// A timed set keeps its seconds in the draft's reps field
+					reps: step.measure === "duration" ? 0 : set.reps,
+					duration_seconds: step.measure === "duration" ? set.reps : null,
 					kind: step.kind,
 					side: step.side,
 					completed_at: set.completedAt,

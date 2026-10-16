@@ -22,7 +22,7 @@ import {
 	useMovement,
 	useUpdateMovement,
 } from "@/lib/queries/movements";
-import type { LoadType } from "@/lib/queries/types";
+import type { LoadType, MovementMeasure } from "@/lib/queries/types";
 import { useThemeColors } from "@/lib/theme";
 import { cn } from "@/lib/utils";
 
@@ -32,8 +32,14 @@ const LOAD_TYPES: { value: LoadType; label: string }[] = [
 	{ value: "assisted", label: "Assisté" },
 ];
 
+const MEASURES: { value: MovementMeasure; label: string }[] = [
+	{ value: "reps", label: "Répétitions" },
+	{ value: "duration", label: "Durée (secondes)" },
+];
+
 type FormState = {
 	name: string;
+	measure: MovementMeasure;
 	notes: string;
 	loadType: LoadType;
 	increment: string;
@@ -61,6 +67,7 @@ export default function MovementDetail() {
 
 	const [formState, setFormState] = useState<FormState>({
 		name: "",
+		measure: "reps",
 		notes: "",
 		loadType: "external",
 		increment: "",
@@ -73,6 +80,7 @@ export default function MovementDetail() {
 		setFilledFrom(movement);
 		setFormState({
 			name: movement.name,
+			measure: movement.measure,
 			notes: movement.notes ?? "",
 			loadType: movement.load_type,
 			increment: movement.increment_kg?.toString() ?? "",
@@ -99,6 +107,7 @@ export default function MovementDetail() {
 			name: formState.name.trim(),
 			notes: formState.notes.trim() || null,
 			load_type: formState.loadType,
+			measure: formState.measure,
 			increment_kg: increment,
 			unilateral: formState.unilateral,
 		};
@@ -213,6 +222,55 @@ export default function MovementDetail() {
 						placeholder="Développé incliné, barre"
 						editable={!isReadOnly}
 					/>
+				</View>
+
+				<View className="mb-4">
+					<Text className="text-sm font-medium mb-2">Se mesure en</Text>
+					<View className="flex-row flex-wrap gap-2">
+						{MEASURES.map((option) => (
+							<Pressable
+								key={option.value}
+								disabled={isReadOnly}
+								onPress={() => {
+									const change = () =>
+										setFormState((prev) => ({ ...prev, measure: option.value }));
+									// Logged sets keep the unit they were logged in
+									if (
+										movement &&
+										movement.measure !== option.value &&
+										formState.measure === movement.measure
+									) {
+										Alert.alert(
+											"Changer la mesure ?",
+											"Les séances déjà notées gardent leurs valeurs : les objectifs repartiront d’une calibration.",
+											[
+												{ text: "Annuler", style: "cancel" },
+												{ text: "Changer", onPress: change },
+											],
+										);
+										return;
+									}
+									change();
+								}}
+								className={cn(
+									"px-3 py-2 rounded-lg border",
+									formState.measure === option.value
+										? "bg-foreground border-foreground"
+										: "border-border bg-default/30",
+								)}
+							>
+								<Text
+									className={
+										formState.measure === option.value
+											? "text-background font-medium"
+											: "text-foreground"
+									}
+								>
+									{option.label}
+								</Text>
+							</Pressable>
+						))}
+					</View>
 				</View>
 
 				<View className="mb-4">

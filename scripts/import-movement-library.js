@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 // Imports the shared movement library (movements with owner_id null) from free-exercise-db
 // (https://github.com/yuhonas/free-exercise-db, Unlicense), pinned to one commit.
-// Stretching and cardio entries are skipped: the app logs loaded sets. Names stay in English;
-// the source id is kept as library_key.
+// Stretching and cardio entries are skipped: the app logs loaded sets. Names come from the source
+// (English) unless scripts/movement-library-overrides.json gives a French one, merged field by field
+// (name, aliases, measure…); a translated movement keeps its English name as an alias. The source id is
+// kept as library_key, and instructions and category are copied.
 //
 // Images are copied to the public `movement-images` Storage bucket (`<source id>/0.jpg`…) instead of
 // hot-linking GitHub, which is not an image CDN and could move. image_paths holds the object paths.
@@ -41,19 +43,64 @@ function parseArgs(argv) {
   return args;
 }
 
-// A source exercise → a library movement row
+// Hand-written fixes (French names, aliases, timed movements), keyed by source id
+const OVERRIDES = require("./movement-library-overrides.json");
+const OVERRIDE_FIELDS = new Set(["name", "aliases", "measure", "instructions", "equipment", "load_type"]);
+
+// A source exercise → a library movement row, with its override merged field by field
 function toMovement(exercise) {
-  return {
+  const sourceName = exercise.name.trim();
+  const movement = {
     library_key: exercise.id,
     owner_id: null,
-    name: exercise.name.trim(),
+    name: sourceName,
     equipment: exercise.equipment ?? null,
     // Body-only movements are logged as bodyweight, plus any added load
     load_type: exercise.equipment === "body only" ? "bodyweight_plus" : "external",
+    measure: "reps",
     primary_muscles: exercise.primaryMuscles ?? [],
     secondary_muscles: exercise.secondaryMuscles ?? [],
+    instructions: (exercise.instructions ?? []).map((step) => step.trim()).filter(Boolean),
+    category: exercise.category ?? null,
+    aliases: [],
     image_paths: exercise.images ?? [],
   };
+  const override = OVERRIDES[exercise.id];
+  if (!override) return movement;
+  for (const [field, value] of Object.entries(override)) {
+    if (!OVERRIDE_FIELDS.has(field)) throw new Error(`Override ${exercise.id}: unknown field ${field}`);
+    const clean = typeof value === "string" ? value.trim() : Array.isArray(value) ? value.map((v) => v.trim()) : value;
+    // Empty values never erase the source
+    if (clean === null || clean === "" || (Array.isArray(clean) && clean.length === 0)) continue;
+    if (field === "measure" && !["reps", "duration"].includes(clean)) {
+      throw new Error(`Override ${exercise.id}: measure must be reps or duration`);
+    }
+    movement[field] = clean;
+  }
+  // A new equipment changes how the load is counted, unless the override says it
+  if (override.equipment && !override.load_type) {
+    movement.load_type = movement.equipment === "body only" ? "bodyweight_plus" : "external";
+  }
+  // A translated movement stays findable by its source name
+  if (movement.name.toLowerCase() !== sourceName.toLowerCase()) {
+    movement.aliases = [sourceName, ...movement.aliases];
+  }
+  // One alias per spelling, whatever the case, and never the name itself
+  const seen = new Set([movement.name.toLowerCase()]);
+  movement.aliases = movement.aliases.filter((alias) => {
+    const key = alias.toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+  return movement;
+}
+
+// Overrides must point at kept source exercises: a typo would silently do nothing
+function checkOverrides(exercises) {
+  const kept = new Set(exercises.filter((e) => !SKIPPED_CATEGORIES.has(e.category)).map((e) => e.id));
+  const unknown = Object.keys(OVERRIDES).filter((id) => !id.startsWith("_") && !kept.has(id));
+  if (unknown.length > 0) throw new Error(`Overrides for unknown or skipped exercises: ${unknown.join(", ")}`);
 }
 
 async function fetchOk(url) {
@@ -109,6 +156,7 @@ async function main() {
   const supabase = createClient(url, key, { auth: { persistSession: false } });
 
   const exercises = await (await fetchOk(`${SOURCE_BASE}/dist/exercises.json`)).json();
+  checkOverrides(exercises);
   const movements = exercises.filter((e) => !SKIPPED_CATEGORIES.has(e.category)).map(toMovement);
   const existing = await existingLibrary(supabase);
   const needImages = movements.filter(

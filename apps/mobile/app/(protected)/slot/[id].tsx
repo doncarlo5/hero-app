@@ -351,6 +351,8 @@ export default function SlotSettings() {
 	}
 
 	const rule = PROGRESSION_RULES.find((r) => r.value === form.progressionRule);
+	// A timed movement's range is in seconds
+	const isTimed = slot.movement.measure === "duration";
 	const finisher = FINISHERS.find((f) => f.value === form.finisherKind);
 	const switchMovement =
 		(movementsQuery.data ?? []).find((m) => m.id === form.finisherMovementId) ??
@@ -396,7 +398,9 @@ export default function SlotSettings() {
 								</View>
 								<View className="flex-row items-center gap-2">
 									<View className="flex-1">
-										<Text className="text-xs text-muted mb-1">Reps min</Text>
+										<Text className="text-xs text-muted mb-1">
+											{isTimed ? "Sec min" : "Reps min"}
+										</Text>
 										<Input
 											variant="secondary"
 											value={set.repMin}
@@ -406,7 +410,9 @@ export default function SlotSettings() {
 										/>
 									</View>
 									<View className="flex-1">
-										<Text className="text-xs text-muted mb-1">Reps max</Text>
+										<Text className="text-xs text-muted mb-1">
+											{isTimed ? "Sec max" : "Reps max"}
+										</Text>
 										<Input
 											variant="secondary"
 											value={set.repMax}

@@ -12,6 +12,10 @@ _Avoid_: exercise type, exercice
 A shared, read-only movement every user can pick, imported from a public domain source (free-exercise-db). A movement the user creates is a custom movement. UI: "Bibliothèque" / "Mes exercices".
 _Avoid_: default exercise, preset
 
+**Measure**:
+Whether a movement's sets count repetitions or seconds (a plank, a hang). For a timed movement, the rep range of its sets is a range of seconds.
+_Avoid_: exercise type, tracking type
+
 **Load type**:
 How a movement's load is counted: an external load, body weight plus an added load (weighted pull-ups, dips), or body weight minus an assistance.
 _Avoid_: lest (for the added load itself, say "added load")
