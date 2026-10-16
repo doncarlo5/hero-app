@@ -43,6 +43,24 @@ export function useMovementHistory(movementId: string | null) {
 	});
 }
 
+// Movement of the most recent logged exercise (default of the stats screen)
+export function useLastLoggedMovementId() {
+	return useQuery({
+		queryKey: [...queryKeys.exercises, "last-movement"],
+		queryFn: async (): Promise<string | null> => {
+			const row: { movement_id: string } | null = unwrapMaybe(
+				await supabase
+					.from("logged_exercises")
+					.select("movement_id")
+					.order("created_at", { ascending: false })
+					.limit(1)
+					.maybeSingle(),
+			);
+			return row?.movement_id ?? null;
+		},
+	});
+}
+
 // Last performance on a movement: the base of the next targets
 export function useLastPerformance(movementId: string | null) {
 	return useQuery({
