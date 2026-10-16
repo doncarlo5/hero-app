@@ -45,6 +45,11 @@ export function equipmentLabel(equipment: string) {
 	return EQUIPMENT_LABELS[equipment] ?? equipment;
 }
 
+/** Path of the small list thumbnail of a library image (scripts/import-movement-library.js makes it) */
+export function thumbnailPath(imagePath: string) {
+	return `thumbs/${imagePath.replace(/\.[a-z]+$/i, "")}.webp`;
+}
+
 // Library movements are shared (no owner) and read-only
 export function isLibraryMovement(movement: Movement) {
 	return movement.owner_id === null;

@@ -15,26 +15,35 @@
 //
 // Usage (local):
 //   SUPABASE_SERVICE_ROLE_KEY=$(supabase status -o json | jq -r .SERVICE_ROLE_KEY) \
-//     node scripts/import-movement-library.js [--dry-run] [--refresh-images]
+//     node scripts/import-movement-library.js [--dry-run] [--refresh-images] [--thumbnails]
+// Each movement's first image also gets a 160 px WebP thumbnail at thumbs/<id>/0.webp;
+// --thumbnails rebuilds them from the bucket without touching the rows: run it once on a target
+// imported before thumbnails existed (the app falls back to the full image meanwhile).
 // The target defaults to the local stack; another one is named with --url=https://… and needs --yes.
 // Neither the root .env nor SUPABASE_URL is read, so the import never targets prod by accident.
 
 const { createClient } = require("@supabase/supabase-js");
+const sharp = require("sharp");
 
 const SOURCE_COMMIT = "f00c92c7dcf1216a928a52c3706c7ce8e2f71ed5";
 const SOURCE_BASE = `https://raw.githubusercontent.com/yuhonas/free-exercise-db/${SOURCE_COMMIT}`;
 const BUCKET = "movement-images";
 const SKIPPED_CATEGORIES = new Set(["stretching", "cardio"]);
 const UPLOAD_CONCURRENCY = 8;
+// Thumbnail of the first image, for lists: square, WebP, a few KB instead of ~45 KB (apps/mobile
+// derives its path the same way, see thumbnailPath in lib/movement-library.ts)
+const THUMB_SIZE = 160;
+const thumbnailPath = (imagePath) => `thumbs/${imagePath.replace(/\.[a-z]+$/i, "")}.webp`;
 const BATCH_SIZE = 200;
 
 const isLocalHost = (url) => ["localhost", "127.0.0.1", "[::1]"].includes(new URL(url).hostname);
 const sameArray = (a, b) => a.length === b.length && a.every((v, i) => v === b[i]);
 
 function parseArgs(argv) {
-  const args = { dryRun: false, yes: false, refreshImages: false, url: "http://127.0.0.1:54321" };
+  const args = { dryRun: false, yes: false, refreshImages: false, thumbnails: false, url: "http://127.0.0.1:54321" };
   for (const a of argv) {
     if (a === "--dry-run") args.dryRun = true;
+    else if (a === "--thumbnails") args.thumbnails = true;
     else if (a === "--yes") args.yes = true;
     else if (a === "--refresh-images") args.refreshImages = true;
     else if (a.startsWith("--url=")) args.url = a.slice("--url=".length);
@@ -124,17 +133,50 @@ async function existingLibrary(supabase) {
   return new Map(rows.map((r) => [r.library_key, r.image_paths]));
 }
 
+async function upload(supabase, path, body, contentType) {
+  const { error } = await supabase.storage.from(BUCKET).upload(path, body, {
+    contentType,
+    // Paths are tied to the pinned source commit: the files never change
+    cacheControl: "31536000",
+    upsert: true,
+  });
+  if (error) throw new Error(`Upload ${path}: ${error.message}`);
+}
+
+async function uploadThumbnail(supabase, imagePath, image) {
+  const thumb = await sharp(image)
+    .resize(THUMB_SIZE, THUMB_SIZE, { fit: "cover", position: "attention" })
+    .webp({ quality: 70 })
+    .toBuffer();
+  await upload(supabase, thumbnailPath(imagePath), thumb, "image/webp");
+}
+
 async function uploadImages(supabase, movement) {
-  for (const path of movement.image_paths) {
+  for (const [i, path] of movement.image_paths.entries()) {
     const res = await fetchOk(`${SOURCE_BASE}/exercises/${path}`);
     const body = Buffer.from(await res.arrayBuffer());
-    const { error } = await supabase.storage.from(BUCKET).upload(path, body, {
-      contentType: res.headers.get("content-type") ?? "image/jpeg",
-      cacheControl: "31536000",
-      upsert: true,
-    });
-    if (error) throw new Error(`Upload ${path}: ${error.message}`);
+    await upload(supabase, path, body, res.headers.get("content-type") ?? "image/jpeg");
+    if (i === 0) await uploadThumbnail(supabase, path, body);
   }
+}
+
+// --thumbnails: (re)builds the thumbnails of the movements already imported, from their images in the
+// bucket. Run it once on a target imported before thumbnails existed. A missing image is reported, not fatal.
+async function rebuildThumbnails(supabase, existing) {
+  let done = 0;
+  const missing = [];
+  const firstImages = [...existing.values()].map((paths) => paths[0]).filter(Boolean);
+  await eachLimit(firstImages, UPLOAD_CONCURRENCY, async (path) => {
+    const { data, error } = await supabase.storage.from(BUCKET).download(path);
+    if (error) {
+      missing.push(path);
+      return;
+    }
+    await uploadThumbnail(supabase, path, Buffer.from(await data.arrayBuffer()));
+    if (++done % 100 === 0) console.log(`  thumbnails: ${done}`);
+  });
+  if (missing.length > 0) console.warn(`  ${missing.length} images missing: ${missing.slice(0, 5).join(", ")}…`);
+  return done;
 }
 
 // Runs fn over items, `limit` at a time
@@ -169,6 +211,12 @@ async function main() {
       `${movements.length - created} to update, ${needImages.length} needing images`,
   );
   if (args.dryRun) return;
+
+  // Thumbnails only: the rows are not touched
+  if (args.thumbnails) {
+    console.log(`Done: ${await rebuildThumbnails(supabase, existing)} thumbnails rebuilt`);
+    return;
+  }
 
   // Images first: a row only records image paths once they are uploaded
   let uploaded = 0;
