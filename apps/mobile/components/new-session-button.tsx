@@ -10,7 +10,7 @@ import { ActivityIndicator, Alert, Pressable, Text, View } from "react-native";
 import { useAuth } from "@/context/supabase-provider";
 import { useActiveProgram } from "@/lib/queries/programs";
 import { useCreateSession, useLastSession } from "@/lib/queries/sessions";
-import { useThemeColors } from "@/lib/theme";
+import { sheetBackgroundStyle, useThemeColors } from "@/lib/theme";
 import { useColorScheme } from "@/lib/useColorScheme";
 
 export default function NewSessionButton() {
@@ -102,9 +102,7 @@ export default function NewSessionButton() {
 				enableDynamicSizing={true}
 				enablePanDownToClose={true}
 				onClose={() => setOpen(false)}
-				backgroundStyle={{
-					backgroundColor: themeColors.popover,
-				}}
+				backgroundStyle={sheetBackgroundStyle(themeColors)}
 				handleIndicatorStyle={{
 					backgroundColor: themeColors.mutedForeground,
 				}}
@@ -112,11 +110,10 @@ export default function NewSessionButton() {
 				<BottomSheetScrollView
 					contentContainerStyle={{
 						padding: 16,
-						backgroundColor: themeColors.popover,
 						flexGrow: 1,
 					}}
 				>
-					<View className="bg-overlay">
+					<View>
 						{isLoading ? (
 							<View className="pt-14 items-center justify-center">
 								<ActivityIndicator size="large" />

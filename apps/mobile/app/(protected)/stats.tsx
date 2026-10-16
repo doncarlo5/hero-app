@@ -32,7 +32,7 @@ import {
 import { isLibraryMovement } from "@/lib/movement-library";
 import { useMovements } from "@/lib/queries/movements";
 import { setsToArrays, type Movement } from "@/lib/queries/types";
-import { useThemeColors } from "@/lib/theme";
+import { sheetBackgroundStyle, useThemeColors } from "@/lib/theme";
 
 const { width } = Dimensions.get("window");
 
@@ -323,7 +323,7 @@ export default function Stats() {
 				enableDynamicSizing={false}
 				enablePanDownToClose
 				enableOverDrag={true}
-				backgroundStyle={{ backgroundColor: themeColors.popover }}
+				backgroundStyle={sheetBackgroundStyle(themeColors)}
 				handleIndicatorStyle={{ backgroundColor: themeColors.mutedForeground }}
 			>
 				{/* Scrollable list as a sibling, no flex:1 */}

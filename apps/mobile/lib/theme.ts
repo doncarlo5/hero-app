@@ -1,3 +1,4 @@
+import { Platform } from "react-native";
 import { DarkTheme, DefaultTheme, type Theme } from "expo-router";
 import { useCSSVariable } from "uniwind";
 
@@ -49,4 +50,12 @@ export function useNavigationTheme(): Theme {
 			notification: palette.destructive,
 		},
 	};
+}
+
+/**
+ * Background for an @expo/ui BottomSheet. iOS draws its own sheet material (glass), so the content
+ * stays transparent on top of it; Android's sheet takes the overlay color.
+ */
+export function sheetBackgroundStyle(colors: ThemeColors) {
+	return Platform.OS === "ios" ? undefined : { backgroundColor: colors.popover };
 }

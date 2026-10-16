@@ -10,7 +10,7 @@ import TrophyIcon from "@/components/trophy-icon";
 import { Text } from "@/components/ui/text";
 import { useTrophies } from "@/lib/queries/trophies";
 import type { Trophy } from "@/lib/queries/types";
-import { useThemeColors } from "@/lib/theme";
+import { sheetBackgroundStyle, useThemeColors } from "@/lib/theme";
 import { useColorScheme } from "@/lib/useColorScheme";
 
 export default function TrophyScreen() {
@@ -136,9 +136,7 @@ export default function TrophyScreen() {
 				enableDynamicSizing={true}
 				enablePanDownToClose={true}
 				onClose={() => setSelected(null)}
-				backgroundStyle={{
-					backgroundColor: themeColors.popover,
-				}}
+				backgroundStyle={sheetBackgroundStyle(themeColors)}
 				handleIndicatorStyle={{
 					backgroundColor: themeColors.mutedForeground,
 				}}
@@ -147,7 +145,6 @@ export default function TrophyScreen() {
 					contentContainerStyle={{
 						padding: 24,
 						paddingBottom: 24,
-						backgroundColor: themeColors.popover,
 						flexGrow: 1,
 					}}
 				>

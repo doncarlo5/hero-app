@@ -43,7 +43,7 @@ import {
 	type Slot,
 } from "@/lib/queries/types";
 import { targetsFor } from "@/lib/progression/slot-targets";
-import { useThemeColors } from "@/lib/theme";
+import { sheetBackgroundStyle, useThemeColors } from "@/lib/theme";
 import { useColorScheme } from "@/lib/useColorScheme";
 
 // Fixed height: the picker can list more movements than fit on screen
@@ -498,9 +498,7 @@ export default function DoExercise() {
 				snapPoints={PICKER_SNAP_POINTS}
 				enableDynamicSizing={false}
 				enablePanDownToClose={true}
-				backgroundStyle={{
-					backgroundColor: themeColors.popover,
-				}}
+				backgroundStyle={sheetBackgroundStyle(themeColors)}
 				handleIndicatorStyle={{
 					backgroundColor: themeColors.mutedForeground,
 				}}
@@ -510,7 +508,6 @@ export default function DoExercise() {
 					contentContainerStyle={{
 						padding: 24,
 						paddingBottom: 24,
-						backgroundColor: themeColors.popover,
 						flexGrow: 1,
 					}}
 				>
