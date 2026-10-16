@@ -1,6 +1,15 @@
 import { ConfigContext, ExpoConfig } from "expo/config";
+import { ConfigPlugin, withEntitlementsPlist } from "expo/config-plugins";
 
-export default ({ config }: ConfigContext): ExpoConfig => ({
+// expo-notifications declares the push entitlement; the app only schedules local notifications (end of
+// rest), which need none. Without it, a free Apple development profile can sign the app.
+const withoutPushEntitlement: ConfigPlugin = (config) =>
+	withEntitlementsPlist(config, (mod) => {
+		delete mod.modResults["aps-environment"];
+		return mod;
+	});
+
+const appConfig = ({ config }: ConfigContext): ExpoConfig => ({
 	...config,
 	name: "Hero App",
 	slug: "hero-app",
@@ -59,3 +68,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
 		],
 	],
 });
+
+export default (context: ConfigContext): ExpoConfig =>
+	withoutPushEntitlement(appConfig(context));
