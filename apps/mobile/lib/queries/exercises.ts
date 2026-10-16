@@ -1,4 +1,9 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+	useMutation,
+	useQueries,
+	useQuery,
+	useQueryClient,
+} from "@tanstack/react-query";
 
 import { supabase } from "@/config/supabase";
 
@@ -6,7 +11,7 @@ import { queryKeys, unwrap, unwrapMaybe } from "./client";
 import type { LoggedExerciseWithSession, SetKind, Trophy } from "./types";
 
 const EXERCISE_SELECT =
-	"*, logged_sets(set_order, weight, reps, kind), movement:movements(*), sessions(id, date_session)";
+	"*, logged_sets(set_order, weight, reps, kind, side), movement:movements(*), sessions(id, date_session)";
 
 export function useLoggedExercise(id: string) {
 	return useQuery({
@@ -56,13 +61,45 @@ export function useLastPerformance(movementId: string | null) {
 	});
 }
 
+// Last performance of several movements at once (guided session), sharing the cache of
+// useLastPerformance
+export function useLastPerformances(movementIds: string[]) {
+	return useQueries({
+		queries: movementIds.map((movementId) => ({
+			queryKey: [...queryKeys.exercises, "last", movementId],
+			queryFn: async (): Promise<LoggedExerciseWithSession | null> =>
+				unwrapMaybe(
+					await supabase
+						.from("logged_exercises")
+						.select(EXERCISE_SELECT)
+						.eq("movement_id", movementId)
+						.order("created_at", { ascending: false })
+						.limit(1)
+						.maybeSingle(),
+				),
+		})),
+		combine: (results) => ({
+			byMovement: new Map(
+				movementIds.map((id, i) => [id, results[i]?.data ?? null]),
+			),
+			isLoading: results.some((result) => result.isLoading),
+		}),
+	});
+}
+
 export type SaveExerciseInput = {
 	id?: string;
 	movementId: string;
 	slotId?: string | null;
 	sessionId?: string;
 	comment: string;
-	sets: { weight: number; reps: number; kind?: SetKind }[];
+	sets: {
+		weight: number;
+		reps: number;
+		kind?: SetKind;
+		side?: "left" | "right" | null;
+		completed_at?: string;
+	}[];
 };
 
 // save_exercise writes the logged exercise and its sets in one transaction; trophies are

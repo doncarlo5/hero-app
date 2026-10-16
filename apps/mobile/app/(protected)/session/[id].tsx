@@ -36,6 +36,7 @@ import {
 	ChevronRightIcon,
 	ChevronsRight,
 	Gauge,
+	PlayIcon,
 	PlusIcon,
 	SaveIcon,
 	TrashIcon,
@@ -485,13 +486,38 @@ export default function SessionDetail() {
 							</View>
 						</View>
 
+						{session.program_day_id && !session.is_done && (
+							<Button
+								onPress={() =>
+									router.push(
+										`/(protected)/guided-session?sessionId=${session.id}`,
+									)
+								}
+								className="mt-4"
+							>
+								<PlayIcon size={16} color={themeColors.accentForeground} />
+								<Button.Label>Séance guidée</Button.Label>
+							</Button>
+						)}
 						<Button
+							variant={
+								session.program_day_id && !session.is_done
+									? "secondary"
+									: "primary"
+							}
 							onPress={() =>
 								router.push(`/(protected)/do-exercise?sessionId=${session.id}`)
 							}
 							className="my-4"
 						>
-							<PlusIcon size={16} color={themeColors.accentForeground} />
+							<PlusIcon
+								size={16}
+								color={
+									session.program_day_id && !session.is_done
+										? themeColors.foreground
+										: themeColors.accentForeground
+								}
+							/>
 							<Button.Label>Add an exercise</Button.Label>
 						</Button>
 

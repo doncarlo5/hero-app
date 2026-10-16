@@ -11,7 +11,7 @@ export type SetPrescriptionRow = Tables<"set_prescriptions">;
 
 export type LoggedSet = Pick<
 	Tables<"logged_sets">,
-	"set_order" | "weight" | "reps" | "kind"
+	"set_order" | "weight" | "reps" | "kind" | "side"
 >;
 
 export type SlotAlternative = {
@@ -55,10 +55,11 @@ export type SessionListItem = Pick<
 	logged_exercises: { count: number }[];
 };
 
-// Working sets as parallel arrays, ordered by set_order (shape the screens and charts use)
+// Working sets as parallel arrays, ordered by set_order (shape the screens and charts use). A
+// unilateral set is logged once per side: the left side stands for the set.
 export function setsToArrays(sets: LoggedSet[]) {
 	const ordered = sets
-		.filter((set) => set.kind === "working")
+		.filter((set) => set.kind === "working" && set.side !== "right")
 		.sort((a, b) => a.set_order - b.set_order);
 	return {
 		reps: ordered.map((set) => set.reps),

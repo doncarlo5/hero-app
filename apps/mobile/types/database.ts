@@ -135,6 +135,7 @@ export type Database = {
 			};
 			logged_sets: {
 				Row: {
+					completed_at: string | null;
 					created_at: string;
 					id: string;
 					kind: Database["public"]["Enums"]["set_kind"];
@@ -147,6 +148,7 @@ export type Database = {
 				};
 				ComputedFields: never;
 				Insert: {
+					completed_at?: string | null;
 					created_at?: string;
 					id?: string;
 					kind?: Database["public"]["Enums"]["set_kind"];
@@ -158,6 +160,7 @@ export type Database = {
 					weight: number;
 				};
 				Update: {
+					completed_at?: string | null;
 					created_at?: string;
 					id?: string;
 					kind?: Database["public"]["Enums"]["set_kind"];
@@ -377,11 +380,13 @@ export type Database = {
 					comment: string | null;
 					created_at: string;
 					date_session: string;
+					ended_at: string | null;
 					id: string;
 					is_done: boolean;
 					label: string | null;
 					owner_id: string;
 					program_day_id: string | null;
+					started_at: string | null;
 					updated_at: string;
 				};
 				ComputedFields: never;
@@ -390,11 +395,13 @@ export type Database = {
 					comment?: string | null;
 					created_at?: string;
 					date_session: string;
+					ended_at?: string | null;
 					id?: string;
 					is_done?: boolean;
 					label?: string | null;
 					owner_id: string;
 					program_day_id?: string | null;
+					started_at?: string | null;
 					updated_at?: string;
 				};
 				Update: {
@@ -402,11 +409,13 @@ export type Database = {
 					comment?: string | null;
 					created_at?: string;
 					date_session?: string;
+					ended_at?: string | null;
 					id?: string;
 					is_done?: boolean;
 					label?: string | null;
 					owner_id?: string;
 					program_day_id?: string | null;
+					started_at?: string | null;
 					updated_at?: string;
 				};
 				Relationships: [
