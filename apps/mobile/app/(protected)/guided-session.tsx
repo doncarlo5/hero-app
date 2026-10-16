@@ -47,6 +47,24 @@ function targetLabel(target: SetTarget | null) {
 	return reps ? `${target.weight} kg × ${reps}` : `${target.weight} kg`;
 }
 
+// Why this target: the rule behind it, in a sentence
+function reasonLabel(step: QueueStep, target: SetTarget | null) {
+	if (!target) return null;
+	if (step.kind === "warmup")
+		return "Échauffement : monte progressivement vers ta première série.";
+	if (step.kind === "drop") return "Charge réduite, enchaîne sans repos.";
+	switch (target.reason) {
+		case "increase":
+			return "Tu as atteint le haut de la fourchette la dernière fois : la charge monte.";
+		case "repeat":
+			return "Même charge que la dernière fois : vise plus de reps.";
+		case "derived":
+			return "Calculée à partir de la série précédente.";
+		default:
+			return null;
+	}
+}
+
 function sideLabel(side: QueueStep["side"]) {
 	if (side === "left") return "côté gauche";
 	if (side === "right") return "côté droit";
@@ -310,12 +328,19 @@ export default function GuidedSession() {
 							</Text>
 						) : (
 							targetLabel(target) && (
-								<View className="flex-row items-center gap-1">
-									<Text className="text-base">
-										Objectif : {targetLabel(target)}
-									</Text>
-									{target?.reason === "increase" && (
-										<ArrowUpIcon size={16} color={themeColors.brand} />
+								<View className="gap-0.5">
+									<View className="flex-row items-center gap-1">
+										<Text className="text-base">
+											Objectif : {targetLabel(target)}
+										</Text>
+										{target?.reason === "increase" && (
+											<ArrowUpIcon size={16} color={themeColors.brand} />
+										)}
+									</View>
+									{reasonLabel(step, target) && (
+										<Text className="text-sm text-muted">
+											{reasonLabel(step, target)}
+										</Text>
 									)}
 								</View>
 							)

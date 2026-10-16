@@ -383,6 +383,44 @@ describe("session draft", () => {
 		);
 	});
 
+	test("each set is sent with the target the app proposed", () => {
+		const one = buildSetQueue([slot("A", 1, 1)]);
+		const draft = completeStep(
+			createDraft("s1", at(0)),
+			one,
+			0,
+			{
+				weight: 52.5,
+				reps: 8,
+				target: { weight: 52.5, repMin: 6, repMax: 8, reason: "increase" },
+			},
+			at(1),
+			newId,
+		);
+		const [set] = exercisesToSend(draft, one)[0].sets;
+		assert.deepEqual(
+			[
+				set.target_weight,
+				set.target_rep_min,
+				set.target_rep_max,
+				set.target_reason,
+			],
+			[52.5, 6, 8, "increase"],
+		);
+		const untargeted = completeStep(
+			createDraft("s1", at(0)),
+			one,
+			0,
+			{ weight: 50, reps: 8 },
+			at(1),
+			newId,
+		);
+		assert.equal(
+			exercisesToSend(untargeted, one)[0].sets[0].target_reason,
+			null,
+		);
+	});
+
 	test("finishing early sends unfinished slots too", () => {
 		let draft = createDraft("s1", at(0));
 		draft = completeStep(

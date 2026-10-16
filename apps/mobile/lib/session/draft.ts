@@ -10,7 +10,20 @@ export const DRAFT_VERSION = 1;
 /** A draft untouched for this long is offered to be finished or discarded rather than resumed */
 export const STALE_AFTER_MS = 4 * 60 * 60 * 1000;
 
-export type DraftSet = { weight: number; reps: number; completedAt: string };
+/** What the app proposed for a set when it was done (progression engine), kept with the set */
+export type DraftTarget = {
+	weight: number | null;
+	repMin: number | null;
+	repMax: number | null;
+	reason: "increase" | "repeat" | "derived" | "calibration";
+};
+
+export type DraftSet = {
+	weight: number;
+	reps: number;
+	completedAt: string;
+	target?: DraftTarget | null;
+};
 
 export type DraftExercise = {
 	/** Logged exercise id, chosen by the app */
@@ -50,6 +63,10 @@ export type ExercisePayload = {
 		kind: StepKind;
 		side: "left" | "right" | null;
 		completed_at: string;
+		target_weight: number | null;
+		target_rep_min: number | null;
+		target_rep_max: number | null;
+		target_reason: DraftTarget["reason"] | null;
 	}[];
 };
 
@@ -92,7 +109,7 @@ export function completeStep(
 	draft: SessionDraft,
 	queue: QueueStep[],
 	index: number,
-	values: { weight: number; reps: number },
+	values: { weight: number; reps: number; target?: DraftTarget | null },
 	now: Date,
 	newId: () => string,
 ): SessionDraft {
@@ -224,6 +241,10 @@ export function exercisesToSend(
 					kind: step.kind,
 					side: step.side,
 					completed_at: set.completedAt,
+					target_weight: set.target?.weight ?? null,
+					target_rep_min: set.target?.repMin ?? null,
+					target_rep_max: set.target?.repMax ?? null,
+					target_reason: set.target?.reason ?? null,
 				};
 			}),
 		});

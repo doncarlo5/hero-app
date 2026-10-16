@@ -143,6 +143,10 @@ export type Database = {
 					reps: number;
 					set_order: number;
 					side: Database["public"]["Enums"]["body_side"] | null;
+					target_reason: string | null;
+					target_rep_max: number | null;
+					target_rep_min: number | null;
+					target_weight: number | null;
 					updated_at: string;
 					weight: number;
 				};
@@ -156,6 +160,10 @@ export type Database = {
 					reps: number;
 					set_order: number;
 					side?: Database["public"]["Enums"]["body_side"] | null;
+					target_reason?: string | null;
+					target_rep_max?: number | null;
+					target_rep_min?: number | null;
+					target_weight?: number | null;
 					updated_at?: string;
 					weight: number;
 				};
@@ -168,6 +176,10 @@ export type Database = {
 					reps?: number;
 					set_order?: number;
 					side?: Database["public"]["Enums"]["body_side"] | null;
+					target_reason?: string | null;
+					target_rep_max?: number | null;
+					target_rep_min?: number | null;
+					target_weight?: number | null;
 					updated_at?: string;
 					weight?: number;
 				};
