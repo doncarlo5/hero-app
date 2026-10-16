@@ -11,6 +11,7 @@ import {
 	View,
 } from "react-native";
 
+import { errorMessage } from "@/lib/errors";
 import { Image } from "@/components/image";
 import { Text } from "@/components/ui/text";
 import { useAuth } from "@/context/supabase-provider";
@@ -118,8 +119,11 @@ export default function MovementDetail() {
 				{ ...changes, owner_id: session.user.id },
 				{
 					onSuccess: () => router.back(),
-					onError: () =>
-						Alert.alert("Erreur", "Impossible de créer l'exercice."),
+					onError: (error) =>
+						Alert.alert(
+							"Erreur",
+							errorMessage(error, "Impossible de créer l’exercice."),
+						),
 				},
 			);
 			return;
@@ -130,8 +134,11 @@ export default function MovementDetail() {
 			{ id: movement.id, changes },
 			{
 				onSuccess: () => router.back(),
-				onError: () =>
-					Alert.alert("Erreur", "Impossible d'enregistrer l'exercice."),
+				onError: (error) =>
+					Alert.alert(
+						"Erreur",
+						errorMessage(error, "Impossible d’enregistrer l’exercice."),
+					),
 			},
 		);
 	};
@@ -149,8 +156,11 @@ export default function MovementDetail() {
 					onPress: () =>
 						deleteMovement.mutate(movement.id, {
 							onSuccess: () => router.back(),
-							onError: () =>
-								Alert.alert("Erreur", "Impossible de supprimer l'exercice."),
+							onError: (error) =>
+								Alert.alert(
+									"Erreur",
+									errorMessage(error, "Impossible de supprimer l’exercice."),
+								),
 						}),
 				},
 			],
@@ -233,7 +243,10 @@ export default function MovementDetail() {
 								disabled={isReadOnly}
 								onPress={() => {
 									const change = () =>
-										setFormState((prev) => ({ ...prev, measure: option.value }));
+										setFormState((prev) => ({
+											...prev,
+											measure: option.value,
+										}));
 									// Logged sets keep the unit they were logged in
 									if (
 										movement &&

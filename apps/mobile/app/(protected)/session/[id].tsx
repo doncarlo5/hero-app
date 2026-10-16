@@ -17,6 +17,7 @@ import {
 } from "react-native";
 
 import { Button } from "heroui-native";
+import { errorMessage } from "@/lib/errors";
 import { Text } from "@/components/ui/text";
 import { useActiveProgram } from "@/lib/queries/programs";
 import { prescriptionLabels } from "@/lib/queries/types";
@@ -206,7 +207,10 @@ export default function SessionDetail() {
 			});
 			return true;
 		} catch (error) {
-			Alert.alert("Error", "Failed to save changes. Please try again.");
+			Alert.alert(
+				"Erreur",
+				errorMessage(error, "Impossible d’enregistrer la séance. Réessaie."),
+			);
 			return false;
 		}
 	};

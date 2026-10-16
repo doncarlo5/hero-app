@@ -10,6 +10,7 @@ import React, { useEffect, useState } from "react";
 import { Alert, Pressable, ScrollView, View } from "react-native";
 
 import { Button, Input, Label } from "heroui-native";
+import { errorMessage } from "@/lib/errors";
 import { Text } from "@/components/ui/text";
 import { useAuth } from "@/context/supabase-provider";
 import { useProfile, useUpdateProfile } from "@/lib/queries/profile";
@@ -82,7 +83,10 @@ export default function Informations() {
 					setNewPassword("");
 				},
 				onError: (error) =>
-					Alert.alert("Erreur", error.message || "Une erreur est survenue!"),
+					Alert.alert(
+						"Erreur",
+						errorMessage(error, "Impossible d’enregistrer tes informations."),
+					),
 			},
 		);
 	};

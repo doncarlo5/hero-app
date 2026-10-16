@@ -28,6 +28,7 @@ import {
 	View,
 } from "react-native";
 
+import { errorMessage } from "@/lib/errors";
 import { CountDownTimer } from "@/components/countdown-timer";
 import { MovementPicker } from "@/components/movement-picker";
 import { SafeAreaView } from "@/components/safe-area-view";
@@ -226,7 +227,10 @@ export default function DoExercise() {
 				},
 				// The form keeps its values so the user can retry
 				onError: (error) =>
-					Alert.alert("Erreur", error.message || "Impossible d'enregistrer."),
+					Alert.alert(
+						"Erreur",
+						errorMessage(error, "Impossible d’enregistrer l’exercice."),
+					),
 			},
 		);
 	};

@@ -22,6 +22,7 @@ import {
 	View,
 } from "react-native";
 
+import { errorMessage } from "@/lib/errors";
 import { MovementPicker } from "@/components/movement-picker";
 import { SafeAreaView } from "@/components/safe-area-view";
 import { Button } from "heroui-native";
@@ -119,7 +120,11 @@ export default function ProgramPage() {
 			{ programId, name: name.trim(), position: days.length + 1 },
 			{
 				onSuccess: (created) => setSelectedDayId(created.id),
-				onError: () => Alert.alert("Erreur", "Impossible d'ajouter le jour."),
+				onError: (error) =>
+					Alert.alert(
+						"Erreur",
+						errorMessage(error, "Impossible d’ajouter le jour."),
+					),
 			},
 		);
 	};
@@ -248,8 +253,11 @@ export default function ProgramPage() {
 			},
 			{
 				onSuccess: () => router.back(),
-				onError: () =>
-					Alert.alert("Erreur", "Impossible d'enregistrer le jour."),
+				onError: (error) =>
+					Alert.alert(
+						"Erreur",
+						errorMessage(error, "Impossible d’enregistrer le jour."),
+					),
 			},
 		);
 	};

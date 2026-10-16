@@ -32,7 +32,7 @@ export default function ExerciseTypes() {
 	].filter((section) => section.data.length > 0);
 
 	const handleExerciseTypePress = (exerciseType: Movement) => {
-		router.push(`/exercise-type/${exerciseType.id}`);
+		router.push(`/movement/${exerciseType.id}`);
 	};
 
 	const handleCreateExercise = () => {
