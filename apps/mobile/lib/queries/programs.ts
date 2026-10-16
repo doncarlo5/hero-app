@@ -52,6 +52,7 @@ export function useActiveProgram() {
 	return {
 		...query,
 		isLoading: profile.isLoading || query.isLoading,
+		isError: profile.isError || query.isError,
 		data: programId ? query.data : null,
 	};
 }

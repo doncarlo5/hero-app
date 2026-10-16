@@ -11,8 +11,9 @@ import {
 
 import { Session } from "@supabase/supabase-js";
 
-import { supabase } from "@/config/supabase";
+import { loadStoredSession, supabase } from "@/config/supabase";
 import { queryClient } from "@/lib/queries/client";
+import { clearPersistedQueries } from "@/lib/queries/persist";
 
 import * as AppleAuthentication from "expo-apple-authentication";
 import { makeRedirectUri } from "expo-auth-session";
@@ -254,9 +255,20 @@ export function AuthProvider({ children }: PropsWithChildren) {
 	};
 
 	useEffect(() => {
+		let reported = false;
+		// Launch on the stored session without waiting for supabase-js: offline, refreshing an expired
+		// token takes up to 30 s of retries. The events below then confirm it or sign out.
+		loadStoredSession().then((stored) => {
+			if (!stored || reported) return;
+			setSession(stored);
+			setAuthenticated(true);
+			setIsLoading(false);
+		});
+
 		const {
 			data: { subscription },
 		} = supabase.auth.onAuthStateChange(async (event, session) => {
+			reported = true;
 			// Handle token refresh failure
 			if (event === ("TOKEN_REFRESH_FAILED" as any)) {
 				setSession(null);
@@ -266,12 +278,22 @@ export function AuthProvider({ children }: PropsWithChildren) {
 				return;
 			}
 
-			if (session) {
-				setSession(session);
+			// Offline launch with an expired token: stay signed in on the stored session (the cached
+			// queries and the guided session draft still work), supabase-js refreshes it later
+			const offlineSession =
+				!session && event === "INITIAL_SESSION"
+					? await loadStoredSession()
+					: null;
+
+			if (session || offlineSession) {
+				setSession(session ?? offlineSession);
 				setAuthenticated(true);
 			} else {
-				// not logged in: drop the previous user's cached data
+				// not logged in: drop the previous user's data, in memory and on the device
 				queryClient.clear();
+				clearPersistedQueries().catch((error) =>
+					console.warn("Query cache:", error),
+				);
 				setSession(null);
 				setAuthenticated(false);
 			}

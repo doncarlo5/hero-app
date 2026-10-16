@@ -79,9 +79,8 @@ export function useLastPerformances(movementIds: string[]) {
 				),
 		})),
 		combine: (results) => ({
-			byMovement: new Map(
-				movementIds.map((id, i) => [id, results[i]?.data ?? null]),
-			),
+			// undefined: not loaded yet (or not cached offline); null: never performed
+			byMovement: new Map(movementIds.map((id, i) => [id, results[i]?.data])),
 			isLoading: results.some((result) => result.isLoading),
 		}),
 	});

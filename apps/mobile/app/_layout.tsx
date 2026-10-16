@@ -1,7 +1,7 @@
 import "react-native-reanimated";
 import "../global.css";
 
-import { QueryClientProvider } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { Stack, ThemeProvider, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { HeroUINativeProvider } from "heroui-native";
@@ -12,6 +12,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { AuthProvider, useAuth } from "@/context/supabase-provider";
 import { useApplyColorSchemePreference } from "@/lib/color-scheme-preference";
 import { queryClient } from "@/lib/queries/client";
+import { persistOptions } from "@/lib/queries/persist";
 import { useNavigationTheme } from "@/lib/theme";
 
 export default function AppLayout() {
@@ -31,7 +32,10 @@ export default function AppLayout() {
 				<HeroUINativeProvider
 					config={{ devInfo: { stylingPrinciples: false } }}
 				>
-					<QueryClientProvider client={queryClient}>
+					<PersistQueryClientProvider
+						client={queryClient}
+						persistOptions={persistOptions}
+					>
 						<AuthProvider>
 							<View className="flex-1 bg-background">
 								<Stack
@@ -64,7 +68,7 @@ export default function AppLayout() {
 								<AuthLoadingOverlay />
 							</View>
 						</AuthProvider>
-					</QueryClientProvider>
+					</PersistQueryClientProvider>
 				</HeroUINativeProvider>
 			</ThemeProvider>
 		</GestureHandlerRootView>

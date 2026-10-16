@@ -73,8 +73,14 @@ export default function GuidedSession() {
 	const target = step ? guided.targetOf(step) : null;
 
 	// Fill the inputs once per step: what was logged, else the target load, else (calibration) the
-	// load of the slot's previous set in this session
-	if (!guided.isLoading && step && draft && filledFor !== step.key) {
+	// load of the slot's previous set in this session. Not before the target is known.
+	if (
+		!guided.isLoading &&
+		step &&
+		draft &&
+		filledFor !== step.key &&
+		(target || !guided.targetsPending || draft.sets[step.key])
+	) {
 		const logged = draft.sets[step.key];
 		const previous = guided.queue
 			.slice(0, index)
@@ -157,6 +163,25 @@ export default function GuidedSession() {
 			],
 		);
 	};
+
+	if (guided.isUnavailable) {
+		return (
+			<View className="flex-1 items-center justify-center gap-4 bg-background p-6">
+				<CloudOffIcon size={32} color={themeColors.mutedForeground} />
+				<Text className="text-center text-lg font-semibold">
+					Séance indisponible hors connexion
+				</Text>
+				<Text className="text-center text-muted">
+					Cette séance n’a pas encore été chargée sur le téléphone. Retrouve du
+					réseau pour l’ouvrir : les séries déjà faites restent enregistrées
+					ici.
+				</Text>
+				<Button variant="secondary" onPress={guided.reload}>
+					<Button.Label>Réessayer</Button.Label>
+				</Button>
+			</View>
+		);
+	}
 
 	if (guided.isLoading) {
 		return (
