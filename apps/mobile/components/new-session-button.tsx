@@ -2,22 +2,39 @@ import {
 	BottomSheet,
 	BottomSheetScrollView,
 } from "@expo/ui/community/bottom-sheet";
+import { differenceInCalendarDays } from "date-fns";
 import { useRouter } from "expo-router";
 import { Zap } from "lucide-react-native";
 import React, { useCallback, useRef, useState } from "react";
 import { ActivityIndicator, Alert, Pressable, Text, View } from "react-native";
 
 import { useAuth } from "@/context/supabase-provider";
+import { lastSessionByDay, nextProgramDay } from "@/lib/program/rotation";
 import { useActiveProgram } from "@/lib/queries/programs";
-import { useCreateSession, useLastSession } from "@/lib/queries/sessions";
+import {
+	useCreateSession,
+	useLastSession,
+	useProgramDaySessions,
+} from "@/lib/queries/sessions";
+import { cn } from "@/lib/utils";
 import { sheetBackgroundStyle, useThemeColors } from "@/lib/theme";
 import { useColorScheme } from "@/lib/useColorScheme";
+
+// "aujourd'hui", "hier", "il y a 3 j": how long ago a day was last done
+function daysAgo(date: string) {
+	const days = differenceInCalendarDays(new Date(), new Date(date));
+	if (days <= 0) return "aujourd’hui";
+	if (days === 1) return "hier";
+	return `il y a ${days} j`;
+}
 
 export default function NewSessionButton() {
 	const { session } = useAuth();
 	const program = useActiveProgram();
 	const createSession = useCreateSession();
 	const lastSession = useLastSession();
+	const days = program.data?.program_days ?? [];
+	const daySessions = useProgramDaySessions(days.map((d) => d.id));
 	const isLoading = createSession.isPending;
 	const [open, setOpen] = useState(false);
 	const { isDarkColorScheme } = useColorScheme();
@@ -45,6 +62,12 @@ export default function NewSessionButton() {
 	const handleClosePress = useCallback(() => {
 		sheetRef.current?.close();
 	}, []);
+
+	// The day after the last one done, in the program's order
+	const nextDayId = daySessions.data
+		? nextProgramDay(days, daySessions.data)
+		: null;
+	const lastDone = lastSessionByDay(days, daySessions.data ?? []);
 
 	// day null: a free session outside the program
 	const handleCreateSession = (day: { id: string; name: string } | null) => {
@@ -129,21 +152,46 @@ export default function NewSessionButton() {
 									</Text>
 								)}
 								<View className="gap-2">
-									{program.data?.program_days.map((day) => (
-										<Pressable
-											key={day.id}
-											onPress={() => handleCreateSession(day)}
-											className="flex-row items-center justify-between rounded-md border border-border bg-surface px-4 py-3 active:opacity-70"
-										>
-											<Text className="text-lg font-medium text-foreground">
-												{day.name}
-											</Text>
-											<Text className="text-sm text-muted">
-												{day.slots.length} exercice
-												{day.slots.length > 1 ? "s" : ""}
-											</Text>
-										</Pressable>
-									))}
+									{days.map((day) => {
+										const isNext = day.id === nextDayId;
+										const last = lastDone.get(day.id);
+										return (
+											<Pressable
+												key={day.id}
+												onPress={() => handleCreateSession(day)}
+												accessibilityRole="button"
+												accessibilityHint={
+													isNext ? "Séance suivante du programme" : undefined
+												}
+												className={cn(
+													"flex-row items-center justify-between rounded-md border bg-surface px-4 py-3 active:opacity-70",
+													isNext ? "border-accent" : "border-border",
+												)}
+											>
+												<View className="flex-1 gap-0.5">
+													<View className="flex-row items-center gap-2">
+														<Text className="text-lg font-medium text-foreground">
+															{day.name}
+														</Text>
+														{isNext && (
+															<View className="rounded-full bg-accent px-2 py-0.5">
+																<Text className="text-xs font-medium text-accent-foreground">
+																	Suivante
+																</Text>
+															</View>
+														)}
+													</View>
+													<Text className="text-sm text-muted">
+														{last ? `Dernière : ${daysAgo(last)}` : "Pas encore faite"}
+													</Text>
+												</View>
+												<Text className="text-sm text-muted">
+													{day.slots.length} exercice
+													{day.slots.length > 1 ? "s" : ""}
+												</Text>
+											</Pressable>
+										);
+									})}
 									<Pressable
 										onPress={() => handleCreateSession(null)}
 										className="rounded-md border border-dashed border-border px-4 py-3 active:opacity-70"

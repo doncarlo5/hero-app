@@ -67,6 +67,23 @@ export function useLastSession() {
 	});
 }
 
+// Recent sessions of the given program days: when each day was last done, for the rotation
+export function useProgramDaySessions(dayIds: string[]) {
+	return useQuery({
+		queryKey: [...queryKeys.sessions, "by-day", dayIds.join()],
+		enabled: dayIds.length > 0,
+		queryFn: async () =>
+			unwrap(
+				await supabase
+					.from("sessions")
+					.select("program_day_id, date_session")
+					.in("program_day_id", dayIds)
+					.order("date_session", { ascending: false })
+					.limit(100),
+			),
+	});
+}
+
 // Most recent session other than the current one (for "your last notes")
 export function usePreviousSession(currentId: string) {
 	return useQuery({
