@@ -38,6 +38,10 @@ _Avoid_: programme
 One of a program's training days, with its ordered slots.
 _Avoid_: session type, séance type, split
 
+**Next day**:
+The program day suggested for the next session: the one after the day of the most recent session of the program, in the program's order, back to the first after the last.
+_Avoid_: next workout, rotation
+
 **Slot**:
 A position in a program day that one movement fills, with the sets it prescribes.
 _Avoid_: program exercise, exercise
