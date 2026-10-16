@@ -96,6 +96,7 @@ Local test account: `test@hero.local` / `hero-local-test`. The movement library 
 
 CI (`.github/workflows/ci.yml`) runs on every pull request: mobile typecheck, lint and unit tests (in three time zones), and every migration plus the seed applied to a fresh Postgres. Vercel builds the web app and the legacy API.
 
+- Movement library: `node scripts/audit-movement-library.js` (local) or `scripts/audit-movement-library-prod.sh` checks every library row against Storage (images and thumbnails served, decoded, right size; clean keys, names, aliases) and exits 1 on a problem. CI checks the French overrides against the pinned source (`import-movement-library.js --dry-run`).
 - Mongo → Supabase sync: `node --test scripts/sync-mongo-delta.test.js` (local Supabase + throwaway Mongo, see README).
 - Legacy API: Jest in `apps/api/test/`.
 - Mobile: `npm test` in `apps/mobile` runs the unit tests of the progression engine and the guided session modules (Node test runner; pure modules import each other with `.ts` extensions and no `@/` alias). Screens: verify on the iOS simulator against the local Supabase.

@@ -124,6 +124,14 @@ export function MovementFrames(props: {
 					))}
 				</View>
 			)}
+			{/* Library photos come from free-exercise-db (public domain), credited where they are shown */}
+			{props.movement.owner_id === null && (
+				<View className="absolute top-2 left-2 rounded-full bg-black/50 px-2 py-0.5">
+					<Text className="text-[10px] text-white/90">
+						Photos : free-exercise-db
+					</Text>
+				</View>
+			)}
 			{canStep && (
 				<View className="absolute bottom-2 left-2 rounded-full bg-black/50 px-2 py-1">
 					<Text className="text-xs text-white">
