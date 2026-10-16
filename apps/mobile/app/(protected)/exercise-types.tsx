@@ -2,22 +2,22 @@ import { useRouter } from "expo-router";
 import { PlusIcon } from "lucide-react-native";
 import { Pressable, ScrollView, View } from "react-native";
 
-import ExerciseTypeCard from "@/components/exercise-type-card";
+import MovementCard from "@/components/exercise-type-card";
 import { Button } from "heroui-native";
 import { Text } from "@/components/ui/text";
-import { useExerciseTypes } from "@/lib/queries/exercise-types";
-import type { ExerciseType } from "@/lib/queries/types";
+import { useMovements } from "@/lib/queries/movements";
+import type { Movement } from "@/lib/queries/types";
 import { useThemeColors } from "@/lib/theme";
 
 export default function ExerciseTypes() {
-	const exerciseTypesQuery = useExerciseTypes();
+	const exerciseTypesQuery = useMovements();
 	const router = useRouter();
 	const themeColors = useThemeColors();
 
 	const exerciseTypes = exerciseTypesQuery.data ?? [];
 	const isLoading = exerciseTypesQuery.isLoading;
 
-	const handleExerciseTypePress = (exerciseType: ExerciseType) => {
+	const handleExerciseTypePress = (exerciseType: Movement) => {
 		router.push(`/exercise-type/${exerciseType.id}`);
 	};
 
@@ -77,8 +77,8 @@ export default function ExerciseTypes() {
 				) : (
 					<View className="flex flex-col gap-4">
 						{exerciseTypes.map((exerciseType) => (
-							<ExerciseTypeCard
-								exerciseType={exerciseType}
+							<MovementCard
+								movement={exerciseType}
 								key={exerciseType.id}
 								onPress={handleExerciseTypePress}
 							/>

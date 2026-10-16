@@ -35,20 +35,39 @@ async function createAuthUser(pg, id, email, fullName) {
   );
 }
 
+// The April copy, as it sits in the legacy schema: one shared created_at, like the sign-up bulk insert
+async function insertLegacyTypes(pg, owner, names, createdAt) {
+  const ids = {};
+  for (const name of names) {
+    ids[name] = (
+      await pg.query(
+        `insert into legacy.exercise_types (owner_id, name, timer_seconds, rep_range_1, rep_range_2, rep_range_3,
+           session_types, definition_key, created_at, updated_at)
+         values ($1, $2, 120, '6-8', '8-10', '10-12', '{"Upper A"}', $3, $4, $4) returning id`,
+        [owner, name, name, createdAt],
+      )
+    ).rows[0].id;
+  }
+  return ids;
+}
+
+const LEGACY = ["exercise_types", "sessions", "exercise_users", "programs"];
+const CURRENT = ["movements", "programs", "sessions", "logged_exercises"];
+
 async function counts(pg, ids) {
   const out = {};
-  for (const t of ["profiles", "exercise_types", "sessions", "exercise_users", "programs", "feedbacks", "trophies"]) {
-    const col = t === "profiles" ? "id" : "owner_id";
-    out[t] = Number((await pg.query(`select count(*) from public.${t} where ${col} = any($1)`, [ids])).rows[0].count);
-  }
-  out.exercise_sets = Number(
-    (
-      await pg.query(
-        `select count(*) from public.exercise_sets s join public.exercise_users eu on eu.id = s.exercise_user_id
-       where eu.owner_id = any($1)`,
-        [ids],
-      )
-    ).rows[0].count,
+  const count = async (sql) => Number((await pg.query(sql, [ids])).rows[0].count);
+  out.profiles = await count("select count(*) from public.profiles where id = any($1)");
+  for (const t of LEGACY) out[`legacy.${t}`] = await count(`select count(*) from legacy.${t} where owner_id = any($1)`);
+  for (const t of [...CURRENT, "feedbacks", "trophies"])
+    out[t] = await count(`select count(*) from public.${t} where owner_id = any($1)`);
+  out["legacy.exercise_sets"] = await count(
+    `select count(*) from legacy.exercise_sets s join legacy.exercise_users eu on eu.id = s.exercise_user_id
+     where eu.owner_id = any($1)`,
+  );
+  out.logged_sets = await count(
+    `select count(*) from public.logged_sets s join public.logged_exercises le on le.id = s.logged_exercise_id
+     where le.owner_id = any($1)`,
   );
   return out;
 }
@@ -74,16 +93,19 @@ test("delta sync copies Mongo changes to Supabase and is idempotent", async () =
     await createAuthUser(pg, B, `b-${suffix}@hero.local`, "Bob New");
     await pg.query("delete from public.profiles where id = $1", [B]); // as if the trigger had not run yet
 
-    const typeId = async (owner, key) =>
-      (await pg.query("select id from public.exercise_types where owner_id = $1 and definition_key = $2", [owner, key]))
-        .rows[0].id;
-    const pullups = await typeId(A, "Tractions lestées");
-    const incline = await typeId(A, "Développé incliné - Barre");
+    const legacyTypes = await insertLegacyTypes(
+      pg,
+      A,
+      ["Tractions lestées", "Développé incliné - Barre", "Squat - Barre"],
+      d("2025-01-01T00:00:00.000Z"),
+    );
+    const pullups = legacyTypes["Tractions lestées"];
+    const incline = legacyTypes["Développé incliné - Barre"];
 
     const insertSession = async (created, fields) =>
       (
         await pg.query(
-          `insert into public.sessions (owner_id, date_session, type_session, body_weight, is_done, comment, created_at, updated_at)
+          `insert into legacy.sessions (owner_id, date_session, type_session, body_weight, is_done, comment, created_at, updated_at)
          values ($1, $2, 'Upper A', $3, $4, $5, $6, $6) returning id`,
           [A, created, fields.body_weight, fields.is_done, fields.comment ?? null, created],
         )
@@ -91,19 +113,19 @@ test("delta sync copies Mongo changes to Supabase and is idempotent", async () =
     const sbS1 = await insertSession(d("2026-02-01T10:00:00.123Z"), { body_weight: 80, is_done: false });
     const sbS3 = await insertSession(d("2026-02-03T10:00:00.456Z"), { body_weight: 80, is_done: true, comment: "old" });
     // Edited from the new app after the Mongo edit: Supabase must win
-    await pg.query("update public.sessions set comment = 'edited in supabase' where id = $1", [sbS3]);
+    await pg.query("update legacy.sessions set comment = 'edited in supabase' where id = $1", [sbS3]);
 
     const insertEu = async (created, type, session, sets) => {
       const id = (
         await pg.query(
-          `insert into public.exercise_users (owner_id, type_id, session_id, created_at, updated_at)
+          `insert into legacy.exercise_users (owner_id, type_id, session_id, created_at, updated_at)
          values ($1, $2, $3, $4, $4) returning id`,
           [A, type, session, created],
         )
       ).rows[0].id;
       for (const [i, [w, r]] of sets.entries()) {
         await pg.query(
-          "insert into public.exercise_sets (exercise_user_id, set_order, weight, reps) values ($1, $2, $3, $4)",
+          "insert into legacy.exercise_sets (exercise_user_id, set_order, weight, reps) values ($1, $2, $3, $4)",
           [id, i + 1, w, r],
         );
       }
@@ -352,26 +374,28 @@ test("delta sync copies Mongo changes to Supabase and is idempotent", async () =
     const real = await run({ mongoUri, supabaseDbUrl, since: SINCE, log: quiet });
     assert.deepEqual(dry.stats, real.stats, "dry run predicts the real run");
     assert.deepEqual(real.stats.profiles, { inserted: 1, updated: 0, unchanged: 0 });
-    assert.deepEqual(real.stats.exercise_types, { inserted: 2, updated: 1, unchanged: 0 }); // Curl marteau, Face pull | B's Tractions (edited in Mongo)
+    assert.deepEqual(real.stats.exercise_types, { inserted: 3, updated: 0, unchanged: 0 }); // Curl marteau, Face pull, B's Tractions (B has no legacy rows)
     assert.deepEqual(real.stats.sessions, { inserted: 3, updated: 1, unchanged: 1 }); // s0 s2 sB | s1 | s3
     assert.deepEqual(real.stats.exercise_users, { inserted: 5, updated: 1, unchanged: 0 }); // the untouched copied exercise is not a candidate
-    assert.deepEqual(real.stats.programs, { inserted: 1, updated: 1, unchanged: 0 });
+    assert.deepEqual(real.stats.programs, { inserted: 2, updated: 0, unchanged: 0 }); // A's Upper A, B's Other (no legacy programs yet)
     assert.deepEqual(real.stats.feedbacks, { inserted: 2, updated: 0, unchanged: 0 });
     assert.equal(real.skipped.orphanOwner, 2);
     assert.equal(real.skipped.ownerWithoutAuthUser, 1);
     assert.equal(real.skipped.missingExerciseType, 0);
 
     // Copied session finished in Mongo; Supabase-edited session kept
-    assert.equal((await pg.query("select is_done from public.sessions where id = $1", [sbS1])).rows[0].is_done, true);
-    assert.equal(
-      (await pg.query("select comment from public.sessions where id = $1", [sbS3])).rows[0].comment,
-      "edited in supabase",
-    );
+    for (const schema of ["legacy", "public"]) {
+      assert.equal((await pg.query(`select is_done from ${schema}.sessions where id = $1`, [sbS1])).rows[0].is_done, true);
+      assert.equal(
+        (await pg.query(`select comment from ${schema}.sessions where id = $1`, [sbS3])).rows[0].comment,
+        "edited in supabase",
+      );
+    }
     // Sets replaced, one row per set from 1
     assert.deepEqual(
       (
         await pg.query(
-          "select set_order, weight::float8 as weight, reps from public.exercise_sets where exercise_user_id = $1 order by set_order",
+          "select set_order, weight::float8 as weight, reps from public.logged_sets where logged_exercise_id = $1 order by set_order",
           [sbEu3],
         )
       ).rows,
@@ -383,7 +407,7 @@ test("delta sync copies Mongo changes to Supabase and is idempotent", async () =
     );
     assert.equal(
       Number(
-        (await pg.query("select count(*) from public.exercise_sets where exercise_user_id = $1", [sbEu1])).rows[0]
+        (await pg.query("select count(*) from public.logged_sets where logged_exercise_id = $1", [sbEu1])).rows[0]
           .count,
       ),
       2,
@@ -391,28 +415,30 @@ test("delta sync copies Mongo changes to Supabase and is idempotent", async () =
     // Exercise in a never-copied session is attached to the inserted session
     const s0Row = (
       await pg.query(
-        `select s.type_session::text, s.body_weight::float8 from public.exercise_users eu join public.sessions s on s.id = eu.session_id
-       where eu.owner_id = $1 and eu.created_at = '2026-05-04T10:00:00Z'`,
+        `select s.label, d.name as day, s.body_weight::float8 from public.logged_exercises le
+       join public.sessions s on s.id = le.session_id left join public.program_days d on d.id = s.program_day_id
+       where le.owner_id = $1 and le.created_at = '2026-05-04T10:00:00Z'`,
         [A],
       )
     ).rows[0];
-    assert.deepEqual(s0Row, { type_session: "Lower", body_weight: 81 });
+    assert.deepEqual(s0Row, { label: "Lower", day: "Lower", body_weight: 81 });
     // Trophies evaluated by the triggers: 40 kg × 6 at 79 kg body weight
     const achieved = (
       await pg.query(
-        `select count(*) from public.trophies where owner_id = $1 and exercise_type_id = $2 and achieved`,
+        `select count(*) from public.trophies t join legacy.movement_map mm on mm.movement_id = t.movement_id
+         where t.owner_id = $1 and mm.legacy_id = $2 and t.achieved`,
         [A, pullups],
       )
     ).rows[0].count;
     assert.ok(Number(achieved) > 0, "pull-up trophies awarded from the copied sets");
-    // Program replaced in Mongo order with alternatives
+    // Program replaced in Mongo order with alternatives, converted into the Upper A day's slots
     const program = (
       await pg.query(
-        `select et.name, (select array_agg(alt.name order by a.position) from public.program_exercise_alternatives a
-                        join public.exercise_types alt on alt.id = a.exercise_type_id where a.program_exercise_id = pe.id) as alts
-       from public.programs p join public.program_exercises pe on pe.program_id = p.id
-       join public.exercise_types et on et.id = pe.exercise_type_id
-       where p.owner_id = $1 and p.session_type = 'Upper A' order by pe."order"`,
+        `select m.name, (select array_agg(alt.name order by a.position) from public.slot_alternatives a
+                        join public.movements alt on alt.id = a.movement_id where a.slot_id = s.id) as alts
+       from public.programs p join public.program_days d on d.program_id = p.id
+       join public.slots s on s.program_day_id = d.id join public.movements m on m.id = s.movement_id
+       where p.owner_id = $1 and d.name = 'Upper A' order by s.position`,
         [A],
       )
     ).rows;
@@ -420,26 +446,42 @@ test("delta sync copies Mongo changes to Supabase and is idempotent", async () =
       { name: "Curl marteau", alts: null },
       { name: "Tractions lestées", alts: ["Développé incliné - Barre"] },
     ]);
-    // B: profile created with default data, onboarding flag copied, custom data attached
+    // B: profile created with the default movements, onboarding flag copied, custom data attached.
+    // B's Mongo "Tractions lestées" lands on the default movement instead of duplicating it.
     const profileB = (await pg.query("select first_name, has_seen_onboarding from public.profiles where id = $1", [B]))
       .rows[0];
     assert.deepEqual(profileB, { first_name: "Bob", has_seen_onboarding: true });
-    assert.ok(
-      Number((await pg.query("select count(*) from public.exercise_types where owner_id = $1", [B])).rows[0].count) >
-        10,
-    );
+    const movementsB = (
+      await pg.query("select name from public.movements where owner_id = $1", [B])
+    ).rows.map((r) => r.name);
+    assert.ok(movementsB.length > 10);
+    assert.equal(movementsB.filter((n) => n === "Tractions lestées").length, 1);
+    assert.ok(movementsB.includes("Face pull"));
     assert.equal(
-      Number((await pg.query("select count(*) from public.exercise_users where owner_id = $1", [B])).rows[0].count),
+      Number((await pg.query("select count(*) from public.logged_exercises where owner_id = $1", [B])).rows[0].count),
       2,
     );
 
-    // --- Second run: nothing left to do -----------------------------------------------
+    // --- Second run: nothing left to do, and edits made in the new app are kept ---------
+    await pg.query("update public.sessions set comment = 'edited in the new app' where id = $1", [sbS1]);
+    await pg.query("update public.logged_exercises set comment = 'new app' where id = $1", [sbEu1]);
     const after = await counts(pg, [A, B]);
     const again = await run({ mongoUri, supabaseDbUrl, since: SINCE, log: quiet });
     for (const [table, s] of Object.entries(again.stats)) {
       assert.equal(s.inserted + s.updated, 0, `${table} changed on the second run`);
     }
+    for (const [table, n] of Object.entries(again.converted)) {
+      assert.equal(n, 0, `${table} re-converted on the second run`);
+    }
     assert.deepEqual(await counts(pg, [A, B]), after);
+    assert.equal(
+      (await pg.query("select comment from public.sessions where id = $1", [sbS1])).rows[0].comment,
+      "edited in the new app",
+    );
+    assert.equal(
+      (await pg.query("select comment from public.logged_exercises where id = $1", [sbEu1])).rows[0].comment,
+      "new app",
+    );
   } finally {
     await pg.query("delete from auth.users where id = any($1)", [[A, B]]);
     await pg.end();
@@ -459,11 +501,15 @@ test("rows created in bulk with the same created_at are matched by content, not 
   const mD = new ObjectId();
   try {
     await createAuthUser(pg, D, `d-${crypto.randomUUID().slice(0, 8)}@hero.local`, "Dana Bulk");
+    const names = (await pg.query("select name from public.default_exercise_types order by sort_order")).rows.map(
+      (r) => r.name,
+    );
+    await insertLegacyTypes(pg, D, names, d("2026-05-01T12:00:00.000Z")); // inside the --since window
     const types = (
       await pg.query(
         `select id, name, advice, timer_seconds, rep_range_1, rep_range_2, rep_range_3, rep_range_4,
                 session_types::text[] as session_types, trophy_locked, created_at
-         from public.exercise_types where owner_id = $1`,
+         from legacy.exercise_types where owner_id = $1`,
         [D],
       )
     ).rows;
@@ -490,31 +536,8 @@ test("rows created in bulk with the same created_at are matched by content, not 
         updatedAt: t.created_at,
       })),
     );
-    const programs = (
-      await pg.query(
-        `select p.session_type::text as session_type, p.created_at,
-                coalesce(json_agg(json_build_object('type', pe.exercise_type_id, 'order', pe."order",
-                  'alts', (select coalesce(json_agg(a.exercise_type_id order by a.position), '[]')
-                           from public.program_exercise_alternatives a where a.program_exercise_id = pe.id)))
-                  filter (where pe.id is not null), '[]') as exercises
-         from public.programs p left join public.program_exercises pe on pe.program_id = p.id
-         where p.owner_id = $1 group by p.id`,
-        [D],
-      )
-    ).rows;
-    await db.collection("programs").insertMany(
-      programs.map((p) => ({
-        owner: mD,
-        sessionType: p.session_type,
-        createdAt: p.created_at,
-        updatedAt: p.created_at,
-        exercises: p.exercises.map((e) => ({
-          exerciseType: mongoIds.get(e.type),
-          order: e.order,
-          alternatives: e.alts.map((a) => mongoIds.get(a)),
-        })),
-      })),
-    );
+    // As in prod, the legacy rows were converted when the migration ran
+    await pg.query("select private.migrate_legacy()");
 
     const before = await counts(pg, [D]);
     const result = await run({ mongoUri, supabaseDbUrl, since: SINCE, log: quiet });

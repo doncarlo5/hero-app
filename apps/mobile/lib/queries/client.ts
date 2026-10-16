@@ -14,13 +14,13 @@ export const queryKeys = {
 	profile: ["profile"] as const,
 	sessions: ["sessions"] as const,
 	session: (id: string) => ["sessions", "detail", id] as const,
-	exerciseTypes: ["exercise-types"] as const,
-	exerciseType: (id: string) => ["exercise-types", "detail", id] as const,
+	movements: ["movements"] as const,
+	movement: (id: string) => ["movements", "detail", id] as const,
 	exercises: ["exercises"] as const,
 	exercise: (id: string) => ["exercises", "detail", id] as const,
 	trophies: ["trophies"] as const,
 	programs: ["programs"] as const,
-	program: (sessionType: string) => ["programs", sessionType] as const,
+	program: (id: string) => ["programs", id] as const,
 };
 
 // Supabase returns { data, error }: throw so React Query sees the failure.

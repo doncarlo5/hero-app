@@ -24,9 +24,9 @@ import {
 import { SafeAreaView } from "@/components/safe-area-view";
 import { Button } from "heroui-native";
 import { Text } from "@/components/ui/text";
-import { useExerciseHistory } from "@/lib/queries/exercises";
-import { useExerciseTypes } from "@/lib/queries/exercise-types";
-import { setsToArrays, type ExerciseType } from "@/lib/queries/types";
+import { useMovementHistory } from "@/lib/queries/exercises";
+import { useMovements } from "@/lib/queries/movements";
+import { setsToArrays, type Movement } from "@/lib/queries/types";
 import { useThemeColors } from "@/lib/theme";
 
 const { width } = Dimensions.get("window");
@@ -37,25 +37,25 @@ const SNAP_POINTS = ["50%", "90%"];
 export default function Stats() {
 	const themeColors = useThemeColors();
 	const bottomSheetRef = useRef<BottomSheet>(null);
-	const exerciseTypesQuery = useExerciseTypes();
+	const exerciseTypesQuery = useMovements();
 	const [pickedTypeId, setPickedTypeId] = useState<string | null>(null);
 
 	const allExerciseTypes = exerciseTypesQuery.data ?? [];
 	const isLoadingTypes = exerciseTypesQuery.isLoading;
-	// Default to the most recently edited exercise type
+	// Default to the first movement, by name
 	const selectedExerciseType =
 		allExerciseTypes.find((type) => type.id === pickedTypeId) ??
 		allExerciseTypes[0] ??
 		null;
 
-	const historyQuery = useExerciseHistory(selectedExerciseType?.id ?? null);
+	const historyQuery = useMovementHistory(selectedExerciseType?.id ?? null);
 	const isLoading = isLoadingTypes || historyQuery.isLoading;
 	// One entry per recorded exercise, sets as arrays ordered by set_order
 	const exercise = (historyQuery.data ?? [])
 		.filter((item) => item.sessions)
 		.map((item) => ({
 			date: item.sessions?.date_session as string,
-			weight: setsToArrays(item.exercise_sets).weights,
+			weight: setsToArrays(item.logged_sets).weights,
 		}));
 
 	const openBottomSheet = () => {
@@ -66,7 +66,7 @@ export default function Stats() {
 		bottomSheetRef.current?.close();
 	};
 
-	const onExerciseTypeChange = (exerciseType: ExerciseType) => {
+	const onExerciseTypeChange = (exerciseType: Movement) => {
 		setPickedTypeId(exerciseType.id);
 	};
 
@@ -74,6 +74,9 @@ export default function Stats() {
 		const formattedDate = format(new Date(tickFormat), "dd/MM/yyyy");
 		return formattedDate;
 	};
+
+	// A fourth series is drawn when some exercise had four sets
+	const hasSet4 = exercise.some((item) => item.weight.length >= 4);
 
 	// Prepare data for Victory charts
 	const chartData = exercise.map((exerciseItem) => ({
@@ -221,7 +224,7 @@ export default function Stats() {
 										},
 									}}
 								/>
-								{selectedExerciseType?.rep_range_4 && (
+								{hasSet4 && (
 									<VictoryArea
 										data={chartData}
 										x="x"
@@ -251,7 +254,7 @@ export default function Stats() {
 									{ name: "Série 1", symbol: { fill: "#AC38B2" } },
 									{ name: "Série 2", symbol: { fill: "#B2AC38" } },
 									{ name: "Série 3", symbol: { fill: "#38B2AC" } },
-									...(selectedExerciseType?.rep_range_4
+									...(hasSet4
 										? [{ name: "Série 4", symbol: { fill: "#B238AC" } }]
 										: []),
 								]}

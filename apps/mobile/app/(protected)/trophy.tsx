@@ -29,7 +29,7 @@ export default function TrophyScreen() {
 
 	const trophies = trophiesQuery.data ?? [];
 	const grouped = trophies.reduce((acc: Record<string, Trophy[]>, t) => {
-		const key = t.exercise_types?.name ?? "Autres";
+		const key = t.movement?.name ?? "Autres";
 		if (!acc[key]) acc[key] = [];
 		acc[key].push(t);
 		return acc;
@@ -165,7 +165,7 @@ export default function TrophyScreen() {
 									</Text>
 									<Text className="mt-2 text-center text-muted">
 										Tu as obtenu le trophée {selected.trophy_type} pour
-										l&apos;exercice {selected.exercise_types?.name} avec{" "}
+										l&apos;exercice {selected.movement?.name} avec{" "}
 										{selected.reps_user} reps.
 									</Text>
 									<View
@@ -223,7 +223,7 @@ export default function TrophyScreen() {
 											{selected.reps_goal} reps
 										</Text>
 										<Text className="mt-1 text-center text-xs text-muted">
-											pour l&apos;exercice {selected.exercise_types?.name}
+											pour l&apos;exercice {selected.movement?.name}
 										</Text>
 									</View>
 								</View>

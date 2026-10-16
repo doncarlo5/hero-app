@@ -174,9 +174,7 @@ export default function Home() {
 
 									{lastSession && (
 										<View className="flex-row items-center gap-2">
-											<TypeSessionBadge
-												type_session={lastSession.type_session}
-											/>
+											<TypeSessionBadge label={lastSession.label} />
 											<Text className="capitalize text-slate-600 dark:text-gray-400 text-sm">
 												{format(
 													new Date(lastSession.date_session),

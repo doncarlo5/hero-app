@@ -15,6 +15,7 @@ import React, { useRef, useState } from "react";
 import {
 	ActivityIndicator,
 	Alert,
+	Platform,
 	ScrollView,
 	TouchableOpacity,
 	View,
@@ -23,20 +24,30 @@ import {
 import { SafeAreaView } from "@/components/safe-area-view";
 import { Button } from "heroui-native";
 import { Text } from "@/components/ui/text";
-import { useExerciseTypes } from "@/lib/queries/exercise-types";
-import { useProgram, useSaveProgram } from "@/lib/queries/programs";
+import { useMovements } from "@/lib/queries/movements";
 import {
-	SESSION_TYPES,
-	type ExerciseTypeRef,
-	type SessionType,
+	useActiveProgram,
+	useCreateProgramDay,
+	useSaveProgramDay,
+} from "@/lib/queries/programs";
+import {
+	prescriptionLabels,
+	type Movement,
+	type ProgramDay,
 } from "@/lib/queries/types";
 import { useThemeColors } from "@/lib/theme";
 import { useColorScheme } from "@/lib/useColorScheme";
 import { Pressable } from "react-native-gesture-handler";
 
+type MovementRef = Pick<Movement, "id" | "name">;
+
 interface ExerciseProgram {
-	exerciseType: ExerciseTypeRef;
-	alternatives: ExerciseTypeRef[];
+	/** Existing slot: keeps its set prescriptions when saved */
+	slotId?: string;
+	/** "3 × 4-6 / 6-8 / 8-10", for existing slots */
+	summary?: string;
+	exerciseType: MovementRef;
+	alternatives: MovementRef[];
 	order: number;
 }
 
@@ -47,10 +58,13 @@ export default function ProgramPage() {
 	// Bottom sheet ref
 	const bottomSheetRef = useRef<BottomSheet>(null);
 
-	const [sessionType, setSessionType] = useState<SessionType>("Upper A");
-	const programQuery = useProgram(sessionType);
-	const exerciseTypesQuery = useExerciseTypes(sessionType);
-	const saveProgramMutation = useSaveProgram();
+	const programQuery = useActiveProgram();
+	const days = programQuery.data?.program_days ?? [];
+	const [selectedDayId, setSelectedDayId] = useState<string | null>(null);
+	const day = days.find((d) => d.id === selectedDayId) ?? days[0] ?? null;
+	const exerciseTypesQuery = useMovements();
+	const saveProgramMutation = useSaveProgramDay();
+	const createDay = useCreateProgramDay();
 	// Local draft, edited until saved
 	const [exercises, setExercises] = useState<ExerciseProgram[]>([]);
 	const [targetExercise, setTargetExercise] = useState<number | null>(null);
@@ -61,29 +75,51 @@ export default function ProgramPage() {
 	const isSaving = saveProgramMutation.isPending;
 	const router = useRouter();
 
-	// Reset the draft from the saved program when it loads, is saved, or the session
-	// type changes (an empty program is null for several session types)
-	const [draftFrom, setDraftFrom] = useState<{
-		sessionType: SessionType;
-		program: typeof programQuery.data;
-	} | null>(null);
-	if (
-		programQuery.data !== undefined &&
-		(draftFrom?.sessionType !== sessionType ||
-			draftFrom.program !== programQuery.data)
-	) {
-		setDraftFrom({ sessionType, program: programQuery.data });
-		const programExercises = programQuery.data?.program_exercises ?? [];
+	// Reset the draft from the saved day when it loads, is saved, or another day is selected
+	const [draftFrom, setDraftFrom] = useState<ProgramDay | null>(null);
+	if (day && draftFrom !== day) {
+		setDraftFrom(day);
 		setExercises(
-			programExercises.map((programExercise, index) => ({
-				exerciseType: programExercise.exercise_types,
-				alternatives: programExercise.program_exercise_alternatives.map(
-					(alternative) => alternative.exercise_types,
-				),
-				order: index + 1,
-			})),
+			day.slots.map((slot, index) => {
+				const labels = prescriptionLabels(slot);
+				return {
+					slotId: slot.id,
+					summary:
+						labels.length > 0
+							? `${labels.length} × ${labels.join(" / ")}`
+							: undefined,
+					exerciseType: slot.movement,
+					alternatives: slot.alternatives.map(
+						(alternative) => alternative.movement,
+					),
+					order: index + 1,
+				};
+			}),
 		);
 	}
+
+	const addDay = (name: string) => {
+		const programId = programQuery.data?.id;
+		if (!programId || !name.trim()) return;
+		createDay.mutate(
+			{ programId, name: name.trim(), position: days.length + 1 },
+			{
+				onSuccess: (created) => setSelectedDayId(created.id),
+				onError: () => Alert.alert("Erreur", "Impossible d'ajouter le jour."),
+			},
+		);
+	};
+
+	const promptNewDay = () => {
+		const fallback = `Jour ${days.length + 1}`;
+		if (Platform.OS === "ios") {
+			Alert.prompt("Nouveau jour", "Nom du jour d'entraînement", (name) =>
+				addDay(name || fallback),
+			);
+		} else {
+			addDay(fallback);
+		}
+	};
 
 	const openAddExercise = () => {
 		setTargetExercise(null);
@@ -95,7 +131,7 @@ export default function ProgramPage() {
 		bottomSheetRef.current?.snapToIndex(0);
 	};
 
-	const handleSelect = (exercise: ExerciseTypeRef) => {
+	const handleSelect = (exercise: MovementRef) => {
 		if (targetExercise === null) {
 			const newOrder = exercises.length + 1;
 			setExercises([
@@ -164,21 +200,20 @@ export default function ProgramPage() {
 	};
 
 	const saveProgram = () => {
-		if (isSaving) return;
+		if (isSaving || !day) return;
 		saveProgramMutation.mutate(
 			{
-				sessionType,
-				exercises: exercises.map((ex) => ({
-					exerciseTypeId: ex.exerciseType.id,
+				dayId: day.id,
+				slots: exercises.map((ex) => ({
+					id: ex.slotId,
+					movementId: ex.exerciseType.id,
 					alternativeIds: ex.alternatives.map((alt) => alt.id),
 				})),
 			},
 			{
-				onSuccess: () => {
-					Alert.alert("Success", "Program saved successfully");
-					router.back();
-				},
-				onError: () => Alert.alert("Error", "Failed to save program"),
+				onSuccess: () => router.back(),
+				onError: () =>
+					Alert.alert("Erreur", "Impossible d'enregistrer le jour."),
 			},
 		);
 	};
@@ -195,10 +230,13 @@ export default function ProgramPage() {
 			/>
 			<SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
 				<ScrollView className="flex-1 px-4 pt-4">
-					{/* Session Type Selection */}
+					{/* Program days */}
 					<View className="mb-4">
-						<Text className="text-lg font-semibold text-foreground mb-3">
-							Session Type
+						<Text className="text-lg font-semibold text-foreground">
+							{programQuery.data?.name ?? "Programme"}
+						</Text>
+						<Text className="text-sm text-muted mb-3">
+							Jours d&apos;entraînement
 						</Text>
 						<ScrollView
 							horizontal
@@ -206,27 +244,33 @@ export default function ProgramPage() {
 							className="mb-4"
 						>
 							<View className="flex-row gap-2">
-								{SESSION_TYPES.map((type) => (
+								{days.map((d) => (
 									<TouchableOpacity
-										key={type}
-										onPress={() => setSessionType(type)}
+										key={d.id}
+										onPress={() => setSelectedDayId(d.id)}
 										className={`px-4 py-2 rounded-lg border ${
-											sessionType === type
+											day?.id === d.id
 												? "bg-foreground border-foreground"
 												: "border-border bg-default/30"
 										}`}
 									>
 										<Text
 											className={
-												sessionType === type
+												day?.id === d.id
 													? "text-background font-medium"
 													: "text-foreground"
 											}
 										>
-											{type}
+											{d.name}
 										</Text>
 									</TouchableOpacity>
 								))}
+								<TouchableOpacity
+									onPress={promptNewDay}
+									className="px-4 py-2 rounded-lg border border-dashed border-border"
+								>
+									<Text className="text-muted">+ Jour</Text>
+								</TouchableOpacity>
 							</View>
 						</ScrollView>
 					</View>
@@ -234,19 +278,19 @@ export default function ProgramPage() {
 					{/* Add Exercise Button */}
 					<Button onPress={openAddExercise} className="mb-4">
 						<PlusCircle size={18} color={themeColors.accentForeground} />
-						<Button.Label>Add Exercise</Button.Label>
+						<Button.Label>Ajouter un exercice</Button.Label>
 					</Button>
 
 					{/* Exercises List */}
 					{isLoading ? (
 						<View className="flex-1 items-center justify-center py-8">
 							<ActivityIndicator size="large" />
-							<Text className="text-muted mt-2">Loading program...</Text>
+							<Text className="text-muted mt-2">Chargement du programme…</Text>
 						</View>
 					) : exercises.length === 0 ? (
 						<View className="bg-default/30 rounded-lg p-6 items-center">
 							<Text className="text-muted text-center">
-								No exercises in this program yet. Add your first exercise!
+								Aucun exercice ce jour-là. Ajoute le premier !
 							</Text>
 						</View>
 					) : (
@@ -260,6 +304,9 @@ export default function ProgramPage() {
 										<View className="flex-1">
 											<Text className="text-lg font-semibold text-foreground">
 												{exercise.order}. {exercise.exerciseType.name}
+											</Text>
+											<Text className="text-sm text-muted">
+												{exercise.summary ?? "3 × 8-12 (par défaut)"}
 											</Text>
 										</View>
 										<View className="flex-row items-center gap-1">
@@ -392,7 +439,7 @@ export default function ProgramPage() {
 				<View className="absolute bottom-20 right-10">
 					<Button
 						onPress={saveProgram}
-						isDisabled={isSaving || exercises.length === 0}
+						isDisabled={isSaving || !day}
 						isIconOnly
 						className="h-16 w-16 rounded-full"
 					>
@@ -430,18 +477,18 @@ export default function ProgramPage() {
 					>
 						<Text className="text-xl font-bold mb-4">
 							{targetExercise === null
-								? "Select Exercise"
-								: "Select Alternative"}
+								? "Choisir un exercice"
+								: "Choisir une alternative"}
 						</Text>
 						{isLoadingTypes ? (
 							<View className="items-center py-8">
 								<ActivityIndicator size="large" />
-								<Text className="text-muted mt-2">Loading exercises...</Text>
+								<Text className="text-muted mt-2">Chargement…</Text>
 							</View>
 						) : availableExercises.length === 0 ? (
 							<View className="bg-default/30 rounded-lg p-6 items-center">
 								<Text className="text-muted text-center">
-									No exercises available for this session type.
+									Aucun exercice. Crée-en un dans « Mes exercices ».
 								</Text>
 							</View>
 						) : (
@@ -461,7 +508,7 @@ export default function ProgramPage() {
 							className="mt-4"
 						>
 							<XIcon size={16} color={themeColors.mutedForeground} />
-							<Button.Label>Close</Button.Label>
+							<Button.Label>Fermer</Button.Label>
 						</Button>
 					</BottomSheetScrollView>
 				</BottomSheet>

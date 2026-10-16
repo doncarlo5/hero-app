@@ -9,17 +9,12 @@ import { subDays } from "date-fns";
 import { supabase } from "@/config/supabase";
 
 import { queryKeys, unwrap, unwrapMaybe } from "./client";
-import type {
-	Session,
-	SessionListItem,
-	SessionType,
-	SessionWithExercises,
-} from "./types";
+import type { Session, SessionListItem, SessionWithExercises } from "./types";
 
 const SESSIONS_PAGE_SIZE = 30;
 
 const SESSION_DETAIL_SELECT =
-	"*, exercise_users(*, exercise_sets(set_order, weight, reps), exercise_types(*))";
+	"*, program_day:program_days(id, name, program_id), logged_exercises(*, logged_sets(set_order, weight, reps, kind), movement:movements(*))";
 
 export function useSessionsPages() {
 	return useInfiniteQuery({
@@ -31,7 +26,7 @@ export function useSessionsPages() {
 				await supabase
 					.from("sessions")
 					.select(
-						"id, date_session, type_session, is_done, comment, exercise_users(count)",
+						"id, date_session, label, is_done, comment, logged_exercises(count)",
 					)
 					.order("date_session", { ascending: false })
 					.range(from, from + SESSIONS_PAGE_SIZE - 1),
@@ -111,7 +106,7 @@ export function useSession(id: string) {
 					.from("sessions")
 					.select(SESSION_DETAIL_SELECT)
 					.eq("id", id)
-					.order("created_at", { referencedTable: "exercise_users" })
+					.order("created_at", { referencedTable: "logged_exercises" })
 					.single(),
 			),
 	});
@@ -121,9 +116,11 @@ export function useCreateSession() {
 	const queryClient = useQueryClient();
 
 	return useMutation({
+		// dayId null: a free session outside the program
 		mutationFn: async (input: {
 			ownerId: string;
-			typeSession: SessionType;
+			dayId: string | null;
+			label: string;
 			bodyWeight: number;
 		}): Promise<Session> =>
 			unwrap(
@@ -132,7 +129,8 @@ export function useCreateSession() {
 					.insert({
 						owner_id: input.ownerId,
 						date_session: new Date().toISOString(),
-						type_session: input.typeSession,
+						program_day_id: input.dayId,
+						label: input.label,
 						body_weight: input.bodyWeight,
 					})
 					.select()

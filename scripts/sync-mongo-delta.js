@@ -2,7 +2,9 @@
 // Final Mongo → Supabase delta sync, run right before the Supabase build of the mobile app ships.
 // Copies what the store app wrote to MongoDB Atlas since the original copy (2026-04-06):
 // users (profiles), exercise types, sessions, exercise users + sets, programs, feedbacks.
-// Trophies are not copied: the Supabase triggers evaluate them from the copied sets.
+// Rows land in the `legacy` schema (the Mongo-era model, see docs/adr/0001-programs-as-data.md), then
+// private.migrate_legacy() converts them into the current model. Trophies are not copied: the database
+// evaluates them from the converted sets.
 //
 // Safe to re-run: Mongo documents are matched to existing rows by owner + created_at
 // (the first copy kept Mongo's timestamps), exercise types also by name, programs by session type.
@@ -87,28 +89,28 @@ const SELECTS = {
     select id, owner_id, name, advice, timer_seconds, rep_range_1, rep_range_2, rep_range_3, rep_range_4,
            session_types::text[] as session_types, trophy_locked, created_at, updated_at,
            updated_at = created_at as untouched
-    from public.exercise_types`,
+    from legacy.exercise_types`,
   sessions: `
     select id, owner_id, date_session, type_session::text as type_session, body_weight::float8 as body_weight,
            is_done, comment, created_at, updated_at, updated_at = created_at as untouched
-    from public.sessions`,
+    from legacy.sessions`,
   exerciseUsers: `
     select eu.id, eu.owner_id, eu.type_id, eu.session_id, eu.comment, eu.created_at, eu.updated_at,
            eu.updated_at = eu.created_at as untouched,
            coalesce((select json_agg(json_build_object('weight', s.weight::float8, 'reps', s.reps) order by s.set_order)
-                     from public.exercise_sets s where s.exercise_user_id = eu.id), '[]') as sets
-    from public.exercise_users eu`,
+                     from legacy.exercise_sets s where s.exercise_user_id = eu.id), '[]') as sets
+    from legacy.exercise_users eu`,
   programs: `
     select p.id, p.owner_id, p.session_type::text as session_type, p.created_at, p.updated_at,
            p.updated_at = p.created_at as untouched,
            coalesce((select json_agg(json_build_object(
                        'type', pe.exercise_type_id,
                        'alts', coalesce((select json_agg(a.exercise_type_id order by a.position)
-                                         from public.program_exercise_alternatives a
+                                         from legacy.program_exercise_alternatives a
                                          where a.program_exercise_id = pe.id), '[]'))
                      order by pe."order", pe.created_at, pe.id)
-                     from public.program_exercises pe where pe.program_id = p.id), '[]') as exercises
-    from public.programs p`,
+                     from legacy.program_exercises pe where pe.program_id = p.id), '[]') as exercises
+    from legacy.programs p`,
   feedbacks: `
     select id, owner_id, subject, message, created_at, updated_at, updated_at = created_at as untouched
     from public.feedbacks`,
@@ -138,31 +140,7 @@ async function loadAllState(pg) {
 
 const emptyState = () => ({ types: [], sessions: [], exerciseUsers: [], programs: [], feedbacks: [] });
 
-// Dry run: what private.setup_user would create for a user without profile
-function simulateSetup(defaults) {
-  const now = new Date();
-  const idByKey = new Map();
-  const types = defaults.types.map((d) => {
-    const id = crypto.randomUUID();
-    idByKey.set(d.key, id);
-    return { ...d, id, created_at: now, updated_at: now, untouched: true };
-  });
-  const programs = [...groupBy(defaults.programs, (p) => p.session_type)].map(([sessionType, rows]) => ({
-    id: crypto.randomUUID(),
-    session_type: sessionType,
-    created_at: now,
-    updated_at: now,
-    untouched: true,
-    exercises: rows
-      .filter((r) => idByKey.has(r.exercise_key))
-      .map((r) => ({
-        type: idByKey.get(r.exercise_key),
-        alts: r.alternative_keys.filter((k) => idByKey.has(k)).map((k) => idByKey.get(k)),
-      })),
-  }));
-  return { ...emptyState(), types, programs };
-}
-
+// private.setup_user writes the current model only: a new user starts with no legacy rows
 // ---------------------------------------------------------------------------
 // Sync
 
@@ -175,6 +153,7 @@ async function run({ mongoUri, supabaseDbUrl, dryRun = false, since = DEFAULT_SI
   const stats = Object.fromEntries(TABLES.map((t) => [t, { inserted: 0, updated: 0, unchanged: 0 }]));
   const skipped = { orphanOwner: 0, ownerWithoutAuthUser: 0, missingExerciseType: 0, missingSessionRef: 0 };
   const warnings = [];
+  let converted = null;
 
   const mongo = await MongoClient.connect(mongoUri);
   const pg = new Client({ connectionString: supabaseDbUrl });
@@ -196,17 +175,6 @@ async function run({ mongoUri, supabaseDbUrl, dryRun = false, since = DEFAULT_SI
         r,
       ]),
     );
-    const defaults = {
-      types: (
-        await pg.query(`select key, name, advice, timer_seconds, rep_range_1, rep_range_2, rep_range_3, rep_range_4,
-                               session_types::text[] as session_types, trophy_locked, key as definition_key
-                        from public.default_exercise_types order by sort_order`)
-      ).rows,
-      programs: (
-        await pg.query(`select session_type::text as session_type, exercise_key, alternative_keys
-                        from public.default_program_exercises order by session_type, position`)
-      ).rows,
-    };
     const stateByOwner = await loadAllState(pg);
 
     const mongoUserIds = new Set(users.map((u) => String(u._id)));
@@ -246,10 +214,10 @@ async function run({ mongoUri, supabaseDbUrl, dryRun = false, since = DEFAULT_SI
       let profile = profiles.get(uid);
       const created = !profile;
       if (created) {
-        // Same path as a sign-up: profile (names from the auth metadata), default types, programs, trophies
+        // Same path as a sign-up: profile (names from the auth metadata), default movements, empty program
         stats.profiles.inserted++;
         if (dryRun) {
-          state = simulateSetup(defaults);
+          state = emptyState();
         } else {
           await pg.query("select private.setup_user($1)", [uid]);
           profile = (
@@ -349,7 +317,7 @@ async function run({ mongoUri, supabaseDbUrl, dryRun = false, since = DEFAULT_SI
             stats.exercise_types.updated++;
             if (!dryRun) {
               await pg.query(
-                `update public.exercise_types set name = $2, advice = $3, timer_seconds = $4, rep_range_1 = $5,
+                `update legacy.exercise_types set name = $2, advice = $3, timer_seconds = $4, rep_range_1 = $5,
                    rep_range_2 = $6, rep_range_3 = $7, rep_range_4 = $8, session_types = $9::public.session_type[],
                    trophy_locked = $10 where id = $1`,
                 [match.id, ...Object.values(row)],
@@ -365,7 +333,7 @@ async function run({ mongoUri, supabaseDbUrl, dryRun = false, since = DEFAULT_SI
           // definition_key is set by the set_definition_key trigger, trophies by init_trophies
           ({ id } = (
             await pg.query(
-              `insert into public.exercise_types (owner_id, name, advice, timer_seconds, rep_range_1, rep_range_2,
+              `insert into legacy.exercise_types (owner_id, name, advice, timer_seconds, rep_range_1, rep_range_2,
                  rep_range_3, rep_range_4, session_types, trophy_locked, created_at, updated_at)
                values ($1, $2, $3, $4, $5, $6, $7, $8, $9::public.session_type[], $10, $11, $12) returning id`,
               [uid, ...Object.values(row), t.createdAt || new Date(), t.updatedAt || t.createdAt || new Date()],
@@ -404,7 +372,7 @@ async function run({ mongoUri, supabaseDbUrl, dryRun = false, since = DEFAULT_SI
             stats.sessions.updated++;
             if (!dryRun) {
               await pg.query(
-                `update public.sessions set date_session = $2, type_session = $3, body_weight = $4, is_done = $5,
+                `update legacy.sessions set date_session = $2, type_session = $3, body_weight = $4, is_done = $5,
                    comment = $6 where id = $1`,
                 [match.id, new Date(row.date_session), row.type_session, row.body_weight, row.is_done, row.comment],
               );
@@ -418,7 +386,7 @@ async function run({ mongoUri, supabaseDbUrl, dryRun = false, since = DEFAULT_SI
         if (!dryRun) {
           ({ id } = (
             await pg.query(
-              `insert into public.sessions (owner_id, date_session, type_session, body_weight, is_done, comment,
+              `insert into legacy.sessions (owner_id, date_session, type_session, body_weight, is_done, comment,
                  created_at, updated_at)
                values ($1, $2, $3, $4, $5, $6, $7, $8) returning id`,
               [
@@ -441,7 +409,7 @@ async function run({ mongoUri, supabaseDbUrl, dryRun = false, since = DEFAULT_SI
       const insertSets = async (exerciseUserId, sets) => {
         if (dryRun || sets.length === 0) return;
         await pg.query(
-          `insert into public.exercise_sets (exercise_user_id, set_order, weight, reps)
+          `insert into legacy.exercise_sets (exercise_user_id, set_order, weight, reps)
            select $1, x.o, x.w, x.r from unnest($2::numeric[], $3::int[]) with ordinality as x(w, r, o)`,
           [exerciseUserId, sets.map((s) => s.weight), sets.map((s) => s.reps)],
         );
@@ -471,7 +439,7 @@ async function run({ mongoUri, supabaseDbUrl, dryRun = false, since = DEFAULT_SI
           if (!dryRun) {
             ({ id } = (
               await pg.query(
-                `insert into public.exercise_users (owner_id, type_id, session_id, comment, created_at, updated_at)
+                `insert into legacy.exercise_users (owner_id, type_id, session_id, comment, created_at, updated_at)
                  values ($1, $2, $3, $4, $5, $6) returning id`,
                 [
                   uid,
@@ -495,14 +463,14 @@ async function run({ mongoUri, supabaseDbUrl, dryRun = false, since = DEFAULT_SI
           stats.exercise_users.updated++;
           if (!dryRun && rowChanged) {
             await pg.query(
-              "update public.exercise_users set type_id = $2, session_id = $3, comment = $4 where id = $1",
+              "update legacy.exercise_users set type_id = $2, session_id = $3, comment = $4 where id = $1",
               [match.id, row.type_id, row.session_id, row.comment],
             );
           }
           if (setsChanged) {
             // Sets are replaced as a whole: counted as updated
             stats.exercise_sets.updated += sets.length;
-            if (!dryRun) await pg.query("delete from public.exercise_sets where exercise_user_id = $1", [match.id]);
+            if (!dryRun) await pg.query("delete from legacy.exercise_sets where exercise_user_id = $1", [match.id]);
             await insertSets(match.id, sets);
           }
         } else stats.exercise_users.unchanged++;
@@ -532,12 +500,12 @@ async function run({ mongoUri, supabaseDbUrl, dryRun = false, since = DEFAULT_SI
         if (dryRun) continue;
         let programId = match?.id;
         if (match) {
-          await pg.query("delete from public.program_exercises where program_id = $1", [programId]);
-          await pg.query("update public.programs set updated_at = now() where id = $1", [programId]);
+          await pg.query("delete from legacy.program_exercises where program_id = $1", [programId]);
+          await pg.query("update legacy.programs set updated_at = now() where id = $1", [programId]);
         } else {
           ({ id: programId } = (
             await pg.query(
-              `insert into public.programs (owner_id, session_type, created_at, updated_at)
+              `insert into legacy.programs (owner_id, session_type, created_at, updated_at)
                values ($1, $2, $3, $4) returning id`,
               [uid, p.sessionType, p.createdAt || new Date(), p.updatedAt || p.createdAt || new Date()],
             )
@@ -546,13 +514,13 @@ async function run({ mongoUri, supabaseDbUrl, dryRun = false, since = DEFAULT_SI
         for (const [i, e] of exercises.entries()) {
           const { id: peId } = (
             await pg.query(
-              `insert into public.program_exercises (program_id, exercise_type_id, "order") values ($1, $2, $3) returning id`,
+              `insert into legacy.program_exercises (program_id, exercise_type_id, "order") values ($1, $2, $3) returning id`,
               [programId, e.type, i + 1],
             )
           ).rows[0];
           if (e.alts.length > 0) {
             await pg.query(
-              `insert into public.program_exercise_alternatives (program_exercise_id, exercise_type_id, position)
+              `insert into legacy.program_exercise_alternatives (program_exercise_id, exercise_type_id, position)
                select $1, x.t, x.o from unnest($2::uuid[]) with ordinality as x(t, o)`,
               [peId, e.alts],
             );
@@ -585,8 +553,12 @@ async function run({ mongoUri, supabaseDbUrl, dryRun = false, since = DEFAULT_SI
       }
     }
 
-    if (dryRun) await pg.query("rollback");
-    else await pg.query("commit");
+    if (dryRun) {
+      await pg.query("rollback");
+    } else {
+      converted = (await pg.query("select private.migrate_legacy() as counts")).rows[0].counts;
+      await pg.query("commit");
+    }
   } catch (error) {
     await pg.query("rollback").catch(() => {});
     throw error;
@@ -615,8 +587,10 @@ async function run({ mongoUri, supabaseDbUrl, dryRun = false, since = DEFAULT_SI
     for (const w of warnings.slice(0, 50)) log(`  ${w}`);
     if (warnings.length > 50) log(`  … ${warnings.length - 50} more`);
   }
-  log("\nTrophies are evaluated by the database triggers from the copied sets.");
-  return { stats, skipped, warnings };
+  if (converted) log(`\nconverted to the current model (rows written): ${JSON.stringify(converted)}`);
+  else log("\nThe conversion to the current model (private.migrate_legacy) runs on the real run only.");
+  log("Trophies are evaluated by the database from the converted sets.");
+  return { stats, skipped, warnings, converted };
 }
 
 async function main() {

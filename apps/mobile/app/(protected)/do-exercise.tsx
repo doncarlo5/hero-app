@@ -4,8 +4,10 @@ import {
 } from "@expo/ui/community/bottom-sheet";
 import { format } from "date-fns";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { Button, Input, TextArea } from "heroui-native";
 import {
 	AlignJustifyIcon,
+	ArrowUpIcon,
 	CheckIcon,
 	EditIcon,
 	HistoryIcon,
@@ -28,14 +30,27 @@ import {
 
 import { CountDownTimer } from "@/components/countdown-timer";
 import { SafeAreaView } from "@/components/safe-area-view";
-import { Button, Input, TextArea } from "heroui-native";
 import { Text } from "@/components/ui/text";
-import { useLastExercise, useSaveExercise } from "@/lib/queries/exercises";
-import { useExerciseTypes } from "@/lib/queries/exercise-types";
+import { useLastPerformance, useSaveExercise } from "@/lib/queries/exercises";
+import { useMovements } from "@/lib/queries/movements";
+import { useActiveProgram } from "@/lib/queries/programs";
 import { useSession } from "@/lib/queries/sessions";
-import { setsToArrays, type ExerciseType } from "@/lib/queries/types";
+import {
+	prescriptionLabels,
+	setsToArrays,
+	type Movement,
+	type Slot,
+} from "@/lib/queries/types";
+import {
+	computeTargets,
+	DEFAULT_INCREMENT,
+	type SetTarget,
+} from "@/lib/progression/engine";
 import { useThemeColors } from "@/lib/theme";
 import { useColorScheme } from "@/lib/useColorScheme";
+
+const DEFAULT_SET_COUNT = 3;
+const DEFAULT_REST_SECONDS = 90;
 
 // "12,5" and "12.5" are both accepted; empty or invalid input counts as 0
 function parseNumber(value: string) {
@@ -63,142 +78,157 @@ function CheckboxComponent(props: { isChecked: boolean; onPress: () => void }) {
 	);
 }
 
+type SetDraft = { reps: string; weight: string; done: boolean };
+
+// Targets of the slot from the last performance; without a slot, the last loads are repeated
+function targetsFor(
+	slot: Slot | null,
+	movement: Movement,
+	lastSets: { weight: number; reps: number }[],
+): SetTarget[] {
+	if (slot && slot.set_prescriptions.length > 0) {
+		return computeTargets({
+			prescriptions: slot.set_prescriptions.map((p) => ({
+				position: p.position,
+				repMin: p.rep_min,
+				repMax: p.rep_max,
+				loadRule: p.load_rule,
+				loadValue: p.load_value,
+			})),
+			progressionRule: slot.progression_rule,
+			lastSets,
+			increment: movement.increment_kg ?? DEFAULT_INCREMENT,
+		});
+	}
+	const count = Math.max(lastSets.length, DEFAULT_SET_COUNT);
+	return Array.from({ length: count }, (_, i) => ({
+		position: i + 1,
+		weight: lastSets[i]?.weight ?? null,
+		repMin: null,
+		repMax: null,
+		reason: lastSets[i] ? "repeat" : "calibration",
+	}));
+}
+
 export default function DoExercise() {
 	const router = useRouter();
 	const { isDarkColorScheme } = useColorScheme();
 	const themeColors = useThemeColors();
-	const { sessionId, exerciseTypeId } = useLocalSearchParams<{
+	const params = useLocalSearchParams<{
 		sessionId: string;
-		exerciseTypeId?: string;
+		movementId?: string;
+		slotId?: string;
 	}>();
+	const sessionId = params.sessionId;
 
-	// Bottom sheet ref
 	const bottomSheetRef = useRef<BottomSheet>(null);
-	// ScrollView ref for keyboard handling
 	const scrollViewRef = useRef<ScrollView>(null);
 
 	const sessionQuery = useSession(sessionId);
-	const exerciseTypesQuery = useExerciseTypes(sessionQuery.data?.type_session);
+	const programQuery = useActiveProgram();
+	const movementsQuery = useMovements();
 	const saveExercise = useSaveExercise();
-	const [pickedTypeId, setPickedTypeId] = useState<string | null>(
-		exerciseTypeId ?? null,
+	const [pickedMovementId, setPickedMovementId] = useState<string | null>(
+		params.movementId ?? null,
 	);
 
-	const allExerciseTypes = sessionQuery.data
-		? (exerciseTypesQuery.data ?? [])
-		: [];
-	const isLoadingTypes = sessionQuery.isLoading || exerciseTypesQuery.isLoading;
-	const oneExerciseType: ExerciseType | null =
-		allExerciseTypes.find((type) => type.id === pickedTypeId) ?? null;
-	const selectedExerciseIndex = oneExerciseType
-		? allExerciseTypes.indexOf(oneExerciseType)
-		: null;
+	const day =
+		programQuery.data?.program_days.find(
+			(d) => d.id === sessionQuery.data?.program_day_id,
+		) ?? null;
+	const allMovements = movementsQuery.data ?? [];
+	const isLoadingMovements =
+		sessionQuery.isLoading ||
+		movementsQuery.isLoading ||
+		programQuery.isLoading;
+	const movement = allMovements.find((m) => m.id === pickedMovementId) ?? null;
 
-	const lastExerciseQuery = useLastExercise(oneExerciseType?.id ?? null);
-	const isLoadingLastExercise = lastExerciseQuery.isLoading;
-	const lastExerciseData = lastExerciseQuery.data ?? null;
-	// Previous sets as arrays, plus the date of the session they were done in
-	const lastExercise = lastExerciseData
-		? {
-				rep: setsToArrays(lastExerciseData.exercise_sets).reps,
-				weight: setsToArrays(lastExerciseData.exercise_sets).weights,
-				comment: lastExerciseData.comment,
-				date: lastExerciseData.sessions?.date_session ?? null,
-			}
-		: null;
+	// The slot this exercise fills: the one passed by the session screen, else the day's slot that
+	// uses or offers the movement
+	const slot: Slot | null =
+		day?.slots.find((s) => s.id === params.slotId) ??
+		day?.slots.find(
+			(s) =>
+				s.movement_id === pickedMovementId ||
+				s.alternatives.some((a) => a.movement.id === pickedMovementId),
+		) ??
+		null;
+
+	// Movements of the day first (slot movements and their alternatives), then the others
+	const dayMovementIds = new Set(
+		(day?.slots ?? []).flatMap((s) => [
+			s.movement_id,
+			...s.alternatives.map((a) => a.movement.id),
+		]),
+	);
+	const dayMovements = allMovements.filter((m) => dayMovementIds.has(m.id));
+	const otherMovements = allMovements.filter((m) => !dayMovementIds.has(m.id));
+
+	const lastPerformanceQuery = useLastPerformance(movement?.id ?? null);
+	const lastPerformance = lastPerformanceQuery.data ?? null;
+	const lastSets = lastPerformance
+		? (() => {
+				const { reps, weights } = setsToArrays(lastPerformance.logged_sets);
+				return reps.map((r, i) => ({ reps: r, weight: weights[i] }));
+			})()
+		: [];
+	const targets = movement ? targetsFor(slot, movement, lastSets) : [];
+	const rangeLabels = slot ? prescriptionLabels(slot) : [];
 	const isLoading = saveExercise.isPending;
 
 	const [showPrefillButton, setShowPrefillButton] = useState(false);
-	const [addRep4, setAddRep4] = useState(false);
+	const [sets, setSets] = useState<SetDraft[]>([]);
+	const [comment, setComment] = useState("");
 
-	const [formState, setFormState] = useState({
-		rep1: "",
-		rep2: "",
-		rep3: "",
-		rep4: "",
-		weight1: "",
-		weight2: "",
-		weight3: "",
-		weight4: "",
-		comment: "",
-	});
-
-	const [completedSets, setCompletedSets] = useState({
-		set1: false,
-		set2: false,
-		set3: false,
-		set4: false,
-	});
-
-	// Prefill with the previous sets of this exercise type, once per loaded exercise
+	// Prefill once per movement, slot and last performance: target loads, reps left to the lifter
+	const prefillKey = movement
+		? `${movement.id}:${slot?.id ?? "-"}:${lastPerformance?.id ?? "-"}`
+		: null;
 	const [prefilledFrom, setPrefilledFrom] = useState<string | null>(null);
-	if (lastExerciseData && lastExerciseData.id !== prefilledFrom) {
-		setPrefilledFrom(lastExerciseData.id);
-		const { reps, weights } = setsToArrays(lastExerciseData.exercise_sets);
-		setFormState({
-			rep1: reps[0]?.toString() || "",
-			weight1: weights[0]?.toString() || "",
-			rep2: reps[1]?.toString() || "",
-			weight2: weights[1]?.toString() || "",
-			rep3: reps[2]?.toString() || "",
-			weight3: weights[2]?.toString() || "",
-			rep4: reps[3]?.toString() || "",
-			weight4: weights[3]?.toString() || "",
-			comment: "",
-		});
-		setAddRep4(Boolean(reps[3]));
+	if (
+		prefillKey &&
+		prefillKey !== prefilledFrom &&
+		!lastPerformanceQuery.isLoading
+	) {
+		setPrefilledFrom(prefillKey);
+		setSets(
+			targets.map((target) => ({
+				reps: "",
+				weight: target.weight?.toString() ?? "",
+				done: false,
+			})),
+		);
 	}
 
-	const onExerciseTypeChange = (exerciseType: ExerciseType) => {
-		setPickedTypeId(exerciseType.id);
-	};
-
-	const handleInputChange = (field: string, value: string) => {
-		setFormState({ ...formState, [field]: value });
-
-		if (field === "weight1") {
+	const updateSet = (index: number, changes: Partial<SetDraft>) => {
+		setSets((prev) =>
+			prev.map((s, i) => (i === index ? { ...s, ...changes } : s)),
+		);
+		if (index === 0 && changes.weight !== undefined) {
 			setShowPrefillButton(true);
 		}
 	};
 
 	const handlePrefillWeights = () => {
-		const newFormState = {
-			...formState,
-			weight2: formState.weight1,
-			weight3: formState.weight1,
-		};
-
-		if (oneExerciseType?.rep_range_4 || addRep4) {
-			newFormState.weight4 = formState.weight1;
-		}
-
-		setFormState(newFormState);
+		setSets((prev) =>
+			prev.map((s) => ({ ...s, weight: prev[0]?.weight ?? "" })),
+		);
 		setShowPrefillButton(false);
 	};
 
 	const handleSubmit = () => {
-		if (!oneExerciseType || !sessionId || isLoading) return;
-
-		// Same shape as before: three or four sets, in order, empty ones as 0
-		const showsSet4 = Boolean(addRep4 || oneExerciseType.rep_range_4);
-		const sets = [
-			{ reps: formState.rep1, weight: formState.weight1 },
-			{ reps: formState.rep2, weight: formState.weight2 },
-			{ reps: formState.rep3, weight: formState.weight3 },
-			...(showsSet4
-				? [{ reps: formState.rep4, weight: formState.weight4 }]
-				: []),
-		].map((set) => ({
-			reps: Math.round(parseNumber(set.reps)),
-			weight: parseNumber(set.weight),
-		}));
+		if (!movement || !sessionId || isLoading) return;
 
 		saveExercise.mutate(
 			{
-				typeId: oneExerciseType.id,
+				movementId: movement.id,
+				slotId: slot?.id ?? null,
 				sessionId,
-				comment: formState.comment,
-				sets,
+				comment,
+				sets: sets.map((s) => ({
+					reps: Math.round(parseNumber(s.reps)),
+					weight: parseNumber(s.weight),
+				})),
 			},
 			{
 				onSuccess: (result) => {
@@ -220,17 +250,42 @@ export default function DoExercise() {
 				},
 				// The form keeps its values so the user can retry
 				onError: (error) =>
-					Alert.alert("Error", error.message || "Failed to save exercise"),
+					Alert.alert("Erreur", error.message || "Impossible d'enregistrer."),
 			},
 		);
 	};
 
-	const toggleSet = (setNumber: 1 | 2 | 3 | 4) => {
-		setCompletedSets((prev) => ({
-			...prev,
-			[`set${setNumber}`]: !prev[`set${setNumber}` as keyof typeof prev],
-		}));
-	};
+	const notes = [movement?.notes, slot?.note].filter(Boolean).join("\n");
+	const hasCalibration = targets.some((t) => t.reason === "calibration");
+
+	const renderPickerRow = (m: Movement) => (
+		<Pressable
+			key={m.id}
+			onPress={() => {
+				setPickedMovementId(m.id);
+				bottomSheetRef.current?.close();
+			}}
+		>
+			<View className="flex-row items-center p-3">
+				<View
+					className={`rounded-full border border-gray-300 dark:border-gray-600 p-2 ${
+						m.id === pickedMovementId
+							? "bg-gray-700 dark:bg-gray-500"
+							: "bg-transparent"
+					}`}
+				/>
+				<Text
+					className={`ml-2 ${
+						m.id === pickedMovementId
+							? "text-foreground font-semibold"
+							: "text-foreground"
+					}`}
+				>
+					{m.name}
+				</Text>
+			</View>
+		</Pressable>
+	);
 
 	return (
 		<SafeAreaView className="flex-1 bg-background" edges={["bottom"]}>
@@ -246,16 +301,16 @@ export default function DoExercise() {
 					contentContainerStyle={{ paddingBottom: 100 }}
 					showsVerticalScrollIndicator={true}
 				>
-					{/* Exercise Type Selection */}
+					{/* Movement selection */}
 					<View className="mb-4">
-						{isLoadingTypes ? (
+						{isLoadingMovements ? (
 							<View className="bg-default/30 rounded-lg p-4">
 								<ActivityIndicator size="small" />
 							</View>
-						) : allExerciseTypes.length === 0 ? (
+						) : allMovements.length === 0 ? (
 							<View className="bg-default/30 rounded-lg p-4">
 								<Text className="text-muted text-center">
-									Please create an exercise for this session type.
+									Crée d&apos;abord un exercice dans « Mes exercices ».
 								</Text>
 							</View>
 						) : (
@@ -266,9 +321,7 @@ export default function DoExercise() {
 								className="flex-row items-center w-full bg-default rounded-md justify-between p-4"
 							>
 								<Text className="text-foreground">
-									{oneExerciseType
-										? oneExerciseType.name
-										: "Select an exercise"}
+									{movement ? movement.name : "Choisir un exercice"}
 								</Text>
 								<AlignJustifyIcon
 									size={20}
@@ -279,39 +332,48 @@ export default function DoExercise() {
 						)}
 					</View>
 
-					{/* Last Exercise Date */}
-					{lastExercise?.date && (
+					{/* Last performance date */}
+					{lastPerformance?.sessions?.date_session && (
 						<View className="flex-row items-center justify-end gap-1 px-2 py-1 mb-3">
 							<HistoryIcon size={14} color={themeColors.mutedForeground} />
 							<Text className="text-sm text-muted">
-								{isLoadingLastExercise
-									? "Loading..."
-									: format(new Date(lastExercise.date), "dd/MM/yyyy")}
+								{format(
+									new Date(lastPerformance.sessions.date_session),
+									"dd/MM/yyyy",
+								)}
 							</Text>
 						</View>
 					)}
 
-					{/* Advice */}
-					{oneExerciseType?.advice && (
+					{/* Notes of the movement and the slot */}
+					{notes.length > 0 && (
 						<View className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 mb-5 flex-row items-start gap-2">
 							<InfoIcon
 								size={16}
 								color={isDarkColorScheme ? "#60a5fa" : "#1e40af"}
 							/>
 							<Text className="text-sm text-blue-700 dark:text-blue-200 flex-1">
-								{oneExerciseType.advice}
+								{notes}
 							</Text>
 						</View>
 					)}
 
-					{oneExerciseType && (
-						<CountDownTimer exerciseTypeTimer={oneExerciseType.timer_seconds} />
+					{movement && (
+						<CountDownTimer
+							exerciseTypeTimer={slot?.rest_seconds ?? DEFAULT_REST_SECONDS}
+						/>
 					)}
 
-					{/* Exercise Form */}
-					{oneExerciseType && (
+					{movement && hasCalibration && (
+						<Text className="text-sm text-muted mb-3">
+							Première fois sur cet exercice : trouve ta charge en partant
+							léger.
+						</Text>
+					)}
+
+					{/* Sets form */}
+					{movement && (
 						<View>
-							{/* Prefill Button */}
 							{showPrefillButton && (
 								<View className="flex-row gap-2 mb-2">
 									<Button
@@ -321,7 +383,7 @@ export default function DoExercise() {
 									>
 										<StarIcon size={16} color={themeColors.mutedForeground} />
 										<Button.Label>
-											All sets to {formState.weight1} KG
+											Toutes les séries à {sets[0]?.weight} kg
 										</Button.Label>
 									</Button>
 									<Button
@@ -334,225 +396,119 @@ export default function DoExercise() {
 								</View>
 							)}
 
-							{/* Sets Form */}
 							<View className="bg-slate-50 dark:bg-slate-900/40 rounded-2xl py-4 px-2 mb-5">
-								<View className="flex-row justify-between gap-1 px-2">
-									{/* Reps Column */}
-									<View className="flex-1 max-w-[25%]">
-										<Text className="text-sm text-muted text-center mb-2">
-											Reps
-										</Text>
-										<View className="gap-1">
-											<Input
-												value={formState.rep1}
-												onChangeText={(value) =>
-													handleInputChange("rep1", value)
-												}
-												placeholder={lastExercise?.rep[0]?.toString() || "0"}
-												keyboardType="numeric"
-												returnKeyType="done"
-												blurOnSubmit
-												onSubmitEditing={Keyboard.dismiss}
-												className="h-12 text-center text-3xl font-black"
-											/>
-											<Input
-												value={formState.rep2}
-												onChangeText={(value) =>
-													handleInputChange("rep2", value)
-												}
-												placeholder={lastExercise?.rep[1]?.toString() || "0"}
-												keyboardType="numeric"
-												returnKeyType="done"
-												blurOnSubmit
-												onSubmitEditing={Keyboard.dismiss}
-												className="h-12 text-center text-3xl font-black"
-											/>
-											<Input
-												value={formState.rep3}
-												onChangeText={(value) =>
-													handleInputChange("rep3", value)
-												}
-												placeholder={lastExercise?.rep[2]?.toString() || "0"}
-												keyboardType="numeric"
-												returnKeyType="done"
-												blurOnSubmit
-												onSubmitEditing={Keyboard.dismiss}
-												className="h-12 text-center text-3xl font-black"
-											/>
-											{(addRep4 || oneExerciseType.rep_range_4) && (
+								<View className="flex-row justify-between gap-1 px-2 mb-2">
+									<Text className="flex-1 max-w-[25%] text-sm text-muted text-center">
+										Reps
+									</Text>
+									<Text className="flex-1 max-w-[35%] text-sm text-muted text-center">
+										KG
+									</Text>
+									<Text className="flex-1 max-w-[20%] text-sm text-muted text-center">
+										Objectif
+									</Text>
+									<Text className="flex-1 max-w-[20%] text-sm text-muted text-center">
+										Série
+									</Text>
+								</View>
+								{sets.map((set, index) => {
+									const target = targets[index];
+									return (
+										<View
+											key={index}
+											className="flex-row justify-between items-center gap-1 px-2 mb-1"
+										>
+											<View className="flex-1 max-w-[25%]">
 												<Input
-													value={formState.rep4}
-													onChangeText={(value) =>
-														handleInputChange("rep4", value)
-													}
-													placeholder={lastExercise?.rep[3]?.toString() || "0"}
+													value={set.reps}
+													onChangeText={(reps) => updateSet(index, { reps })}
+													placeholder={lastSets[index]?.reps.toString() || "0"}
 													keyboardType="numeric"
 													returnKeyType="done"
 													blurOnSubmit
 													onSubmitEditing={Keyboard.dismiss}
 													className="h-12 text-center text-3xl font-black"
 												/>
-											)}
-										</View>
-									</View>
-
-									{/* Weight Column */}
-									<View className="flex-1 max-w-[35%]">
-										<Text className="text-sm text-muted text-center mb-2">
-											KG
-										</Text>
-										<View className="gap-1">
-											<Input
-												value={formState.weight1}
-												onChangeText={(value) =>
-													handleInputChange("weight1", value)
-												}
-												placeholder={lastExercise?.weight[0]?.toString() || "0"}
-												keyboardType="numeric"
-												returnKeyType="done"
-												blurOnSubmit
-												onSubmitEditing={Keyboard.dismiss}
-												className="h-12 text-center text-3xl font-black"
-											/>
-											<Input
-												value={formState.weight2}
-												onChangeText={(value) =>
-													handleInputChange("weight2", value)
-												}
-												placeholder={lastExercise?.weight[1]?.toString() || "0"}
-												keyboardType="numeric"
-												returnKeyType="done"
-												blurOnSubmit
-												onSubmitEditing={Keyboard.dismiss}
-												className="h-12 text-center text-3xl font-black"
-											/>
-											<Input
-												value={formState.weight3}
-												onChangeText={(value) =>
-													handleInputChange("weight3", value)
-												}
-												placeholder={lastExercise?.weight[2]?.toString() || "0"}
-												keyboardType="numeric"
-												returnKeyType="done"
-												blurOnSubmit
-												onSubmitEditing={Keyboard.dismiss}
-												className="h-12 text-center text-3xl font-black"
-											/>
-											{(addRep4 || oneExerciseType.rep_range_4) && (
+											</View>
+											<View className="flex-1 max-w-[35%]">
 												<Input
-													value={formState.weight4}
-													onChangeText={(value) =>
-														handleInputChange("weight4", value)
+													value={set.weight}
+													onChangeText={(weight) =>
+														updateSet(index, { weight })
 													}
 													placeholder={
-														lastExercise?.weight[3]?.toString() || "0"
+														lastSets[index]?.weight.toString() || "0"
 													}
 													keyboardType="numeric"
 													returnKeyType="done"
 													blurOnSubmit
 													onSubmitEditing={Keyboard.dismiss}
-													className="h-12 text-center text-2xl font-bold"
+													className="h-12 text-center text-3xl font-black"
 												/>
-											)}
-										</View>
-									</View>
-
-									{/* Range Column */}
-									<View className="flex-1 max-w-[20%]">
-										<Text className="text-sm text-muted text-center mb-2">
-											Range
-										</Text>
-										<View className="gap-1">
-											<View className="h-12 items-center justify-center">
+											</View>
+											<View className="flex-1 max-w-[20%] h-12 flex-row items-center justify-center gap-1">
 												<Text className="text-gray-700 dark:text-gray-300 font-light">
-													{oneExerciseType.rep_range_1}
+													{rangeLabels[index] ?? "–"}
 												</Text>
+												{target?.reason === "increase" && (
+													<ArrowUpIcon size={14} color={themeColors.brand} />
+												)}
 											</View>
-											<View className="h-12 items-center justify-center">
-												<Text className="text-gray-700 dark:text-gray-300 font-light">
-													{oneExerciseType.rep_range_2}
-												</Text>
+											<View className="flex-1 max-w-[20%] h-12 items-center justify-center">
+												<CheckboxComponent
+													isChecked={set.done}
+													onPress={() => updateSet(index, { done: !set.done })}
+												/>
 											</View>
-											<View className="h-12 items-center justify-center">
-												<Text className="text-gray-700 dark:text-gray-300 font-light">
-													{oneExerciseType.rep_range_3}
-												</Text>
-											</View>
-											{(addRep4 || oneExerciseType.rep_range_4) && (
-												<View className="h-12 items-center justify-center">
-													<Text className="text-gray-700 dark:text-gray-300 font-light">
-														{oneExerciseType.rep_range_4}
-													</Text>
-												</View>
-											)}
 										</View>
-									</View>
+									);
+								})}
 
-									{/* Checkbox Column */}
-									<View className="flex-1 max-w-[20%]">
-										<Text className="text-sm text-muted text-center mb-2">
-											Set
-										</Text>
-										<View className="gap-1">
-											<View className="h-12 items-center justify-center">
-												<CheckboxComponent
-													isChecked={completedSets.set1}
-													onPress={() => toggleSet(1)}
-												/>
-											</View>
-											<View className="h-12 items-center justify-center">
-												<CheckboxComponent
-													isChecked={completedSets.set2}
-													onPress={() => toggleSet(2)}
-												/>
-											</View>
-											<View className="h-12 items-center justify-center">
-												<CheckboxComponent
-													isChecked={completedSets.set3}
-													onPress={() => toggleSet(3)}
-												/>
-											</View>
-											{(addRep4 || oneExerciseType.rep_range_4) && (
-												<View className="h-12 items-center justify-center">
-													<CheckboxComponent
-														isChecked={completedSets.set4}
-														onPress={() => toggleSet(4)}
-													/>
-												</View>
-											)}
-										</View>
-									</View>
-								</View>
-
-								{/* Add/Remove Set 4 Button */}
-								{!oneExerciseType.rep_range_4 && (
+								<View className="flex-row justify-center gap-6 mt-4">
 									<TouchableOpacity
-										onPress={() => setAddRep4(!addRep4)}
-										className="mt-4 items-center"
+										onPress={() =>
+											setSets((prev) => [
+												...prev,
+												{
+													reps: "",
+													weight: prev.at(-1)?.weight ?? "",
+													done: false,
+												},
+											])
+										}
 									>
 										<Text className="text-xs italic text-gray-400 dark:text-gray-500">
-											{addRep4 ? "Reduce by one set ↑" : "Add one set ↓"}
+											Ajouter une série ↓
 										</Text>
 									</TouchableOpacity>
-								)}
+									{sets.length > 1 && (
+										<TouchableOpacity
+											onPress={() => setSets((prev) => prev.slice(0, -1))}
+										>
+											<Text className="text-xs italic text-gray-400 dark:text-gray-500">
+												Retirer une série ↑
+											</Text>
+										</TouchableOpacity>
+									)}
+								</View>
 							</View>
 
-							{/* Notes Section */}
+							{/* Notes */}
 							<View className="bg-slate-50 dark:bg-slate-900/40 rounded-2xl p-4 mb-20">
 								<View className="flex-row items-center gap-2 mb-3">
 									<EditIcon size={16} color={themeColors.mutedForeground} />
 									<Text className="text-muted">Notes</Text>
-									{lastExercise?.comment && (
+									{lastPerformance?.comment && (
 										<View className="w-2 h-2 bg-teal-500 rounded-full" />
 									)}
 								</View>
 								<TextArea
-									value={formState.comment}
-									onChangeText={(value) => handleInputChange("comment", value)}
+									value={comment}
+									onChangeText={setComment}
 									placeholder={
-										lastExercise?.comment
-											? `Previous note: ${lastExercise.comment}`
-											: "Previous note: None."
+										lastPerformance?.comment
+											? `Note précédente : ${lastPerformance.comment}`
+											: "Note précédente : aucune."
 									}
 									maxLength={200}
 									className="min-h-[80px]"
@@ -563,12 +519,12 @@ export default function DoExercise() {
 				</ScrollView>
 			</KeyboardAvoidingView>
 
-			{/* Submit Button */}
-			{oneExerciseType && (
+			{/* Submit */}
+			{movement && (
 				<View className="absolute bottom-20 right-10">
 					<Button
 						onPress={handleSubmit}
-						isDisabled={isLoading}
+						isDisabled={isLoading || sets.length === 0}
 						isIconOnly
 						className="h-16 w-16 rounded-full"
 					>
@@ -584,7 +540,7 @@ export default function DoExercise() {
 				</View>
 			)}
 
-			{/* Exercise Picker BottomSheet */}
+			{/* Movement picker */}
 			<BottomSheet
 				ref={bottomSheetRef}
 				index={-1}
@@ -605,37 +561,18 @@ export default function DoExercise() {
 						flexGrow: 1,
 					}}
 				>
-					<Text className="text-xl font-bold mb-4">Select Exercise</Text>
-					<View>
-						{allExerciseTypes.map((type, index) => (
-							<Pressable
-								key={type.id}
-								onPress={() => {
-									onExerciseTypeChange(type);
-									bottomSheetRef.current?.close();
-								}}
-							>
-								<View className="flex-row items-center p-3">
-									<View
-										className={`rounded-full border border-gray-300 dark:border-gray-600 p-2 ${
-											selectedExerciseIndex === index
-												? "bg-gray-700 dark:bg-gray-500"
-												: "bg-transparent"
-										}`}
-									/>
-									<Text
-										className={`ml-2 ${
-											selectedExerciseIndex === index
-												? "text-foreground font-semibold"
-												: "text-foreground"
-										}`}
-									>
-										{type.name}
-									</Text>
-								</View>
-							</Pressable>
-						))}
-					</View>
+					{dayMovements.length > 0 && (
+						<>
+							<Text className="text-xl font-bold mb-2">{day?.name}</Text>
+							<View className="mb-4">{dayMovements.map(renderPickerRow)}</View>
+						</>
+					)}
+					<Text className="text-xl font-bold mb-2">
+						{dayMovements.length > 0
+							? "Autres exercices"
+							: "Choisir un exercice"}
+					</Text>
+					<View>{otherMovements.map(renderPickerRow)}</View>
 				</BottomSheetScrollView>
 			</BottomSheet>
 		</SafeAreaView>
