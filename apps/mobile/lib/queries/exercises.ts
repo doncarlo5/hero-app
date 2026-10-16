@@ -79,18 +79,28 @@ export function useLastPerformance(movementId: string | null) {
 	});
 }
 
-// Last performance of several movements at once (guided session), sharing the cache of
-// useLastPerformance
-export function useLastPerformances(movementIds: string[]) {
+// Last performance of several movements before a session (guided session): the session's own
+// exercises are left out, so its targets do not change while it is being done
+export function useLastPerformances(
+	movementIds: string[],
+	beforeSessionId: string,
+) {
 	return useQueries({
 		queries: movementIds.map((movementId) => ({
-			queryKey: [...queryKeys.exercises, "last", movementId],
+			queryKey: [
+				...queryKeys.exercises,
+				"last",
+				movementId,
+				"before",
+				beforeSessionId,
+			],
 			queryFn: async (): Promise<LoggedExerciseWithSession | null> =>
 				unwrapMaybe(
 					await supabase
 						.from("logged_exercises")
 						.select(EXERCISE_SELECT)
 						.eq("movement_id", movementId)
+						.or(`session_id.is.null,session_id.neq.${beforeSessionId}`)
 						.order("created_at", { ascending: false })
 						.limit(1)
 						.maybeSingle(),

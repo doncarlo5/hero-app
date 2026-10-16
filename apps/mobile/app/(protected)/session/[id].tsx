@@ -557,6 +557,11 @@ export default function SessionDetail() {
 													>
 														<Text className="text-xs font-medium text-foreground">
 															Set {index + 1}
+															{set.side === "left"
+																? " · G"
+																: set.side === "right"
+																	? " · D"
+																	: ""}
 														</Text>
 														<Text className="text-sm font-bold text-foreground">
 															{set.reps} reps
@@ -569,6 +574,26 @@ export default function SessionDetail() {
 											})}
 									</View>
 								</View>
+
+								{item.logged_sets.some((set) => set.kind !== "working") && (
+									<Text className="text-xs text-muted mb-3">
+										{[
+											["warmup", "échauffement"],
+											["drop", "drop"],
+											["cheat", "reps trichées"],
+											["switch", "switch"],
+											["mini", "mini-série"],
+										]
+											.map(([kind, label]) => {
+												const count = item.logged_sets.filter(
+													(set) => set.kind === kind,
+												).length;
+												return count > 0 ? `${count} × ${label}` : null;
+											})
+											.filter(Boolean)
+											.join(" · ")}
+									</Text>
+								)}
 
 								{item.comment && (
 									<View className="bg-default/20 rounded-lg mb-4">

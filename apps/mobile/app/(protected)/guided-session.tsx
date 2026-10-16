@@ -11,6 +11,7 @@ import { useState } from "react";
 import {
 	ActivityIndicator,
 	Alert,
+	Keyboard,
 	KeyboardAvoidingView,
 	Platform,
 	Pressable,
@@ -22,6 +23,7 @@ import { MovementThumbnail } from "@/components/movement-thumbnail";
 import { RestPanel } from "@/components/rest-panel";
 import { Text } from "@/components/ui/text";
 import type { SetTarget } from "@/lib/progression/engine";
+import { currentIndex } from "@/lib/session/draft";
 import { restPhase } from "@/lib/session/rest";
 import { partLabel, type QueueStep } from "@/lib/session/set-queue";
 import { useGuidedSession } from "@/lib/session/use-guided-session";
@@ -86,7 +88,7 @@ export default function GuidedSession() {
 	const [isFinishing, setIsFinishing] = useState(false);
 
 	const draft = guided.draft;
-	const index = draft?.stepIndex ?? 0;
+	const index = draft ? currentIndex(draft, guided.queue) : 0;
 	const step = guided.queue[index] ?? null;
 	const target = step ? guided.targetOf(step) : null;
 
@@ -111,7 +113,14 @@ export default function GuidedSession() {
 				? String(logged.weight)
 				: ((target?.weight ?? fallback)?.toString() ?? ""),
 		);
-		setReps(logged ? String(logged.reps) : "");
+		// Warm-up reps are fixed: prefilled so the set is one tap
+		setReps(
+			logged
+				? String(logged.reps)
+				: step.kind === "warmup" && target?.repMax
+					? String(target.repMax)
+					: "",
+		);
 	}
 
 	const stepLabel = (s: QueueStep) => {
@@ -123,11 +132,15 @@ export default function GuidedSession() {
 	const handleDone = () => {
 		if (!step) return;
 		const w = parseNumber(weight);
-		const r = parseNumber(reps);
+		// A warm-up left empty counts its planned reps
+		const r =
+			parseNumber(reps) ??
+			(step.kind === "warmup" ? (target?.repMax ?? null) : null);
 		if (w === null || w < 0 || r === null || r < 0 || !Number.isInteger(r)) {
 			Alert.alert("Série", "Indique la charge et un nombre entier de reps.");
 			return;
 		}
+		Keyboard.dismiss();
 		guided.complete(index, { weight: w, reps: r });
 	};
 
@@ -181,6 +194,29 @@ export default function GuidedSession() {
 			],
 		);
 	};
+
+	if (guided.isGone) {
+		return (
+			<View className="flex-1 items-center justify-center gap-4 bg-background p-6">
+				<Text className="text-center text-lg font-semibold">
+					Cette séance n’existe plus
+				</Text>
+				<Text className="text-center text-muted">
+					Elle a été supprimée. Les séries notées ici pendant la séance guidée
+					ne peuvent plus y être enregistrées.
+				</Text>
+				<Button
+					variant="secondary"
+					onPress={async () => {
+						await guided.discard();
+						router.back();
+					}}
+				>
+					<Button.Label>Fermer la séance guidée</Button.Label>
+				</Button>
+			</View>
+		);
+	}
 
 	if (guided.isUnavailable) {
 		return (
@@ -256,6 +292,7 @@ export default function GuidedSession() {
 				className="flex-1"
 				contentContainerClassName="p-4 gap-4 pb-32"
 				keyboardShouldPersistTaps="handled"
+				keyboardDismissMode="on-drag"
 			>
 				<View className="flex-row items-center justify-between">
 					<Text className="text-lg font-semibold">{guided.day.name}</Text>
@@ -388,7 +425,10 @@ export default function GuidedSession() {
 						<Button
 							variant="ghost"
 							size="sm"
-							onPress={() => guided.skip(index)}
+							onPress={() => {
+								Keyboard.dismiss();
+								guided.skip(index);
+							}}
 						>
 							<SkipForwardIcon size={16} color={themeColors.foreground} />
 							<Button.Label>Passer cette série</Button.Label>

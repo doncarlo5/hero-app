@@ -2,7 +2,7 @@
 // session in progress so the app can offer to resume it after being killed.
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import { parseDraft, type SessionDraft } from "./draft";
+import { hasUnsent, parseDraft, type SessionDraft } from "./draft";
 
 const ACTIVE_KEY = "guided-session:active";
 const draftKey = (sessionId: string) => `guided-session:${sessionId}`;
@@ -45,4 +45,30 @@ export async function clearAllDrafts() {
 	await AsyncStorage.multiRemove(
 		keys.filter((key) => key.startsWith("guided-session:")),
 	);
+}
+
+/**
+ * Drops the drafts of other sessions that have nothing left to send (finished or abandoned guided
+ * sessions). A draft with unsent exercises is kept: it may still reach the server.
+ */
+export async function pruneDrafts(keepSessionId: string | null) {
+	const keys = (await AsyncStorage.getAllKeys()).filter(
+		(key) =>
+			key.startsWith("guided-session:") &&
+			key !== ACTIVE_KEY &&
+			key !== (keepSessionId ? draftKey(keepSessionId) : null),
+	);
+	const stale: string[] = [];
+	for (const [key, raw] of await AsyncStorage.multiGet(keys)) {
+		const draft = raw ? parseDraft(JSON.parse(raw)) : null;
+		if (!draft || !hasUnsent(draft)) stale.push(key);
+	}
+	if (stale.length > 0) await AsyncStorage.multiRemove(stale);
+}
+
+/** Sessions that still have a draft on the device */
+export async function draftSessionIds(): Promise<string[]> {
+	return (await AsyncStorage.getAllKeys())
+		.filter((key) => key.startsWith("guided-session:") && key !== ACTIVE_KEY)
+		.map((key) => key.slice("guided-session:".length));
 }

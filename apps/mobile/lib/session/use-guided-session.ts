@@ -24,12 +24,14 @@ import {
 import {
 	completeStep,
 	createDraft,
+	currentIndex,
 	exercisesToSend,
 	goToStep,
 	hasUnsent,
 	isFinished,
 	markSent,
 	setRest,
+	skipLoggedElsewhere,
 	skipStep,
 	swapMovement,
 	type SessionDraft,
@@ -151,14 +153,17 @@ export function useGuidedSession(sessionId: string) {
 
 	const swaps = draft?.swaps ?? {};
 	// Every movement the session may do: the slots', their alternatives' (to swap) and switch finishers'
-	const lastPerformances = useLastPerformances([
-		...new Set(
-			slots.flatMap((slot) => [
-				slot.movement_id,
-				...slot.alternatives.map((a) => a.movement.id),
-			]),
-		),
-	]);
+	const lastPerformances = useLastPerformances(
+		[
+			...new Set(
+				slots.flatMap((slot) => [
+					slot.movement_id,
+					...slot.alternatives.map((a) => a.movement.id),
+				]),
+			),
+		],
+		sessionId,
+	);
 
 	// Targets of a slot's working sets, from the last performance of the movement done today
 	const workingTargets = (slot: Slot): SetTarget[] | null => {
@@ -355,12 +360,15 @@ export function useGuidedSession(sessionId: string) {
 			id: sessionId,
 			changes: { ended_at: new Date().toISOString(), is_done: true },
 		});
+		// Closed: later changes (a late confirmation, an effect) must not write the draft back
+		draftRef.current = null;
 		scheduleRestNotification(null, null);
 		await clearDraft(sessionId);
 		return true;
 	};
 
 	const discard = async () => {
+		draftRef.current = null;
 		scheduleRestNotification(null, null);
 		await clearDraft(sessionId);
 	};
@@ -396,6 +404,27 @@ export function useGuidedSession(sessionId: string) {
 		});
 	}, [sessionQuery.data, startedAt, draftStartedAt]);
 
+	// Exercises of this session logged outside the guided session (classic exercise screen): their
+	// slots are skipped here so they are not logged twice
+	const ownIds = new Set(
+		Object.values(draft?.exercises ?? {}).map((e) => e.id),
+	);
+	const loggedElsewhere = (sessionQuery.data?.logged_exercises ?? [])
+		.filter((e) => e.slot_id && !ownIds.has(e.id))
+		.map((e) => e.slot_id as string);
+	const loggedElsewhereKey = loggedElsewhere.join();
+	useEffect(() => {
+		if (!draftRef.current || loggedElsewhere.length === 0 || queue.length === 0)
+			return;
+		const next = skipLoggedElsewhere(
+			draftRef.current,
+			queue,
+			loggedElsewhere,
+			new Date(),
+		);
+		if (next !== draftRef.current) apply(() => next);
+	}, [loggedElsewhereKey, queue.length, draft === null]);
+
 	// Write each exercise as soon as its slot is done
 	useEffect(() => {
 		if (draft && day) send();
@@ -405,7 +434,7 @@ export function useGuidedSession(sessionId: string) {
 	const rest: RestTimer | null = draft?.rest ?? null;
 	const restKey = rest ? `${rest.startedAt}:${rest.durationSeconds}` : null;
 	// The label is part of the key: after a relaunch the program loads after the draft
-	const restLabel = draft ? nextLabel(draft.stepIndex) : null;
+	const restLabel = draft ? nextLabel(currentIndex(draft, queue)) : null;
 	useEffect(() => {
 		scheduleRestNotification(rest, restLabel);
 	}, [restKey, restLabel]);
@@ -428,6 +457,9 @@ export function useGuidedSession(sessionId: string) {
 	const sessionReady = Boolean(sessionQuery.data);
 	const programReady =
 		!programQuery.isLoading && !(programQuery.isError && !programQuery.data);
+	// The server says the session no longer exists (deleted, or another account's): the device copy is stale
+	const isGone =
+		(sessionQuery.error as { code?: string } | null)?.code === "PGRST116";
 	// Neither the server nor the device copy has the session or the program
 	const isUnavailable =
 		!isRestoring &&
@@ -443,6 +475,7 @@ export function useGuidedSession(sessionId: string) {
 				(lastPerformances.isLoading && !waitedTooLong) ||
 				!draft),
 		isUnavailable,
+		isGone,
 		// Past the wait, the screen renders while the last performances may still arrive
 		targetsPending: lastPerformances.isLoading,
 		reload: () => queryClient.refetchQueries({ type: "active" }),
