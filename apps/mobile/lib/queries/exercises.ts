@@ -116,6 +116,10 @@ export type SaveExerciseInput = {
 		kind?: SetKind;
 		side?: "left" | "right" | null;
 		completed_at?: string;
+		target_weight?: number | null;
+		target_rep_min?: number | null;
+		target_rep_max?: number | null;
+		target_reason?: "increase" | "repeat" | "derived" | "calibration" | null;
 	}[];
 };
 

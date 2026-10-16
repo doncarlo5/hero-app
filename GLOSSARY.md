@@ -129,7 +129,7 @@ The loads and repetitions logged for a movement in one session.
 _Avoid_: result, perf
 
 **Target**:
-The load and repetitions proposed for a set, computed from the last performance and the slot's progression rule.
+The load and repetitions proposed for a set, computed from the last performance and the slot's progression rule. It is kept with the logged set, with its reason (load up, same load, derived from the previous set, calibration).
 _Avoid_: objective, goal
 
 **Progression rule**:

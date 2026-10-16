@@ -291,10 +291,34 @@ export function useGuidedSession(sessionId: string) {
 		return movement ? `${movement.name}, ${partLabel(step)}` : null;
 	};
 
-	const complete = (index: number, values: { weight: number; reps: number }) =>
+	// The target shown is kept with the set: what the app proposed, beside what was lifted
+	const complete = (
+		index: number,
+		values: { weight: number; reps: number },
+	) => {
+		const step = queue[index];
+		const target = step ? targetOf(step) : null;
 		apply((current) =>
-			completeStep(current, queue, index, values, new Date(), randomUUID),
+			completeStep(
+				current,
+				queue,
+				index,
+				{
+					...values,
+					target: target
+						? {
+								weight: target.weight,
+								repMin: target.repMin,
+								repMax: target.repMax,
+								reason: target.reason,
+							}
+						: null,
+				},
+				new Date(),
+				randomUUID,
+			),
 		);
+	};
 	const skip = (index: number) =>
 		apply((current) => skipStep(current, queue, index, new Date()));
 	const goTo = (index: number) =>
