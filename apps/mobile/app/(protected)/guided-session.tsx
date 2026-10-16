@@ -1,3 +1,5 @@
+import { format } from "date-fns";
+import { fr } from "date-fns/locale/fr";
 import { useKeepAwake } from "expo-keep-awake";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Button, Input } from "heroui-native";
@@ -71,6 +73,13 @@ function reasonLabel(step: QueueStep, target: SetTarget | null) {
 	}
 }
 
+// One set as "80×5", "PDC×8" (bodyweight), "45 s" or "10 kg · 45 s"
+function setLabel(set: { weight: number; count: number }, unit: "reps" | "s") {
+	const weight = set.weight.toString().replace(".", ",");
+	if (unit === "s") return set.weight > 0 ? `${weight} kg · ${set.count} s` : `${set.count} s`;
+	return `${set.weight > 0 ? weight : "PDC"}×${set.count}`;
+}
+
 function sideLabel(side: QueueStep["side"]) {
 	if (side === "left") return "côté gauche";
 	if (side === "right") return "côté droit";
@@ -96,6 +105,7 @@ export default function GuidedSession() {
 	const index = draft ? currentIndex(draft, guided.queue) : 0;
 	const step = guided.queue[index] ?? null;
 	const target = step ? guided.targetOf(step) : null;
+	const last = step ? guided.lastOf(step) : null;
 
 	// Fill the inputs once per step: what was logged, else the target load, else (calibration) the
 	// load of the slot's previous set in this session. Not before the target is known.
@@ -407,6 +417,28 @@ export default function GuidedSession() {
 									)}
 								</View>
 							)
+						)}
+						{last && (
+							<Text
+								className="text-sm text-muted"
+								accessibilityLabel={`La dernière fois, ${format(new Date(last.date), "EEEE d MMMM", { locale: fr })} : ${last.sets.map((set) => setLabel(set, unit)).join(", ")}`}
+							>
+								{`Dernière fois (${format(new Date(last.date), "EEE d MMM", { locale: fr })}) : `}
+								{last.sets.map((set, i) => (
+									<Text
+										key={i}
+										className={cn(
+											"text-sm",
+											i === last.setIndex
+												? "font-semibold text-foreground"
+												: "text-muted",
+										)}
+									>
+										{i > 0 ? " · " : ""}
+										{setLabel(set, unit)}
+									</Text>
+								))}
+							</Text>
 						)}
 						{slot?.tempo && (
 							<Text className="text-sm text-muted">Tempo : {slot.tempo}</Text>

@@ -13,6 +13,10 @@ import type { LoggedExerciseWithSession, SetKind, Trophy } from "./types";
 const EXERCISE_SELECT =
 	"*, logged_sets(set_order, weight, reps, kind, side, duration_seconds, completed_at, target_weight, target_rep_min, target_rep_max, target_reason), movement:movements(*), sessions(id, date_session)";
 
+// A last performance has at least one working set: an exercise stopped after its warm-up, or with
+// only finisher parts, is not one (its targets would fall back to calibration)
+const PERFORMANCE_SELECT = `${EXERCISE_SELECT}, working:logged_sets!inner(kind)`;
+
 export function useLoggedExercise(id: string) {
 	return useQuery({
 		queryKey: queryKeys.exercise(id),
@@ -70,8 +74,9 @@ export function useLastPerformance(movementId: string | null) {
 			unwrapMaybe(
 				await supabase
 					.from("logged_exercises")
-					.select(EXERCISE_SELECT)
+					.select(PERFORMANCE_SELECT)
 					.eq("movement_id", movementId as string)
+					.eq("working.kind", "working")
 					.order("created_at", { ascending: false })
 					.limit(1)
 					.maybeSingle(),
@@ -98,8 +103,9 @@ export function useLastPerformances(
 				unwrapMaybe(
 					await supabase
 						.from("logged_exercises")
-						.select(EXERCISE_SELECT)
+						.select(PERFORMANCE_SELECT)
 						.eq("movement_id", movementId)
+						.eq("working.kind", "working")
 						.or(`session_id.is.null,session_id.neq.${beforeSessionId}`)
 						.order("created_at", { ascending: false })
 						.limit(1)
