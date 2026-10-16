@@ -17,7 +17,8 @@
 //   SUPABASE_SERVICE_ROLE_KEY=$(supabase status -o json | jq -r .SERVICE_ROLE_KEY) \
 //     node scripts/import-movement-library.js [--dry-run] [--refresh-images] [--thumbnails]
 // Each movement's first image also gets a 160 px WebP thumbnail at thumbs/<id>/0.webp;
-// --thumbnails rebuilds them all from the bucket without touching the rows.
+// --thumbnails rebuilds them from the bucket without touching the rows: run it once on a target
+// imported before thumbnails existed (the app falls back to the full image meanwhile).
 // The target defaults to the local stack; another one is named with --url=https://… and needs --yes.
 // Neither the root .env nor SUPABASE_URL is read, so the import never targets prod by accident.
 
@@ -159,19 +160,22 @@ async function uploadImages(supabase, movement) {
   }
 }
 
-// --thumbnails: (re)builds every thumbnail from the images already in the bucket
-async function rebuildThumbnails(supabase, movements) {
+// --thumbnails: (re)builds the thumbnails of the movements already imported, from their images in the
+// bucket. Run it once on a target imported before thumbnails existed. A missing image is reported, not fatal.
+async function rebuildThumbnails(supabase, existing) {
   let done = 0;
-  await eachLimit(
-    movements.filter((m) => m.image_paths.length > 0),
-    UPLOAD_CONCURRENCY,
-    async (m) => {
-      const { data, error } = await supabase.storage.from(BUCKET).download(m.image_paths[0]);
-      if (error) throw new Error(`Download ${m.image_paths[0]}: ${error.message}`);
-      await uploadThumbnail(supabase, m.image_paths[0], Buffer.from(await data.arrayBuffer()));
-      if (++done % 100 === 0) console.log(`  thumbnails: ${done}`);
-    },
-  );
+  const missing = [];
+  const firstImages = [...existing.values()].map((paths) => paths[0]).filter(Boolean);
+  await eachLimit(firstImages, UPLOAD_CONCURRENCY, async (path) => {
+    const { data, error } = await supabase.storage.from(BUCKET).download(path);
+    if (error) {
+      missing.push(path);
+      return;
+    }
+    await uploadThumbnail(supabase, path, Buffer.from(await data.arrayBuffer()));
+    if (++done % 100 === 0) console.log(`  thumbnails: ${done}`);
+  });
+  if (missing.length > 0) console.warn(`  ${missing.length} images missing: ${missing.slice(0, 5).join(", ")}…`);
   return done;
 }
 
@@ -208,8 +212,9 @@ async function main() {
   );
   if (args.dryRun) return;
 
+  // Thumbnails only: the rows are not touched
   if (args.thumbnails) {
-    console.log(`Done: ${await rebuildThumbnails(supabase, movements)} thumbnails rebuilt`);
+    console.log(`Done: ${await rebuildThumbnails(supabase, existing)} thumbnails rebuilt`);
     return;
   }
 

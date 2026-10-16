@@ -16,7 +16,8 @@ export function MovementThumbnail(props: {
 	className?: string;
 }) {
 	const themeColors = useThemeColors();
-	const [thumbFailed, setThumbFailed] = useState(false);
+	// The image whose thumbnail failed: a reused component shows the next movement's thumbnail again
+	const [failedPath, setFailedPath] = useState<string | null>(null);
 	const path = props.movement.image_paths[0];
 
 	if (!path) {
@@ -35,9 +36,9 @@ export function MovementThumbnail(props: {
 	return (
 		<Image
 			source={{
-				uri: movementImageUrl(thumbFailed ? path : thumbnailPath(path)),
+				uri: movementImageUrl(failedPath === path ? path : thumbnailPath(path)),
 			}}
-			onError={() => setThumbFailed(true)}
+			onError={() => setFailedPath(path)}
 			contentFit="cover"
 			transition={150}
 			// Paths never change (pinned source commit): keep them in memory and on disk
